@@ -1,0 +1,33 @@
+{
+  "name": "postcss-react-zero-ui-postcss",
+  "version": "0.0.0",
+  "description": "PostCSS plugin React Zero UI",
+  "keywords": ["postcss", "css", "postcss-plugin", "postcss-react-zero-ui-postcss"],
+  "scripts": {
+    "unit": "node --test index.test.js",
+    "test": "npm run unit && eslint ."
+  },
+  "author": "Austin1serb <serbaustin@gmail.com>",
+  "license": "MIT",
+  "repository": "austin1serb/postcss-react-zero-ui-postcss",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "peerDependencies": {
+    "postcss": "^8.4.27"
+  },
+  "devDependencies": {
+    "eslint": "^8.47.0",
+    "postcss": "^8.4.27"
+  },
+  "eslintConfig": {
+    "parserOptions": {
+      "ecmaVersion": 2017
+    },
+    "env": {
+      "node": true,
+      "es6": true
+    },
+    "extends": ["eslint:recommended"]
+  }
+}
