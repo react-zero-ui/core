@@ -1,25 +1,59 @@
 {
-  "name": "postcss-react-zero-ui",
-  "version": "0.0.0",
-  "description": "PostCSS plugin React Zero UI",
-  "keywords": [
-    "postcss",
-    "css",
-    "postcss-plugin",
-    "postcss-react-zero-ui"
+  "name": "react-zero-ui",
+  "version": "1.0.0",
+  "description": "Zero-config UI state management with PostCSS plugin for React",
+  "main": "index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./postcss": {
+      "types": "./postcss/index.d.ts",
+      "require": "./postcss/index.js"
+    },
+    "./.zero-ui/attributes": {
+      "types": "./.zero-ui/attributes.d.ts",
+      "default": "./.zero-ui/attributes.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "postcss/",
+    ".zero-ui/attributes.js"
   ],
   "scripts": {
-    "unit": "node --test index.test.js",
-    "test": "npm run unit && eslint ."
+    "test:postcss": "node --test postcss/index.test.js",
+    "test": "npm run test:postcss && eslint .",
+    "lint": "eslint ."
   },
+  "keywords": [
+    "react",
+    "ui",
+    "state",
+    "css",
+    "postcss",
+    "postcss-plugin",
+    "zero-config",
+    "react-zero-ui",
+    "postcss-react-zero-ui"
+  ],
   "author": "Austin1serb <serbaustin@gmail.com>",
   "license": "MIT",
-  "repository": "austin1serb/postcss-react-zero-ui",
+  "repository": "austin1serb/react-zero-ui",
   "engines": {
     "node": ">=18.0.0"
   },
   "peerDependencies": {
-    "postcss": "^8.4.27"
+    "postcss": "^8.4.27",
+    "react": ">=16.8.0"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.27.5",
+    "@babel/traverse": "^7.27.4",
+    "chokidar": "^4.0.3"
   },
   "devDependencies": {
     "eslint": "^8.47.0",
@@ -27,7 +61,8 @@
   },
   "eslintConfig": {
     "parserOptions": {
-      "ecmaVersion": 2017
+      "ecmaVersion": 2017,
+      "sourceType": "module"
     },
     "env": {
       "node": true,
@@ -36,10 +71,5 @@
     "extends": [
       "eslint:recommended"
     ]
-  },
-  "dependencies": {
-    "@babel/parser": "^7.27.5",
-    "@babel/traverse": "^7.27.4",
-    "chokidar": "^4.0.3"
   }
 }
