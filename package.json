@@ -1,13 +1,14 @@
 {
   "name": "@austinserb/react-zero-ui",
-  "version": "1.0.0",
-  "description": "Zero-config UI state management with PostCSS plugin for React",
+  "version": "1.0.1",
+  "description": "Zero re-render UI state management for React",
   "main": "index.js",
   "types": "./index.d.ts",
   "private": false,
   "publishConfig": {
     "access": "public"
   },
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./index.d.ts",
@@ -21,7 +22,9 @@
   "files": [
     "index.js",
     "index.d.ts",
-    "postcss/"
+    "postcss/index.js",
+    "postcss/index.d.ts",
+    "postcss/generated-attributes.js"
   ],
   "scripts": {
     "test:postcss": "node --test postcss/index.test.js",
@@ -41,13 +44,17 @@
   ],
   "author": "Austinserb <serbaustin@gmail.com>",
   "license": "MIT",
-  "repository": "austin1serb/react-zero-ui",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/austin1serb/react-zero-ui.git"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
   "peerDependencies": {
     "postcss": "^8.4.27",
-    "react": ">=16.8.0"
+    "react": ">=16.8.0",
+    "tailwindcss": "^4.0.0"
   },
   "dependencies": {
     "@babel/parser": "^7.27.5",
@@ -55,8 +62,7 @@
     "chokidar": "^4.0.3"
   },
   "devDependencies": {
-    "eslint": "^8.47.0",
-    "postcss": "^8.4.27"
+    "eslint": "^8.47.0"
   },
   "eslintConfig": {
     "parserOptions": {

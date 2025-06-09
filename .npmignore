@@ -3,6 +3,8 @@ npm-debug.log
 package-lock.json
 yarn.lock
 
+/postcss/*.test.js
+
 *.test.js
 .github
 .editorconfig

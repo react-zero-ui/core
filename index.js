@@ -1,3 +1,5 @@
+/* global window, document */
+
 import { useCallback } from 'react';
 
 export { bodyAttributes } from './postcss/generated-attributes.js';
