@@ -19,13 +19,6 @@
       "require": "./postcss/index.js"
     }
   },
-  "files": [
-    "index.js",
-    "index.d.ts",
-    "postcss/index.js",
-    "postcss/index.d.ts",
-    "postcss/generated-attributes.js"
-  ],
   "scripts": {
     "test:postcss": "node --test postcss/index.test.js",
     "test": "npm run test:postcss && eslint .",
