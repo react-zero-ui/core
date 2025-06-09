@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const parser = require('@babel/parser');
 const traverse = require('@babel/traverse').default;
-const chokidar = require('../node_modules/chokidar');
+const chokidar = require('chokidar');
 
 const HEADER = '/* AUTO-GENERATED - DO NOT EDIT */';
 
