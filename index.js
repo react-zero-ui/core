@@ -1,6 +1,5 @@
 "use client";
 import { useCallback } from 'react';
-export { bodyAttributes } from './.zero-ui/attributes.js';
 
 export function useUI(key, initialValue) {
 

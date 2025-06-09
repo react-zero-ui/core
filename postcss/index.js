@@ -37,26 +37,32 @@ function detectFileType(filePath) {
 }
 
 function extractVariants(filePath) {
-  const code = fs.readFileSync(filePath, 'utf-8');
-  if (!code.includes('useUI')) return [];
-
-  fileType = detectFileType(filePath);
-
-  let ast;
   try {
-    ast = parser.parse(code, {
-      sourceType: 'module',
-      plugins: ['jsx', 'typescript'],
-    });
-  } catch (e) {
-    console.warn(`⚠️ Skipping ${filePath}: parse error: ${e.message}`);
-    return [];
-  }
+    const code = fs.readFileSync(filePath, 'utf-8');
+    if (!code.includes('useUI')) return [];
 
-  if (fileType.isTypeScript) {
-    return extractTypeScriptVariants(ast);
-  } else {
-    return extractJavaScriptVariants(ast);
+    fileType = detectFileType(filePath);
+
+    let ast;
+    try {
+      ast = parser.parse(code, {
+        sourceType: 'module',
+        plugins: ['jsx', 'typescript'],
+      });
+    } catch (e) {
+      console.warn(`⚠️ Skipping ${filePath}: parse error: ${e.message}`);
+      return [];
+    }
+
+    if (fileType.isTypeScript) {
+      return extractTypeScriptVariants(ast);
+    } else {
+      return extractJavaScriptVariants(ast);
+    }
+  } catch (error) {
+    console.error(`Error processing ${filePath}:`, error.message);
+    return [];
+
   }
 }
 
@@ -259,6 +265,13 @@ function extractArgumentValues(node, path) {
     case 'StringLiteral':
       values.add(node.value);
       break;
+    case 'BooleanLiteral':
+      values.add(String(node.value));
+      break;
+
+    case 'NumericLiteral':
+      values.add(String(node.value));
+      break;
 
     case 'ConditionalExpression':
       // isActive ? 'react' : 'zero'
@@ -398,8 +411,9 @@ module.exports = () => {
           root.append('\n' + cssBlock);
         }
         // Generate body attributes file
-        const ATTR_FILE = path.resolve(cwd, fileType.isTypeScript ? '.zero-ui/attributes.d.ts' : '.zero-ui/attributes.js');
-        const attrExport = `export const bodyAttributes = ${JSON.stringify(initialValues, null, 2)};\n`;
+        const ATTR_FILE = path.join(__dirname, 'generated-attributes.js');
+        const attrExport = `/* AUTO-GENERATED - DO NOT EDIT */\n
+        export const bodyAttributes = ${JSON.stringify(initialValues, null, 2)};\n`;
 
         const existingContent = fs.existsSync(ATTR_FILE) ? fs.readFileSync(ATTR_FILE, 'utf-8') : '';
         if (existingContent !== attrExport) {

@@ -28,7 +28,7 @@ async function runTest(testName, files, callback) {
       .process('', { from: undefined });
 
     // Run assertions
-    await callback(result, testDir);
+    await callback(result);
 
   } finally {
     process.chdir(originalCwd);
@@ -52,10 +52,9 @@ test('generates body attributes file correctly', async () => {
         return <div>Test</div>;
       }
     `
-  }, (result, testDir) => {
+  }, (result) => {
     // Check attributes file exists
-
-    const attrPath = '.zero-ui/attributes.js';
+    const attrPath = './postcss/generated-attributes.js';
     assert(fs.existsSync(attrPath), 'Attributes file should exist');
 
     // Read and parse attributes
@@ -89,7 +88,7 @@ test('handles TypeScript generic types', async () => {
         return <div>Status: {status}</div>;
       }
     `
-  }, (result, testDir) => {
+  }, (result) => {
     console.log('\n🔍 TypeScript Generic Test:');
 
     // Check all variants were generated
@@ -99,7 +98,7 @@ test('handles TypeScript generic types', async () => {
     });
 
     // Check attributes file
-    const content = fs.readFileSync('.zero-ui/attributes.js', 'utf-8');
+    const content = fs.readFileSync('./postcss/generated-attributes.js', 'utf-8');
     console.log('Attributes:', content);
     assert(content.includes('"data-status": "idle"'), 'Should use initial value');
   });
@@ -129,7 +128,7 @@ test('detects JavaScript setValue calls', async () => {
         );
       }
     `
-  }, (result, testDir) => {
+  }, (result) => {
     console.log('\n🔍 JavaScript Detection Test:');
 
     const states = ['closed', 'open', 'minimized', 'fullscreen'];
@@ -137,7 +136,7 @@ test('detects JavaScript setValue calls', async () => {
       assert(result.css.includes(`@variant modal-${state}`), `Should detect modal-${state}`);
     });
 
-    const content = fs.readFileSync('.zero-ui/attributes.js', 'utf-8');
+    const content = fs.readFileSync('./postcss/generated-attributes.js', 'utf-8');
     console.log('Initial value:', content.match(/"data-modal": "[^"]+"/)[0]);
   });
 });
@@ -158,7 +157,7 @@ test('handles boolean values', async () => {
         );
       }
     `
-  }, (result, testDir) => {
+  }, (result) => {
     console.log('\n🔍 Boolean Values Test:');
 
     assert(result.css.includes('@variant drawer-true'), 'Should have drawer-true');
@@ -166,7 +165,7 @@ test('handles boolean values', async () => {
     assert(result.css.includes('@variant checkbox-true'), 'Should have checkbox-true');
     assert(result.css.includes('@variant checkbox-false'), 'Should have checkbox-false');
 
-    const content = fs.readFileSync('.zero-ui/attributes.js', 'utf-8');
+    const content = fs.readFileSync('./postcss/generated-attributes.js', 'utf-8');
     console.log('Boolean attributes:', content);
   });
 });
@@ -188,7 +187,7 @@ test('handles kebab-case conversion', async () => {
         );
       }
     `
-  }, (result, testDir) => {
+  }, (result) => {
     console.log('\n🔍 Kebab-case Test:');
 
     // Check CSS has kebab-case
@@ -198,7 +197,7 @@ test('handles kebab-case conversion', async () => {
     assert(result.css.includes('@variant background-color-pale-yellow'), 'Should convert to kebab-case');
 
     // Check attributes use kebab-case keys
-    const content = fs.readFileSync('.zero-ui/attributes.js', 'utf-8');
+    const content = fs.readFileSync('./postcss/generated-attributes.js', 'utf-8');
     assert(content.includes('"data-primary-color"'), 'Attribute key should be kebab-case');
     assert(content.includes('"data-background-color"'), 'Attribute key should be kebab-case');
     console.log('Kebab-case attributes:', content);
@@ -228,7 +227,7 @@ test('handles conditional expressions', async () => {
         );
       }
     `
-  }, (result, testDir) => {
+  }, (result) => {
     console.log('\n🔍 Conditional Expressions Test:');
 
     const expectedStates = ['default', 'active', 'inactive', 'night', 'day', 'fallback'];
@@ -261,7 +260,7 @@ test('handles multiple files and deduplication', async () => {
         return <div>Sidebar</div>;
       }
     `,
-  }, (result, testDir) => {
+  }, (result) => {
     console.log('\n🔍 Multiple Files Test: ', result.css);
 
     // Should combine all theme values from all files
@@ -292,7 +291,7 @@ test('handles parsing errors gracefully', async () => {
         {{{ invalid syntax
       }
     `
-  }, (result, testDir) => {
+  }, (result) => {
     console.log('\n🔍 Parse Error Test:');
 
     // Should still process valid files
@@ -316,13 +315,13 @@ test('handles empty and missing values', async () => {
         return <div>Edge cases</div>;
       }
     `
-  }, (result, testDir) => {
+  }, (result) => {
     console.log('\n🔍 Edge Cases Test:');
 
     // Should handle only setter pattern
     assert(result.css.includes('@variant only-setter-value'), 'Should handle only setter pattern');
 
-    const content = fs.readFileSync('.zero-ui/attributes.js', 'utf-8');
+    const content = fs.readFileSync('./postcss/generated-attributes.js', 'utf-8');
     console.log('Edge case attributes:', content);
   });
 });

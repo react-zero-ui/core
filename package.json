@@ -1,9 +1,13 @@
 {
-  "name": "react-zero-ui",
+  "name": "@austinserb/react-zero-ui",
   "version": "1.0.0",
   "description": "Zero-config UI state management with PostCSS plugin for React",
   "main": "index.js",
   "types": "./index.d.ts",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     ".": {
       "types": "./index.d.ts",
@@ -13,9 +17,9 @@
       "types": "./postcss/index.d.ts",
       "require": "./postcss/index.js"
     },
-    "./.zero-ui/attributes": {
-      "types": "./.zero-ui/attributes.d.ts",
-      "default": "./.zero-ui/attributes.js"
+    "./attributes": {
+      "types": "./postcss/attributes.d.ts",
+      "default": "./postcss/generated-attributes.js"
     }
   },
   "files": [
@@ -40,7 +44,7 @@
     "react-zero-ui",
     "postcss-react-zero-ui"
   ],
-  "author": "Austin1serb <serbaustin@gmail.com>",
+  "author": "Austinserb <serbaustin@gmail.com>",
   "license": "MIT",
   "repository": "austin1serb/react-zero-ui",
   "engines": {
