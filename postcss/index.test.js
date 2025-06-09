@@ -14,6 +14,7 @@ async function runTest(testName, files, callback) {
   try {
     process.chdir(testDir);
 
+
     // Create test files
     for (const [filePath, content] of Object.entries(files)) {
       const dir = path.dirname(filePath);
@@ -32,10 +33,16 @@ async function runTest(testName, files, callback) {
 
   } finally {
     process.chdir(originalCwd);
+
+    // Clean up any generated files in the package directory
+    const generatedPath = path.join(__dirname, 'generated-attributes.js');
+    if (fs.existsSync(generatedPath)) {
+      fs.unlinkSync(generatedPath);
+    }
+
     fs.rmSync(testDir, { recursive: true, force: true });
   }
 }
-
 
 
 
@@ -54,7 +61,7 @@ test('generates body attributes file correctly', async () => {
     `
   }, (result) => {
     // Check attributes file exists
-    const attrPath = './postcss/generated-attributes.js';
+    const attrPath = path.join(__dirname, 'generated-attributes.js');
     assert(fs.existsSync(attrPath), 'Attributes file should exist');
 
     // Read and parse attributes
@@ -98,7 +105,7 @@ test('handles TypeScript generic types', async () => {
     });
 
     // Check attributes file
-    const content = fs.readFileSync('./postcss/generated-attributes.js', 'utf-8');
+    const content = fs.readFileSync(path.join(__dirname, 'generated-attributes.js'), 'utf-8');
     console.log('Attributes:', content);
     assert(content.includes('"data-status": "idle"'), 'Should use initial value');
   });
@@ -136,7 +143,7 @@ test('detects JavaScript setValue calls', async () => {
       assert(result.css.includes(`@variant modal-${state}`), `Should detect modal-${state}`);
     });
 
-    const content = fs.readFileSync('./postcss/generated-attributes.js', 'utf-8');
+    const content = fs.readFileSync(path.join(__dirname, 'generated-attributes.js'), 'utf-8');
     console.log('Initial value:', content.match(/"data-modal": "[^"]+"/)[0]);
   });
 });
@@ -165,7 +172,7 @@ test('handles boolean values', async () => {
     assert(result.css.includes('@variant checkbox-true'), 'Should have checkbox-true');
     assert(result.css.includes('@variant checkbox-false'), 'Should have checkbox-false');
 
-    const content = fs.readFileSync('./postcss/generated-attributes.js', 'utf-8');
+    const content = fs.readFileSync(path.join(__dirname, 'generated-attributes.js'), 'utf-8');
     console.log('Boolean attributes:', content);
   });
 });
@@ -197,7 +204,7 @@ test('handles kebab-case conversion', async () => {
     assert(result.css.includes('@variant background-color-pale-yellow'), 'Should convert to kebab-case');
 
     // Check attributes use kebab-case keys
-    const content = fs.readFileSync('./postcss/generated-attributes.js', 'utf-8');
+    const content = fs.readFileSync(path.join(__dirname, 'generated-attributes.js'), 'utf-8');
     assert(content.includes('"data-primary-color"'), 'Attribute key should be kebab-case');
     assert(content.includes('"data-background-color"'), 'Attribute key should be kebab-case');
     console.log('Kebab-case attributes:', content);
@@ -301,30 +308,238 @@ test('handles parsing errors gracefully', async () => {
     assert(result.css.includes('AUTO-GENERATED'), 'Should complete processing');
   });
 });
+test('throws on empty string initial value', async () => {
+  await assert.rejects(() =>
+    runTest('invalid-empty', {
+      'src/fail.jsx': `
+        import { useUI } from 'react-zero-ui';
+        useUI('bad_key', '');
+      `
+    }),
+    /Invalid state key\/value ""/,
+    'Should throw for empty string initial value'
+  );
+});
 
-test('handles empty and missing values', async () => {
-  await runTest('edge-cases', {
+test('valid edge cases: underscores + missing initial', async () => {
+  await runTest('valid-edge', {
     'src/edge.jsx': `
       import { useUI } from 'react-zero-ui';
-      
       function EdgeCases() {
-        const [empty, setEmpty] = useUI('empty', '');
-        const [noInitial] = useUI('noInitial');
-        const [, setOnlySetter] = useUI('onlySetter', 'value');
-        
+        const [noInitial] = useUI('noInitial_value');
+        const [, setOnlySetter] = useUI('only_setter_key', 'yes');
+        setOnlySetter('set_later');
         return <div>Edge cases</div>;
       }
     `
   }, (result) => {
-    console.log('\n🔍 Edge Cases Test:');
-
-    // Should handle only setter pattern
-    assert(result.css.includes('@variant only-setter-value'), 'Should handle only setter pattern');
-
-    const content = fs.readFileSync('./postcss/generated-attributes.js', 'utf-8');
-    console.log('Edge case attributes:', content);
+    console.log('result: ', result.css);
+    assert(result.css.includes('@variant only-setter-key-set-later'));
+    assert(!result.css.includes('@variant no-initial-value'));
   });
 });
 
-// Run all tests
-console.log('🧪 Running Zero UI PostCSS Plugin Tests...\n');
+
+
+test('watches for file changes', async () => {
+  if (process.env.NODE_ENV === 'production') {
+    console.log('Skipping watch test in production');
+    return;
+  }
+
+  await runTest('file-watching', {
+    'src/initial.jsx': `
+      import { useUI } from 'react-zero-ui';
+      function Initial() {
+        const [state, setState] = useUI('watchTest', 'initial');
+        return <div>Initial</div>;
+      }
+    `
+  }, async (result) => {
+    // Initial state
+    assert(result.css.includes('@variant watch-test-initial'));
+
+    // Add a new file
+    fs.writeFileSync('src/new.jsx', `
+      import { useUI } from 'react-zero-ui';
+      function New() {
+        const [state, setState] = useUI('watchTest', 'initial');
+        return <button onClick={() => setState('updated')}>Update</button>;
+      }
+    `);
+
+    // Wait for file watcher to process
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Re-process to check if watcher picked up changes
+    const result2 = await postcss([plugin()])
+      .process('', { from: undefined });
+
+    assert(result2.css.includes('@variant watch-test-updated'), 'Should detect new state');
+  });
+});
+
+test('ignores node_modules and hidden directories', async () => {
+  await runTest('ignored-dirs', {
+    'src/valid.jsx': `
+      import { useUI } from 'react-zero-ui';
+      function Valid() {
+        const [state] = useUI('valid', 'yes');
+        return <div>Valid</div>;
+      }
+    `,
+    'node_modules/package/file.jsx': `
+      import { useUI } from 'react-zero-ui';
+      function Ignored() {
+        const [state] = useUI('ignored', 'shouldNotAppear');
+        return <div>Should be ignored</div>;
+      }
+    `,
+    '.next/file.jsx': `
+      import { useUI } from 'react-zero-ui';
+      function Hidden() {
+        const [state] = useUI('hidden', 'shouldNotAppear');
+        return <div>Should be ignored</div>;
+      }
+    `
+  }, (result) => {
+    console.log('result: ', result.css);
+    assert(result.css.includes('@variant valid-yes'), 'Should process valid files');
+    assert(!result.css.includes('ignored'), 'Should ignore node_modules');
+    assert(!result.css.includes('hidden'), 'Should ignore hidden directories');
+  });
+});
+
+test('handles deeply nested file structures', async () => {
+  await runTest('deep-nesting', {
+    'src/features/auth/components/login/LoginForm.jsx': `
+      import { useUI } from 'react-zero-ui';
+      function LoginForm() {
+        const [authState, setAuthState] = useUI('authState', 'loggedOut');
+        return <button onClick={() => setAuthState('loggedIn')}>Login</button>;
+      }
+    `
+  }, (result) => {
+    assert(result.css.includes('@variant auth-state-logged-out'));
+    assert(result.css.includes('@variant auth-state-logged-in'));
+  });
+});
+
+test('handles complex TypeScript scenarios', async () => {
+  await runTest('complex-typescript', {
+    'src/complex.tsx': `
+      import { useUI } from 'react-zero-ui';
+      
+      type Status = 'idle' | 'loading' | 'success' | 'error';
+      
+      function Complex() {
+        // Type reference
+        const [status] = useUI<Status>('status', 'idle');
+        
+        // Inline boolean
+        const [open] = useUI<boolean>('modal', false);
+        
+        // String literal union with many values
+        const [size] = useUI<'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'>('size', 'md');
+        
+        return <div>Complex types</div>;
+      }
+    `
+  }, (result) => {
+    // Should extract all size variants
+    ['xs', 'sm', 'md', 'lg', 'xl', '2xl'].forEach(size => {
+      assert(result.css.includes(`@variant size-${size}`), `Should have size-${size}`);
+    });
+    // Check attributes file
+    const content = fs.readFileSync(path.join(__dirname, 'generated-attributes.js'), 'utf-8');
+    assert(content.includes('"data-size": "md"'), 'Should have size-md');
+    assert(content.includes('"data-status": "idle"'), 'Should have status-idle');
+    assert(content.includes('"data-modal": "false"'), 'Should have modal-false');
+  });
+});
+
+test('handles large projects efficiently', async function () {
+
+  const files = {};
+
+  // Generate 50 files
+  for (let i = 0; i < 50; i++) {
+    files[`src/component${i}.jsx`] = `
+      import { useUI } from 'react-zero-ui';
+      function Component${i}() {
+        const [state${i}] = useUI('state${i}', 'value${i}');
+        return <div>Component ${i}</div>;
+      }
+    `;
+  }
+
+  const startTime = Date.now();
+
+  await runTest('performance', files, (result) => {
+    const endTime = Date.now();
+    const duration = endTime - startTime;
+
+    console.log(`\n⚡ Performance: Processed 50 files in ${duration}ms`);
+
+    // Should process all files
+    assert(result.css.includes('@variant state49-value49'), 'Should process all files');
+
+    // Should complete in reasonable time
+    assert(duration < 300, 'Should process 50 files in under 300ms');
+  });
+});
+
+test('handles special characters in values', async () => {
+  await runTest('special-chars', {
+    'src/special.jsx': `
+      import { useUI } from 'react-zero-ui';
+      function Special() {
+        const [state, setState] = useUI('special', 'default');
+        return (
+          <div>
+            <button onClick={() => setState('with-dash')}>Dash</button>
+            <button onClick={() => setState('with_underscore')}>Underscore</button>
+            <button onClick={() => setState('123numeric')}>Numeric</button>
+          </div>
+        );
+      }
+    `
+  }, (result) => {
+    assert(result.css.includes('@variant special-with-dash'));
+    assert(result.css.includes('@variant special-with-underscore'));
+    assert(result.css.includes('@variant special-123numeric'));
+  });
+});
+
+test('handles concurrent file modifications', async () => {
+  // Test that rapid changes don't cause issues
+  await runTest('concurrent', {
+    'src/rapid.jsx': `
+      import { useUI } from 'react-zero-ui';
+      function Rapid() {
+        const [count] = useUI('count', 'zero');
+        return <div>Initial</div>;
+      }
+    `
+  }, async () => {
+    // Simulate rapid file changes
+    for (let i = 0; i < 5; i++) {
+      fs.writeFileSync('src/rapid.jsx', `
+        import { useUI } from 'react-zero-ui';
+        function Rapid() {
+          const [count, setCount] = useUI('count', 'zero');
+          return <button onClick={() => setCount('${i}')}>Count ${i}</button>;
+        }
+      `);
+
+      // Small delay to simulate real editing
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+
+    // Final processing should work correctly
+    const finalResult = await postcss([plugin()])
+      .process('', { from: undefined });
+
+    assert(finalResult.css.includes('AUTO-GENERATED'), 'Should handle rapid changes');
+  });
+});

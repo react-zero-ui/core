@@ -1,5 +1,6 @@
-"use client";
 import { useCallback } from 'react';
+
+export { bodyAttributes } from './postcss/generated-attributes.js';
 
 export function useUI(key, initialValue) {
 

@@ -10,7 +10,25 @@ const chokidar = require('../node_modules/chokidar');
 const HEADER = '/* AUTO-GENERATED - DO NOT EDIT */';
 
 // Helper functions
-const toKebabCase = (str) => str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+function toKebabCase(str) {
+  if (typeof str !== 'string') {
+    throw new Error(`Expected string but got: ${typeof str}`);
+  }
+
+  // Disallow invalid characters: only letters, numbers, underscore, and dash allowed
+  if (!/^[a-zA-Z0-9_-]+$/.test(str)) {
+    throw new Error(
+      `Invalid state key/value "${str}". Only alphanumerics, underscores, and dashes are allowed.`
+    );
+  }
+
+  // Replace underscores with dashes, and convert camelCase to kebab-case
+  return str
+    .replace(/_/g, '-') // underscores → dashes
+    .replace(/([a-z])([A-Z])/g, '$1-$2') // camelCase → kebab
+    .toLowerCase();
+}
+
 let fileType;
 
 function getAllSourceFiles(base) {
@@ -412,8 +430,7 @@ module.exports = () => {
         }
         // Generate body attributes file
         const ATTR_FILE = path.join(__dirname, 'generated-attributes.js');
-        const attrExport = `/* AUTO-GENERATED - DO NOT EDIT */\n
-        export const bodyAttributes = ${JSON.stringify(initialValues, null, 2)};\n`;
+        const attrExport = `/* AUTO-GENERATED - DO NOT EDIT */\nexport const bodyAttributes = ${JSON.stringify(initialValues, null, 2)};\n`;
 
         const existingContent = fs.existsSync(ATTR_FILE) ? fs.readFileSync(ATTR_FILE, 'utf-8') : '';
         if (existingContent !== attrExport) {

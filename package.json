@@ -16,17 +16,12 @@
     "./postcss": {
       "types": "./postcss/index.d.ts",
       "require": "./postcss/index.js"
-    },
-    "./attributes": {
-      "types": "./postcss/attributes.d.ts",
-      "default": "./postcss/generated-attributes.js"
     }
   },
   "files": [
     "index.js",
     "index.d.ts",
-    "postcss/",
-    ".zero-ui/attributes.js"
+    "postcss/"
   ],
   "scripts": {
     "test:postcss": "node --test postcss/index.test.js",

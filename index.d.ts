@@ -33,3 +33,5 @@ export function useUI<T>(
   key: string,
   initialValue: T
 ): [T, (value: T | ((prev: T) => T)) => void];
+
+export { bodyAttributes } from "./postcss/generated-attributes.js";
