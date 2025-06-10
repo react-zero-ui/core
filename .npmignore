@@ -3,6 +3,9 @@ npm-debug.log
 package-lock.json
 yarn.lock
 
+.gitignore
+/postcss/generated-attributes.js
+
 /postcss/*.test.js
 
 *.test.js
