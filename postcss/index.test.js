@@ -6,9 +6,14 @@ const path = require('path');
 const os = require('os');
 const plugin = require('.')
 
+function getAttrFile() {
+  return path.join(process.cwd(), '.zero-ui', 'attributes.js');
+}
+
+
 // Helper to create temp directory and run test
 async function runTest(testName, files, callback) {
-  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-test-'));
+  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-test'));
   const originalCwd = process.cwd();
 
   try {
@@ -35,7 +40,7 @@ async function runTest(testName, files, callback) {
     process.chdir(originalCwd);
 
     // Clean up any generated files in the package directory
-    const generatedPath = path.join(__dirname, 'generated-attributes.js');
+    const generatedPath = getAttrFile();
     if (fs.existsSync(generatedPath)) {
       fs.unlinkSync(generatedPath);
     }
@@ -61,11 +66,10 @@ test('generates body attributes file correctly', async () => {
     `
   }, (result) => {
     // Check attributes file exists
-    const attrPath = path.join(__dirname, 'generated-attributes.js');
-    assert(fs.existsSync(attrPath), 'Attributes file should exist');
+    assert(fs.existsSync(getAttrFile()), 'Attributes file should exist');
 
     // Read and parse attributes
-    const content = fs.readFileSync(attrPath, 'utf-8');
+    const content = fs.readFileSync(getAttrFile(), 'utf-8');
     console.log('\n📄 Generated attributes file:');
     console.log(content);
 
@@ -105,7 +109,7 @@ test('handles TypeScript generic types', async () => {
     });
 
     // Check attributes file
-    const content = fs.readFileSync(path.join(__dirname, 'generated-attributes.js'), 'utf-8');
+    const content = fs.readFileSync(getAttrFile(), 'utf-8');
     console.log('Attributes:', content);
     assert(content.includes('"data-status": "idle"'), 'Should use initial value');
   });
@@ -143,7 +147,7 @@ test('detects JavaScript setValue calls', async () => {
       assert(result.css.includes(`@variant modal-${state}`), `Should detect modal-${state}`);
     });
 
-    const content = fs.readFileSync(path.join(__dirname, 'generated-attributes.js'), 'utf-8');
+    const content = fs.readFileSync(getAttrFile(), 'utf-8');
     console.log('Initial value:', content.match(/"data-modal": "[^"]+"/)[0]);
   });
 });
@@ -172,7 +176,7 @@ test('handles boolean values', async () => {
     assert(result.css.includes('@variant checkbox-true'), 'Should have checkbox-true');
     assert(result.css.includes('@variant checkbox-false'), 'Should have checkbox-false');
 
-    const content = fs.readFileSync(path.join(__dirname, 'generated-attributes.js'), 'utf-8');
+    const content = fs.readFileSync(getAttrFile(), 'utf-8');
     console.log('Boolean attributes:', content);
   });
 });
@@ -204,7 +208,7 @@ test('handles kebab-case conversion', async () => {
     assert(result.css.includes('@variant background-color-pale-yellow'), 'Should convert to kebab-case');
 
     // Check attributes use kebab-case keys
-    const content = fs.readFileSync(path.join(__dirname, 'generated-attributes.js'), 'utf-8');
+    const content = fs.readFileSync(getAttrFile(), 'utf-8');
     assert(content.includes('"data-primary-color"'), 'Attribute key should be kebab-case');
     assert(content.includes('"data-background-color"'), 'Attribute key should be kebab-case');
     console.log('Kebab-case attributes:', content);
@@ -451,7 +455,7 @@ test('handles complex TypeScript scenarios', async () => {
       assert(result.css.includes(`@variant size-${size}`), `Should have size-${size}`);
     });
     // Check attributes file
-    const content = fs.readFileSync(path.join(__dirname, 'generated-attributes.js'), 'utf-8');
+    const content = fs.readFileSync(getAttrFile(), 'utf-8');
     assert(content.includes('"data-size": "md"'), 'Should have size-md');
     assert(content.includes('"data-status": "idle"'), 'Should have status-idle');
     assert(content.includes('"data-modal": "false"'), 'Should have modal-false');

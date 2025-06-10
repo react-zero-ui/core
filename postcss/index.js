@@ -3,7 +3,7 @@
  */
 const fs = require('fs');
 const path = require('path');
-const { toKebabCase, getAllSourceFiles, extractVariants, buildCss } = require('./helpers');
+const { toKebabCase, getAllSourceFiles, extractVariants, buildCss, patchConfigAlias } = require('./helpers');
 
 const HEADER = '/* AUTO-GENERATED - DO NOT EDIT */';
 
@@ -91,16 +91,39 @@ module.exports = () => {
       });
 
       // Generate body attributes file
-      const ATTR_FILE = path.join(__dirname, 'generated-attributes.js');
+      const ATTR_DIR = path.join(process.cwd(), '.zero-ui');
+      const ATTR_FILE = path.join(ATTR_DIR, 'attributes.js');
       const attrExport = `/* AUTO-GENERATED - DO NOT EDIT */\nexport const bodyAttributes = ${JSON.stringify(initialValues, null, 2)};\n`;
+      // --- strongly typed .d.ts  ------------------------------------
+      const toLiteral = (v) =>
+        typeof v === 'string' ? `"${v.replace(/"/g, '\\"')}"` : v;
+
+      const lines = [];
+      lines.push('/* AUTO-GENERATED - DO NOT EDIT */');
+      lines.push('export declare const bodyAttributes: {');
+
+      for (const { key, values } of finalVariants) {
+        const slug = `data-${toKebabCase(key)}`;
+        const union = values.map(toLiteral).join(' | ');
+        lines.push(`  "${slug}": ${union};`);
+      }
+      lines.push('};\n');
+      const attrTypeExport = lines.join('\n');
+      // -------------------------------------------------------------------
+
 
       const existingContent = fs.existsSync(ATTR_FILE) ? fs.readFileSync(ATTR_FILE, 'utf-8') : '';
       if (existingContent !== attrExport) {
-        fs.mkdirSync(path.dirname(ATTR_FILE), { recursive: true });
+        fs.mkdirSync(ATTR_DIR, { recursive: true });
+        const ATTR_TYPE_FILE = path.join(ATTR_DIR, 'attributes.d.ts');
+
         fs.writeFileSync(ATTR_FILE, attrExport);
+        fs.writeFileSync(ATTR_TYPE_FILE, attrTypeExport);
       }
+      patchConfigAlias();
     }
   };
 };
 
 module.exports.postcss = true;
+

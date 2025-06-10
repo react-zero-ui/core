@@ -20,9 +20,18 @@
     }
   },
   "scripts": {
-    "test:postcss": "node --test postcss/index.test.js",
-    "test": "npm run test:postcss && eslint .",
+    "test:postcss": "node --test postcss/index.test.js && eslint .",
+    "test": "node test/run-all.js",
+    "test:unit": "node --test test/*.test.js",
+    "test:integration": "node --test test/integration.test.js",
+    "test:e2e": "node --test test/e2e.test.js",
+    "test:workflow": "node --test test/workflow.test.js",
+    "test:environments": "node --test test/environments.test.js",
+    "test:performance": "node --test test/performance.test.js",
     "lint": "eslint ."
+  },
+  "bin": {
+    "zero-ui": "./init.js"
   },
   "keywords": [
     "react",
@@ -55,7 +64,9 @@
     "chokidar": "^4.0.3"
   },
   "devDependencies": {
-    "eslint": "^8.47.0"
+    "eslint": "^8.47.0",
+    "fs-extra": "^11.3.0",
+    "puppeteer": "^24.10.0"
   },
   "eslintConfig": {
     "parserOptions": {
@@ -64,7 +75,8 @@
     },
     "env": {
       "node": true,
-      "es6": true
+      "es6": true,
+      "browser": true
     },
     "extends": [
       "eslint:recommended"

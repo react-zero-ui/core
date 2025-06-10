@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const parser = require('@babel/parser');
 const traverse = require('@babel/traverse').default;
+const generate = require('@babel/generator').default;
 
 const SUPPORTED_EXTENSIONS = {
   TYPESCRIPT: ['.ts', '.tsx'],
@@ -345,12 +346,74 @@ function buildCss(variants, header) {
   return css;
 }
 
+
+/**
+ * Parse a tsconfig/jsconfig JSON file using Babel (handles comments, trailing commas)
+ */
+function parseJsonWithBabel(source, filePath) {
+  try {
+    const ast = parser.parseExpression(source, {
+      sourceType: 'module',
+      plugins: ['json'],
+    });
+    // Convert Babel AST back to plain JS object
+    return eval(`(${generate(ast).code})`);
+  } catch (err) {
+    console.warn(`[Zero-UI] Failed to parse ${filePath}: ${err.message}`);
+    return null;
+  }
+}
+
+/**
+ * Adds @zero-ui/attributes path alias to tsconfig or jsconfig.
+ * Ensures correct module resolution for the generated attributes file.
+ * No-op if already present or config is missing.
+ */
+function patchConfigAlias() {
+  const cwd = process.cwd();
+
+  const configFile =
+    fs.existsSync(path.join(cwd, 'tsconfig.json'))
+      ? 'tsconfig.json'
+      : fs.existsSync(path.join(cwd, 'jsconfig.json'))
+        ? 'jsconfig.json'
+        : null;
+
+  if (!configFile) return console.warn(`[Zero-UI] No tsconfig.json or jsconfig.json found in ${cwd}`);
+
+  const configPath = path.join(cwd, configFile);
+  const raw = fs.readFileSync(configPath, 'utf-8');
+  const config = parseJsonWithBabel(raw, configPath);
+  if (!config) return console.warn(`[Zero-UI] Could not parse ${configFile}`);
+
+  config.compilerOptions = config.compilerOptions || {};
+  config.compilerOptions.baseUrl = config.compilerOptions.baseUrl || '.';
+  config.compilerOptions.paths = config.compilerOptions.paths || {};
+
+  const expected = ['./.zero-ui/attributes.js'];
+  const current = config.compilerOptions.paths['@zero-ui/attributes'];
+
+  if (
+    !Array.isArray(current) ||
+    JSON.stringify(current) !== JSON.stringify(expected)
+  ) {
+    config.compilerOptions.paths['@zero-ui/attributes'] = expected;
+    fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n');
+    console.log(`[Zero-UI] Patched ${configFile} with @zero-ui/attributes`);
+  }
+}
+
+
+
+
 module.exports = {
   toKebabCase,
   getAllSourceFiles,
   detectFileType,
   extractVariants,
   buildCss,
+  patchConfigAlias
 };
+
 
 

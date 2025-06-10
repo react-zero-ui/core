@@ -5,7 +5,7 @@ yarn.lock
 
 .gitignore
 /postcss/*.test.js
-
+/test/*
 *.test.js
 .github
 .editorconfig
