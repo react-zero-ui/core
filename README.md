@@ -16,7 +16,7 @@ npm install @austinserb/react-zero-ui
 ```
 
 ## Usage
-```tsx
+```jsx
 import { useUI } from '@austinserb/react-zero-ui';
 const [theme, setTheme] = useUI('theme', 'light');
 
@@ -26,4 +26,5 @@ const [theme, setTheme] = useUI('theme', 'light');
     Toggle Theme
   </div>
 </button>
+
 ```

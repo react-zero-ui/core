@@ -5,6 +5,7 @@
   "main": "index.js",
   "types": "./index.d.ts",
   "private": false,
+  "type": "module",
   "publishConfig": {
     "access": "public"
   },
@@ -16,22 +17,16 @@
     },
     "./postcss": {
       "types": "./postcss/index.d.ts",
-      "require": "./postcss/index.js"
+      "require": "./postcss/index.cjs"
     }
   },
   "scripts": {
-    "test:postcss": "node --test postcss/index.test.js && eslint .",
-    "test": "node test/run-all.js",
-    "test:unit": "node --test test/*.test.js",
-    "test:integration": "node --test test/integration.test.js",
-    "test:e2e": "node --test test/e2e.test.js",
-    "test:workflow": "node --test test/workflow.test.js",
-    "test:environments": "node --test test/environments.test.js",
-    "test:performance": "node --test test/performance.test.js",
+    "test": "playwright test",
+    "test:postcss": "node --test postcss/index.test.cjs",
     "lint": "eslint ."
   },
   "bin": {
-    "zero-ui": "./init.js"
+    "zero-ui": "./init.cjs"
   },
   "keywords": [
     "react",
@@ -64,18 +59,17 @@
     "chokidar": "^4.0.3"
   },
   "devDependencies": {
-    "eslint": "^8.47.0",
-    "fs-extra": "^11.3.0",
-    "puppeteer": "^24.10.0"
+    "@playwright/test": "^1.52.0",
+    "eslint": "^8.47.0"
   },
   "eslintConfig": {
     "parserOptions": {
-      "ecmaVersion": 2017,
+      "ecmaVersion": 2022,
       "sourceType": "module"
     },
     "env": {
       "node": true,
-      "es6": true,
+      "es2022": true,
       "browser": true
     },
     "extends": [

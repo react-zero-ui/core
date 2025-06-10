@@ -10,3 +10,6 @@ yarn.lock
 .github
 .editorconfig
 coverage/
+t.py
+.next/
+.git.
