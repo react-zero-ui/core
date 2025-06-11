@@ -7,9 +7,9 @@ import { existsSync, readFileSync } from 'node:fs';
 
 const test = base.extend({});
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const projectDir = path.resolve(__dirname, '../fixtures/next');
+const projectDir = path.resolve(__dirname, '../fixtures/vite');
 
-const zeroUiBin = path.resolve('./init.cjs');    // library CLI
+const zeroUiBin = path.resolve(__dirname, '../../src/cli/init.cjs');    // library CLI
 
 
 test.beforeAll(() => resetZeroUiState(projectDir));

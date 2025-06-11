@@ -7,7 +7,6 @@ export function resetZeroUiState(projectDir) {
 
   const tsconfigPath = path.join(projectDir, 'tsconfig.json');
   const zeroUiDir = path.join(projectDir, '.zero-ui');
-  console.log('zeroUiDir: ', zeroUiDir);
 
   if (fs.existsSync(zeroUiDir)) rmSync(zeroUiDir, { recursive: true, force: true });
 

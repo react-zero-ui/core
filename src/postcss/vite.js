@@ -6,7 +6,7 @@ export default function zeroUI() {
     name: 'vite-zero-ui',
     enforce: 'pre', // run before other Vite plugins
     async config() {
-      const { default: zeroUiPostcss } = await import('./postcss/index.cjs');
+      const { default: zeroUiPostcss } = await import('./index.cjs');
       return {
         css: {
           postcss: {

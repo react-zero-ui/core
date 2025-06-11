@@ -1,7 +1,7 @@
 // postcss/helpers.cjs
 const fs = require('fs');
 const path = require('path');
-const { CONFIG, IGNORE_DIRS } = require('../core.config.cjs');
+const { CONFIG, IGNORE_DIRS } = require('../config.cjs');
 const { extractVariants, parseJsonWithBabel, } = require('./ast.cjs');
 
 function toKebabCase(str) {
@@ -175,6 +175,7 @@ function isZeroUiInitialized() {
     return attrContent.includes('export const bodyAttributes') &&
       typeContent.includes('export declare const bodyAttributes');
   } catch (error) {
+    console.error('[Zero-UI] Error checking if Zero-UI is initialized:', error);
     return false;
   }
 }

@@ -4,6 +4,7 @@ package-lock.json
 yarn.lock
 
 .gitignore
+
 /postcss/*.test.js
 /__tests__/*
 *.test.js
@@ -13,5 +14,19 @@ coverage/
 t.py
 .next/
 .git.
+eslint.config.js
+.DS_Store
+
+playwright.*
+playwright.config.ts
+playwright.next.config.js
+playwright.next.config.ts
+playwright.vite.config.js
+playwright.vite.config.ts
 
 test-results/
+
+
+!.npmignore          
+!package.json
+!/src/**    

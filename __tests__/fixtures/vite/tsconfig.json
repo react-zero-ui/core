@@ -8,4 +8,12 @@
       "path": "./tsconfig.node.json"
     }
   ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@zero-ui/attributes": [
+        "./.zero-ui/attributes.js"
+      ]
+    }
+  }
 }

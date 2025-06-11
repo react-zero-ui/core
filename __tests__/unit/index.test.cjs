@@ -4,8 +4,8 @@ const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const plugin = require('./index.cjs')
-const { patchConfigAlias, toKebabCase } = require('./helpers.cjs')
+const plugin = require('../../src/postcss/index.cjs')
+const { patchConfigAlias, toKebabCase } = require('../../src/postcss/helpers.cjs')
 
 function getAttrFile() {
   return path.join(process.cwd(), '.zero-ui', 'attributes.js');

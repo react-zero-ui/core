@@ -9,7 +9,7 @@ const {
   isZeroUiInitialized,
 
 } = require('./helpers.cjs');
-const { runZeroUiInit } = require('../scripts/postInstall.cjs');
+const { runZeroUiInit } = require('../cli/postInstall.cjs');
 
 module.exports = () => {
   return {

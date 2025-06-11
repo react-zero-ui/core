@@ -7,7 +7,7 @@ const traverse = require('@babel/traverse').default;
 const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
-const { CONFIG } = require('../core.config.cjs');
+const { CONFIG } = require('../config.cjs');
 
 // Cache for parsed files
 const fileCache = new Map();
