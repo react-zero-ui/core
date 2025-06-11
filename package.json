@@ -18,10 +18,15 @@
     "./postcss": {
       "types": "./postcss/index.d.ts",
       "require": "./postcss/index.cjs"
+    },
+    "./vite": {
+      "types": "./vite.d.ts",
+      "default": "./vite.js"
     }
   },
   "scripts": {
-    "test": "playwright test",
+    "test:next": "playwright test -c playwright.next.config.ts",
+    "test:vite": "playwright test -c playwright.vite.config.ts",
     "test:postcss": "node --test postcss/index.test.cjs",
     "lint": "eslint ."
   },
@@ -54,13 +59,15 @@
     "tailwindcss": "^4.0.0"
   },
   "dependencies": {
+    "@babel/generator": "^7.27.5",
     "@babel/parser": "^7.27.5",
     "@babel/traverse": "^7.27.4",
-    "chokidar": "^4.0.3"
+    "@tailwindcss/postcss": "^4.1.8",
+    "dotenv": "^16.5.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.52.0",
-    "eslint": "^8.47.0"
+    "@playwright/test": "^1.53.0",
+    "eslint": "^9.28.0"
   },
   "eslintConfig": {
     "parserOptions": {

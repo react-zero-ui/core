@@ -5,7 +5,7 @@ yarn.lock
 
 .gitignore
 /postcss/*.test.js
-/test/*
+/__tests__/*
 *.test.js
 .github
 .editorconfig
@@ -13,3 +13,5 @@ coverage/
 t.py
 .next/
 .git.
+
+test-results/

@@ -23,11 +23,7 @@
     ],
     "target": "ES2017",
     "baseUrl": ".",
-    "paths": {
-      "@zero-ui/attributes": [
-        "./.zero-ui/attributes.js"
-      ]
-    }
+    "paths": {}
   },
   "include": [
     "next-env.d.ts",

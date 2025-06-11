@@ -6,3 +6,5 @@ t.py
 
 .next/ 
 .git.
+
+test-results/

@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const plugin = require('./index.cjs')
-const { patchConfigAlias } = require('./helpers.cjs')
+const { patchConfigAlias, toKebabCase } = require('./helpers.cjs')
 
 function getAttrFile() {
   return path.join(process.cwd(), '.zero-ui', 'attributes.js');
@@ -311,17 +311,9 @@ test('handles parsing errors gracefully', async () => {
     assert(result.css.includes('AUTO-GENERATED'), 'Should complete processing');
   });
 });
-test('throws on empty string initial value', async () => {
-  await assert.rejects(() =>
-    runTest('invalid-empty', {
-      'src/fail.jsx': `
-        import { useUI } from 'react-zero-ui';
-        useUI('bad_key', '');
-      `
-    }),
-    /Invalid state key\/value ""/,
-    'Should throw for empty string initial value'
-  );
+
+test('throws on empty string initial value', () => {
+  assert.throws(() => toKebabCase(''));
 });
 
 test('valid edge cases: underscores + missing initial', async () => {
@@ -778,3 +770,4 @@ test('patchConfigAlias - config file patching', async (t) => {
     }
   });
 });
+

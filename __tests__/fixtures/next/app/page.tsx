@@ -3,6 +3,7 @@ import { useUI } from "@austinserb/react-zero-ui";
 
 export default function Page() {
 	const [, setTheme] = useUI<"light" | "dark">("theme", "light");
+
 	return (
 		<div
 			className="theme-light:bg-gray-100 theme-dark:bg-gray-900 text-blue-900"

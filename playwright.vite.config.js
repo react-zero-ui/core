@@ -13,7 +13,7 @@ export default defineConfig({
 
 	use: {
 		headless: true,
-		baseURL: "http://localhost:3000",
+		baseURL: "http://localhost:5173",
 	},
 
 	// One project = one fixture app (Next, Vite, etc.)
@@ -23,27 +23,18 @@ export default defineConfig({
 			testMatch: /.*cli\.spec\.js/,
 		},
 		{
-			name: "next-e2e",
-			testMatch: /.*next\.spec\.js/,
+			dependencies: ["cli-setup"],
+			name: "vite-e2e",
+			testMatch: /.*vite\.spec\.js/,
 			use: {
-				baseURL: "http://localhost:3000",
+				baseURL: "http://localhost:5173",
 			},
 		},
-		// add more fixture apps later:
-		// {
-		//   name: 'vite',
-		//   testDir: './tests/e2e/vite',
-		//   webServer: {
-		//     command: 'npm run dev',
-		//     cwd: path.resolve(__dirname, 'tests/fixtures/vite'),
-		//     port: 5173,
-		//   },
-		// },
 	],
 	webServer: {
 		command: "npm run dev",
-		cwd: path.resolve(__dirname, "./__tests__/fixtures/next"),
-		url: "http://localhost:3000",
+		cwd: path.resolve(__dirname, "./__tests__/fixtures/vite"),
+		url: "http://localhost:5173",
 		reuseExistingServer: !process.env.CI, // speeds local runs
 	},
 });
