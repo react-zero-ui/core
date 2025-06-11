@@ -10,7 +10,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 console.log('__dirname: ', __dirname);
 const projectDir = path.resolve(__dirname, '../fixtures/next');
 
-const zeroUiBin = path.resolve(__dirname, '../../src/cli/init.js');    // library CLI
+const zeroUiBin = path.resolve(__dirname, '../../src/cli/init.cjs');    // library CLI
 
 
 test.beforeAll(() => resetZeroUiState(projectDir));

@@ -9,7 +9,7 @@ const test = base.extend({});
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectDir = path.resolve(__dirname, '../fixtures/vite');
 
-const zeroUiBin = path.resolve(__dirname, '../../src/cli/init.js');    // library CLI
+const zeroUiBin = path.resolve(__dirname, '../../src/cli/init.cjs');    // library CLI
 
 
 test.beforeAll(() => resetZeroUiState(projectDir));

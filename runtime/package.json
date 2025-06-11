@@ -1,13 +1,13 @@
 {
   "name": "@austinserb/react-zero-ui",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Zero re-render UI state management for React",
   "private": false,
   "type": "module",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "bin": {
-    "init-react-zero-ui": "./src/cli/init.js"
+    "init-react-zero-ui": "./src/cli/init.cjs"
   },
   "exports": {
     ".": {
@@ -24,8 +24,8 @@
       "import": "./src/postcss/vite.js"
     },
     "./cli": {
-      "require": "./src/cli/init.js",
-      "import": "./src/cli/init.js",
+      "require": "./src/cli/init.cjs",
+      "import": "./src/cli/init.cjs",
       "types": "./src/cli/init.d.ts"
     }
   },
