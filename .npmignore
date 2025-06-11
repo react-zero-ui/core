@@ -4,6 +4,7 @@ package-lock.json
 yarn.lock
 
 .gitignore
+*.tgz
 
 /postcss/*.test.js
 /__tests__/*

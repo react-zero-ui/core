@@ -37,7 +37,7 @@
     "lint": "eslint ."
   },
   "bin": {
-    "init-zero-ui": "./src/cli/init.cjs"
+    "init-react-zero-ui": "./src/cli/init.cjs"
   },
   "keywords": [
     "react",
