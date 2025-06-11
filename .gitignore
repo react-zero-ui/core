@@ -3,7 +3,7 @@ npm-debug.log
 yarn-error.log
 coverage/
 t.py
- 
+*.tgz
 
 .next/ 
 .git.
