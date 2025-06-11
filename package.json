@@ -18,15 +18,14 @@
     },
     "./postcss": {
       "types": "./src/postcss/index.d.ts",
-      "import": "./src/postcss/index.cjs"
+      "require": "./src/postcss/index.cjs"
     },
     "./vite": {
       "types": "./src/postcss/vite.d.ts",
       "import": "./src/postcss/vite.js"
     },
     "./cli": {
-      "require": "./src/cli/init.cjs",
-      "import": "./src/cli/init.cjs"
+      "require": "./src/cli/init.cjs"
     }
   },
   "scripts": {
