@@ -1,8 +1,8 @@
 {
-  "name": "create-zero-ui",
+  "name": "react-zero-ui",
   "version": "1.0.0",
   "bin": {
-    "create-zero-ui": "./bin.js"
+    "react-zero-ui": "./bin.js"
   },
   "dependencies": {
     "@austinserb/react-zero-ui": "^1.0.9"

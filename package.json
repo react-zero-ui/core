@@ -2,8 +2,8 @@
   "name": "@austinserb/react-zero-ui",
   "version": "1.0.10",
   "description": "Zero re-render UI state management for React",
-  "main": "index.js",
-  "types": "./index.d.ts",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
   "private": false,
   "type": "module",
   "publishConfig": {
@@ -32,10 +32,12 @@
     "test:next": "playwright test -c __tests__/config/playwright.next.config.js",
     "test:vite": "playwright test -c __tests__/config/playwright.vite.config.js",
     "test:unit": "node --test __tests__/unit/index.test.cjs",
+    "test:cli": "node --test __tests__/unit/cli.test.cjs",
+    "test:all": "npm run test:unit && npm run test:cli",
     "lint": "eslint ."
   },
   "bin": {
-    "zero-ui": "./src/cli/init.cjs"
+    "init-zero-ui": "./src/cli/init.cjs"
   },
   "keywords": [
     "react",
@@ -63,14 +65,13 @@
   "peerDependencies": {
     "postcss": "^8.4.27",
     "react": ">=16.8.0",
-    "tailwindcss": "^4.0.0"
+    "tailwindcss": "^4.0.0",
+    "@tailwindcss/postcss": "^4.1.8"
   },
   "dependencies": {
     "@babel/generator": "^7.27.5",
     "@babel/parser": "^7.27.5",
-    "@babel/traverse": "^7.27.4",
-    "@tailwindcss/postcss": "^4.1.8",
-    "dotenv": "^16.5.0"
+    "@babel/traverse": "^7.27.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
@@ -85,8 +86,7 @@
     },
     "env": {
       "node": true,
-      "es2022": true,
-      "browser": true
+      "es2022": true
     },
     "extends": [
       "eslint:recommended"
