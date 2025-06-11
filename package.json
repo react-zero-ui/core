@@ -13,19 +13,20 @@
   "exports": {
     ".": {
       "types": "./src/index.d.ts",
-      "require": "./src/index.js",
       "import": "./src/index.js",
       "default": "./src/index.js"
     },
     "./postcss": {
       "types": "./src/postcss/index.d.ts",
-      "require": "./src/postcss/index.cjs",
       "import": "./src/postcss/index.cjs"
     },
     "./vite": {
       "types": "./src/postcss/vite.d.ts",
-      "require": "./src/postcss/vite.js",
       "import": "./src/postcss/vite.js"
+    },
+    "./cli": {
+      "require": "./src/cli/init.cjs",
+      "import": "./src/cli/init.cjs"
     }
   },
   "scripts": {
