@@ -7,7 +7,7 @@
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "bin": {
-    "init-react-zero-ui": "./src/cli/init.cjs"
+    "init-react-zero-ui": "./src/cli/init.js"
   },
   "exports": {
     ".": {
@@ -24,7 +24,9 @@
       "import": "./src/postcss/vite.js"
     },
     "./cli": {
-      "require": "./src/cli/init.cjs"
+      "require": "./src/cli/init.js",
+      "import": "./src/cli/init.js",
+      "types": "./src/cli/init.d.ts"
     }
   },
   "scripts": {
