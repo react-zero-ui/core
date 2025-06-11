@@ -1,0 +1,91 @@
+{
+  "name": "@austinserb/react-zero-ui",
+  "version": "1.0.11",
+  "description": "Zero re-render UI state management for React",
+  "private": false,
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "bin": {
+    "init-react-zero-ui": "./src/cli/init.cjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.js",
+      "default": "./src/index.js"
+    },
+    "./postcss": {
+      "types": "./src/postcss/index.d.ts",
+      "require": "./src/postcss/index.cjs"
+    },
+    "./vite": {
+      "types": "./src/postcss/vite.d.ts",
+      "import": "./src/postcss/vite.js"
+    },
+    "./cli": {
+      "require": "./src/cli/init.cjs"
+    }
+  },
+  "scripts": {
+    "test:next": "playwright test -c __tests__/config/playwright.next.config.js",
+    "test:vite": "playwright test -c __tests__/config/playwright.vite.config.js",
+    "test:unit": "node --test __tests__/unit/index.test.cjs",
+    "test:cli": "node --test __tests__/unit/cli.test.cjs",
+    "test:all": "npm run test:unit && npm run test:cli",
+    "lint": "eslint ."
+  },
+  "keywords": [
+    "react",
+    "ui",
+    "state",
+    "css",
+    "postcss",
+    "postcss-plugin",
+    "zero-config",
+    "react-zero-ui",
+    "postcss-react-zero-ui",
+    "pre-rendering",
+    "no-rerender",
+    "zero-ui"
+  ],
+  "author": "Austinserb <serbaustin@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/austin1serb/react-zero-ui.git"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "peerDependencies": {
+    "postcss": "^8.4.27",
+    "react": ">=16.8.0",
+    "tailwindcss": "^4.0.0",
+    "@tailwindcss/postcss": "^4.1.8"
+  },
+  "dependencies": {
+    "@babel/generator": "^7.27.5",
+    "@babel/parser": "^7.27.5",
+    "@babel/traverse": "^7.27.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.28.0",
+    "@playwright/test": "^1.53.0",
+    "eslint": "^9.28.0",
+    "globals": "^16.2.0"
+  },
+  "eslintConfig": {
+    "parserOptions": {
+      "ecmaVersion": 2022,
+      "sourceType": "module"
+    },
+    "env": {
+      "node": true,
+      "es2022": true
+    },
+    "extends": [
+      "eslint:recommended"
+    ]
+  }
+}
