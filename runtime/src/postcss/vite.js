@@ -1,3 +1,5 @@
+//src/postcss/vite.js
+
 // vite-plugin-zero-ui.ts  (ESM wrapper)
 import tailwindcss from '@tailwindcss/postcss';
 import path from 'path';

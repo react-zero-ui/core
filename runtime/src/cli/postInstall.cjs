@@ -2,7 +2,8 @@
 const {
   processVariants,
   generateAttributesFile,
-  patchConfigAlias
+  patchConfigAlias,
+  patchPostcssConfig
 } = require('../postcss/helpers.cjs');
 
 function runZeroUiInit() {
@@ -15,8 +16,11 @@ function runZeroUiInit() {
     // Generate attribute files using the shared helper
     generateAttributesFile(finalVariants, initialValues);
 
-    // Patch config for module resolution
+    // Patch config for module resolution 
     patchConfigAlias();
+
+    // Patch PostCSS config for Next.js projects
+    patchPostcssConfig();
 
     console.log(`[Zero-UI] ✅ Initialized with ${finalVariants.length} variants from ${sourceFiles.length} files`);
 

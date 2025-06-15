@@ -25,9 +25,9 @@
       "import": "./src/postcss/vite.js"
     },
     "./cli": {
+      "types": "./src/cli/init.d.ts",
       "require": "./src/cli/init.cjs",
-      "import": "./src/cli/init.cjs",
-      "types": "./src/cli/init.d.ts"
+      "import": "./src/cli/init.cjs"
     }
   },
   "scripts": {

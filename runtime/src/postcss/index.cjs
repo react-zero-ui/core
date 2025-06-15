@@ -1,4 +1,4 @@
-// postcss/index.cjs
+// src/postcss/index.cjs
 /**
  * @type {import('postcss').PluginCreator}
  */

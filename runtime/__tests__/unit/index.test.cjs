@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const plugin = require('../../src/postcss/index.cjs')
-const { patchConfigAlias, toKebabCase } = require('../../src/postcss/helpers.cjs')
+const { patchConfigAlias, toKebabCase, patchPostcssConfig } = require('../../src/postcss/helpers.cjs')
 
 function getAttrFile() {
   return path.join(process.cwd(), '.zero-ui', 'attributes.js');
@@ -770,5 +770,268 @@ test('patchConfigAlias - config file patching', async (t) => {
       fs.rmSync(testDir, { recursive: true, force: true });
     }
   });
+});
+
+// PostCSS Config Tests
+test('PostCSS config - creates new .js config for Next.js project', async () => {
+  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-postcss-test'));
+  const originalCwd = process.cwd();
+
+  try {
+    process.chdir(testDir);
+
+    // Create Next.js project indicators
+    fs.writeFileSync('next.config.js', 'module.exports = {}');
+    fs.writeFileSync('package.json', JSON.stringify({
+      dependencies: { next: '^14.0.0' }
+    }));
+
+    // Run patchPostcssConfig
+    patchPostcssConfig();
+
+    // Verify postcss.config.js was created
+    assert(fs.existsSync('postcss.config.js'), 'Should create postcss.config.js');
+
+    const configContent = fs.readFileSync('postcss.config.js', 'utf-8');
+    console.log('\n📄 Generated PostCSS config:');
+    console.log(configContent);
+
+    assert(configContent.includes('@austinserb/react-zero-ui/postcss'), 'Should include Zero-UI plugin');
+    assert(configContent.includes('@tailwindcss/postcss'), 'Should include Tailwind plugin');
+    assert(configContent.includes('module.exports'), 'Should use CommonJS format');
+
+  } finally {
+    process.chdir(originalCwd);
+    fs.rmSync(testDir, { recursive: true, force: true });
+  }
+});
+
+test('PostCSS config - updates existing .js config', async () => {
+  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-postcss-test'));
+  const originalCwd = process.cwd();
+
+  try {
+    process.chdir(testDir);
+
+    // Create Next.js project
+    fs.writeFileSync('next.config.js', 'module.exports = {}');
+
+    // Create existing PostCSS config without Zero-UI
+    const existingConfig = `module.exports = {
+  plugins: {
+    'autoprefixer': {},
+    '@tailwindcss/postcss': {}
+  }
+};`;
+    fs.writeFileSync('postcss.config.js', existingConfig);
+
+    // Run patchPostcssConfig
+    patchPostcssConfig();
+
+    // Verify config was updated
+    const updatedContent = fs.readFileSync('postcss.config.js', 'utf-8');
+    console.log('\n📄 Updated PostCSS config:');
+    console.log(updatedContent);
+
+    assert(updatedContent.includes('@austinserb/react-zero-ui/postcss'), 'Should add Zero-UI plugin');
+    assert(updatedContent.includes('autoprefixer'), 'Should preserve existing plugins');
+    assert(updatedContent.includes('@tailwindcss/postcss'), 'Should preserve Tailwind');
+
+  } finally {
+    process.chdir(originalCwd);
+    fs.rmSync(testDir, { recursive: true, force: true });
+  }
+});
+
+test('PostCSS config - updates existing .mjs config', async () => {
+  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-postcss-test'));
+  const originalCwd = process.cwd();
+
+  try {
+    process.chdir(testDir);
+
+    // Create Next.js project
+    fs.writeFileSync('next.config.mjs', 'export default {}');
+
+    // Create existing .mjs PostCSS config with array format
+    const existingConfig = `const config = {
+  plugins: [
+    'autoprefixer',
+    '@tailwindcss/postcss'
+  ]
+};
+
+export default config;`;
+    fs.writeFileSync('postcss.config.mjs', existingConfig);
+
+    // Run patchPostcssConfig
+    patchPostcssConfig();
+
+    // Verify config was updated
+    const updatedContent = fs.readFileSync('postcss.config.mjs', 'utf-8');
+    console.log('\n📄 Updated .mjs PostCSS config:');
+    console.log(updatedContent);
+
+    assert(updatedContent.includes('@austinserb/react-zero-ui/postcss'), 'Should add Zero-UI plugin');
+    assert(updatedContent.includes('export default'), 'Should preserve ES module format');
+    assert(updatedContent.includes('autoprefixer'), 'Should preserve existing plugins');
+
+  } finally {
+    process.chdir(originalCwd);
+    fs.rmSync(testDir, { recursive: true });
+  }
+});
+
+test('PostCSS config - skips if Zero-UI already configured', async () => {
+  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-postcss-test'));
+  const originalCwd = process.cwd();
+
+  try {
+    process.chdir(testDir);
+
+    // Create Next.js project
+    fs.writeFileSync('next.config.js', 'module.exports = {}');
+
+    // Create PostCSS config with Zero-UI already configured
+    const existingConfig = `module.exports = {
+  plugins: {
+    '@austinserb/react-zero-ui/postcss': {},
+    '@tailwindcss/postcss': {}
+  }
+};`;
+    fs.writeFileSync('postcss.config.js', existingConfig);
+    const originalContent = fs.readFileSync('postcss.config.js', 'utf-8');
+
+    // Run patchPostcssConfig
+    patchPostcssConfig();
+
+    // Verify config was not modified
+    const updatedContent = fs.readFileSync('postcss.config.js', 'utf-8');
+    assert.equal(originalContent, updatedContent, 'Should not modify config with Zero-UI already present');
+
+  } finally {
+    process.chdir(originalCwd);
+    fs.rmSync(testDir, { recursive: true, force: true });
+  }
+});
+
+test('PostCSS config - skips non-Next.js projects', async () => {
+  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-postcss-test'));
+  const originalCwd = process.cwd();
+
+  try {
+    process.chdir(testDir);
+
+    // Create non-Next.js project (React only)
+    fs.writeFileSync('package.json', JSON.stringify({
+      dependencies: { react: '^18.0.0' }
+    }));
+
+    // Run patchPostcssConfig
+    patchPostcssConfig();
+
+    // Verify no PostCSS config was created
+    assert(!fs.existsSync('postcss.config.js'), 'Should not create config for non-Next.js project');
+    assert(!fs.existsSync('postcss.config.mjs'), 'Should not create .mjs config for non-Next.js project');
+
+  } finally {
+    process.chdir(originalCwd);
+    fs.rmSync(testDir, { recursive: true, force: true });
+  }
+});
+
+test('PostCSS config - handles complex existing configs', async () => {
+  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-postcss-test'));
+  const originalCwd = process.cwd();
+
+  try {
+    process.chdir(testDir);
+
+    // Create Next.js project
+    fs.writeFileSync('next.config.js', 'module.exports = {}');
+
+    // Create complex PostCSS config
+    const complexConfig = `module.exports = {
+  plugins: {
+    'postcss-flexbugs-fixes': {},
+    'postcss-preset-env': {
+      autoprefixer: {
+        flexbox: 'no-2009',
+      },
+      stage: 3,
+    },
+    '@tailwindcss/postcss': {}
+  }
+};`;
+    fs.writeFileSync('postcss.config.js', complexConfig);
+
+    // Run patchPostcssConfig
+    patchPostcssConfig();
+
+    // Verify Zero-UI was added at the beginning
+    const updatedContent = fs.readFileSync('postcss.config.js', 'utf-8');
+    console.log('\n📄 Complex config update:');
+    console.log(updatedContent);
+
+    assert(updatedContent.includes('@austinserb/react-zero-ui/postcss'), 'Should add Zero-UI plugin');
+    assert(updatedContent.includes('postcss-flexbugs-fixes'), 'Should preserve existing plugins');
+    assert(updatedContent.includes('postcss-preset-env'), 'Should preserve complex plugin configs');
+
+    // Verify Zero-UI comes before other plugins
+    const zeroUiIndex = updatedContent.indexOf('@austinserb/react-zero-ui/postcss');
+    const tailwindIndex = updatedContent.indexOf('@tailwindcss/postcss');
+    assert(zeroUiIndex < tailwindIndex, 'Zero-UI should come before Tailwind');
+
+  } finally {
+    process.chdir(originalCwd);
+    fs.rmSync(testDir, { recursive: true, force: true });
+  }
+});
+
+test('PostCSS config - prefers .js over .mjs when both exist', async () => {
+  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-postcss-test'));
+  const originalCwd = process.cwd();
+
+  try {
+    process.chdir(testDir);
+
+    // Create Next.js project
+    fs.writeFileSync('next.config.js', 'module.exports = {}');
+
+    // Create both .js and .mjs configs
+    fs.writeFileSync('postcss.config.js', `module.exports = {
+  plugins: {
+    '@tailwindcss/postcss': {}
+  }
+};`);
+
+    fs.writeFileSync('postcss.config.mjs', `const config = {
+  plugins: [
+    '@tailwindcss/postcss'
+  ]
+};
+
+export default config;`);
+
+    const originalJsContent = fs.readFileSync('postcss.config.js', 'utf-8');
+    const originalMjsContent = fs.readFileSync('postcss.config.mjs', 'utf-8');
+
+    console.log('\n📄 Original .js config:');
+    console.log(originalJsContent);
+
+    // Run patchPostcssConfig
+    patchPostcssConfig();
+
+    // Verify .js was modified, .mjs was not
+    const updatedJsContent = fs.readFileSync('postcss.config.js', 'utf-8');
+    const updatedMjsContent = fs.readFileSync('postcss.config.mjs', 'utf-8');
+
+    assert(updatedJsContent.includes('@austinserb/react-zero-ui/postcss'), 'Should modify .js config');
+    assert.equal(originalMjsContent, updatedMjsContent, 'Should not modify .mjs config when .js exists');
+
+  } finally {
+    process.chdir(originalCwd);
+    fs.rmSync(testDir, { recursive: true, force: true });
+  }
 });
 

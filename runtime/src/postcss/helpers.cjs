@@ -1,8 +1,9 @@
-// postcss/helpers.cjs
+// src/postcss/helpers.cjs
 const fs = require('fs');
 const path = require('path');
 const { CONFIG, IGNORE_DIRS } = require('../config.cjs');
-const { extractVariants, parseJsonWithBabel, } = require('./ast.cjs');
+const { extractVariants, parseJsonWithBabel, parseAndUpdatePostcssConfig } = require('./ast.cjs');
+
 
 function toKebabCase(str) {
   if (typeof str !== 'string') {
@@ -251,8 +252,79 @@ function patchConfigAlias() {
   }
 }
 
+/**
+ * Patches postcss.config.js to include Zero-UI plugin before Tailwind CSS
+ * Only runs for Next.js projects and uses AST parsing for robust config modification
+ */
+function patchPostcssConfig() {
+  const cwd = process.cwd();
+  const postcssConfigJsPath = path.join(cwd, 'postcss.config.js');
+  const postcssConfigMjsPath = path.join(cwd, 'postcss.config.mjs');
+  const packageJsonPath = path.join(cwd, 'package.json');
 
+  // Determine which config file exists (prefer .js over .mjs)
+  let postcssConfigPath = null;
+  let isESModule = false;
 
+  if (fs.existsSync(postcssConfigJsPath)) {
+    postcssConfigPath = postcssConfigJsPath;
+    isESModule = false;
+  } else if (fs.existsSync(postcssConfigMjsPath)) {
+    postcssConfigPath = postcssConfigMjsPath;
+    isESModule = true;
+  }
+
+  // Check if this is a Next.js project
+  const isNextProject = fs.existsSync(path.join(cwd, 'next.config.js')) ||
+    fs.existsSync(path.join(cwd, 'next.config.mjs')) ||
+    fs.existsSync(path.join(cwd, 'next.config.ts'));
+
+  if (!isNextProject && fs.existsSync(packageJsonPath)) {
+    try {
+      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+      const hasNext = packageJson.dependencies?.next || packageJson.devDependencies?.next;
+      if (!hasNext) {
+        return; // Not a Next.js project, skip PostCSS config patching
+      }
+    } catch {
+      console.warn('[Zero-UI] Could not read package.json, skipping PostCSS config patch');
+      return;
+    }
+  }
+
+  const zeroUiPlugin = '@austinserb/react-zero-ui/postcss';
+
+  // If no config exists, create a .js file (more widely supported)
+  if (!postcssConfigPath) {
+    const newConfigPath = postcssConfigJsPath;
+    const newConfig = `// postcss.config.js
+module.exports = {
+  plugins: {
+    '${zeroUiPlugin}': {},
+    // Tailwind MUST come AFTER Zero-UI
+    '@tailwindcss/postcss': {}
+  }
+};
+`;
+    fs.writeFileSync(newConfigPath, newConfig);
+    console.log('[Zero-UI] Created postcss.config.js with Zero-UI plugin');
+    return;
+  }
+
+  // Parse existing config using AST
+  const existingContent = fs.readFileSync(postcssConfigPath, 'utf-8');
+  const updatedConfig = parseAndUpdatePostcssConfig(existingContent, zeroUiPlugin, isESModule);
+
+  if (updatedConfig && updatedConfig !== existingContent) {
+    fs.writeFileSync(postcssConfigPath, updatedConfig);
+    const configFileName = path.basename(postcssConfigPath);
+    console.log(`[Zero-UI] Updated ${configFileName} to include Zero-UI plugin`);
+  } else if (updatedConfig === null) {
+    const configFileName = path.basename(postcssConfigPath);
+    console.log(`[Zero-UI] PostCSS config exists but missing Zero-UI plugin.`);
+    console.log(`[Zero-UI] Please manually add "@austinserb/react-zero-ui/postcss" before Tailwind in your ${configFileName}`);
+  }
+}
 
 module.exports = {
   toKebabCase,
@@ -260,8 +332,8 @@ module.exports = {
   extractVariants,
   buildCss,
   patchConfigAlias,
+  patchPostcssConfig,
   generateAttributesFile,
   processVariants,
   isZeroUiInitialized,
-
 };

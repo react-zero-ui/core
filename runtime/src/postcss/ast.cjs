@@ -1,4 +1,4 @@
-
+// src/postcss/ast.cjs
 
 // TODO update to esbuild or SWC + run in parallel w/ per changed file only
 const parser = require('@babel/parser');
@@ -304,7 +304,117 @@ function parseJsonWithBabel(source) {
   }
 }
 
+
+/** 
+ * Parse PostCSS config JavaScript file and add Zero-UI plugin if not present
+ * Uses Babel AST for robust parsing and modification
+ * Supports both CommonJS (.js) and ES Modules (.mjs) formats
+ * @param {string} source - The PostCSS config source code
+ * @param {string} zeroUiPlugin - The Zero-UI plugin name
+ * @param {boolean} isESModule - Whether the config is an ES module
+ * @returns {string | null} The modified config code or null if no changes were made
+ */
+function parseAndUpdatePostcssConfig(source, zeroUiPlugin, isESModule = false) {
+  try {
+    const ast = parser.parse(source, {
+      sourceType: 'module',
+      plugins: ['commonjs', 'importMeta'],
+    });
+
+    let modified = false;
+
+    // Check if Zero-UI plugin already exists
+    if (source.includes(zeroUiPlugin)) {
+      return source; // Already configured
+    }
+
+    traverse(ast, {
+      // Handle CommonJS: module.exports = { ... } and exports = { ... }
+      AssignmentExpression(path) {
+        const { left, right } = path.node;
+
+        // Check for module.exports or exports assignment
+        const isModuleExports = left.type === 'MemberExpression' &&
+          left.object.name === 'module' &&
+          left.property.name === 'exports';
+        const isExportsAssignment = left.type === 'Identifier' && left.name === 'exports';
+
+        if ((isModuleExports || isExportsAssignment) && right.type === 'ObjectExpression') {
+          const pluginsProperty = right.properties.find(prop =>
+            prop.key && prop.key.name === 'plugins'
+          );
+
+          if (pluginsProperty) {
+            modified = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
+          }
+        }
+      },
+
+      // Handle ES Modules: export default { ... }
+      ExportDefaultDeclaration(path) {
+        if (isESModule && path.node.declaration.type === 'ObjectExpression') {
+          const pluginsProperty = path.node.declaration.properties.find(prop =>
+            prop.key && prop.key.name === 'plugins'
+          );
+
+          if (pluginsProperty) {
+            modified = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
+          }
+        }
+      },
+
+      // Handle: const config = { plugins: ... }; export default config
+      VariableDeclarator(path) {
+        if (isESModule && path.node.init && path.node.init.type === 'ObjectExpression') {
+          const pluginsProperty = path.node.init.properties.find(prop =>
+            prop.key && prop.key.name === 'plugins'
+          );
+
+          if (pluginsProperty) {
+            modified = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
+          }
+        }
+      }
+    });
+
+    if (modified) {
+      return generate(ast).code;
+    } else {
+      return null; // Could not automatically modify
+    }
+
+  } catch (err) {
+    console.warn(`[Zero-UI] Failed to parse PostCSS config: ${err.message}`);
+    return null;
+  }
+}
+
+/**
+ * Helper function to add Zero-UI plugin to plugins configuration
+ * Handles both object format {plugin: {}} and array format [plugin]
+ */
+function addZeroUiToPlugins(pluginsNode, zeroUiPlugin) {
+  if (pluginsNode.type === 'ObjectExpression') {
+    // Object format: { 'plugin': {} }
+    pluginsNode.properties.unshift({
+      type: 'ObjectProperty',
+      key: { type: 'StringLiteral', value: zeroUiPlugin },
+      value: { type: 'ObjectExpression', properties: [] }
+    });
+    return true;
+  } else if (pluginsNode.type === 'ArrayExpression') {
+    // Array format: ['plugin']
+    pluginsNode.elements.unshift({
+      type: 'StringLiteral',
+      value: zeroUiPlugin
+    });
+    return true;
+  }
+  return false;
+}
+
 module.exports = {
   extractVariants,
   parseJsonWithBabel,
+  parseAndUpdatePostcssConfig,
 };

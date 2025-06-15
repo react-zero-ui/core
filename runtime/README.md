@@ -1,6 +1,6 @@
 # React Zero-UI
 
-**Instant UI state updates. ZERO React re-renders. ZERO runtime overhead** Update the UI instantly, manage global UI state from anywhere. No prop drilling, get started with one line of code. ```npx create-zero-ui```
+**Instant UI state updates. ZERO React re-renders. ZERO runtime overhead.** Update the UI instantly, manage global UI state from anywhere. No prop drilling. get started with one command in your existing React app. ```npx create-zero-ui```
 
 [![npm version](https://img.shields.io/npm/v/@austinserb/react-zero-ui)](https://www.npmjs.com/package/@austinserb/react-zero-ui)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -61,7 +61,7 @@ export default {
 }
 ```
 
-**Next.js:**
+#### Next.js
 
 #### 1. Add PostCSS Plugin
 
@@ -93,7 +93,7 @@ return (
 
 ## Usage
 
-### Basic Theme Switching
+**Basic Theme Switching**
 
 ```tsx
 import { useUI } from '@austinserb/react-zero-ui';
@@ -152,7 +152,7 @@ clasName="md:theme-dark:bg-black md:peer-checked:theme-light:hidden"
 
 ### `useUI(key: string, SSRValue: string)`
 
-Returns a tuple similar to `useState`, but the first value is intentionally stale (use CSS classes instead).
+Returns a tuple similar to `useState`, but the first value is intentionally stale.
 
 ```jsx
 const [staleValue, setValue] = useUI('theme', 'light');
