@@ -1,7 +1,8 @@
 import { useCallback } from 'react';
 
 
-export function useUI(key, initialValue) {
+
+function useUI(key, initialValue) {
 
   const parseValue = (stringValue) => {
     if (stringValue === null || stringValue === undefined) return initialValue;
@@ -33,3 +34,7 @@ export function useUI(key, initialValue) {
   return [initialValue, setValue];
 }
 
+
+
+export { useUI };
+export default useUI;

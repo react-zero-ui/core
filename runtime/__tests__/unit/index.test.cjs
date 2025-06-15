@@ -648,7 +648,8 @@ test('patchConfigAlias - config file patching', async (t) => {
           paths: {
             "@zero-ui/attributes": ["./.zero-ui/attributes.js"],
             "@/*": ["./src/*"]
-          }
+          },
+          include: [".zero-ui/**/*.d.ts", ".next/**/*.d.ts"]
         }
       };
       fs.writeFileSync('tsconfig.json', JSON.stringify(tsconfigContent, null, 2));

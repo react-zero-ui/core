@@ -126,14 +126,24 @@ function generateAttributesFile(finalVariants, initialValues) {
 
   // Generate TypeScript definitions
   const toLiteral = (v) => typeof v === 'string' ? `"${v.replace(/"/g, '\\"')}"` : v;
+  const variantLines = finalVariants.map(({ key, values }) => {
+    const slug = `data-${toKebabCase(key)}`;
+    const union = values.length
+      ? values.map(toLiteral).join(' | ')
+      : 'string';                    // ← fallback
+    return `  "${slug}": ${union};`;
+  });
+
+  // Always include an index signature so TS doesn't optimize
+  // the declaration away when no variants exist.
+  if (variantLines.length === 0) {
+    variantLines.push('  [key: string]: string;');
+  }
+
   const typeLines = [
     CONFIG.HEADER,
     'export declare const bodyAttributes: {',
-    ...finalVariants.map(({ key, values }) => {
-      const slug = `data-${toKebabCase(key)}`;
-      const union = values.map(toLiteral).join(' | ');
-      return `  "${slug}": ${union};`;
-    }),
+    ...variantLines,
     '};',
     ''
   ];
@@ -181,43 +191,66 @@ function isZeroUiInitialized() {
 }
 
 /**
- * Adds @zero-ui/attributes path alias to tsconfig or jsconfig.
- * Ensures correct module resolution for the generated attributes file.
- * No-op if already present or config is missing.
+ * Adds the @zero-ui/attributes path alias and ensures the generated .d.ts files
+ * are inside the TypeScript program. Writes to ts/ jsconfig only if something
+ * actually changes.
  */
 function patchConfigAlias() {
   const cwd = process.cwd();
 
-  const configFile =
-    fs.existsSync(path.join(cwd, 'tsconfig.json'))
-      ? 'tsconfig.json'
-      : fs.existsSync(path.join(cwd, 'jsconfig.json'))
-        ? 'jsconfig.json'
-        : null;
+  const configFile = fs.existsSync(path.join(cwd, 'tsconfig.json'))
+    ? 'tsconfig.json'
+    : fs.existsSync(path.join(cwd, 'jsconfig.json'))
+      ? 'jsconfig.json'
+      : null;
 
-  if (!configFile) return console.warn(`[Zero-UI] No tsconfig.json or jsconfig.json found in ${cwd}`);
+  // Ignore Vite fixtures — they patch their own config
+  if (fs.existsSync(path.join(cwd, 'vite.config.ts'))) return;
+  if (!configFile) {
+    return console.warn(`[Zero-UI] No ts/ jsconfig found in ${cwd}`);
+  }
 
   const configPath = path.join(cwd, configFile);
   const raw = fs.readFileSync(configPath, 'utf-8');
   const config = parseJsonWithBabel(raw, configPath);
-  if (!config) return console.warn(`[Zero-UI] Could not parse ${configFile}`);
+  if (!config) {
+    return console.warn(`[Zero-UI] Could not parse ${configFile}`);
+  }
 
-  config.compilerOptions = config.compilerOptions || {};
-  config.compilerOptions.baseUrl = config.compilerOptions.baseUrl || '.';
-  config.compilerOptions.paths = config.compilerOptions.paths || {};
+  /* ---------- ensure alias ---------- */
+  config.compilerOptions ??= {};
+  config.compilerOptions.baseUrl ??= '.';
+  config.compilerOptions.paths ??= {};
 
-  const expected = ['./.zero-ui/attributes.js'];
-  const current = config.compilerOptions.paths['@zero-ui/attributes'];
+  const expectedPaths = ['./.zero-ui/attributes.js'];
+  const currentPaths = config.compilerOptions.paths['@zero-ui/attributes'];
+  let changed = false;
 
   if (
-    !Array.isArray(current) ||
-    JSON.stringify(current) !== JSON.stringify(expected)
+    !Array.isArray(currentPaths) ||
+    JSON.stringify(currentPaths) !== JSON.stringify(expectedPaths)
   ) {
-    config.compilerOptions.paths['@zero-ui/attributes'] = expected;
+    config.compilerOptions.paths['@zero-ui/attributes'] = expectedPaths;
+    changed = true;
+  }
+
+  /* ---------- ensure .d.ts includes ---------- */
+  const extraIncludes = ['.zero-ui/**/*.d.ts', '.next/**/*.d.ts'];
+  config.include = Array.from(
+    new Set([...(config.include ?? []), ...extraIncludes])
+  );
+
+  if (config.include.length !== (config.include ?? []).length) {
+    changed = true;
+  }
+
+  /* ---------- write only if modified ---------- */
+  if (changed) {
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n');
-    console.log(`[Zero-UI] Patched ${configFile} with @zero-ui/attributes`);
+    console.log(`[Zero-UI] Patched ${configFile} (paths &/or includes)`);
   }
 }
+
 
 
 

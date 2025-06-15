@@ -1,5 +1,6 @@
 "use client";
-import { useUI } from "@austinserb/react-zero-ui";
+
+import useUI from "@austinserb/react-zero-ui";
 
 export default function Page() {
 	const [, setTheme] = useUI<"light" | "dark">("theme", "light");

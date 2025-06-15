@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@austinserb/react-zero-ui": "file:../../..",
+    "@austinserb/react-zero-ui": "file:../../../../austinserb-react-zero-ui-1.0.15.tgz",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

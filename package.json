@@ -11,5 +11,11 @@
     "test": "npm run test -w runtime",
     "pack:runtime": "npm pack --workspace runtime",
     "pack:init": "npm pack --workspace init-react-zero-ui"
+  },
+  "dependencies": {
+    "@austinserb/react-zero-ui": "^1.0.13"
+  },
+  "devDependencies": {
+    "@austinserb/react-zero-ui": "workspace:runtime"
   }
 }

@@ -1,5 +1,5 @@
 "use client";
-import { useUI } from "@austinserb/react-zero-ui";
+import useUI from "@austinserb/react-zero-ui";
 import "./App.css";
 
 const App: React.FC = () => {

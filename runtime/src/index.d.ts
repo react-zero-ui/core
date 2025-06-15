@@ -1,17 +1,8 @@
-// Overload for boolean type
-export function useUI<T extends boolean>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void];
+/**
+ * Returns [staleValue, setState] - destructure as `const [, setState] = useUI(...)`
+ * The first value is intentionally stale/static, use only the setter.
+ */
+declare function useUI<T extends string | number | boolean | readonly string[]>(key: string, initialValue: T): readonly [T, (v: T | ((currentValue: T) => T)) => void];
 
-// Overload for string array types
-export function useUI<T extends string[]>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void];
-
-// Overload for string types
-export function useUI<T extends string>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void];
-
-// Overload for number types
-export function useUI<T extends number>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void];
-
-// Overload for union types (most common use case)
-export function useUI<T extends string>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void];
-
-// Generic fallback
-export function useUI<T>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void];
+export { useUI };
+export default useUI;
