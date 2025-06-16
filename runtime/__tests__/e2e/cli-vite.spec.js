@@ -15,25 +15,21 @@ const zeroUiBin = path.resolve(__dirname, '../../src/cli/init.cjs');    // libra
 test.beforeAll(() => resetZeroUiState(projectDir));
 
 
-test.describe('Zero-UI Next.js CLI', () => {
+test.describe('Zero-UI Vite CLI', () => {
 
   test('init CLI scaffolds project', () => {
     // run zero-ui init
     spawnSync('node', [zeroUiBin], { cwd: projectDir, stdio: 'inherit' });
 
     const attrsPath = path.join(projectDir, '.zero-ui/attributes.js');
-    const tsconfPath = path.join(projectDir, 'tsconfig.json');
 
-    // assert attributes.js
+    // assert attributes.js exists and has correct exports
     expect(existsSync(attrsPath), '.zero-ui/attributes.js should exist').toBeTruthy();
     const attrsContent = readFileSync(attrsPath, 'utf8');
     expect(attrsContent).toContain('export const bodyAttributes');
 
-    // assert tsconfig.json
-    const tsconf = JSON.parse(readFileSync(tsconfPath, 'utf8'));
-    expect(tsconf.compilerOptions.paths['@zero-ui/attributes']).toEqual(
-      ['./.zero-ui/attributes.js']
-    );
+    // Vite apps use direct imports, no tsconfig modification needed
+    // Users import from './.zero-ui/attributes.js' directly
   });
 
 

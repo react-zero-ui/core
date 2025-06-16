@@ -10,10 +10,6 @@
   ],
   "compilerOptions": {
     "baseUrl": ".",
-    "paths": {
-      "@zero-ui/attributes": [
-        "./.zero-ui/attributes.js"
-      ]
-    }
+    "paths": {}
   }
 }
