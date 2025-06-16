@@ -83,6 +83,40 @@ test('generates body attributes file correctly', async () => {
   });
 });
 
+test('generates body attributes file correctly when kebab-case is used', async () => {
+  await runTest('attributes', {
+    'app/test.jsx': `
+      import { useUI } from 'react-zero-ui';
+      
+      function Component() {
+        const [theme, setTheme] = useUI('theme-secondary', 'light');
+        const [sidebar, setSidebar] = useUI('sidebarNew', 'expanded');
+        return (
+          <div className="theme-secondary-light:bg-gray-200 theme-secondary-light:text-gray-900 theme-secondary-dark:bg-gray-900 theme-secondary-dark:text-gray-200 h-screen w-screen">
+            <button onClick={() => setTheme(prev => (prev === 'light' ? 'dark' : 'light'))}>Toggle Theme</button>
+          </div>
+        );
+      }
+    `
+  }, (result) => {
+    // Check attributes file exists
+    assert(fs.existsSync(getAttrFile()), 'Attributes file should exist');
+
+    const content = fs.readFileSync(getAttrFile(), 'utf-8');
+    console.log("result.css: ", result.css);
+
+    // Verify content
+    assert(content.includes('export const bodyAttributes'), 'Should export bodyAttributes');
+    assert(content.includes('"data-theme-secondary": "light"'), 'Should have theme-secondary attribute');
+    assert(content.includes('"data-sidebar-new": "expanded"'), 'Should have sidebar-new attribute');
+
+    // Verify CSS variants
+    assert(result.css.includes('@variant theme-secondary-light'), 'Should have theme-secondary-light variant');
+    assert(result.css.includes('@variant sidebar-new-expanded'), 'Should have sidebar-new-expanded variant');
+  });
+});
+
+
 
 
 

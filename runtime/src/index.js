@@ -1,6 +1,10 @@
 import { useCallback } from 'react';
 
-
+// Convert kebab-case to camelCase for dataset API
+// "theme-secondary" -> "themeSecondary"
+function kebabToCamelCase(str) {
+  return str.replace(/-([a-z])/g, (match, letter) => letter.toUpperCase());
+}
 
 function useUI(key, initialValue) {
 
@@ -18,7 +22,8 @@ function useUI(key, initialValue) {
 
   const setValue = useCallback((valueOrUpdater) => {
     if (typeof window === 'undefined' || typeof document === 'undefined') return;
-    const getCurrentValue = () => parseValue(document.body.dataset[key]);
+    const datasetKey = kebabToCamelCase(key);
+    const getCurrentValue = () => parseValue(document.body.dataset[datasetKey]);
 
     let newValue;
     if (typeof valueOrUpdater === 'function') {
@@ -26,7 +31,7 @@ function useUI(key, initialValue) {
     } else {
       newValue = valueOrUpdater;
     }
-    document.body.dataset[key] = String(newValue);
+    document.body.dataset[datasetKey] = String(newValue);
   }, [key]);
 
 
