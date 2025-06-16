@@ -13,18 +13,24 @@ import { resolve } from 'node:path';
     spawnSync('npm', ['init', '-y'], { cwd: full, stdio: 'inherit' });
   }
 
-  /* 2️⃣  install runtime lib + peers */
+  /* 2️⃣  install runtime lib as production dependency */
+  spawnSync(
+    'npm',
+    ['install', '@austinserb/react-zero-ui'],
+    { cwd: full, stdio: 'inherit' }
+  );
+
+  /* 3️⃣  install build tools as dev dependencies */
   spawnSync(
     'npm',
     [
       'install', '--save-dev',
-      '@austinserb/react-zero-ui',
       'postcss', 'tailwindcss', '@tailwindcss/postcss'
     ],
     { cwd: full, stdio: 'inherit' }
   );
 
-  /* 3️⃣  run the real CLI exported by the runtime */
+  /* 4️⃣  run the real CLI exported by the runtime */
   const mod = await import('@austinserb/react-zero-ui/cli');
   const cli = typeof mod.default === 'function' ? mod.default : mod;
   if (typeof cli === 'function') {

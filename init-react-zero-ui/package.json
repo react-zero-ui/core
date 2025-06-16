@@ -1,6 +1,6 @@
 {
   "name": "create-zero-ui",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "type": "module",
   "main": "./bin.js",
   "bin": {
@@ -11,7 +11,7 @@
     "package.json"
   ],
   "dependencies": {
-    "@austinserb/react-zero-ui": "^1.0.14",
+    "@austinserb/react-zero-ui": "^1.0.17",
     "postcss": "^8.4.27",
     "tailwindcss": "^4.0.0",
     "@tailwindcss/postcss": "^4.1.8"

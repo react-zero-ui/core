@@ -63,20 +63,7 @@ export default {
 
 #### Next.js
 
-#### 1. Add PostCSS Plugin
-
-```js
-// postcss.config.js
-module.exports = {
-  plugins: {
-    ['@austinserb/react-zero-ui/postcss']
-    //*tailwindcss MUST come AFTER Zero-UI
-    ['@tailwindcss']
-  }
-}
-```
-
-#### 2. Spread bodyAttributes on `<body>` in Layout
+#### 1. Spread bodyAttributes on `<body>` in Layout
 
 ```jsx
 import { bodyAttributes } from "@zero-ui/attributes";
@@ -89,6 +76,19 @@ return (
     <body {...bodyAttributes}>{children}</body>
 </html>
 )}
+```
+
+#### 2. Add PostCSS Plugin
+
+```js
+// postcss.config.js
+module.exports = {
+  plugins: {
+    ['@austinserb/react-zero-ui/postcss']
+    //*tailwindcss MUST come AFTER Zero-UI
+    ['@tailwindcss']
+  }
+}
 ```
 
 ## Usage
