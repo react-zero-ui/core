@@ -1,41 +1,30 @@
-import { test as base, expect } from '@playwright/test';
-import { resetZeroUiState } from './resetProjectState';
+import { test, expect } from '@playwright/test';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
-const test = base.extend({});
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-console.log('__dirname: ', __dirname);
+
 const projectDir = path.resolve(__dirname, '../fixtures/next');
 
-const zeroUiBin = path.resolve(__dirname, '../../src/cli/init.cjs');    // library CLI
+test('Next CLI scaffolds .zero-ui + tsconfig + postcss', async () => {
+  // CLI setup is handled by global setup, just verify the results
+  const attrs = path.join(projectDir, '.zero-ui/attributes.js');
+  const tsc = path.join(projectDir, 'tsconfig.json');
+  const post = path.join(projectDir, 'postcss.config.mjs');
 
+  await expect.poll(() => existsSync(attrs)).toBeTruthy();
+  await expect.poll(() => readFileSync(attrs, 'utf8'))
+    .toContain('export const bodyAttributes');
 
-test.beforeAll(() => resetZeroUiState(projectDir));
+  await expect.poll(() => {
+    if (!existsSync(tsc)) return false;
+    const conf = JSON.parse(readFileSync(tsc, 'utf8'));
+    return conf.compilerOptions?.paths?.['@zero-ui/attributes']?.[0] === './.zero-ui/attributes.js';
+  }).toBeTruthy();
 
-
-test.describe('Zero-UI Next.js CLI', () => {
-
-  test('init CLI scaffolds project', () => {
-    // run zero-ui init
-    spawnSync('node', [zeroUiBin], { cwd: projectDir, stdio: 'inherit' });
-
-    const attrsPath = path.join(projectDir, '.zero-ui/attributes.js');
-    const tsconfPath = path.join(projectDir, 'tsconfig.json');
-
-    // assert attributes.js
-    expect(existsSync(attrsPath), '.zero-ui/attributes.js should exist').toBeTruthy();
-    const attrsContent = readFileSync(attrsPath, 'utf8');
-    expect(attrsContent).toContain('export const bodyAttributes');
-
-    // assert tsconfig.json
-    const tsconf = JSON.parse(readFileSync(tsconfPath, 'utf8'));
-    expect(tsconf.compilerOptions.paths['@zero-ui/attributes']).toEqual(
-      ['./.zero-ui/attributes.js']
-    );
-  });
-
-
+  await expect.poll(() => {
+    if (!existsSync(post)) return false;
+    return readFileSync(post, 'utf8').includes('@austinserb/react-zero-ui/postcss');
+  }).toBeTruthy();
 });

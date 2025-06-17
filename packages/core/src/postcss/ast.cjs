@@ -413,8 +413,165 @@ function addZeroUiToPlugins(pluginsNode, zeroUiPlugin) {
   return false;
 }
 
+/**
+ * Helper to create a zeroUI() call AST node
+ */
+function createZeroUICallNode() {
+  return {
+    type: 'CallExpression',
+    callee: { type: 'Identifier', name: 'zeroUI' },
+    arguments: []
+  };
+}
+
+/**
+ * Helper to create a zeroUI import AST node
+ */
+function createZeroUIImportNode(importPath) {
+  return {
+    type: 'ImportDeclaration',
+    specifiers: [{
+      type: 'ImportDefaultSpecifier',
+      local: { type: 'Identifier', name: 'zeroUI' }
+    }],
+    source: { type: 'StringLiteral', value: importPath }
+  };
+}
+
+/**
+ * Helper to process a plugins array - replaces Tailwind with zeroUI or adds zeroUI
+ */
+function processPluginsArray(pluginsArray) {
+  let tailwindIndex = -1;
+  let zeroUIIndex = -1;
+
+  // Find existing plugins
+  pluginsArray.forEach((element, index) => {
+    if (element && element.type === 'CallExpression') {
+      if (element.callee.name === 'tailwindcss') {
+        tailwindIndex = index;
+      } else if (element.callee.name === 'zeroUI') {
+        zeroUIIndex = index;
+      }
+    }
+  });
+
+  // Replace Tailwind with Zero-UI
+  if (tailwindIndex >= 0) {
+    pluginsArray[tailwindIndex] = createZeroUICallNode();
+    return true;
+  }
+  // Add Zero-UI if not present
+  else if (zeroUIIndex === -1) {
+    pluginsArray.push(createZeroUICallNode());
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Helper to handle config object (creates plugins array if needed)
+ */
+function processConfigObject(configObject) {
+  const pluginsProperty = configObject.properties.find(prop =>
+    prop.key && prop.key.name === 'plugins'
+  );
+
+  if (pluginsProperty && pluginsProperty.value.type === 'ArrayExpression') {
+    // Process existing plugins array
+    return processPluginsArray(pluginsProperty.value.elements);
+  } else if (!pluginsProperty) {
+    // Create new plugins array with zeroUI
+    configObject.properties.push({
+      type: 'ObjectProperty',
+      key: { type: 'Identifier', name: 'plugins' },
+      value: {
+        type: 'ArrayExpression',
+        elements: [createZeroUICallNode()]
+      }
+    });
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Helper to add zeroUI import to program
+ * Uses the FAANG approach: add at the beginning and let tooling handle organization
+ */
+function addZeroUIImport(programPath, zeroUiPlugin) {
+  const zeroUIImport = createZeroUIImportNode(zeroUiPlugin);
+  // Simple approach: add at the beginning
+  programPath.node.body.unshift(zeroUIImport);
+}
+
+/**
+ * Parse Vite config TypeScript/JavaScript file and add Zero-UI plugin
+ * Replaces @tailwindcss/vite plugin if present, otherwise adds zeroUI plugin
+ * @param {string} source - The Vite config source code
+ * @param {string} zeroUiPlugin - The Zero-UI plugin import path
+ * @returns {string | null} The modified config code or null if no changes were made
+ */
+function parseAndUpdateViteConfig(source, zeroUiPlugin) {
+  try {
+    // Quick check - if already configured correctly, return original
+    const hasZeroUIImport = source.includes(zeroUiPlugin);
+    const hasZeroUIPlugin = source.includes('zeroUI()');
+    const hasTailwindPlugin = source.includes('@tailwindcss/vite');
+
+    if (hasZeroUIImport && hasZeroUIPlugin && !hasTailwindPlugin) {
+      return source;
+    }
+
+    const ast = parser.parse(source, {
+      sourceType: 'module',
+      plugins: ['typescript', 'importMeta'],
+    });
+
+    let modified = false;
+
+    traverse(ast, {
+      Program(path) {
+        if (!hasZeroUIImport) {
+          addZeroUIImport(path, zeroUiPlugin);
+          modified = true;
+        }
+      },
+
+      // Handle both direct export and variable assignment patterns
+      CallExpression(path) {
+        if (path.node.callee.name === 'defineConfig' &&
+          path.node.arguments.length > 0 &&
+          path.node.arguments[0].type === 'ObjectExpression') {
+
+          if (processConfigObject(path.node.arguments[0])) {
+            modified = true;
+          }
+        }
+      },
+
+      // Remove Tailwind import if we're replacing it
+      ImportDeclaration(path) {
+        if (path.node.source.value === '@tailwindcss/vite' && hasTailwindPlugin) {
+          path.remove();
+          modified = true;
+        }
+      }
+    });
+
+    return modified ? generate(ast).code : null;
+
+  } catch (err) {
+    console.warn(`[Zero-UI] Failed to parse Vite config: ${err.message}`);
+    return null;
+  }
+}
+
 module.exports = {
   extractVariants,
   parseJsonWithBabel,
   parseAndUpdatePostcssConfig,
+  parseAndUpdateViteConfig,
 };

@@ -10,8 +10,8 @@
   "sideEffects": false,
   "files": [
     "src/**/*",
-    "../../README.md",
-    "../../LICENSE"
+    "README.md",
+    "LICENSE"
   ],
   "exports": {
     ".": {

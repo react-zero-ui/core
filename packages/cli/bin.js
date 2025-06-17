@@ -3,41 +3,34 @@ import { existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { resolve } from 'node:path';
 
-(async () => {
-  const cwd = process.cwd();
-  const targetDir = process.argv[2] ?? '.';
-  const full = resolve(cwd, targetDir);
+const cwd = process.cwd();
+const target = resolve(cwd, process.argv[2] ?? '.');
 
-  /* 1️⃣  ensure package.json */
-  if (!existsSync(resolve(full, 'package.json'))) {
-    spawnSync('npm', ['init', '-y'], { cwd: full, stdio: 'inherit' });
-  }
+/* 🔍 pick the package manager */
+const pm =
+  existsSync(resolve(target, 'pnpm-lock.yaml')) ? 'pnpm' :
+    existsSync(resolve(target, 'yarn.lock')) ? 'yarn' :
+      'npm';
 
-  /* 2️⃣  install runtime lib as production dependency */
-  spawnSync(
-    'npm',
-    ['install', '@austinserb/react-zero-ui'],
-    { cwd: full, stdio: 'inherit' }
-  );
+const exec = (cmd, args) =>
+  spawnSync(pm, [cmd, ...args], { cwd: target, stdio: 'inherit' });
 
-  /* 3️⃣  install build tools as dev dependencies */
-  spawnSync(
-    'npm',
-    [
-      'install', '--save-dev',
-      'postcss', 'tailwindcss', '@tailwindcss/postcss'
-    ],
-    { cwd: full, stdio: 'inherit' }
-  );
+/* 1️⃣ ensure package.json */
+if (!existsSync(resolve(target, 'package.json'))) exec('init', ['-y']);
 
-  /* 4️⃣  run the real CLI exported by the runtime */
-  const mod = await import('@austinserb/react-zero-ui/cli');
-  const cli = typeof mod.default === 'function' ? mod.default : mod;
-  if (typeof cli === 'function') {
-    cli(process.argv.slice(3));               // pass any extra args
-    console.log('\n🎉  Zero-UI installed.  Run `npm run dev`!\n');
-  } else {
-    console.error('[Zero-UI] CLI entry is not a function.');
-    process.exit(1);
-  }
-})();
+/* 2️⃣ runtime dependency */
+exec(pm === 'yarn' ? 'add' : 'install', ['@austinserb/react-zero-ui']);
+
+/* 3️⃣ dev deps */
+exec(pm === 'yarn' ? 'add' : 'install',
+  ['postcss', 'tailwindcss', '@tailwindcss/postcss', '--save-dev']);
+
+/* 4️⃣ handoff */
+const { default: zeroUiCli } = await import('@austinserb/react-zero-ui/cli');
+if (typeof zeroUiCli === 'function') {
+  zeroUiCli(process.argv.slice(3));
+  console.log(`\n🎉  Zero-UI installed. Run \`${pm} run dev\`!\n`);
+} else {
+  console.error('[Zero-UI] CLI entry is not a function.');
+  process.exit(1);
+}

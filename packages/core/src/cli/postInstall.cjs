@@ -3,12 +3,27 @@ const {
   processVariants,
   generateAttributesFile,
   patchConfigAlias,
-  patchPostcssConfig
+  patchPostcssConfig,
+  patchViteConfig,
+  hasViteConfig,
 } = require('../postcss/helpers.cjs');
 
 function runZeroUiInit() {
   try {
     console.log('[Zero-UI] Initializing...');
+
+    // Patch Vite config for Vite projects
+    if (hasViteConfig()) {
+      patchViteConfig();
+    }
+
+
+    if (!hasViteConfig()) {
+      // Patch config for module resolution 
+      patchConfigAlias();
+      // Patch PostCSS config for Next.js projects
+      patchPostcssConfig();
+    }
 
     // Process all variants using the shared helper
     const { finalVariants, initialValues, sourceFiles } = processVariants();
@@ -16,11 +31,6 @@ function runZeroUiInit() {
     // Generate attribute files using the shared helper
     generateAttributesFile(finalVariants, initialValues);
 
-    // Patch config for module resolution 
-    patchConfigAlias();
-
-    // Patch PostCSS config for Next.js projects
-    patchPostcssConfig();
 
     console.log(`[Zero-UI] ✅ Initialized with ${finalVariants.length} variants from ${sourceFiles.length} files`);
 

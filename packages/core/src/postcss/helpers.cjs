@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const { CONFIG, IGNORE_DIRS } = require('../config.cjs');
-const { extractVariants, parseJsonWithBabel, parseAndUpdatePostcssConfig } = require('./ast.cjs');
+const { extractVariants, parseJsonWithBabel, parseAndUpdatePostcssConfig, parseAndUpdateViteConfig } = require('./ast.cjs');
 
 
 function toKebabCase(str) {
@@ -274,30 +274,19 @@ function patchPostcssConfig() {
     isESModule = true;
   }
 
-  // Check if this is a Next.js project
-  const isNextProject = fs.existsSync(path.join(cwd, 'next.config.js')) ||
-    fs.existsSync(path.join(cwd, 'next.config.mjs')) ||
-    fs.existsSync(path.join(cwd, 'next.config.ts'));
-
-  if (!isNextProject && fs.existsSync(packageJsonPath)) {
-    try {
-      const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-      const hasNext = packageJson.dependencies?.next || packageJson.devDependencies?.next;
-      if (!hasNext) {
-        return; // Not a Next.js project, skip PostCSS config patching
-      }
-    } catch {
-      console.warn('[Zero-UI] Could not read package.json, skipping PostCSS config patch');
-      return;
-    }
-  }
-
   const zeroUiPlugin = '@austinserb/react-zero-ui/postcss';
+
+  let createMjs = false;
+
+  if (fs.existsSync(packageJsonPath)) {
+    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+    createMjs = packageJson.type === 'module';
+  }
 
   // If no config exists, create a .js file (more widely supported)
   if (!postcssConfigPath) {
-    const newConfigPath = postcssConfigJsPath;
-    const newConfig = `// postcss.config.js
+    const newConfigPath = createMjs ? postcssConfigMjsPath : postcssConfigJsPath;
+    const configJs = `// postcss.config.js
 module.exports = {
   plugins: {
     '${zeroUiPlugin}': {},
@@ -306,9 +295,18 @@ module.exports = {
   }
 };
 `;
-    fs.writeFileSync(newConfigPath, newConfig);
-    console.log('[Zero-UI] Created postcss.config.js with Zero-UI plugin');
-    return;
+    const configMjs = `// postcss.config.mjs
+export default {
+  plugins: {
+    '${zeroUiPlugin}': {},
+    // Tailwind MUST come AFTER Zero-UI
+    '@tailwindcss/postcss': {}
+  }
+};
+`;
+    const newConfigJs = createMjs ? configMjs : configJs;
+    fs.writeFileSync(newConfigPath, newConfigJs);
+    console.log(`[Zero-UI] Created ${path.basename(newConfigPath)} with Zero-UI plugin`); return;
   }
 
   // Parse existing config using AST
@@ -322,9 +320,82 @@ module.exports = {
   } else if (updatedConfig === null) {
     const configFileName = path.basename(postcssConfigPath);
     console.log(`[Zero-UI] PostCSS config exists but missing Zero-UI plugin.`);
-    console.log(`[Zero-UI] Please manually add "@austinserb/react-zero-ui/postcss" before Tailwind in your ${configFileName}`);
+    console.warn(`[Zero-UI] Please manually add "@austinserb/react-zero-ui/postcss" before Tailwind in your ${configFileName}`);
   }
 }
+
+
+
+/**
+ * Patches vite.config.ts/js to include Zero-UI plugin and replace Tailwind CSS v4+ plugin if present
+ * Only runs for Vite projects and uses AST parsing for robust config modification
+ */
+function patchViteConfig() {
+  const cwd = process.cwd();
+  const viteConfigTsPath = path.join(cwd, 'vite.config.ts');
+  const viteConfigJsPath = path.join(cwd, 'vite.config.js');
+  const viteConfigMjsPath = path.join(cwd, 'vite.config.mjs');
+
+  // Determine which config file exists (prefer .ts over .js)
+  let viteConfigPath = null;
+
+  if (fs.existsSync(viteConfigTsPath)) {
+    viteConfigPath = viteConfigTsPath;
+  } else if (fs.existsSync(viteConfigJsPath)) {
+    viteConfigPath = viteConfigJsPath;
+  } else if (fs.existsSync(viteConfigMjsPath)) {
+    viteConfigPath = viteConfigMjsPath;
+  } else {
+    return; // No Vite config found, skip patching
+  }
+
+  const zeroUiPlugin = '@austinserb/react-zero-ui/vite';
+
+  try {
+    // Read existing config
+    const existingContent = fs.readFileSync(viteConfigPath, 'utf-8');
+
+    // Parse and update config using AST
+    const updatedConfig = parseAndUpdateViteConfig(existingContent, zeroUiPlugin);
+
+    if (updatedConfig && updatedConfig !== existingContent) {
+      fs.writeFileSync(viteConfigPath, updatedConfig);
+      const configFileName = path.basename(viteConfigPath);
+      console.log(`[Zero-UI] Updated ${configFileName} with Zero-UI plugin`);
+
+      // Check if Tailwind was replaced
+      if (existingContent.includes('@tailwindcss/vite')) {
+        console.log(`[Zero-UI] Replaced @tailwindcss/vite with Zero-UI plugin`);
+      }
+    } else if (updatedConfig === null) {
+      const configFileName = path.basename(viteConfigPath);
+      console.log(`[Zero-UI] Could not automatically update ${configFileName}`);
+      console.log(`[Zero-UI] Please manually add "import zeroUI from '${zeroUiPlugin}'" and "zeroUI()" to your plugins array`);
+    }
+    // If updatedConfig === existingContent, config is already properly configured
+
+
+  } catch (error) {
+    console.error('[Zero-UI] Error patching Vite config:', error.message);
+  }
+}
+
+/**
+ * Check if the current project has Vite config files
+ * @returns {boolean} True if Vite config files are found
+ */
+function hasViteConfig() {
+  const cwd = process.cwd();
+  const viteConfigFiles = [
+    'vite.config.ts',
+    'vite.config.js',
+    'vite.config.mjs'
+  ];
+  return viteConfigFiles.some(configFile =>
+    fs.existsSync(path.join(cwd, configFile))
+  );
+}
+
 
 module.exports = {
   toKebabCase,
@@ -333,7 +404,9 @@ module.exports = {
   buildCss,
   patchConfigAlias,
   patchPostcssConfig,
+  patchViteConfig,
   generateAttributesFile,
   processVariants,
   isZeroUiInitialized,
+  hasViteConfig,
 };

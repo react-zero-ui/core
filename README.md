@@ -4,7 +4,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@austinserb/react-zero-ui)](https://www.npmjs.com/package/@austinserb/react-zero-ui)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![CI](https://github.com/austin1serb/react-zero-ui/actions/workflows/ci.yaml/badge.svg)
+![CI](https://github.com/austin1serb/react-zero-ui/actions/workflows/ci.yml/badge.svg?branch=main)
 
 ## Why Zero-UI?
 

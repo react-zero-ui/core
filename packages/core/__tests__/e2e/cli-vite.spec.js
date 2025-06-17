@@ -1,36 +1,25 @@
-import { test as base, expect } from '@playwright/test';
-import { resetZeroUiState } from './resetProjectState';
+import { test, expect } from '@playwright/test';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
-const test = base.extend({});
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 const projectDir = path.resolve(__dirname, '../fixtures/vite');
 
-const zeroUiBin = path.resolve(__dirname, '../../src/cli/init.cjs');    // library CLI
+test('Vite CLI scaffolds .zero-ui + vite.config', async () => {
+  // CLI setup is handled by global setup, just verify the results
+  const attrs = path.join(projectDir, '.zero-ui/attributes.js');
+  const vite = path.join(projectDir, 'vite.config.ts');
 
+  await expect.poll(() => existsSync(attrs)).toBeTruthy();
+  await expect.poll(() => readFileSync(attrs, 'utf8'))
+    .toContain('export const bodyAttributes');
 
-test.beforeAll(() => resetZeroUiState(projectDir));
-
-
-test.describe('Zero-UI Vite CLI', () => {
-
-  test('init CLI scaffolds project', () => {
-    // run zero-ui init
-    spawnSync('node', [zeroUiBin], { cwd: projectDir, stdio: 'inherit' });
-
-    const attrsPath = path.join(projectDir, '.zero-ui/attributes.js');
-
-    // assert attributes.js exists and has correct exports
-    expect(existsSync(attrsPath), '.zero-ui/attributes.js should exist').toBeTruthy();
-    const attrsContent = readFileSync(attrsPath, 'utf8');
-    expect(attrsContent).toContain('export const bodyAttributes');
-
-    // Vite apps use direct imports, no tsconfig modification needed
-    // Users import from './.zero-ui/attributes.js' directly
-  });
-
-
+  await expect.poll(() => {
+    if (!existsSync(vite)) return false;
+    const src = readFileSync(vite, 'utf8');
+    return /from ['"]@austinserb\/react-zero-ui\/vite['"]/.test(src) &&
+      /\bplugins:\s*\[.*zeroUI\(\).*]/s.test(src);
+  }).toBeTruthy();
 });

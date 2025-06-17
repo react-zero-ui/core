@@ -10,7 +10,6 @@
     "preinstall": "npx only-allow pnpm",
     "test": "pnpm -r test",
     "prepack:core": "pnpm -F @austinserb/react-zero-ui pack --pack-destination ./dist",
-    "prepack:cli": "pnpm -F create-zero-ui pack --pack-destination ./dist",
     "i-tarball": "node scripts/install-local-tarball.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"

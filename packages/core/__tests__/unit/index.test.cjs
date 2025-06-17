@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const plugin = require('../../src/postcss/index.cjs')
-const { patchConfigAlias, toKebabCase, patchPostcssConfig } = require('../../src/postcss/helpers.cjs')
+const { patchConfigAlias, toKebabCase, patchPostcssConfig, patchViteConfig } = require('../../src/postcss/helpers.cjs')
 
 function getAttrFile() {
   return path.join(process.cwd(), '.zero-ui', 'attributes.js');
@@ -815,7 +815,7 @@ test('PostCSS config - creates new .js config for Next.js project', async () => 
     process.chdir(testDir);
 
     // Create Next.js project indicators
-    fs.writeFileSync('next.config.js', 'module.exports = {}');
+    fs.writeFileSync('next.config.cjs', 'module.exports = {}');
     fs.writeFileSync('package.json', JSON.stringify({
       dependencies: { next: '^14.0.0' }
     }));
@@ -949,32 +949,9 @@ test('PostCSS config - skips if Zero-UI already configured', async () => {
   }
 });
 
-test('PostCSS config - skips non-Next.js projects', async () => {
-  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-postcss-test'));
-  const originalCwd = process.cwd();
 
-  try {
-    process.chdir(testDir);
 
-    // Create non-Next.js project (React only)
-    fs.writeFileSync('package.json', JSON.stringify({
-      dependencies: { react: '^18.0.0' }
-    }));
-
-    // Run patchPostcssConfig
-    patchPostcssConfig();
-
-    // Verify no PostCSS config was created
-    assert(!fs.existsSync('postcss.config.js'), 'Should not create config for non-Next.js project');
-    assert(!fs.existsSync('postcss.config.mjs'), 'Should not create .mjs config for non-Next.js project');
-
-  } finally {
-    process.chdir(originalCwd);
-    fs.rmSync(testDir, { recursive: true, force: true });
-  }
-});
-
-test('PostCSS config - handles complex existing configs', async () => {
+test('PostCSS config - handles complex existing configs w/comments', async () => {
   const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-postcss-test'));
   const originalCwd = process.cwd();
 
@@ -990,10 +967,13 @@ test('PostCSS config - handles complex existing configs', async () => {
     'postcss-flexbugs-fixes': {},
     'postcss-preset-env': {
       autoprefixer: {
+        // https://vite.dev/config/
         flexbox: 'no-2009',
       },
       stage: 3,
     },
+       // https://tailwindcss.com/docs/installation/using-vite
+
     '@tailwindcss/postcss': {}
   }
 };`;
@@ -1062,6 +1042,447 @@ export default config;`);
 
     assert(updatedJsContent.includes('@austinserb/react-zero-ui/postcss'), 'Should modify .js config');
     assert.equal(originalMjsContent, updatedMjsContent, 'Should not modify .mjs config when .js exists');
+
+  } finally {
+    process.chdir(originalCwd);
+    fs.rmSync(testDir, { recursive: true, force: true });
+  }
+});
+
+// Vite Config Tests
+test('Vite config - adds zeroUI plugin to existing config without Tailwind', async () => {
+  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+  const originalCwd = process.cwd();
+
+  try {
+    process.chdir(testDir);
+
+    // Create existing Vite config without Tailwind
+    const existingConfig = `import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [
+    react()
+  ]
+})`;
+    fs.writeFileSync('vite.config.ts', existingConfig);
+
+    // Run patchViteConfig
+    patchViteConfig();
+
+    // Verify config was updated
+    const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
+    console.log('\n📄 Updated Vite config:');
+    console.log(updatedContent);
+
+    assert(updatedContent.includes('@austinserb/react-zero-ui/vite'), 'Should add Zero-UI import');
+    assert(updatedContent.includes('zeroUI()'), 'Should add zeroUI plugin');
+    assert(updatedContent.includes('react()'), 'Should preserve existing plugins');
+
+  } finally {
+    process.chdir(originalCwd);
+    fs.rmSync(testDir, { recursive: true, force: true });
+  }
+});
+
+test('Vite config - replaces Tailwind CSS v4+ plugin with zeroUI', async () => {
+  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+  const originalCwd = process.cwd();
+
+  try {
+    process.chdir(testDir);
+
+    // Create Vite config with Tailwind CSS v4+
+    const existingConfig = `import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineConfig({
+  plugins: [
+    react(),
+    tailwindcss()
+  ]
+})`;
+    fs.writeFileSync('vite.config.ts', existingConfig);
+
+    // Run patchViteConfig
+    patchViteConfig();
+
+    // Verify config was updated
+    const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
+    console.log('\n📄 Vite config with Tailwind replaced:');
+    console.log(updatedContent);
+
+    assert(updatedContent.includes('@austinserb/react-zero-ui/vite'), 'Should add Zero-UI import');
+    assert(updatedContent.includes('zeroUI()'), 'Should add zeroUI plugin');
+    assert(!updatedContent.includes('@tailwindcss/vite'), 'Should remove Tailwind import');
+    assert(!updatedContent.includes('tailwindcss()'), 'Should replace Tailwind plugin');
+    assert(updatedContent.includes('react()'), 'Should preserve other plugins');
+
+  } finally {
+    process.chdir(originalCwd);
+    fs.rmSync(testDir, { recursive: true, force: true });
+  }
+});
+
+test('Vite config - handles .js files when .ts does not exist', async () => {
+  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+  const originalCwd = process.cwd();
+
+  try {
+    process.chdir(testDir);
+
+    // Create .js Vite config
+    const existingConfig = `import { defineConfig } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineConfig({
+  plugins: [
+    tailwindcss()
+  ]
+})`;
+    fs.writeFileSync('vite.config.js', existingConfig);
+
+    // Run patchViteConfig
+    patchViteConfig();
+
+    // Verify config was updated
+    const updatedContent = fs.readFileSync('vite.config.js', 'utf-8');
+    console.log('\n📄 Updated .js Vite config:');
+    console.log(updatedContent);
+
+    assert(updatedContent.includes('zeroUI()'), 'Should replace Tailwind with zeroUI');
+    assert(!updatedContent.includes('tailwindcss()'), 'Should remove Tailwind plugin');
+
+  } finally {
+    process.chdir(originalCwd);
+    fs.rmSync(testDir, { recursive: true, force: true });
+  }
+});
+
+test('Vite config - prefers .ts over .js when both exist', async () => {
+  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+  const originalCwd = process.cwd();
+
+  try {
+    process.chdir(testDir);
+
+    // Create both .ts and .js configs
+    fs.writeFileSync('vite.config.ts', `import { defineConfig } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineConfig({
+  plugins: [tailwindcss()]
+})`);
+
+    fs.writeFileSync('vite.config.js', `import { defineConfig } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineConfig({
+  plugins: [tailwindcss()]
+})`);
+
+    const originalJsContent = fs.readFileSync('vite.config.js', 'utf-8');
+
+    // Run patchViteConfig
+    patchViteConfig();
+
+    // Verify .ts was modified, .js was not
+    const updatedTsContent = fs.readFileSync('vite.config.ts', 'utf-8');
+    const updatedJsContent = fs.readFileSync('vite.config.js', 'utf-8');
+
+    assert(updatedTsContent.includes('zeroUI()'), 'Should modify .ts config');
+    assert.equal(originalJsContent, updatedJsContent, 'Should not modify .js config when .ts exists');
+
+  } finally {
+    process.chdir(originalCwd);
+    fs.rmSync(testDir, { recursive: true, force: true });
+  }
+});
+
+test('Vite config - skips if zeroUI already configured', async () => {
+  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+  const originalCwd = process.cwd();
+
+  try {
+    process.chdir(testDir);
+
+    // Create Vite config with zeroUI already configured
+    const existingConfig = `import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import zeroUI from '@austinserb/react-zero-ui/vite'
+
+export default defineConfig({
+  plugins: [
+    react(),
+    zeroUI()
+  ]
+})`;
+    fs.writeFileSync('vite.config.ts', existingConfig);
+    const originalContent = fs.readFileSync('vite.config.ts', 'utf-8');
+
+    // Run patchViteConfig
+    patchViteConfig();
+
+    // Verify config was not modified
+    const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
+    assert.equal(originalContent, updatedContent, 'Should not modify config with zeroUI already present');
+
+  } finally {
+    process.chdir(originalCwd);
+    fs.rmSync(testDir, { recursive: true, force: true });
+  }
+});
+
+test('Vite config - skips when no vite config exists', async () => {
+  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+  const originalCwd = process.cwd();
+
+  try {
+    process.chdir(testDir);
+
+    // No Vite config files exist
+    // Run patchViteConfig (should not throw)
+    patchViteConfig();
+
+    // Verify no files were created
+    assert(!fs.existsSync('vite.config.ts'), 'Should not create vite.config.ts');
+    assert(!fs.existsSync('vite.config.js'), 'Should not create vite.config.js');
+
+  } finally {
+    process.chdir(originalCwd);
+    fs.rmSync(testDir, { recursive: true, force: true });
+  }
+});
+
+test('Vite config - handles complex existing configs', async () => {
+  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+  const originalCwd = process.cwd();
+
+  try {
+    process.chdir(testDir);
+
+    // Create complex Vite config
+    const complexConfig = `import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { resolve } from 'path'
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineConfig({
+  plugins: [
+    react({
+      fastRefresh: true
+    }),
+    tailwindcss()
+  ],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src')
+    }
+  },
+  server: {
+    port: 3000
+  }
+})`;
+    fs.writeFileSync('vite.config.ts', complexConfig);
+
+    // Run patchViteConfig
+    patchViteConfig();
+
+    // Verify Zero-UI was added and Tailwind replaced
+    const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
+    console.log('\n📄 Complex config update:');
+    console.log(updatedContent);
+
+    assert(updatedContent.includes('@austinserb/react-zero-ui/vite'), 'Should add Zero-UI import');
+    assert(updatedContent.includes('zeroUI()'), 'Should add zeroUI plugin');
+    assert(!updatedContent.includes('@tailwindcss/vite'), 'Should remove Tailwind import');
+    assert(!updatedContent.includes('tailwindcss()'), 'Should replace Tailwind plugin');
+    assert(updatedContent.includes('react({'), 'Should preserve React plugin with options');
+    assert(updatedContent.includes('resolve:'), 'Should preserve other config options');
+    assert(updatedContent.includes('server:'), 'Should preserve server config');
+
+  } finally {
+    process.chdir(originalCwd);
+    fs.rmSync(testDir, { recursive: true, force: true });
+  }
+});
+
+test('Vite config - handles multiple Tailwind instances', async () => {
+  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+  const originalCwd = process.cwd();
+
+  try {
+    process.chdir(testDir);
+
+    // Create config with multiple tailwindcss calls (edge case)
+    const existingConfig = `import { defineConfig } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineConfig({
+  plugins: [
+    tailwindcss({ config: './tailwind.config.js' }),
+    // This would be unusual but let's handle it
+    tailwindcss()
+  ]
+})`;
+    fs.writeFileSync('vite.config.ts', existingConfig);
+
+    // Run patchViteConfig
+    patchViteConfig();
+
+    // Verify only first Tailwind was replaced
+    const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
+    console.log('\n📄 Multiple Tailwind instances:');
+    console.log(updatedContent);
+
+    assert(updatedContent.includes('zeroUI()'), 'Should add zeroUI plugin');
+    // Should replace first instance
+    const zeroUICount = (updatedContent.match(/zeroUI\(\)/g) || []).length;
+    assert.equal(zeroUICount, 1, 'Should add zeroUI once');
+
+  } finally {
+    process.chdir(originalCwd);
+    fs.rmSync(testDir, { recursive: true, force: true });
+  }
+});
+
+test('Vite config - handles config with variable assignment', async () => {
+  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+  const originalCwd = process.cwd();
+
+  try {
+    process.chdir(testDir);
+
+    // Create config using variable assignment pattern
+    const existingConfig = `import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+const config = defineConfig({
+  plugins: [
+    react(),
+    tailwindcss()
+  ]
+})
+
+export default config`;
+    fs.writeFileSync('vite.config.ts', existingConfig);
+
+    // Run patchViteConfig
+    patchViteConfig();
+
+    // Verify config was updated
+    const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
+    console.log('\n📄 Variable assignment config:');
+    console.log(updatedContent);
+
+    assert(updatedContent.includes('@austinserb/react-zero-ui/vite'), 'Should add Zero-UI import');
+    assert(updatedContent.includes('zeroUI()'), 'Should add zeroUI plugin');
+    assert(!updatedContent.includes('tailwindcss()'), 'Should replace Tailwind plugin');
+
+  } finally {
+    process.chdir(originalCwd);
+    fs.rmSync(testDir, { recursive: true, force: true });
+  }
+});
+
+test('Vite config - handles parse errors gracefully', async () => {
+  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+  const originalCwd = process.cwd();
+
+  try {
+    process.chdir(testDir);
+
+    // Create invalid Vite config with syntax errors
+    const invalidConfig = `import { defineConfig } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineConfig({
+  plugins: [
+    tailwindcss( // missing closing parenthesis
+  ]
+  // missing closing brace`;
+    fs.writeFileSync('vite.config.ts', invalidConfig);
+    const originalContent = fs.readFileSync('vite.config.ts', 'utf-8');
+
+    // Run patchViteConfig (should not throw)
+    patchViteConfig();
+
+    // Verify config was not modified due to parse error
+    const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
+    assert.equal(originalContent, updatedContent, 'Should not modify config with parse errors');
+
+  } finally {
+    process.chdir(originalCwd);
+    fs.rmSync(testDir, { recursive: true, force: true });
+  }
+});
+
+test('Vite config - handles config with no plugins array', async () => {
+  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+  const originalCwd = process.cwd();
+
+  try {
+    process.chdir(testDir);
+
+    // Create Vite config without plugins array
+    const existingConfig = `import { defineConfig } from 'vite'
+
+export default defineConfig({
+  server: {
+    port: 3000
+  },
+  build: {
+    outDir: 'dist'
+  }
+})`;
+    fs.writeFileSync('vite.config.ts', existingConfig);
+
+    // Run patchViteConfig
+    patchViteConfig();
+
+    // Verify config was updated with new plugins array
+    const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
+    console.log('\n📄 Config without plugins array:');
+    console.log(updatedContent);
+
+    assert(updatedContent.includes('@austinserb/react-zero-ui/vite'), 'Should add Zero-UI import');
+    assert(updatedContent.includes('zeroUI()'), 'Should add zeroUI plugin');
+    assert(updatedContent.includes('plugins:'), 'Should add plugins array');
+
+  } finally {
+    process.chdir(originalCwd);
+    fs.rmSync(testDir, { recursive: true, force: true });
+  }
+});
+
+test('Vite config - handles empty plugins array', async () => {
+  const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+  const originalCwd = process.cwd();
+
+  try {
+    process.chdir(testDir);
+
+    // Create Vite config with empty plugins array
+    const existingConfig = `import { defineConfig } from 'vite'
+
+export default defineConfig({
+  plugins: []
+})`;
+    fs.writeFileSync('vite.config.ts', existingConfig);
+
+    // Run patchViteConfig
+    patchViteConfig();
+
+    // Verify config was updated
+    const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
+    console.log('\n📄 Empty plugins array:');
+    console.log(updatedContent);
+
+    assert(updatedContent.includes('@austinserb/react-zero-ui/vite'), 'Should add Zero-UI import');
+    assert(updatedContent.includes('zeroUI()'), 'Should add zeroUI plugin to empty array');
 
   } finally {
     process.chdir(originalCwd);

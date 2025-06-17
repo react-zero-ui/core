@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 // src/cli/init.cjs  - single source of truth
 
 //import the actual implementation from postInstall.cjs 
