@@ -12,6 +12,7 @@ test.describe('Zero-UI Next Integration', () => {
     test(`toggles <${attr}> from light → dark`, async ({ page }) => {
       // 1️⃣ Load fully hydrated page
       await page.goto('/', { waitUntil: 'networkidle' });
+      await page.locator('body').waitFor({ state: 'visible', timeout: 5000 });
       console.log(`✅ page loaded testing ${attr} from light → dark`);
 
       const body = page.locator('body');
