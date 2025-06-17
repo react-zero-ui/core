@@ -20,8 +20,8 @@ test.describe('Zero-UI Next Integration', () => {
 
 
       // 2️⃣ Assert initial state
-      await expect(body).toHaveAttribute(attr, 'light');
-      await expect(button).toBeVisible((console.log(`✅ ${button} is visible`)));   // auto-retries until true
+      await expect.poll(() => body.getAttribute(attr)).toBe('light', (console.log(`✅ ${body} has data-theme ${attr} is light`)));
+      await expect.poll(() => button.isVisible()).toBe(true, (console.log(`✅ ${button} is visible`)));   // auto-retries until true
 
 
       // 3️⃣ Action
