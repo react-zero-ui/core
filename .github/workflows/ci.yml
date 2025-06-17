@@ -8,43 +8,53 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15 # never let a hung Playwright job eat our runners
+    timeout-minutes: 15
 
     steps:
-      # 1 > checkout code
+      # 1 ▸ code
       - uses: actions/checkout@v4
 
-      # 2 > install pnpm 10.12.1 (same as packageManager field)
+      # 2 ▸ pnpm
       - uses: pnpm/action-setup@v3
         with:
           version: 10.12.1
-          run_install: false # we'll call pnpm install ourselves
+          run_install: false
 
-      # 3 > set up Node 20 + cache the global pnpm store
+      # 3 ▸ Node + pnpm-store cache
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
 
-      # 4 > install all workspace deps deterministically
+      # 4 ▸ deps
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # 5 > lint
-      - name: Lint
-        run: pnpm lint
+      # 5 ▸ **cache Playwright browsers**
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright # default download dir
+          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-playwright-
 
-      # 6 > pack core and inject tarball into demo fixtures
-      - name: Pack core tarball
-        run: pnpm run prepack:core # builds .tgz in ./dist
-      - name: Inject tarball into fixtures
-        run: node scripts/install-local-tarball.js # script injects .tgz into demo fixtures
+      # 6 ▸ download browsers if cache miss
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps
 
-      # 7 > run full unit + Playwright suite
-      - name: Run tests
-        run: pnpm test # resolves to core's "test" → test:all
+      # 7 ▸ lint
+      - run: pnpm lint
+        name: Lint
 
-      # 8 > upload Playwright traces on failure
+      # 8 ▸ pack, inject tarball, run tests
+      - run: pnpm run prepack:core
+        name: Pack core tarball
+      - run: node scripts/install-local-tarball.js
+        name: Inject tarball into fixtures
+      - run: pnpm test
+        name: Run tests
+
+      # 9 ▸ traces on failure
       - name: Upload Playwright traces on failure
         if: failure()
         uses: actions/upload-artifact@v4
