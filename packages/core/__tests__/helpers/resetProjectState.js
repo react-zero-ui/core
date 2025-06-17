@@ -1,3 +1,4 @@
+// __tests__/helpers/resetProjectState.js
 import fs from 'node:fs';
 import path from 'node:path';
 import { rmSync } from 'node:fs';
@@ -16,11 +17,12 @@ export async function resetZeroUiState(projectDir, isNext = false) {
   /* ─── 1. wipe .zero-ui  ─────────────────────────────────────────────── */
   const zeroUiDir = path.join(projectDir, '.zero-ui');
   if (fs.existsSync(zeroUiDir)) {
-    console.log('[Reset] ✅ Removing .zero-ui directory');
     rmSync(zeroUiDir, { recursive: true, force: true });
+    console.log('[Reset] ✅ Removed .zero-ui directory');
   } else {
     console.log('[Reset] ⏭️  .zero-ui directory not found, skipping');
   }
+
 
   /* ─── 2. Next.js cleanup (tsconfig + postcss)  ──────────────────────── */
   if (isNext) {

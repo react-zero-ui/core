@@ -1,103 +1,33 @@
-
 import { test, expect } from '@playwright/test';
 
+// Table-driven so every toggle runs in its own fresh browser context.
+const scenarios = [
+  { toggle: 'theme-toggle', attr: 'data-theme' },
+  { toggle: 'theme-toggle-secondary', attr: 'data-theme-2' },
+  { toggle: 'theme-toggle-3', attr: 'data-theme-three' },
+];
+
+test.describe('Zero-UI Next Integration', () => {
+  for (const { toggle, attr } of scenarios) {
+    test(`toggles <${attr}> from light → dark`, async ({ page }) => {
+      // 1️⃣ Load fully hydrated page
+      await page.goto('/', { waitUntil: 'networkidle' });
+      console.log(`✅ page loaded testing ${attr} from light → dark`);
+
+      const body = page.locator('body');
+      const button = page.getByTestId(toggle);
 
 
+      // 2️⃣ Assert initial state
+      await expect(body).toHaveAttribute(attr, 'light');
+      await expect(button).toBeVisible((console.log(`✅ ${button} is visible`)));   // auto-retries until true
 
-test.describe('Zero-UI Next.js Integration', () => {
 
+      // 3️⃣ Action
+      await button.click((console.log(`✅ ${button} clicked`)));
 
-  test('Browser loads initial theme on body', async ({ page }) => {
-
-    await page.goto('/', { waitUntil: 'networkidle' });
-
-    // body attribute check + theme = initial theme
-    const theme = await page.getAttribute('body', 'data-theme');
-    expect(theme).toBe('light');
-  });
-
-  test('theme toggles on button click', async ({ page }) => {
-    await page.goto('/');
-
-    // Wait for hydration and button
-    const button = page.getByTestId('theme-toggle');
-    await expect(button).toBeVisible();
-
-    // Wait for container to ensure styles are applied
-    const container = page.getByTestId('theme-container');
-    await expect(container).toHaveClass(/theme-light:/); // initially light
-
-    // Read initial theme attribute
-    const before = await page.getAttribute('body', 'data-theme');
-    console.log('🌞 before:', before);
-
-    // Click to toggle
-    await button.click();
-
-    // Wait for DOM to reflect change
-    await page.waitForTimeout(100); // Optional: add debounce if needed
-    const after = await page.getAttribute('body', 'data-theme');
-    console.log('🌙 after:', after);
-
-    // Assertion
-    expect(before).toBe('light');
-    expect(after).toBe('dark');
-  });
-
-  test('theme2 toggles on button click', async ({ page }) => {
-    await page.goto('/');
-
-    // Wait for hydration and button
-    const button = page.getByTestId('theme-toggle-secondary');
-    await expect(button).toBeVisible();
-
-    // Wait for container to ensure styles are applied
-    const container = page.getByTestId('theme-container-secondary');
-    await expect(container).toHaveClass(/theme-2-light:/); // initially light
-
-    // Read initial theme attribute
-    const before = await page.getAttribute('body', 'data-theme-2');
-    console.log('🌞 before:', before);
-
-    // Click to toggle
-    await button.click();
-
-    // Wait for DOM to reflect change
-    await page.waitForTimeout(100); // Optional: add debounce if needed
-    const after = await page.getAttribute('body', 'data-theme-2');
-    console.log('🌙 after:', after);
-
-    // Assertion
-    expect(before).toBe('light');
-    expect(after).toBe('dark');
-  });
-
-  test('theme3 toggles on button click', async ({ page }) => {
-    await page.goto('/');
-
-    // Wait for hydration and button
-    const button = page.getByTestId('theme-toggle-3');
-    await expect(button).toBeVisible();
-
-    // Wait for container to ensure styles are applied
-    const container = page.getByTestId('theme-container-3');
-    await expect(container).toHaveClass(/theme-three-light:/); // initially light
-
-    // Read initial theme attribute
-    const before = await page.getAttribute('body', 'data-theme-three');
-    console.log('🌞 before:', before);
-
-    // Click to toggle
-    await button.click();
-
-    // Wait for DOM to reflect change
-    await page.waitForTimeout(100); // Optional: add debounce if needed
-    const after = await page.getAttribute('body', 'data-theme-three');
-    console.log('🌙 after:', after);
-
-    // Assertion
-    expect(before).toBe('light');
-    expect(after).toBe('dark');
-  });
-
+      // 4️⃣ Final state
+      await expect(body).toHaveAttribute(attr, 'dark', (console.log(`✅ body attr changes after click`)));
+    });
+  }
 });

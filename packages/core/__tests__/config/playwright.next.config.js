@@ -25,7 +25,7 @@ export default defineConfig({
 	projects: [
 		{
 			name: "next-e2e",
-			testMatch: /.*next\.spec\.js/,
+			testMatch: /.*next.*\.spec\.js/,  // Matches both cli-next.spec.js and next.spec.js
 			use: {
 				baseURL: BASE_URL,
 			},

@@ -1,4 +1,4 @@
-// tests/helpers/loadCli.js
+// __tests__/helpers/loadCli.js
 import { createRequire } from 'node:module';
 import path from 'node:path';
 

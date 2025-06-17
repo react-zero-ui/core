@@ -25,7 +25,7 @@ export default defineConfig({
 	projects: [
 		{
 			name: "vite-e2e",
-			testMatch: /.*vite\.spec\.js/,
+			testMatch: /.*vite.*\.spec\.js/,  // Matches both cli-vite.spec.js and vite.spec.js
 			use: {
 				baseURL: BASE_URL,
 			},

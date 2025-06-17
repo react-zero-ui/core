@@ -12,7 +12,8 @@
     "prepack:core": "pnpm -F @austinserb/react-zero-ui pack --pack-destination ./dist",
     "i-tarball": "node scripts/install-local-tarball.js",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "test:all": "pnpm install --frozen-lockfile && pnpm prepack:core && pnpm lint && pnpm i-tarball && pnpm test"
   },
   "devDependencies": {
     "eslint": "^9.0.0",
