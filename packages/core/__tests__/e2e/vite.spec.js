@@ -20,15 +20,15 @@ test.describe('Zero-UI Vite Integration', () => {
 
 
       // 2️⃣ Assert initial state
-      await expect.poll(() => body.getAttribute(attr)).toBe('light', (console.log(`✅ ${body} has data-theme ${attr} is light`)));
-      await expect.poll(() => button.isVisible()).toBe(true, (console.log(`✅ ${button} is visible`)));   // auto-retries until true
+      await expect.poll(async () => await body.getAttribute(attr)).toBe('light');
+      await expect.poll(async () => await button.isVisible()).toBe(true);   // auto-retries until true
 
 
       // 3️⃣ Action
       await button.click((console.log(`✅ ${button} clicked`)));
 
       // 4️⃣ Final state
-      await expect(body).toHaveAttribute(attr, 'dark', (console.log(`✅ body attr changes after click`)));
+      await expect.poll(async () => await body.getAttribute(attr)).toBe('dark');
     });
   }
 });
