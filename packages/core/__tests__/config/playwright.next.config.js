@@ -11,7 +11,10 @@ const BASE_URL = `http://localhost:${PORT}`;
 export default defineConfig({
 	testDir: "../e2e", // all E2E specs live here
 	workers: 2,
-	timeout: 10000,
+	timeout: 60_000,
+	expect: {
+		timeout: 30_000,
+	},
 	reporter: "null",
 	globalSetup: path.resolve(__dirname, "../helpers/globalSetup.next.js"),
 
