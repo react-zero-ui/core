@@ -40,7 +40,7 @@ jobs:
 
       # 6 ▸ download browsers if cache miss
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps
+        run: pnpm --filter @austinserb/react-zero-ui exec playwright install --with-deps
 
       # 7 ▸ lint
       - run: pnpm lint
