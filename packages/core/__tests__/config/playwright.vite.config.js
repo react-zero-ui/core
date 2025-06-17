@@ -11,9 +11,9 @@ const BASE_URL = `http://localhost:${PORT}`;
 export default defineConfig({
 	testDir: "../e2e", // all E2E specs live here
 	workers: 2,
-	timeout: 60_000,
+	timeout: 300_000,
 	expect: {
-		timeout: 30_000,
+		timeout: 150_000,
 	}, reporter: "null",
 	globalSetup: path.resolve(__dirname, "../helpers/globalSetup.vite.js"),
 

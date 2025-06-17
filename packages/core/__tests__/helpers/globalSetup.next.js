@@ -1,3 +1,4 @@
+// packages/core/__tests__/helpers/globalSetup.next.js
 import { resetZeroUiState } from './resetProjectState.js';
 import { loadCliFromFixture } from './loadCli.js';
 import path from 'node:path';
