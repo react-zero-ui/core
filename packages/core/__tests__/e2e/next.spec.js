@@ -1,34 +1,36 @@
 import { test, expect } from '@playwright/test';
 
-// Table-driven so every toggle runs in its own fresh browser context.
 const scenarios = [
   { toggle: 'theme-toggle', attr: 'data-theme' },
   { toggle: 'theme-toggle-secondary', attr: 'data-theme-2' },
   { toggle: 'theme-toggle-3', attr: 'data-theme-three' },
 ];
 
-test.describe('Zero-UI Next Integration', () => {
+test.describe.configure({ mode: 'serial' });   // run one after another
+test.describe('Zero-UI Next.js integration', () => {
   for (const { toggle, attr } of scenarios) {
-    test(`toggles <${attr}> from light → dark`, async ({ page }) => {
-      // 1️⃣ Load fully hydrated page
+    test(`starts "light" and flips <${attr}> → "dark"`, async ({ page }) => {
       await page.goto('/', { waitUntil: 'networkidle' });
-      await page.locator('body').waitFor({ state: 'visible', timeout: 5000 });
-      console.log(`✅ page loaded testing ${attr} from light → dark`);
 
       const body = page.locator('body');
       const button = page.getByTestId(toggle);
 
+      /* ①  Wait until the attribute exists at all */
+      await expect.poll(async () => {
+        const v = await body.getAttribute(attr);
+        return v !== null;
+      }).toBe(true);                      // attribute now present (any value)
 
-      // 2️⃣ Assert initial state
-      await expect.poll(async () => await body.getAttribute(attr)).toBe('light');
-      await expect.poll(async () => await button.isVisible()).toBe(true);   // auto-retries until true
+      /* ②  Now assert it is "light" */
+      await expect(body).toHaveAttribute(attr, 'light');
 
-
-      // 3️⃣ Action
-      await button.click((console.log(`✅ ${button} clicked`)));
-
-      // 4️⃣ Final state
-      await expect.poll(async () => await body.getAttribute(attr)).toBe('dark');
+      /* ③  Click & assert "dark" */
+      await button.click();
+      await expect.poll(async () => {
+        const v = await body.getAttribute(attr);
+        return v !== null;
+      }).toBe(true);
+      await expect(body).toHaveAttribute(attr, 'dark');
     });
   }
 });
