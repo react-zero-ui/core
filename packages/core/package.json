@@ -8,9 +8,12 @@
   "module": "./src/index.js",
   "types": "./src/index.d.ts",
   "sideEffects": false,
-  "bin": {
-    "init-react-zero-ui": "./src/cli/init.cjs"
-  },
+  "files": [
+    "src/**/*",
+    "../../README.md",
+    "../../LICENSE",
+    "../../CHANGELOG.md"
+  ],
   "exports": {
     ".": {
       "types": "./src/index.d.ts",
@@ -56,8 +59,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/austin1serb/react-zero-ui.git"
+    "url": "git+https://github.com/austin1serb/react-zero-ui.git",
+    "directory": "packages/core"
   },
+  "bugs": {
+    "url": "https://github.com/austin1serb/react-zero-ui/issues"
+  },
+  "homepage": "https://github.com/austin1serb/react-zero-ui#readme",
   "engines": {
     "node": ">=18.0.0"
   },
@@ -73,22 +81,6 @@
     "@babel/traverse": "^7.27.4"
   },
   "devDependencies": {
-    "@eslint/js": "^9.28.0",
-    "@playwright/test": "^1.53.0",
-    "eslint": "^9.28.0",
-    "globals": "^16.2.0"
-  },
-  "eslintConfig": {
-    "parserOptions": {
-      "ecmaVersion": 2022,
-      "sourceType": "module"
-    },
-    "env": {
-      "node": true,
-      "es2022": true
-    },
-    "extends": [
-      "eslint:recommended"
-    ]
+    "@playwright/test": "^1.53.0"
   }
 }

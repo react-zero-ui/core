@@ -2,20 +2,22 @@
   "name": "react-zero-ui-monorepo",
   "private": true,
   "version": "0.0.1",
+  "type": "module",
   "workspaces": [
-    "runtime",
-    "init-react-zero-ui"
+    "packages/*"
   ],
   "scripts": {
-    "lint": "npm run lint -w runtime",
-    "test": "npm run test -w runtime",
-    "pack:runtime": "npm pack --workspace runtime",
-    "pack:init": "npm pack --workspace init-react-zero-ui"
-  },
-  "dependencies": {
-    "@austinserb/react-zero-ui": "^1.0.13"
+    "test": "npm run test  -ws",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "pack:core": "npm pack --workspace packages/core",
+    "pack:cli": "npm pack --workspace packages/cli",
+    "release": "release-please github-release && release-please manifest"
   },
   "devDependencies": {
-    "@austinserb/react-zero-ui": "workspace:runtime"
+    "eslint": "^9.0.0",
+    "@eslint/js": "^9.0.0",
+    "eslint-plugin-node": "^11.1.0",
+    "release-please": "^17.0.0"
   }
 }

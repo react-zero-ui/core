@@ -3,7 +3,7 @@ import { useCallback } from 'react';
 // Convert kebab-case to camelCase for dataset API
 // "theme-secondary" -> "themeSecondary"
 function kebabToCamelCase(str) {
-  return str.replace(/-([a-z])/g, (match, letter) => letter.toUpperCase());
+  return str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
 }
 
 function useUI(key, initialValue) {

@@ -13,7 +13,7 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@austinserb/react-zero-ui": "file:../../../../austinserb-react-zero-ui-1.0.18.tgz",
+    "@austinserb/react-zero-ui": "file:../../../../../austinserb-react-zero-ui-1.0.18.tgz",
     "@tailwindcss/postcss": "^4.1.10",
     "@types/node": "24.0.0",
     "@types/react": "19.1.7",

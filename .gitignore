@@ -4,6 +4,10 @@ yarn-error.log
 coverage/
 t.py
 *.tgz
+.tgz
+.DS_Store
+.vscode/
+package-lock.json
 
 .next/ 
 .git.
