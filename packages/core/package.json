@@ -11,8 +11,7 @@
   "files": [
     "src/**/*",
     "../../README.md",
-    "../../LICENSE",
-    "../../CHANGELOG.md"
+    "../../LICENSE"
   ],
   "exports": {
     ".": {
@@ -38,7 +37,8 @@
     "test:vite": "playwright test -c __tests__/config/playwright.vite.config.js",
     "test:unit": "node --test __tests__/unit/index.test.cjs",
     "test:cli": "node --test __tests__/unit/cli.test.cjs",
-    "test:all": "npm run test:unit && npm run test:cli",
+    "test:all": "pnpm run test:unit && pnpm run test:cli && pnpm run test:next && pnpm run test:vite",
+    "test": "pnpm run test:all",
     "lint": "eslint ."
   },
   "keywords": [

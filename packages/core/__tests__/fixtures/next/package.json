@@ -8,12 +8,12 @@
     "clean": "rm -rf .next node_modules package-lock.json"
   },
   "dependencies": {
+    "@austinserb/react-zero-ui": "file:/Users/austinserb/Desktop/React-Zero/react-zero-ui/dist/austinserb-react-zero-ui-1.0.18.tgz",
     "next": "^15.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@austinserb/react-zero-ui": "file:../../../../../austinserb-react-zero-ui-1.0.18.tgz",
     "@tailwindcss/postcss": "^4.1.10",
     "@types/node": "24.0.0",
     "@types/react": "19.1.7",

@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15 # never let a hung Playwright job eat our runners
+
+    steps:
+      # 1 > checkout code
+      - uses: actions/checkout@v4
+
+      # 2 > install pnpm 10.12.1 (same as packageManager field)
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10.12.1
+          run_install: false # we'll call pnpm install ourselves
+
+      # 3 > set up Node 20 + cache the global pnpm store
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      # 4 > install all workspace deps deterministically
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # 5 > lint
+      - name: Lint
+        run: pnpm lint
+
+      # 6 > pack core and inject tarball into demo fixtures
+      - name: Pack core tarball
+        run: pnpm run prepack:core # builds .tgz in ./dist
+      - name: Inject tarball into fixtures
+        run: node scripts/install-local-tarball.js # script injects .tgz into demo fixtures
+
+      # 7 > run full unit + Playwright suite
+      - name: Run tests
+        run: pnpm test # resolves to core's "test" → test:all
+
+      # 8 > upload Playwright traces on failure
+      - name: Upload Playwright traces on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: packages/core/__tests__/test-results/

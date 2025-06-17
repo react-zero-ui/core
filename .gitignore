@@ -1,17 +1,22 @@
+# package artifacts
 node_modules/
-npm-debug.log
-yarn-error.log
+.next/
+dist/
 coverage/
-t.py
-*.tgz
-.tgz
-.DS_Store
-.vscode/
-package-lock.json
-
-.next/ 
-.git.
-
 test-results/
+.pnpm-store/
 
+# logs / temp files
+npm-debug.log*
+yarn-error.log*
+.DS_Store
+
+# IDE/editor
+.vscode/
+
+# tarballs produced during local tests
+*.tgz
+
+# local scratch files 
+t.py
 todo.md

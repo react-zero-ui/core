@@ -1,0 +1,21 @@
+name: Release
+
+on:
+  push:
+    branches: [main] # run after CI passes & merge lands
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/release-please-action@v4
+        with:
+          release-type: node
+          include-component-in-tag: true

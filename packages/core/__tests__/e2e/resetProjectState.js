@@ -17,4 +17,8 @@ export function resetZeroUiState(projectDir) {
       fs.writeFileSync(tsconfigPath, JSON.stringify(tsconf, null, 2));
     }
   }
+  // remove the zero-ui dir
+  if (fs.existsSync(zeroUiDir)) {
+    rmSync(zeroUiDir, { recursive: true, force: true });
+  }
 }

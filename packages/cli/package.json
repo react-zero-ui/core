@@ -14,7 +14,7 @@
     "package.json"
   ],
   "dependencies": {
-    "@austinserb/react-zero-ui": "../../austinserb-react-zero-ui-1.0.18.tgz",
+    "@austinserb/react-zero-ui": "workspace:^",
     "postcss": "^8.4.27",
     "tailwindcss": "^4.0.0",
     "@tailwindcss/postcss": "^4.1.8"
