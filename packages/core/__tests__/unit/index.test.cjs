@@ -1445,7 +1445,6 @@ export default defineConfig({
 
     // Verify config was updated with new plugins array
     const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
-    console.log('\n📄 Config without plugins array:');
     console.log(updatedContent);
 
     assert(updatedContent.includes('@austinserb/react-zero-ui/vite'), 'Should add Zero-UI import');
@@ -1478,7 +1477,6 @@ export default defineConfig({
 
     // Verify config was updated
     const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
-    console.log('\n📄 Empty plugins array:');
     console.log(updatedContent);
 
     assert(updatedContent.includes('@austinserb/react-zero-ui/vite'), 'Should add Zero-UI import');
