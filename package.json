@@ -8,12 +8,14 @@
   "packageManager": "pnpm@10.12.1",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "test": "pnpm -r test",
+    "test": "cd packages/core && pnpm test:all",
     "prepack:core": "pnpm -F @austinserb/react-zero-ui pack --pack-destination ./dist",
     "i-tarball": "node scripts/install-local-tarball.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "test:all": "pnpm install --frozen-lockfile && pnpm prepack:core && pnpm lint && pnpm i-tarball && pnpm test"
+    "test:all": "pnpm install --frozen-lockfile && pnpm prepack:core && pnpm lint && pnpm i-tarball && cd packages/core && pnpm test:all",
+    "test:vite": "cd packages/core && pnpm test:vite",
+    "test:next": "cd packages/core && pnpm test:next"
   },
   "devDependencies": {
     "eslint": "^9.0.0",
