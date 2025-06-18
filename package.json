@@ -16,7 +16,9 @@
     "lint:fix": "eslint . --fix",
     "test:all": "pnpm install --frozen-lockfile && pnpm prepack:core && pnpm lint && pnpm i-tarball && cd packages/core && pnpm test:all",
     "test:vite": "cd packages/core && pnpm test:vite",
-    "test:next": "cd packages/core && pnpm test:next"
+    "test:next": "cd packages/core && pnpm test:next",
+    "test:unit": "cd packages/core && pnpm test:unit",
+    "test:cli": "cd packages/core && pnpm test:cli"
   },
   "devDependencies": {
     "eslint": "^9.0.0",
