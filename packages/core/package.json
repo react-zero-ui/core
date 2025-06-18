@@ -37,9 +37,8 @@
     "test:vite": "playwright test -c __tests__/config/playwright.vite.config.js",
     "test:unit": "node --test __tests__/unit/index.test.cjs",
     "test:cli": "node --test __tests__/unit/cli.test.cjs",
-    "test:all": "pnpm run test:next && pnpm run test:vite && pnpm run test:unit && pnpm run test:cli",
-    "test": "pnpm run test:all",
-    "lint": "eslint ."
+    "test:all": "pnpm run test:vite && pnpm run test:next && pnpm run test:unit && pnpm run test:cli",
+    "test": "pnpm run test:all"
   },
   "keywords": [
     "react",
@@ -70,10 +69,10 @@
     "node": ">=18.0.0"
   },
   "peerDependencies": {
-    "postcss": "^8.4.27",
+    "postcss": "^8.5.5",
     "react": ">=16.8.0",
-    "tailwindcss": "^4.0.0",
-    "@tailwindcss/postcss": "^4.1.8"
+    "tailwindcss": "^4.1.10",
+    "@tailwindcss/postcss": "^4.1.10"
   },
   "dependencies": {
     "@babel/generator": "^7.27.5",
