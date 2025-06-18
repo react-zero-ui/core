@@ -10,27 +10,39 @@ test.describe.configure({ mode: 'serial' });   // run one after another
 test.describe('Zero-UI Next.js integration', () => {
   for (const { toggle, attr } of scenarios) {
     test(`starts "light" and flips <${attr}> → "dark"`, async ({ page }) => {
+      console.log(`\n🧪 Testing ${toggle} with attribute ${attr}`);
+
       await page.goto('/', { waitUntil: 'networkidle' });
+      console.log('📄 Page loaded');
 
       const body = page.locator('body');
       const button = page.getByTestId(toggle);
 
-      /* ①  Wait until the attribute exists at all */
-      await expect.poll(async () => {
-        const v = await body.getAttribute(attr);
-        return v !== null;
-      }).toBe(true);                      // attribute now present (any value)
+      /* ①  Wait until the attribute is "light" */
+      console.log(`🔍 Checking initial ${attr} attribute...`);
 
-      /* ②  Now assert it is "light" */
+      // Debug: Check what the actual attribute value is
+      const actualValue = await body.getAttribute(attr);
+      console.log(`🐛 DEBUG: Current ${attr} value is:`, actualValue);
+
+      // Check if button exists
+      const buttonExists = await button.count();
+      console.log(`🐛 DEBUG: Button ${toggle} count:`, buttonExists);
+
       await expect(body).toHaveAttribute(attr, 'light');
+      console.log(`✅ Initial ${attr} is "light"`);
 
-      /* ③  Click & assert "dark" */
+      /* ②  Click & assert "dark" */
+      console.log(`🖱️  Clicking ${toggle} button...`);
       await button.click();
-      await expect.poll(async () => {
-        const v = await body.getAttribute(attr);
-        return v !== null;
-      }).toBe(true);
+      console.log(`🔍 Checking ${attr} attribute after click...`);
+
+      // Debug: Check what the actual attribute value is after click
+      const actualValueAfter = await body.getAttribute(attr);
+      console.log(`🐛 DEBUG: ${attr} value after click is:`, actualValueAfter);
+
       await expect(body).toHaveAttribute(attr, 'dark');
+      console.log(`✅ ${attr} is now "dark"`);
     });
   }
 });

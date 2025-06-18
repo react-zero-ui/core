@@ -10,6 +10,7 @@ test-results/
 npm-debug.log*
 yarn-error.log*
 .DS_Store
+**/playwright-report/
 
 # IDE/editor
 .vscode/

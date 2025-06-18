@@ -5,16 +5,22 @@ on:
     branches: [main]
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
 
     steps:
-      # 1 ▸ code
+      # 1 ▸ Checkout code
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # required for git-diff later
 
-      # 2 ▸ pnpm
+      # 2 ▸ Set up pnpm
       - uses: pnpm/action-setup@v3
         with:
           version: 10.12.1
@@ -26,45 +32,73 @@ jobs:
           node-version: 20
           cache: pnpm
 
-      # 4 ▸ deps
+      # 4 ▸ Install deps (deterministic)
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # 5 ▸ **cache Playwright browsers**
+      # 5 ▸ Playwright browser cache  ────────────────
       - name: Cache Playwright browsers
+        id: pw-cache
         uses: actions/cache@v4
         with:
-          path: ~/.cache/ms-playwright # default download dir
+          path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-playwright-
+          restore-keys: |
+            ${{ runner.os }}-playwright-
 
-      # 6 ▸ download browsers if cache miss
-      - name: Install Playwright browsers
+      - name: Install Playwright browsers (if cache miss)
+        if: steps.pw-cache.outputs.cache-hit != 'true'
         run: pnpm --filter @austinserb/react-zero-ui exec playwright install --with-deps
 
-      # 7 ▸ lint
-      - run: pnpm lint
-        name: Lint
+      - name: Save Playwright cache
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ steps.pw-cache.outputs.cache-primary-key }}
 
-      # 8 ▸ pack, inject tarball, run tests
-      - run: pnpm run prepack:core
-        name: Pack core tarball
-      - run: node scripts/install-local-tarball.js
-        name: Inject tarball into fixtures
-      - run: pnpm test:vite
-        name: Run Vite tests
-      - run: pnpm test:next
-        name: Run Next.js tests
+      # 6 ▸ Lint fast, fail fast
+      - name: Lint
+        run: pnpm lint
 
-      - run: pnpm test:unit
-        name: Run unit tests
-      - run: pnpm test:cli
-        name: Run CLI tests
+      # 7 ▸ Pack → inject tar-ball → run whole test suite
+      - name: Pack core tarball
+        run: pnpm run prepack:core
 
-      # 9 ▸ traces on failure
-      - name: Upload Playwright traces on failure
+      - name: Inject tarball into fixtures
+        run: node scripts/install-local-tarball.js
+
+      - name: Run Vite tests
+        run: pnpm test:vite
+      - name: Run Next.js tests
+        run: pnpm test:next
+
+      - name: Run unit tests
+        run: pnpm test:unit
+
+      - name: Run CLI tests
+        run: pnpm test:cli
+
+      # 8 ▸ Ensure repo is clean (tar-ball didn't dirty fixtures)
+      - name: Verify clean git tree
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "::error::Git tree dirty after tests"
+            git status --porcelain
+            exit 1
+          fi
+
+      # 9 ▸ Upload Playwright traces & junit on failure
+      - name: Upload Playwright traces
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-traces
           path: packages/core/__tests__/test-results/
+
+      - name: Upload unit snapshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-snapshots
+          path: packages/core/__tests__/snapshots/

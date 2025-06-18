@@ -10,24 +10,32 @@ const BASE_URL = `http://localhost:${PORT}`;
 
 export default defineConfig({
 	testDir: "../e2e", // all E2E specs live here
+	snapshotDir: "../snapshots",
 	workers: 1,
 	timeout: 300_000,
 	expect: {
 		timeout: 150_000,
-	}, reporter: "html",
+	},
+	reporter: "html",
 	globalSetup: path.resolve(__dirname, "../helpers/globalSetup.vite.js"),
 
 	use: {
 		headless: true,
 		baseURL: BASE_URL,
-
 	},
 
 	// One project = one fixture app (Next, Vite, etc.)
 	projects: [
 		{
+			name: "vite-cli-e2e",
+			testMatch: /cli-vite\.spec\.js/,  // Matches both cli-vite.spec.js and vite.spec.js
+			use: {
+				baseURL: BASE_URL,
+			},
+		},
+		{
 			name: "vite-e2e",
-			testMatch: /.*vite.*\.spec\.js/,  // Matches both cli-vite.spec.js and vite.spec.js
+			testMatch: /vite\.spec\.js/,  // Matches both cli-vite.spec.js and vite.spec.js
 			use: {
 				baseURL: BASE_URL,
 			},

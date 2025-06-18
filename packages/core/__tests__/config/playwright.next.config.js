@@ -10,6 +10,7 @@ const BASE_URL = `http://localhost:${PORT}`;
 
 export default defineConfig({
 	testDir: "../e2e", // all E2E specs live here
+	snapshotDir: "../snapshots",
 	workers: 1,
 	timeout: 300_000,
 	expect: {
