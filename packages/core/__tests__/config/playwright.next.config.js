@@ -15,7 +15,7 @@ export default defineConfig({
 	expect: {
 		timeout: 150_000,
 	},
-	reporter: "null",
+	reporter: "html",
 	globalSetup: path.resolve(__dirname, "../helpers/globalSetup.next.js"),
 
 	use: {

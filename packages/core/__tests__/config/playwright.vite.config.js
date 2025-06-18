@@ -14,7 +14,7 @@ export default defineConfig({
 	timeout: 300_000,
 	expect: {
 		timeout: 150_000,
-	}, reporter: "null",
+	}, reporter: "html",
 	globalSetup: path.resolve(__dirname, "../helpers/globalSetup.vite.js"),
 
 	use: {
