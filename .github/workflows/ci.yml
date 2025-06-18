@@ -51,8 +51,15 @@ jobs:
         name: Pack core tarball
       - run: node scripts/install-local-tarball.js
         name: Inject tarball into fixtures
-      - run: pnpm test
-        name: Run tests
+      - run: pnpm test:vite
+        name: Run Vite tests
+      - run: pnpm test:next
+        name: Run Next.js tests
+
+      - run: pnpm test:unit
+        name: Run unit tests
+      - run: pnpm test:cli
+        name: Run CLI tests
 
       # 9 ▸ traces on failure
       - name: Upload Playwright traces on failure
