@@ -37,6 +37,7 @@ function cleanupTestDir(testDir) {
                 fs.unlinkSync(fullPath);
               } catch (e) {
                 // Ignore
+                console.log(`Error deleting file ${fullPath}: ${e.message}`);
               }
             }
           }
@@ -306,12 +307,12 @@ test('CLI script imports and executes library CLI', async () => {
     // Create mock CLI module that matches the actual structure
     const mockCLI = `
       // Mock implementation of the CLI
-      function runZeroUiInit() {
+      async function runZeroUiInit() {
         console.log('Mock CLI executed successfully');
       }
       
       function cli(argv = process.argv.slice(2)) {
-        runZeroUiInit(argv);
+        await runZeroUiInit(argv);
         return Promise.resolve();
       }
       
@@ -406,7 +407,7 @@ export function TestComponent() {
     process.chdir(testDir);
 
     try {
-      runZeroUiInit();
+      await runZeroUiInit();
 
       // Check that initialization messages were logged
       const logOutput = logMessages.join('\n');
@@ -454,7 +455,7 @@ test('Library CLI handles errors gracefully', async () => {
       const { runZeroUiInit } = require('../../src/cli/postInstall.cjs');
 
       // This should complete without errors in most cases
-      runZeroUiInit();
+      await runZeroUiInit();
 
       console.log('✅ Library CLI handles execution without crashing');
 
@@ -723,7 +724,7 @@ export function Toggle() {
     process.chdir(testDir);
 
     try {
-      runZeroUiInit();
+      await runZeroUiInit();
 
       const logOutput = logMessages.join('\n');
       assert(logOutput.includes('[Zero-UI] Initializing...'), 'Should log initialization');

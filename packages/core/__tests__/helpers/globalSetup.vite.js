@@ -10,7 +10,7 @@ export default async function globalSetup() {
 
   // Reset and setup the Vite fixture
   console.log('[Global Setup] Setting up Vite fixture...');
-  resetZeroUiState(projectDir, false);
+  await resetZeroUiState(projectDir, false);
 
   const zeroUiCli = await loadCliFromFixture(projectDir);
   await zeroUiCli([]);

@@ -38,5 +38,7 @@ export default defineConfig({
 		command: "pnpm run dev",
 		cwd: path.resolve(__dirname, "../fixtures/next"),
 		url: BASE_URL,
+		timeout: 60_000, // Give more time for CI environments
+		reuseExistingServer: !process.env.CI, // Don't reuse in CI
 	},
 });

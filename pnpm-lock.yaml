@@ -130,7 +130,7 @@ packages:
     engines: {node: '>=6.0.0'}
 
   '@austinserb/react-zero-ui@file:dist/austinserb-react-zero-ui-1.0.18.tgz':
-    resolution: {integrity: sha512-WdYvrWBUJ2mjbUij4BZcq8y9+TuJTpH7O7yl4V7HZXA5qSnLK2IKcoCo4J39cBQYZt+Jjp2OdGD4uHXCC3CA6A==, tarball: file:dist/austinserb-react-zero-ui-1.0.18.tgz}
+    resolution: {integrity: sha512-WrU/AGAZltAWG0vvvuUkkxk4tMquvxDuuza05EebhnzU3qB5M+xYaWBbqfYw6y1VooF/XCaWWK+g78YQ8kh0pw==, tarball: file:dist/austinserb-react-zero-ui-1.0.18.tgz}
     version: 1.0.18
     engines: {node: '>=18.0.0'}
     peerDependencies:

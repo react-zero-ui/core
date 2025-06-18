@@ -11,6 +11,7 @@
     "clean": "rm -rf node_modules package-lock.json"
   },
   "dependencies": {
+    "@austinserb/react-zero-ui": "file:/Users/austinserb/Desktop/React-Zero/react-zero-ui/dist/austinserb-react-zero-ui-1.0.18.tgz",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

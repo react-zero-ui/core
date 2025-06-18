@@ -58,7 +58,7 @@ function findAllSourceFiles(rootDirs = ['src', 'app']) {
  * @param {string[]} files - Array of file paths to process - if not provided, all source files will be found and processed
  * @returns {Object} - Object containing final variants, initial values, and source files
  */
-function processVariants(files = null) {
+async function processVariants(files = null) {
   const sourceFiles = files || findAllSourceFiles();
   const allVariants = sourceFiles.flatMap(file => {
     return extractVariants(file);
@@ -116,7 +116,7 @@ function buildCss(variants) {
   return css;
 }
 
-function generateAttributesFile(finalVariants, initialValues) {
+async function generateAttributesFile(finalVariants, initialValues) {
   const cwd = process.cwd();
   const ATTR_DIR = path.join(cwd, CONFIG.ZERO_UI_DIR);
   const ATTR_FILE = path.join(ATTR_DIR, 'attributes.js');
@@ -196,7 +196,7 @@ function isZeroUiInitialized() {
  * are inside the TypeScript program. Writes to ts/ jsconfig only if something
  * actually changes.
  */
-function patchConfigAlias() {
+async function patchConfigAlias() {
   const cwd = process.cwd();
 
   const configFile = fs.existsSync(path.join(cwd, 'tsconfig.json'))
@@ -256,7 +256,7 @@ function patchConfigAlias() {
  * Patches postcss.config.js to include Zero-UI plugin before Tailwind CSS
  * Only runs for Next.js projects and uses AST parsing for robust config modification
  */
-function patchPostcssConfig() {
+async function patchPostcssConfig() {
   const cwd = process.cwd();
   const postcssConfigJsPath = path.join(cwd, 'postcss.config.js');
   const postcssConfigMjsPath = path.join(cwd, 'postcss.config.mjs');
@@ -330,7 +330,7 @@ export default {
  * Patches vite.config.ts/js to include Zero-UI plugin and replace Tailwind CSS v4+ plugin if present
  * Only runs for Vite projects and uses AST parsing for robust config modification
  */
-function patchViteConfig() {
+async function patchViteConfig() {
   const cwd = process.cwd();
   const viteConfigTsPath = path.join(cwd, 'vite.config.ts');
   const viteConfigJsPath = path.join(cwd, 'vite.config.js');

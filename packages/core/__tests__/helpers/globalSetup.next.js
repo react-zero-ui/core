@@ -11,7 +11,7 @@ export default async function globalSetup() {
 
   // Reset and setup the Next.js fixture
   console.log('[Global Setup] Setting up Next.js fixture...');
-  resetZeroUiState(projectDir, true);
+  await resetZeroUiState(projectDir, true);
 
   const zeroUiCli = await loadCliFromFixture(projectDir);
   await zeroUiCli([]);

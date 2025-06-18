@@ -8,28 +8,28 @@ const {
   hasViteConfig,
 } = require('../postcss/helpers.cjs');
 
-function runZeroUiInit() {
+async function runZeroUiInit() {
   try {
     console.log('[Zero-UI] Initializing...');
 
     // Patch Vite config for Vite projects
     if (hasViteConfig()) {
-      patchViteConfig();
+      await patchViteConfig();
     }
 
 
     if (!hasViteConfig()) {
       // Patch config for module resolution 
-      patchConfigAlias();
+      await patchConfigAlias();
       // Patch PostCSS config for Next.js projects
-      patchPostcssConfig();
+      await patchPostcssConfig();
     }
 
     // Process all variants using the shared helper
-    const { finalVariants, initialValues, sourceFiles } = processVariants();
+    const { finalVariants, initialValues, sourceFiles } = await processVariants();
 
     // Generate attribute files using the shared helper
-    generateAttributesFile(finalVariants, initialValues);
+    await generateAttributesFile(finalVariants, initialValues);
 
 
     console.log(`[Zero-UI] ✅ Initialized with ${finalVariants.length} variants from ${sourceFiles.length} files`);

@@ -7,12 +7,17 @@ const { runZeroUiInit } = require('./postInstall.cjs');
 
 
 // Take command line arguments (defaulting to process.argv.slice(2) which are the args after node <scriptname>) and pass them to runZeroUiInit
-function cli(argv = process.argv.slice(2)) {
-  runZeroUiInit(argv);
+async function cli(argv = process.argv.slice(2)) {
+  return await runZeroUiInit(argv);
 }
 
 /* -------- CL I  -------- */
-if (require.main === module) cli();   // `npx init-react-zero-ui`
+if (require.main === module) {
+  cli().catch(error => {
+    console.error('CLI failed:', error);
+    process.exit(1);
+  });
+}
 
 /* -------- CJS  -------- */
 module.exports = cli;                 // `require('@…/cli')()`

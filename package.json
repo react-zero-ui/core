@@ -8,6 +8,7 @@
   "packageManager": "pnpm@10.12.1",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
+    "reset": "git clean -fdx && pnpm install --frozen-lockfile && pnpm prepack:core && pnpm i-tarball",
     "test": "cd packages/core && pnpm test:all",
     "prepack:core": "pnpm -F @austinserb/react-zero-ui pack --pack-destination ./dist",
     "i-tarball": "node scripts/install-local-tarball.js",

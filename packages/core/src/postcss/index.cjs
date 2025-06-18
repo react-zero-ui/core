@@ -16,12 +16,11 @@ module.exports = () => {
     postcssPlugin: 'postcss-react-zero-ui',
 
     // Once runs BEFORE Root, so Tailwind will see our variants
-    Once(root, { result }) {
-      const startTime = Date.now();
+    async Once(root, { result }) {
 
       try {
         // Process all variants using the shared helper
-        const { finalVariants, initialValues, sourceFiles } = processVariants();
+        const { finalVariants, initialValues, sourceFiles } = await processVariants();
 
         // Generate CSS
         const cssBlock = buildCss(finalVariants);
@@ -44,24 +43,14 @@ module.exports = () => {
         // Run initialization only once (fallback if user hasn't run npx zero-ui init)
         if (!isZeroUiInitialized()) {
           console.log('[Zero-UI] Auto-initializing (first time setup)...');
-          runZeroUiInit();
+          await runZeroUiInit();
         }
 
         // Generate body attributes file and TypeScript definitions
-        const { jsChanged, tsChanged } = generateAttributesFile(finalVariants, initialValues);
-
-        // Optional: Log performance metrics in development
-        if (process.env.NODE_ENV === 'development') {
-          const processingTime = Date.now() - startTime;
-          console.log(`[Zero-UI] Processed ${sourceFiles.length} files in ${processingTime}ms`);
-          if (jsChanged || tsChanged) {
-            console.log(`[Zero-UI] Updated: ${jsChanged ? 'attributes.js' : ''} ${tsChanged ? 'attributes.d.ts' : ''}`);
-          }
-        }
+        await generateAttributesFile(finalVariants, initialValues);
 
       } catch (error) {
-        console.error('[Zero-UI] PostCSS plugin error: ', error.message);
-        // Don't throw to prevent build failures
+        throw new Error('[Zero-UI] PostCSS plugin error: ', error.message);
       }
     }
   };
