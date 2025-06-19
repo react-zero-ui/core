@@ -7,6 +7,7 @@ on:
       - 'packages/**'
       - '.github/workflows/ci.yml'
       - 'scripts/**'
+      - 'pnpm-lock.yaml'
   pull_request:
 
 concurrency:
