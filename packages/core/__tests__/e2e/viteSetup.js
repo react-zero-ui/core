@@ -1,6 +1,5 @@
-// packages/core/__tests__/helpers/globalSetup.vite.js
-import { resetZeroUiState } from './resetProjectState.js';
-import { loadCliFromFixture } from './loadCli.js';
+import { resetZeroUiState } from '../helpers/resetProjectState.js';
+import { loadCliFromFixture } from '../helpers/loadCli.js';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -16,5 +15,5 @@ export default async function globalSetup() {
   const zeroUiCli = await loadCliFromFixture(projectDir);
   await zeroUiCli([]);
 
-  console.log('[Global Setup] Vite fixture setup complete!');
+  console.log('[Global Setup] ✅ Vite fixture setup complete!✅');
 } 

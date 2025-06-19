@@ -6,7 +6,7 @@ export async function loadCliFromFixture(fixtureDir) {
   const r = createRequire(path.join(fixtureDir, 'package.json'));
   const modulePath = r.resolve('../../../src/cli/init.cjs');   // get the path
   const mod = r(modulePath);  // actually require the module
-
+  console.log('[Global Setup] Loaded CLI from fixture:', modulePath);
   // Return a wrapper function that changes directory before running CLI
   const wrappedCli = async (args = []) => {
     const originalCwd = process.cwd();
@@ -14,6 +14,7 @@ export async function loadCliFromFixture(fixtureDir) {
       process.chdir(fixtureDir);  // Change to fixture directory
 
       // The init.cjs exports a cli function, so call it
+
       if (typeof mod === 'function') {
         return await Promise.resolve(mod(args));  // run the CLI
       } else if (typeof mod.default === 'function') {
@@ -23,6 +24,7 @@ export async function loadCliFromFixture(fixtureDir) {
       }
     } finally {
       process.chdir(originalCwd);  // Always restore original directory
+      console.log('[Global Setup] Restored original directory:', originalCwd);
     }
   };
 

@@ -11,13 +11,12 @@ const BASE_URL = `http://localhost:${PORT}`;
 export default defineConfig({
 	testDir: "../e2e", // all E2E specs live here
 	snapshotDir: "../snapshots",
-	workers: 1,
-	timeout: 300_000,
+	workers: 2,
+	timeout: 30_000,
 	expect: {
-		timeout: 150_000,
+		timeout: 15_000,
 	},
 	reporter: "html",
-	globalSetup: path.resolve(__dirname, "../helpers/globalSetup.next.js"),
 
 	use: {
 		headless: true,
@@ -25,14 +24,20 @@ export default defineConfig({
 
 	},
 
-	// One project = one fixture app (Next, Vite, etc.)
 	projects: [
 		{
+			name: "setup",
+			testMatch: /nextSetup\.js/,
+		},
+		{
+			name: "next-cli-e2e",
+			dependencies: ["setup"],
+			testMatch: /cli-next\.spec\.js/,
+		},
+		{
 			name: "next-e2e",
-			testMatch: /.*next.*\.spec\.js/,  // Matches both cli-next.spec.js and next.spec.js
-			use: {
-				baseURL: BASE_URL,
-			},
+			dependencies: ["next-cli-e2e"],
+			testMatch: /next\.spec\.js/,
 		},
 	],
 	webServer: {
