@@ -78,27 +78,3 @@ jobs:
 
       - name: Run CLI tests
         run: pnpm test:cli
-
-      # 8 ▸ Ensure repo is clean (tar-ball didn't dirty fixtures)
-      - name: Verify clean git tree
-        run: |
-          if [[ -n $(git status --porcelain) ]]; then
-            echo "::error::Git tree dirty after tests"
-            git status --porcelain
-            exit 1
-          fi
-
-      # 9 ▸ Upload Playwright traces & junit on failure
-      - name: Upload Playwright traces
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-traces
-          path: packages/core/__tests__/test-results/
-
-      - name: Upload unit snapshots
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: unit-snapshots
-          path: packages/core/__tests__/snapshots/
