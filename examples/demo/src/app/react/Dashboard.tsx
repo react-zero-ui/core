@@ -10,7 +10,7 @@ export const Dashboard: React.FC = () => {
   const containerClasses = theme === 'light' ? 'bg-gray-200 text-gray-900' : 'bg-gray-900 text-gray-200';
 
   const itemClasses = theme === 'light' ? 'bg-gray-900 text-gray-200' : 'bg-gray-200 text-gray-900';
-  const itemClasses2 = theme === 'dark' ? 'bg-blue-700' : 'bg-blue-400';
+  const itemClasses2 = theme === 'dark' ? 'bg-red-400' : 'bg-blue-400';
 
   return (
     <div className={`${containerClasses} flex h-screen w-screen flex-col items-center justify-start p-5`}>
