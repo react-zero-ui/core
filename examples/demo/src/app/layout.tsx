@@ -2,6 +2,14 @@ import { bodyAttributes } from '@zero-ui/attributes';
 import './globals.css';
 import { TopBarV2 } from './components/TopBar';
 
+export const metadata = {
+  title: 'React Zero UI Demo',
+  description: 'React Zero UI Demo',
+  alternates: {
+    canonical: process.env.NEXT_PUBLIC_URL,
+  },
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
