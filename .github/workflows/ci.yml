@@ -4,9 +4,9 @@ on:
   push:
     branches: [main]
     paths:
-      - "packages/**"
-      - ".github/workflows/ci.yml"
-      - "scripts/**"
+      - 'packages/**'
+      - '.github/workflows/ci.yml'
+      - 'scripts/**'
   pull_request:
 
 concurrency:

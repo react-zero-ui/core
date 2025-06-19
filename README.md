@@ -1,6 +1,6 @@
-# React Zero-UI
+# React Zero-UI (Beta)
 
-**Instant UI state updates. ZERO React re-renders. ZERO runtime overhead.** Update the UI instantly, manage global UI state from anywhere. No prop drilling. get started with one command in your existing React app. ```npx create-zero-ui```
+**Instant UI state updates. ZERO React re-renders. ZERO runtime overhead.** Update the UI instantly, manage global UI state from anywhere. No prop drilling. get started with one command in your existing React app. `npx create-zero-ui`
 
 [![npm version](https://img.shields.io/npm/v/@austinserb/react-zero-ui)](https://www.npmjs.com/package/@austinserb/react-zero-ui)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -14,7 +14,7 @@ Traditional React state triggers RE-renders for every UI change. Switching theme
 Zero-UI bypasses React entirely for pure UI state. Instead of re-renders, it:
 
 - Pre-renders CSS styles and keeps them in the DOM
-- For state changes it flips a ```data-*``` attribute key.
+- For state changes it flips a `data-*` attribute key.
 - Thats it.
 
 **Result:** UI updates that are 10-50x faster.
@@ -23,11 +23,11 @@ Zero-UI bypasses React entirely for pure UI state. Instead of re-renders, it:
 
 Apple M1
 
-| Nodes | React State | Zero-UI | Improvement |
-|-------|------------------|---------|-------------|
-| 1,000 | ~50ms | ~5ms | 10x faster |
-| 5,000 | ~180ms | ~15ms | 12x faster |
-| 10,000 | ~400ms | ~20ms | 20x faster |
+| Nodes  | React State | Zero-UI | Improvement |
+| ------ | ----------- | ------- | ----------- |
+| 1,000  | ~50ms       | ~5ms    | 10x faster  |
+| 5,000  | ~180ms      | ~15ms   | 12x faster  |
+| 10,000 | ~400ms      | ~20ms   | 20x faster  |
 
 ## Quick Start
 
@@ -36,7 +36,7 @@ Apple M1
 CLI script - in your existing Next or Vite App's root:
 
 ```bash
-npx create-zero-ui 
+npx create-zero-ui
 ```
 
 ## Manual Installation
@@ -49,7 +49,6 @@ npm install @austinserb/react-zero-ui
 
 **Prerequisites:** Tailwind v4 must be initialized. [tailwind set up ]("tailwind.com")
 
-
 #### Vite
 
 ```js
@@ -57,9 +56,9 @@ npm install @austinserb/react-zero-ui
 import { zeroUIPlugin } from '@austinserb/react-zero-ui/vite';
 
 export default {
-  //*REMOVE TAILWIND PLUGIN* Zero-UI extends tailwinds plug-in
-  plugins: [zeroUIPlugin()]
-}
+	//*REMOVE TAILWIND PLUGIN* Zero-UI extends tailwinds plug-in
+	plugins: [zeroUIPlugin()],
+};
 ```
 
 #### Next.js
@@ -67,16 +66,17 @@ export default {
 #### 1. Spread bodyAttributes on `<body>` in Layout
 
 ```jsx
-import { bodyAttributes } from "@zero-ui/attributes";
+import { bodyAttributes } from '@zero-ui/attributes';
 //or
-import { bodyAttributes } from "../.zero-ui/attributes";
+import { bodyAttributes } from '../.zero-ui/attributes';
 
 export default function RootLayout({ children }) {
-return (
-<html>
-    <body {...bodyAttributes}>{children}</body>
-</html>
-)}
+	return (
+		<html>
+			<body {...bodyAttributes}>{children}</body>
+		</html>
+	);
+}
 ```
 
 #### 2. Add PostCSS Plugin
@@ -110,7 +110,7 @@ function ThemeToggle() {
 **Consume the state in any component with tailwind!**
 
 ```jsx
-className="theme-light:bg-white theme-dark:bg-black"
+className = 'theme-light:bg-white theme-dark:bg-black';
 ```
 
 **Mutate the state in any component!**
@@ -126,24 +126,28 @@ function UnrelatedPage()
 
 **Use with complex Tailwind Variants**
 
-
 ```jsx
-clasName="md:theme-dark:bg-black md:peer-checked:theme-light:hidden"
+clasName = 'md:theme-dark:bg-black md:peer-checked:theme-light:hidden';
 ```
 
 ## How It Works
 
 1. **State Store**: The `useUI` hook writes to `data-*` attributes on the `<body>` tag instead of React state
+
    ```html
-   <body data-theme="dark" data-accent="blue" data-sidebar="open">
+   <body
+   	data-theme="dark"
+   	data-accent="blue"
+   	data-sidebar="open"></body>
    ```
 
 2. **Babel Transform**: Automatically detects all `useUI` variants in your code during build
 
 3. **PostCSS Plugin**: Generates Tailwind variant classes for every detected state
+
    ```css
    .theme-dark\:bg-gray-900 {
-     background-color: rgb(17 24 39);
+   	background-color: rgb(17 24 39);
    }
    ```
 
@@ -163,7 +167,7 @@ const [staleValue, setValue] = useUI('theme', 'light');
 - `defaultValue`: Initial value if not set
 - Returns: `[staleValue, setValue]`
 
-**note:**  normaly used as const ```const [,setValue]=useUI()``` to denote that the value is stale and will not update 
+**note:** normaly used as const `const [,setValue]=useUI()` to denote that the value is stale and will not update
 
 ### Tailwind Variants
 
@@ -191,7 +195,7 @@ Use the pattern `{key}-{value}:` as a Tailwind variant:
 2. **Not for business logic**: Keep using React state for data that affects logic
 3. **Consistent naming**: Prefer kebab-case for keys (`sidebar-state`, not `sidebarState`)
 4. **Default values**: Always provide default value for  
-```useUI('key', 'value')``` to avoid FOUC.
+   `useUI('key', 'value')` to avoid FOUC.
 
 ## Contributing
 

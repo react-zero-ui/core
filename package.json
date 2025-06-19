@@ -1,29 +1,32 @@
 {
-  "name": "react-zero-ui-monorepo",
-  "private": true,
-  "type": "module",
-  "workspaces": [
-    "packages/*"
-  ],
-  "packageManager": "pnpm@10.12.1",
-  "scripts": {
-    "preinstall": "npx only-allow pnpm",
-    "reset": "git clean -fdx && pnpm install --frozen-lockfile && pnpm prepack:core && pnpm i-tarball",
-    "test": "cd packages/core && pnpm test:all",
-    "prepack:core": "pnpm -F @austinserb/react-zero-ui pack --pack-destination ./dist",
-    "i-tarball": "node scripts/install-local-tarball.js",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "test:all": "pnpm install --frozen-lockfile && pnpm prepack:core && pnpm lint && pnpm i-tarball && cd packages/core && pnpm test:all",
-    "test:vite": "cd packages/core && pnpm test:vite",
-    "test:next": "cd packages/core && pnpm test:next",
-    "test:unit": "cd packages/core && pnpm test:unit",
-    "test:cli": "cd packages/core && pnpm test:cli"
-  },
-  "devDependencies": {
-    "eslint": "^9.0.0",
-    "@eslint/js": "^9.0.0",
-    "eslint-plugin-node": "^11.1.0",
-    "release-please": "^17.0.0"
-  }
+	"name": "react-zero-ui-monorepo",
+	"private": true,
+	"type": "module",
+	"workspaces": [
+		"packages/*"
+	],
+	"packageManager": "pnpm@10.12.1",
+	"scripts": {
+		"preinstall": "npx only-allow pnpm",
+		"reset": "git clean -fdx && pnpm install --frozen-lockfile && pnpm prepack:core && pnpm i-tarball",
+		"test": "cd packages/core && pnpm test:all",
+		"prepack:core": "pnpm -F @austinserb/react-zero-ui pack --pack-destination ./dist",
+		"i-tarball": "node scripts/install-local-tarball.js",
+		"lint": "eslint .",
+		"lint:fix": "eslint . --fix",
+		"test:all": "pnpm install --frozen-lockfile && pnpm prepack:core && pnpm lint && pnpm i-tarball && cd packages/core && pnpm test:all",
+		"test:vite": "cd packages/core && pnpm test:vite",
+		"test:next": "cd packages/core && pnpm test:next",
+		"test:unit": "cd packages/core && pnpm test:unit",
+		"test:cli": "cd packages/core && pnpm test:cli",
+		"format": "prettier --write .",
+		"format:check": "prettier --check ."
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.0.0",
+		"eslint": "^9.0.0",
+		"eslint-plugin-node": "^11.1.0",
+		"prettier": "^3.5.3",
+		"release-please": "^17.0.0"
+	}
 }

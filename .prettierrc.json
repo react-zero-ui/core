@@ -1,0 +1,15 @@
+{
+	"semi": true,
+	"trailingComma": "es5",
+	"singleQuote": true,
+	"tabWidth": 2,
+	"useTabs": true,
+	"printWidth": 160,
+	"endOfLine": "lf",
+	"arrowParens": "avoid",
+	"bracketSpacing": true,
+	"objectWrap": "collapse",
+	"bracketSameLine": true,
+	"embeddedLanguageFormatting": "auto",
+	"singleAttributePerLine": true
+}

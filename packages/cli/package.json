@@ -1,22 +1,22 @@
 {
-  "name": "create-zero-ui",
-  "version": "1.0.4",
-  "type": "module",
-  "main": "./bin.js",
-  "bin": {
-    "react-zero-ui": "./bin.js"
-  },
-  "scripts": {
-    "test": "node --test ../core/__tests__/unit/cli.test.cjs"
-  },
-  "files": [
-    "bin.js",
-    "package.json"
-  ],
-  "dependencies": {
-    "@austinserb/react-zero-ui": "workspace:^",
-    "postcss": "^8.4.27",
-    "tailwindcss": "^4.0.0",
-    "@tailwindcss/postcss": "^4.1.8"
-  }
+	"name": "create-zero-ui",
+	"version": "1.0.4",
+	"type": "module",
+	"main": "./bin.js",
+	"bin": {
+		"react-zero-ui": "./bin.js"
+	},
+	"scripts": {
+		"test": "node --test ../core/__tests__/unit/cli.test.cjs"
+	},
+	"files": [
+		"bin.js",
+		"package.json"
+	],
+	"dependencies": {
+		"@austinserb/react-zero-ui": "workspace:^",
+		"postcss": "^8.4.27",
+		"tailwindcss": "^4.0.0",
+		"@tailwindcss/postcss": "^4.1.8"
+	}
 }

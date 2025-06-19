@@ -1,5 +1,5 @@
-import "./globals.css";
-import { bodyAttributes } from "@zero-ui/attributes";
+import './globals.css';
+import { bodyAttributes } from '@zero-ui/attributes';
 
 export default function RootLayout({ children }) {
 	return (

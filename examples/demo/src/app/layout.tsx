@@ -1,0 +1,18 @@
+import { bodyAttributes } from '@zero-ui/attributes';
+import './globals.css';
+import { TopBarV2 } from './components/TopBar';
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body className={`py-24 md:py-10 antialiased`} {...bodyAttributes}>
+        <TopBarV2 />
+        {children}
+      </body>
+    </html>
+  );
+}

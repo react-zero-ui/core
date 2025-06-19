@@ -5,6 +5,7 @@ dist/
 coverage/
 test-results/
 .pnpm-store/
+package-lock.json
 
 # logs / temp files
 npm-debug.log*
@@ -24,3 +25,5 @@ todo.md
 
 # keep these files
 !next-env.d.ts
+
+ 

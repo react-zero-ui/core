@@ -1,85 +1,85 @@
 {
-  "name": "@austinserb/react-zero-ui",
-  "version": "1.0.19",
-  "description": "Zero re-render UI state management for React",
-  "private": false,
-  "type": "module",
-  "main": "./src/index.js",
-  "module": "./src/index.js",
-  "types": "./src/index.d.ts",
-  "sideEffects": false,
-  "files": [
-    "src/**/*",
-    "README.md",
-    "LICENSE"
-  ],
-  "exports": {
-    ".": {
-      "types": "./src/index.d.ts",
-      "import": "./src/index.js"
-    },
-    "./postcss": {
-      "types": "./src/postcss/index.d.ts",
-      "require": "./src/postcss/index.cjs"
-    },
-    "./vite": {
-      "types": "./src/postcss/vite.d.ts",
-      "import": "./src/postcss/vite.js"
-    },
-    "./cli": {
-      "types": "./src/cli/init.d.ts",
-      "require": "./src/cli/init.cjs",
-      "import": "./src/cli/init.cjs"
-    }
-  },
-  "scripts": {
-    "test:next": "playwright test -c __tests__/config/playwright.next.config.js",
-    "test:vite": "playwright test -c __tests__/config/playwright.vite.config.js",
-    "test:unit": "node --test __tests__/unit/index.test.cjs",
-    "test:cli": "node --test __tests__/unit/cli.test.cjs",
-    "test:all": "pnpm run test:vite && pnpm run test:next && pnpm run test:unit && pnpm run test:cli",
-    "test": "pnpm run test:all"
-  },
-  "keywords": [
-    "react",
-    "ui",
-    "state",
-    "css",
-    "postcss",
-    "postcss-plugin",
-    "zero-config",
-    "react-zero-ui",
-    "postcss-react-zero-ui",
-    "pre-rendering",
-    "no-rerender",
-    "zero-ui"
-  ],
-  "author": "Austinserb <serbaustin@gmail.com>",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/austin1serb/react-zero-ui.git",
-    "directory": "packages/core"
-  },
-  "bugs": {
-    "url": "https://github.com/austin1serb/react-zero-ui/issues"
-  },
-  "homepage": "https://github.com/austin1serb/react-zero-ui#readme",
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "peerDependencies": {
-    "postcss": "^8.5.5",
-    "react": ">=16.8.0",
-    "tailwindcss": "^4.1.10",
-    "@tailwindcss/postcss": "^4.1.10"
-  },
-  "dependencies": {
-    "@babel/generator": "^7.27.5",
-    "@babel/parser": "^7.27.5",
-    "@babel/traverse": "^7.27.4"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.53.0"
-  }
+	"name": "@austinserb/react-zero-ui",
+	"version": "1.0.19",
+	"description": "Zero re-render UI state management for React",
+	"private": false,
+	"type": "module",
+	"main": "./src/index.js",
+	"module": "./src/index.js",
+	"types": "./src/index.d.ts",
+	"sideEffects": false,
+	"files": [
+		"src/**/*",
+		"README.md",
+		"LICENSE"
+	],
+	"exports": {
+		".": {
+			"types": "./src/index.d.ts",
+			"import": "./src/index.js"
+		},
+		"./postcss": {
+			"types": "./src/postcss/index.d.ts",
+			"require": "./src/postcss/index.cjs"
+		},
+		"./vite": {
+			"types": "./src/postcss/vite.d.ts",
+			"import": "./src/postcss/vite.js"
+		},
+		"./cli": {
+			"types": "./src/cli/init.d.ts",
+			"require": "./src/cli/init.cjs",
+			"import": "./src/cli/init.cjs"
+		}
+	},
+	"scripts": {
+		"test:next": "playwright test -c __tests__/config/playwright.next.config.js",
+		"test:vite": "playwright test -c __tests__/config/playwright.vite.config.js",
+		"test:unit": "node --test __tests__/unit/index.test.cjs",
+		"test:cli": "node --test __tests__/unit/cli.test.cjs",
+		"test:all": "pnpm run test:vite && pnpm run test:next && pnpm run test:unit && pnpm run test:cli",
+		"test": "pnpm run test:all"
+	},
+	"keywords": [
+		"react",
+		"ui",
+		"state",
+		"css",
+		"postcss",
+		"postcss-plugin",
+		"zero-config",
+		"react-zero-ui",
+		"postcss-react-zero-ui",
+		"pre-rendering",
+		"no-rerender",
+		"zero-ui"
+	],
+	"author": "Austinserb <serbaustin@gmail.com>",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/austin1serb/react-zero-ui.git",
+		"directory": "packages/core"
+	},
+	"bugs": {
+		"url": "https://github.com/austin1serb/react-zero-ui/issues"
+	},
+	"homepage": "https://github.com/austin1serb/react-zero-ui#readme",
+	"engines": {
+		"node": ">=18.0.0"
+	},
+	"peerDependencies": {
+		"postcss": "^8.5.5",
+		"react": ">=16.8.0",
+		"tailwindcss": "^4.1.10",
+		"@tailwindcss/postcss": "^4.1.10"
+	},
+	"dependencies": {
+		"@babel/generator": "^7.27.5",
+		"@babel/parser": "^7.27.5",
+		"@babel/traverse": "^7.27.4"
+	},
+	"devDependencies": {
+		"@playwright/test": "^1.53.0"
+	}
 }

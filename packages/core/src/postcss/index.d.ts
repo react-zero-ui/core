@@ -1,4 +1,4 @@
-import { PluginCreator } from "postcss";
+import { PluginCreator } from 'postcss';
 
 interface ReactZeroUIOptions {
 	dirs?: string[];
