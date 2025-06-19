@@ -3,6 +3,10 @@ name: CI
 on:
   push:
     branches: [main]
+    paths:
+      - "packages/**"
+      - ".github/workflows/ci.yml"
+      - "scripts/**"
   pull_request:
 
 concurrency:
