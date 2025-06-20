@@ -187,7 +187,6 @@ test('detects JavaScript setValue calls', async () => {
 
 test('handles boolean values', async () => {
 	await runTest(
-
 		{
 			'app/toggle.tsx': `
       import { useUI } from 'react-zero-ui';
@@ -220,7 +219,6 @@ test('handles boolean values', async () => {
 
 test('handles kebab-case conversion', async () => {
 	await runTest(
-
 		{
 			'src/styles.jsx': `
       import { useUI } from 'react-zero-ui';
@@ -258,7 +256,6 @@ test('handles kebab-case conversion', async () => {
 
 test('handles conditional expressions', async () => {
 	await runTest(
-
 		{
 			'app/conditional.jsx': `
       import { useUI } from 'react-zero-ui';
@@ -295,7 +292,6 @@ test('handles conditional expressions', async () => {
 
 test('handles multiple files and deduplication', async () => {
 	await runTest(
-
 		{
 			'src/header.jsx': `
       import { useUI } from 'react-zero-ui';
@@ -337,7 +333,6 @@ test('handles multiple files and deduplication', async () => {
 
 test('handles parsing errors gracefully', async () => {
 	await runTest(
-
 		{
 			'src/valid.jsx': `
       import { useUI } from 'react-zero-ui';
@@ -372,7 +367,6 @@ test('throws on empty string initial value', () => {
 
 test('valid edge cases: underscores + missing initial', async () => {
 	await runTest(
-
 		{
 			'src/edge.jsx': `
       import { useUI } from 'react-zero-ui';
@@ -399,7 +393,6 @@ test('watches for file changes', async () => {
 	}
 
 	await runTest(
-
 		{
 			'src/initial.jsx': `
       import { useUI } from 'react-zero-ui';
@@ -472,7 +465,6 @@ test('ignores node_modules and hidden directories', async () => {
 
 test('handles deeply nested file structures', async () => {
 	await runTest(
-
 		{
 			'src/features/auth/components/login/LoginForm.jsx': `
       import { useUI } from 'react-zero-ui';
@@ -491,7 +483,6 @@ test('handles deeply nested file structures', async () => {
 
 test('handles complex TypeScript scenarios', async () => {
 	await runTest(
-
 		{
 			'src/complex.tsx': `
       import { useUI } from 'react-zero-ui';

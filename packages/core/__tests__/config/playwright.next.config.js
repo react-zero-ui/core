@@ -35,6 +35,6 @@ export default defineConfig({
 		cwd: path.resolve(__dirname, '../fixtures/next'),
 		url: BASE_URL,
 		timeout: 60_000, // Give more time for CI environments
-		reuseExistingServer: !process.env.CI, // Don't reuse in CI
+		reuseExistingServer: false, // Don't reuse in CI
 	},
 });

@@ -6,8 +6,7 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc -b && vite build",
-		"preview": "vite preview",
-		"clean": "rm -rf node_modules package-lock.json"
+		"build-and-preview": "vite build && vite preview --port 5173"
 	},
 	"dependencies": {
 		"react": "^19.1.0",

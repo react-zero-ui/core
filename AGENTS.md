@@ -14,5 +14,6 @@ Use these tips when working with the codebase or generating examples.
 - Only use `useUI` for UI-only state (themes, flags, etc.).
 - Prefer kebab-case keys (`sidebar-open`) so generated variants are predictable.
 - Always pass a default value to `useUI(key, defaultValue)` to avoid flashes during SSR.
+- The first value is ALWAYS STALE, do not use it if you need reactivity.
 - Mutate the state anywhere in the app: `const [, setTheme] = useUI('theme', 'light');` then call `setTheme('dark')`.
 - Compose Tailwind classes anywhere with the pattern `key-value:` like `theme-dark:bg-black`.

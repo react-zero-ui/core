@@ -39,9 +39,7 @@ export async function resetZeroUiState(projectDir, isNext = false) {
 	}
 	console.log('[Reset] ✨ Reset complete!');
 	return;
-
 }
-
 
 const defaultLayoutContent = `import './globals.css';
 

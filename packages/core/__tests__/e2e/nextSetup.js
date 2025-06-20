@@ -20,5 +20,4 @@ export default async function globalSetup() {
 	await new Promise(resolve => setTimeout(resolve, 5000));
 
 	console.log('[Global Setup] ✅ Next.js fixture setup complete!✅');
-
 }

@@ -11,9 +11,12 @@ test('Vite CLI scaffolds .zero-ui + vite.config', async () => {
 	// CLI setup is handled by global setup, just verify the results
 	const attrs = path.join(projectDir, '.zero-ui/attributes.js');
 	const vite = path.join(projectDir, 'vite.config.ts');
+	const attrsContent = readFileSync(attrs, 'utf8');
 
 	await expect.poll(() => existsSync(attrs)).toBeTruthy();
-	await expect.poll(() => readFileSync(attrs, 'utf8')).toContain('export const bodyAttributes');
+	console.log('[Vite CLI] attrs', attrsContent);
+	await expect.poll(() => attrsContent).toContain('export const bodyAttributes');
+	console.log('[Vite CLI] vite', vite);
 
 	await expect
 		.poll(() => {
@@ -22,4 +25,5 @@ test('Vite CLI scaffolds .zero-ui + vite.config', async () => {
 			return /from ['"]@austinserb\/react-zero-ui\/vite['"]/.test(src) && /\bplugins:\s*\[.*zeroUI\(\).*]/s.test(src);
 		})
 		.toBeTruthy();
+	console.log('[Vite CLI] vite', vite);
 });

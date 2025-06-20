@@ -16,7 +16,7 @@ export default function zeroUI() {
 			const attrs = Object.entries(bodyAttributes)
 				.map(([k, v]) => `${k}="${v}"`)
 				.join(' ');
-			return html.replace('<body', `<body ${attrs}`);
+			return html.replace(/<body([^>]*)>/i, `<body$1 ${attrs}>`);
 		},
 	};
 }

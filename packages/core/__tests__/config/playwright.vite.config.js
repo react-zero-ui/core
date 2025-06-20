@@ -15,7 +15,6 @@ export default defineConfig({
 	expect: { timeout: 15_000 },
 	reporter: [
 		['list'], // Shows test results in terminal
-		['html'] // Also keep HTML report
 	],
 
 	use: {
@@ -40,10 +39,10 @@ export default defineConfig({
 		},
 	],
 	webServer: {
-		command: 'pnpm run dev',
+		command: 'pnpm run build-and-preview',
 		cwd: path.resolve(__dirname, '../fixtures/vite'),
 		url: BASE_URL,
 		timeout: 60_000, // Give more time for CI environments
-		reuseExistingServer: !process.env.CI, // Don't reuse in CI
+		reuseExistingServer: false, // Don't reuse in CI
 	},
 });
