@@ -20,7 +20,13 @@
 		"test:unit": "cd packages/core && pnpm test:unit",
 		"test:cli": "cd packages/core && pnpm test:cli",
 		"format": "prettier --write .",
-		"format:check": "prettier --check ."
+		"format:check": "prettier --check .",
+		"version:core:patch": "cd packages/core && pnpm version patch",
+		"version:core:minor": "cd packages/core && pnpm version minor",
+		"version:core:major": "cd packages/core && pnpm version major",
+		"version:cli:patch": "cd packages/cli && pnpm version patch",
+		"version:cli:minor": "cd packages/cli && pnpm version minor",
+		"version:cli:major": "cd packages/cli && pnpm version major"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.0.0",

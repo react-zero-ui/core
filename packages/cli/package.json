@@ -1,6 +1,6 @@
 {
 	"name": "create-zero-ui",
-	"version": "1.0.5",
+	"version": "1.0.6",
 	"type": "module",
 	"main": "./bin.js",
 	"bin": {
@@ -11,7 +11,9 @@
 	},
 	"files": [
 		"bin.js",
-		"package.json"
+		"package.json",
+		"README.md",
+		"LICENSE"
 	],
 	"dependencies": {
 		"@austinserb/react-zero-ui": "^1.0.20",
