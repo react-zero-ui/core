@@ -127,10 +127,9 @@ test('CLI script uses existing package.json if it exists', async () => {
 		fs.writeFileSync(packageJsonPath, JSON.stringify(customPackageJson, null, 2));
 
 		// Run CLI (this will timeout on npm install, but that's ok for this test)
-		const result = await runCLIScript(testDir, 5000).catch(err => {
+		await runCLIScript(testDir, 5000).catch(err => {
 			// We expect this to timeout/fail during npm install
 			console.log('CLI run resulted in:', err.message);
-			console.log('CLI run result:', result);
 			return { timedOut: true };
 		});
 
