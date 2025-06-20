@@ -48,7 +48,6 @@ async function runTest(files, callback) {
 
 test('generates body attributes file correctly', async () => {
 	await runTest(
-		'attributes',
 		{
 			'app/test.jsx': `
       import { useUI } from 'react-zero-ui';
@@ -83,7 +82,6 @@ test('generates body attributes file correctly', async () => {
 
 test('generates body attributes file correctly when kebab-case is used', async () => {
 	await runTest(
-		'attributes',
 		{
 			'app/test.jsx': `
       import { useUI } from 'react-zero-ui';
@@ -120,7 +118,6 @@ test('generates body attributes file correctly when kebab-case is used', async (
 
 test('handles TypeScript generic types', async () => {
 	await runTest(
-		'typescript-generics',
 		{
 			'src/component.tsx': `
       import { useUI } from 'react-zero-ui';
@@ -150,7 +147,6 @@ test('handles TypeScript generic types', async () => {
 
 test('detects JavaScript setValue calls', async () => {
 	await runTest(
-		'javascript-detection',
 		{
 			'src/modal.js': `
       import { useUI } from 'react-zero-ui';
@@ -191,7 +187,7 @@ test('detects JavaScript setValue calls', async () => {
 
 test('handles boolean values', async () => {
 	await runTest(
-		'boolean-values',
+
 		{
 			'app/toggle.tsx': `
       import { useUI } from 'react-zero-ui';
@@ -224,7 +220,7 @@ test('handles boolean values', async () => {
 
 test('handles kebab-case conversion', async () => {
 	await runTest(
-		'kebab-case',
+
 		{
 			'src/styles.jsx': `
       import { useUI } from 'react-zero-ui';
@@ -262,7 +258,7 @@ test('handles kebab-case conversion', async () => {
 
 test('handles conditional expressions', async () => {
 	await runTest(
-		'conditionals',
+
 		{
 			'app/conditional.jsx': `
       import { useUI } from 'react-zero-ui';
@@ -299,7 +295,7 @@ test('handles conditional expressions', async () => {
 
 test('handles multiple files and deduplication', async () => {
 	await runTest(
-		'multiple-files',
+
 		{
 			'src/header.jsx': `
       import { useUI } from 'react-zero-ui';
@@ -341,7 +337,7 @@ test('handles multiple files and deduplication', async () => {
 
 test('handles parsing errors gracefully', async () => {
 	await runTest(
-		'parse-errors',
+
 		{
 			'src/valid.jsx': `
       import { useUI } from 'react-zero-ui';
@@ -376,7 +372,7 @@ test('throws on empty string initial value', () => {
 
 test('valid edge cases: underscores + missing initial', async () => {
 	await runTest(
-		'valid-edge',
+
 		{
 			'src/edge.jsx': `
       import { useUI } from 'react-zero-ui';
@@ -403,7 +399,7 @@ test('watches for file changes', async () => {
 	}
 
 	await runTest(
-		'file-watching',
+
 		{
 			'src/initial.jsx': `
       import { useUI } from 'react-zero-ui';
@@ -442,7 +438,6 @@ test('watches for file changes', async () => {
 
 test('ignores node_modules and hidden directories', async () => {
 	await runTest(
-		'ignored-dirs',
 		{
 			'src/valid.jsx': `
       import { useUI } from 'react-zero-ui';
@@ -477,7 +472,7 @@ test('ignores node_modules and hidden directories', async () => {
 
 test('handles deeply nested file structures', async () => {
 	await runTest(
-		'deep-nesting',
+
 		{
 			'src/features/auth/components/login/LoginForm.jsx': `
       import { useUI } from 'react-zero-ui';
@@ -496,7 +491,7 @@ test('handles deeply nested file structures', async () => {
 
 test('handles complex TypeScript scenarios', async () => {
 	await runTest(
-		'complex-typescript',
+
 		{
 			'src/complex.tsx': `
       import { useUI } from 'react-zero-ui';
@@ -547,7 +542,7 @@ test('handles large projects efficiently', async function () {
 
 	const startTime = Date.now();
 
-	await runTest('performance', files, result => {
+	await runTest(files, result => {
 		const endTime = Date.now();
 		const duration = endTime - startTime;
 
@@ -563,7 +558,6 @@ test('handles large projects efficiently', async function () {
 
 test('handles special characters in values', async () => {
 	await runTest(
-		'special-chars',
 		{
 			'src/special.jsx': `
       import { useUI } from 'react-zero-ui';
@@ -590,7 +584,6 @@ test('handles special characters in values', async () => {
 test('handles concurrent file modifications', async () => {
 	// Test that rapid changes don't cause issues
 	await runTest(
-		'concurrent',
 		{
 			'src/rapid.jsx': `
       import { useUI } from 'react-zero-ui';
@@ -800,7 +793,7 @@ test('patchConfigAlias - config file patching', async t => {
 		}
 	});
 
-	test('patchConfigAlias prefers tsconfig.json over jsconfig.json', async () => {
+	await t.test('patchConfigAlias prefers tsconfig.json over jsconfig.json', async () => {
 		const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-config-test'));
 		const originalCwd = process.cwd();
 

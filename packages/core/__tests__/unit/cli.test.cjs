@@ -31,6 +31,7 @@ function cleanupTestDir(testDir) {
 								fs.rmdirSync(fullPath);
 							} catch (e) {
 								// Ignore
+								console.log(`Error deleting directory ${fullPath}: ${e.message}`);
 							}
 						} else {
 							try {
@@ -128,6 +129,8 @@ test('CLI script uses existing package.json if it exists', async () => {
 		// Run CLI (this will timeout on npm install, but that's ok for this test)
 		const result = await runCLIScript(testDir, 5000).catch(err => {
 			// We expect this to timeout/fail during npm install
+			console.log('CLI run resulted in:', err.message);
+			console.log('CLI run result:', result);
 			return { timedOut: true };
 		});
 
@@ -190,7 +193,7 @@ test('CLI script installs correct dependencies', async () => {
 
 		try {
 			// Run CLI script
-			const result = await runCLIScript(testDir, 10000).catch(err => {
+			await runCLIScript(testDir, 10000).catch(err => {
 				console.log('CLI run resulted in:', err.message);
 				return { error: err.message };
 			});
@@ -237,7 +240,7 @@ test('CLI script handles different target directories', async () => {
 		// Run CLI with subdirectory target
 		const binScript = path.resolve(__dirname, '../../../cli/bin.js');
 
-		const result = await new Promise((resolve, reject) => {
+		await new Promise((resolve, reject) => {
 			const child = spawn('node', [binScript, 'my-project'], { cwd: baseTestDir, stdio: ['pipe', 'pipe', 'pipe'] });
 
 			const timer = setTimeout(() => {
@@ -314,7 +317,10 @@ test('CLI script imports and executes library CLI', async () => {
 		process.env.PATH = `${testDir}:${originalPath}`;
 
 		try {
-			const result = await runCLIScript(testDir, 10000);
+			const result = await runCLIScript(testDir, 10000).catch(err => {
+				console.log('CLI run resulted in:', err.message);
+				return { error: err.message };
+			});
 
 			// Check that CLI was executed
 			assert(
@@ -464,7 +470,7 @@ fi
 			// Run CLI without any arguments (should default to current directory)
 			const binScript = path.resolve(__dirname, '../../../cli/bin.js');
 
-			const result = await new Promise((resolve, reject) => {
+			await new Promise((resolve, reject) => {
 				const child = spawn('node', [binScript], {
 					// No target directory argument
 					cwd: testDir,
@@ -508,7 +514,7 @@ test('CLI script handles invalid target directory', async () => {
 		// Try to run CLI with a non-existent directory
 		const binScript = path.resolve(__dirname, '../../../cli/bin.js');
 
-		const result = await new Promise((resolve, reject) => {
+		const result = await new Promise(resolve => {
 			const child = spawn('node', [binScript, 'non-existent-dir'], { cwd: testDir, stdio: ['pipe', 'pipe', 'pipe'] });
 
 			let stderr = '';
@@ -719,7 +725,7 @@ test('CLI script validates and preserves existing package.json fields', async ()
 		fs.writeFileSync(packageJsonPath, JSON.stringify(complexPackageJson, null, 2));
 
 		// Run CLI with timeout to avoid full installation
-		const result = await runCLIScript(testDir, 3000).catch(err => ({ timedOut: true }));
+		await runCLIScript(testDir, 3000).catch(() => ({ timedOut: true }));
 
 		// Verify all original fields are preserved
 		const updatedPackageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));

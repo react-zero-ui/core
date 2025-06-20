@@ -32,7 +32,7 @@ const browserGlobals = {
 
 export default [
 	/* 1 - never lint generated / vendor files */
-	{ ignores: ['**/node_modules/**', '**/dist/**', '**/.next/**', '**/*.test.*', '**/*.spec.*', 'tests/**', 'eslint.config.js'] },
+	{ ignores: ['**/node_modules/**', '**/dist/**', '**/.next/**', 'eslint.config.js'] },
 
 	/* 2 - baseline rules */
 	js.configs.recommended,
