@@ -4,6 +4,7 @@
 const parser = require('@babel/parser');
 const generate = require('@babel/generator').default;
 const traverse = require('@babel/traverse').default;
+const t = require('@babel/types');
 const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
@@ -512,4 +513,97 @@ function parseAndUpdateViteConfig(source, zeroUiPlugin) {
 	}
 }
 
-module.exports = { extractVariants, parseJsonWithBabel, parseAndUpdatePostcssConfig, parseAndUpdateViteConfig };
+function findLayoutWithBody(root = process.cwd()) {
+	const matches = [];
+	function walk(dir) {
+		for (const file of fs.readdirSync(dir)) {
+			const fullPath = path.join(dir, file);
+			const stat = fs.statSync(fullPath);
+			if (stat.isDirectory()) {
+				walk(fullPath);
+			} else if (/^layout\.(tsx|jsx|js|ts)$/.test(file)) {
+				const source = fs.readFileSync(fullPath, 'utf8');
+				if (source.includes('<body')) {
+					matches.push(fullPath);
+				}
+			}
+		}
+	}
+	walk(root);
+	return matches;
+}
+
+async function patchNextBodyTag() {
+	const matches = findLayoutWithBody();
+
+	if (matches.length !== 1) {
+		console.warn(
+			`[Zero-UI] ⚠️ Found ${matches.length} layout files with <body> tags. ` +
+			`Expected exactly one. Skipping automatic injection.`
+		);
+		return;
+	}
+
+	const filePath = matches[0];
+	const code = fs.readFileSync(filePath, 'utf8');
+
+	// Parse the file into an AST
+	const ast = parser.parse(code, {
+		sourceType: 'module',
+		plugins: ['jsx', 'typescript']
+	});
+
+	let hasImport = false;
+	traverse(ast, {
+		ImportDeclaration(path) {
+			const specifiers = path.node.specifiers;
+			const source = path.node.source.value;
+			if (source === '../.zero-ui/attributes') {
+				for (const spec of specifiers) {
+					if (t.isImportSpecifier(spec) && spec.imported.name === 'bodyAttributes') {
+						hasImport = true;
+					}
+				}
+			}
+		}
+	});
+
+	traverse(ast, {
+		Program(path) {
+			if (!hasImport) {
+				const importDecl = t.importDeclaration(
+					[t.importSpecifier(t.identifier('bodyAttributes'), t.identifier('bodyAttributes'))],
+					t.stringLiteral('@zero-ui/attributes')
+				);
+				path.node.body.unshift(importDecl);
+			}
+		}
+	});
+
+	// Inject JSX spread into <body>
+	let injected = false;
+	traverse(ast, {
+		JSXOpeningElement(path) {
+			if (!injected && t.isJSXIdentifier(path.node.name, { name: 'body' })) {
+				// Prevent duplicate injection
+				const hasSpread = path.node.attributes.some(attr =>
+					t.isJSXSpreadAttribute(attr) && t.isIdentifier(attr.argument, { name: 'bodyAttributes' })
+				);
+				if (!hasSpread) {
+					path.node.attributes.unshift(
+						t.jsxSpreadAttribute(t.identifier('bodyAttributes'))
+					);
+					injected = true;
+				}
+			}
+		}
+	});
+
+	const output = generate(ast, { /* retain lines, formatting */ }, code).code;
+	fs.writeFileSync(filePath, output, 'utf8');
+	console.log(`[Zero-UI] ✅ Patched <body> in ${filePath} with {...bodyAttributes}`);
+}
+
+
+
+module.exports = { extractVariants, parseJsonWithBabel, parseAndUpdatePostcssConfig, parseAndUpdateViteConfig, patchNextBodyTag };

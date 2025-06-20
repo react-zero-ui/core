@@ -1,210 +1,205 @@
-# React Zero-UI (Beta)
+# React Zero‑UI (Beta)
 
-**Instant UI state updates. ZERO React re-renders. ZERO runtime overhead.** Update the UI instantly, manage global UI state from anywhere. No prop drilling. get started with one command in your existing React app. `npx create-zero-ui`
+ **Instant UI state updates. ZERO React re‑renders. <1 KB runtime.**
 
-[![npm version](https://img.shields.io/npm/v/@austinserb/react-zero-ui)](https://www.npmjs.com/package/@austinserb/react-zero-ui)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![CI](https://github.com/austin1serb/react-zero-ui/actions/workflows/ci.yml/badge.svg?branch=main)
+ Pre‑render your UI once, flip a `data-*` attribute to update — that's it.
+ 
+<a href="https://www.npmjs.com/package/@austinserb/react-zero-ui" target="_blank" rel="noopener noreferrer"><img src="https://badgen.net/bundlephobia/min/@austinserb/react-zero-ui@1.0.19" alt="npm version" />
+</a>
 
-## Why Zero-UI?
+<a href="https://www.npmjs.com/package/@austinserb/react-zero-ui" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/npm/v/@austinserb/react-zero-ui" alt="npm version" /></a> <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a> ![CI](https://github.com/austin1serb/react-zero-ui/actions/workflows/ci.yml/badge.svg?branch=main)
 
-Traditional React state triggers RE-renders for every UI change. Switching themes? That's every component RE-rendering. Opening a menu? Same story.
+---
 
-**Enter "PRE-rendering"**
-Zero-UI bypasses React entirely for pure UI state. Instead of re-renders, it:
+## 🚀 Live Demo
 
-- Pre-renders CSS styles and keeps them in the DOM
-- For state changes it flips a `data-*` attribute key.
-- Thats it.
+| Example                                 | Link                                                                                     | What it shows                                                 | Link to Code                                                                 |
+| --------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------- |------------------------------------------------------------------------------ |
+| Interactive menu with render tracker    | <a href="https://react-zero-ui.vercel.app/" target="_blank" rel="noopener noreferrer"><strong>Main Demo↗</strong></a>             | Compare Zero‑UI vs. React side‑by‑side while toggling a menu. | <a href="https://github.com/Austin1serb/React-Zero-UI/tree/main/examples/demo" target="_blank" rel="noopener noreferrer">Github</a> |
+| React benchmark (10 000 nested nodes)   | <a href="https://react-zero-ui.vercel.app/react" target="_blank" rel="noopener noreferrer"><strong>React 10k↗</strong></a>         | How long the traditional React render path takes.             | <a href="https://github.com/Austin1serb/React-Zero-UI/tree/main/examples/demo/src/app/react" target="_blank" rel="noopener noreferrer">Github</a> |
+| Zero‑UI benchmark (10 000 nested nodes) | <a href="https://react-zero-ui.vercel.app/zero-ui" target="_blank" rel="noopener noreferrer"><strong style="text-align: nowrap;">Zero‑UI 10k↗</strong></a>     | Identical DOM, but powered by Zero‑UI's `data-*` switch.      | <a href="https://github.com/Austin1serb/React-Zero-UI/tree/main/examples/demo/src/app/zero-ui" target="_blank" rel="noopener noreferrer">Github</a> |
 
-**Result:** UI updates that are 10-50x faster.
+---
 
-### Performance Comparison
+## 🧐 Why Zero‑UI?
 
-Apple M1
+Every `setState` in React triggers the full VDOM → Diff → Reconciliation → Paint pipeline. For *pure UI state* (themes, menus, toggles) that work is wasted.
 
-| Nodes  | React State | Zero-UI | Improvement |
-| ------ | ----------- | ------- | ----------- |
-| 1,000  | ~50ms       | ~5ms    | 10x faster  |
-| 5,000  | ~180ms      | ~15ms   | 12x faster  |
-| 10,000 | ~400ms      | ~20ms   | 20x faster  |
+**Zero‑UI introduces "*PRE‑rendering*":**
 
-## Quick Start
+1. Tailwind variants for every state are **generated at build‑time**.
+2. The app **pre‑renders once**.
+3. Runtime state changes only **flip a `data-*` attribute on `<body>`**.
 
-**Prerequisites:** Tailwind v4 must be initialized
+Result → **5-10× faster visual updates** with **ZERO additional bundle cost**.
 
-CLI script - in your existing Next or Vite App's root:
+### 📊 Micro‑benchmarks (Apple M1)
+
+| Nodes updated | React state | Zero‑UI | Speed‑up |
+| ------------- | ----------- | ------- | -------- |
+| 10,000        | \~50 ms     | \~5 ms  | **10×**  |
+| 25,000        | \~180 ms    | \~15 ms | **12×**  |
+| 50,000        | \~300 ms    | \~20 ms | **15×**  |
+
+Re‑run these numbers yourself via the links above.
+
+---
+
+## ⚡️ Quick Start
+
+> **Prerequisite:** Tailwind CSS v4 must already be initialized in your project.
 
 ```bash
+# Inside an existing *Next.js (App Router)* or *Vite* repo
 npx create-zero-ui
 ```
 
-## Manual Installation
+That's it — the CLI patch‑installs the required Babel & PostCSS plugins and updates `configs` for you.
+
+### Manual Install
 
 ```bash
 npm install @austinserb/react-zero-ui
 ```
 
-### Setup
+Then follow **Setup →** for your bundler.
 
-**Prerequisites:** Tailwind v4 must be initialized. [tailwind set up ]("tailwind.com")
+---
 
-#### Vite
+## 🔧 Setup
+
+### Vite
 
 ```js
 // vite.config.*
 import { zeroUIPlugin } from '@austinserb/react-zero-ui/vite';
 
 export default {
-	//*REMOVE TAILWIND PLUGIN* Zero-UI extends tailwinds plug-in
-	plugins: [zeroUIPlugin()],
+  // ❗️Remove the default `tailwindcss()` plugin — Zero‑UI extends it internally
+  plugins: [zeroUIPlugin()],
 };
 ```
 
-#### Next.js
+### Next.js (App Router)
 
-#### 1. Spread bodyAttributes on `<body>` in Layout
+1. **Spread `bodyAttributes` on `<body>`** in your root layout.
 
-```jsx
-import { bodyAttributes } from '@zero-ui/attributes';
-//or
-import { bodyAttributes } from '../.zero-ui/attributes';
+   ```tsx
+   // app/layout.tsx
+   import { bodyAttributes } from '@austinserb/react-zero-ui/attributes';
+   // or:  import { bodyAttributes } from '../.zero-ui/attributes';
 
-export default function RootLayout({ children }) {
-	return (
-		<html>
-			<body {...bodyAttributes}>{children}</body>
-		</html>
-	);
-}
-```
+   export default function RootLayout({ children }) {
+     return (
+       <html lang="en">
+         <body {...bodyAttributes}>{children}</body>
+       </html>
+     );
+   }
+   ```
 
-#### 2. Add PostCSS Plugin
+2. **Add the PostCSS plugin (must come *before* Tailwind).**
 
-```js
-// postcss.config.js
-module.exports = {
-  plugins: {
-    ['@austinserb/react-zero-ui/postcss']
-    //*tailwindcss MUST come AFTER Zero-UI
-    ['@tailwindcss']
-  }
-}
-```
+   ```js
+   // postcss.config.js
+   module.exports = {
+     plugins: {
+       '@austinserb/react-zero-ui/postcss': {},
+       tailwindcss: {},
+     },
+   };
+   ```
 
-## Usage
+---
 
-**Basic Theme Switching**
+## 🏄‍♂️ Usage
+
+### Theme toggle example
 
 ```tsx
 import { useUI } from '@austinserb/react-zero-ui';
 
-function ThemeToggle() {
-  const [, setTheme] = useUI<"light | dark">('theme', 'light');
+export function ThemeToggle() {
+  const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
 
-    <button onClick={() => setTheme('dark')}>
-      Switch Theme
-    </button>
+  return (
+    <button onClick={() => setTheme('dark')}>Switch to dark</button>
+  );
+}
 ```
 
-**Consume the state in any component with tailwind!**
-
-```jsx
-className = 'theme-light:bg-white theme-dark:bg-black';
-```
-
-**Mutate the state in any component!**
-
-```jsx
-
-function UnrelatedPage()
-  const [, setTheme] = useUI('theme', 'light');
-
-    <button onClick={setTheme("dark")}>
-    </button>
-```
-
-**Use with complex Tailwind Variants**
-
-```jsx
-clasName = 'md:theme-dark:bg-black md:peer-checked:theme-light:hidden';
-```
-
-## How It Works
-
-1. **State Store**: The `useUI` hook writes to `data-*` attributes on the `<body>` tag instead of React state
-
-   ```html
-   <body
-   	data-theme="dark"
-   	data-accent="blue"
-   	data-sidebar="open"></body>
-   ```
-
-2. **Babel Transform**: Automatically detects all `useUI` variants in your code during build
-
-3. **PostCSS Plugin**: Generates Tailwind variant classes for every detected state
-
-   ```css
-   .theme-dark\:bg-gray-900 {
-   	background-color: rgb(17 24 39);
-   }
-   ```
-
-4. **Instant Updates**: When you call a setter, only the data attribute changes. The browser doesn't have to create a VDOM, and compare it to the current HTML tree (Diffing), and then determine if an update is needed (Reconciliation), and then apply that update (Re-render) by injecting into the html tree. Then the browser has to compile the new injected Html and Css, then compute style, THEN paint the pixels.
-
-## API
-
-### `useUI(key: string, SSRValue: string)`
-
-Returns a tuple similar to `useState`, but the first value is intentionally stale.
-
-```jsx
-const [staleValue, setValue] = useUI('theme', 'light');
-```
-
-- `key`: The UI state key (becomes `data-{key}` on body)
-- `defaultValue`: Initial value if not set
-- Returns: `[staleValue, setValue]`
-
-**note:** normaly used as const `const [,setValue]=useUI()` to denote that the value is stale and will not update
-
-### Tailwind Variants
-
-Use the pattern `{key}-{value}:` as a Tailwind variant:
+Consume the state anywhere with Tailwind variants:
 
 ```jsx
 <div className="theme-light:bg-white theme-dark:bg-black" />
-<div className="accent-red:text-red-500 accent-blue:text-blue-500" />
-<div className="sidebar-open:translate-x-0 sidebar-closed:-translate-x-full" />
 ```
-
-## Features
-
-- ✅ **Zero React re-renders** for UI state changes
-- ✅ **No Context providers** needed
-- ✅ **Works globally** - call setters from anywhere
-- ✅ **TypeScript support** out of the box
-- ✅ **SSR compatible** with Next.js
-- ✅ **Tiny bundle size** (954bytes)
-- ✅ **Framework agnostic CSS** - the generated CSS works everywhere
-
-## Best Practices
-
-1. **Use for UI-only state**: Themes, sidebar states, UI flags
-2. **Not for business logic**: Keep using React state for data that affects logic
-3. **Consistent naming**: Prefer kebab-case for keys (`sidebar-state`, not `sidebarState`)
-4. **Default values**: Always provide default value for  
-   `useUI('key', 'value')` to avoid FOUC.
-
-## Contributing
-
-We love contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-## License
-
-MIT © Austin Serb
 
 ---
 
-Built with ❤️ for the React community. If Zero-UI helps your app feel snappier, consider [starring the repo](https://github.com/austinserb/zero-ui)!
+## 🛠 API
+
+### `useUI(key, defaultValue)`
+
+```ts
+const [staleValue, setValue] = useUI<'open' | 'closed'>(
+  'sidebar',
+  'closed',
+);
+```
+
+* `key` → becomes `data-{key}` on `<body>`.
+* `defaultValue` → optional, prevents FOUC.
+* **Note:** the returned `staleValue` does **not** update (`useUI` is write‑only).
+
+### Tailwind variants
+
+```jsx
+<div className="sidebar-open:translate-x-0 sidebar-closed:-translate-x-full" />
+```
+
+Any `data-{key}="{value}"` pair becomes a variant: `{key}-{value}:`.
+
+---
+
+## 🧬 How it works
+
+1. **`useUI`** → writes to `data-*` attributes on `<body>`.
+2. **Babel plugin** → scans code, finds every `key/value`, injects them into **PostCSS**.
+3. **PostCSS plugin** → generates static Tailwind classes **at build‑time**.
+4. **Runtime** → changing state only touches the attribute — no VDOM, no reconciliation, no re‑paint.
+
+---
+
+## ✅ Features
+
+* **Zero React re‑renders** for UI‑only state.
+* **Global setters** — call from any component or util.
+* **Tiny**: < 1 KB gzipped runtime.
+* **TypeScript‑first**.
+* **SSR‑friendly** (Next.js & Vite SSR).
+* **Framework‑agnostic CSS** — generated classes work in plain HTML / Vue / Svelte as well.
+
+---
+
+## 🏗 Best Practices
+
+1. **UI state only** → themes, layout toggles, feature flags.
+2. **Business logic stays in React** → fetching, data mutation, etc.
+3. **Kebab‑case keys** → e.g. `sidebar-open`.
+4. **Provide defaults** to avoid Flash‑Of‑Unstyled‑Content.
+
+---
+
+## 🤝 Contributing
+
+PRs & issues welcome! Please read the [Contributing Guide](CONTRIBUTING.md).
+
+---
+
+## 📜 License
+
+[MIT](LICENSE) © Austin Serb
+
+---
+
+Built with ❤️ for the React community. If Zero‑UI makes your app feel snappier, please ⭐️ the repo!

@@ -1,5 +1,6 @@
 // scripts/postInstall.cjs
 const { processVariants, generateAttributesFile, patchConfigAlias, patchPostcssConfig, patchViteConfig, hasViteConfig } = require('../postcss/helpers.cjs');
+const { patchNextBodyTag } = require('../postcss/ast.cjs');
 
 async function runZeroUiInit() {
 	try {
@@ -24,6 +25,10 @@ async function runZeroUiInit() {
 		await generateAttributesFile(finalVariants, initialValues);
 
 		console.log(`[Zero-UI] ✅ Initialized with ${finalVariants.length} variants from ${sourceFiles.length} files`);
+
+		if (!hasViteConfig()) {
+			await patchNextBodyTag();
+		}
 
 		if (finalVariants.length === 0) {
 			console.log('[Zero-UI] ℹ️  No useUI hooks found yet. Files will be updated when you add them.');
