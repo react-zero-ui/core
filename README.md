@@ -1,9 +1,9 @@
 # React Zero‑UI (Beta)
 
- **Instant UI state updates. ZERO React re‑renders. <1 KB runtime.**
+**Instant UI state updates. ZERO React re‑renders. <1 KB runtime.**
 
- Pre‑render your UI once, flip a `data-*` attribute to update — that's it.
- 
+Pre‑render your UI once, flip a `data-*` attribute to update — that's it.
+
 <a href="https://www.npmjs.com/package/@austinserb/react-zero-ui" target="_blank" rel="noopener noreferrer"><img src="https://badgen.net/bundlephobia/min/@austinserb/react-zero-ui@1.0.19" alt="npm version" />
 </a>
 
@@ -13,19 +13,19 @@
 
 ## 🚀 Live Demo
 
-| Example                                 | Link                                                                                     | What it shows                                                 | Link to Code                                                                 |
-| --------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------- |------------------------------------------------------------------------------ |
-| Interactive menu with render tracker    | <a href="https://react-zero-ui.vercel.app/" target="_blank" rel="noopener noreferrer"><strong>Main Demo↗</strong></a>             | Compare Zero‑UI vs. React side‑by‑side while toggling a menu. | <a href="https://github.com/Austin1serb/React-Zero-UI/tree/main/examples/demo" target="_blank" rel="noopener noreferrer">Github</a> |
-| React benchmark (10 000 nested nodes)   | <a href="https://react-zero-ui.vercel.app/react" target="_blank" rel="noopener noreferrer"><strong>React 10k↗</strong></a>         | How long the traditional React render path takes.             | <a href="https://github.com/Austin1serb/React-Zero-UI/tree/main/examples/demo/src/app/react" target="_blank" rel="noopener noreferrer">Github</a> |
-| Zero‑UI benchmark (10 000 nested nodes) | <a href="https://react-zero-ui.vercel.app/zero-ui" target="_blank" rel="noopener noreferrer"><strong style="text-align: nowrap;">Zero‑UI 10k↗</strong></a>     | Identical DOM, but powered by Zero‑UI's `data-*` switch.      | <a href="https://github.com/Austin1serb/React-Zero-UI/tree/main/examples/demo/src/app/zero-ui" target="_blank" rel="noopener noreferrer">Github</a> |
+| Example                                 | Link                                                                                                                                                        | What it shows                                                 | Link to Code                                                                                                                                        |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Interactive menu with render tracker    | <a href="https://react-zero-ui.vercel.app/" target="_blank" rel="noopener noreferrer"><strong>Main Demo↗</strong></a>                                      | Compare Zero‑UI vs. React side‑by‑side while toggling a menu. | <a href="https://github.com/Austin1serb/React-Zero-UI/tree/main/examples/demo" target="_blank" rel="noopener noreferrer">Github</a>                 |
+| React benchmark (10 000 nested nodes)   | <a href="https://react-zero-ui.vercel.app/react" target="_blank" rel="noopener noreferrer"><strong>React 10k↗</strong></a>                                 | How long the traditional React render path takes.             | <a href="https://github.com/Austin1serb/React-Zero-UI/tree/main/examples/demo/src/app/react" target="_blank" rel="noopener noreferrer">Github</a>   |
+| Zero‑UI benchmark (10 000 nested nodes) | <a href="https://react-zero-ui.vercel.app/zero-ui" target="_blank" rel="noopener noreferrer"><strong style="text-align: nowrap;">Zero‑UI 10k↗</strong></a> | Identical DOM, but powered by Zero‑UI's `data-*` switch.      | <a href="https://github.com/Austin1serb/React-Zero-UI/tree/main/examples/demo/src/app/zero-ui" target="_blank" rel="noopener noreferrer">Github</a> |
 
 ---
 
 ## 🧐 Why Zero‑UI?
 
-Every `setState` in React triggers the full VDOM → Diff → Reconciliation → Paint pipeline. For *pure UI state* (themes, menus, toggles) that work is wasted.
+Every `setState` in React triggers the full VDOM → Diff → Reconciliation → Paint pipeline. For _pure UI state_ (themes, menus, toggles) that work is wasted.
 
-**Zero‑UI introduces "*PRE‑rendering*":**
+**Zero‑UI introduces "_PRE‑rendering_":**
 
 1. Tailwind variants for every state are **generated at build‑time**.
 2. The app **pre‑renders once**.
@@ -75,8 +75,8 @@ Then follow **Setup →** for your bundler.
 import { zeroUIPlugin } from '@austinserb/react-zero-ui/vite';
 
 export default {
-  // ❗️Remove the default `tailwindcss()` plugin — Zero‑UI extends it internally
-  plugins: [zeroUIPlugin()],
+	// ❗️Remove the default `tailwindcss()` plugin — Zero‑UI extends it internally
+	plugins: [zeroUIPlugin()],
 };
 ```
 
@@ -90,24 +90,19 @@ export default {
    // or:  import { bodyAttributes } from '../.zero-ui/attributes';
 
    export default function RootLayout({ children }) {
-     return (
-       <html lang="en">
-         <body {...bodyAttributes}>{children}</body>
-       </html>
-     );
+   	return (
+   		<html lang="en">
+   			<body {...bodyAttributes}>{children}</body>
+   		</html>
+   	);
    }
    ```
 
-2. **Add the PostCSS plugin (must come *before* Tailwind).**
+2. **Add the PostCSS plugin (must come _before_ Tailwind).**
 
    ```js
    // postcss.config.js
-   module.exports = {
-     plugins: {
-       '@austinserb/react-zero-ui/postcss': {},
-       tailwindcss: {},
-     },
-   };
+   module.exports = { plugins: { '@austinserb/react-zero-ui/postcss': {}, tailwindcss: {} } };
    ```
 
 ---
@@ -120,11 +115,9 @@ export default {
 import { useUI } from '@austinserb/react-zero-ui';
 
 export function ThemeToggle() {
-  const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
+	const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
 
-  return (
-    <button onClick={() => setTheme('dark')}>Switch to dark</button>
-  );
+	return <button onClick={() => setTheme('dark')}>Switch to dark</button>;
 }
 ```
 
@@ -141,15 +134,12 @@ Consume the state anywhere with Tailwind variants:
 ### `useUI(key, defaultValue)`
 
 ```ts
-const [staleValue, setValue] = useUI<'open' | 'closed'>(
-  'sidebar',
-  'closed',
-);
+const [staleValue, setValue] = useUI<'open' | 'closed'>('sidebar', 'closed');
 ```
 
-* `key` → becomes `data-{key}` on `<body>`.
-* `defaultValue` → optional, prevents FOUC.
-* **Note:** the returned `staleValue` does **not** update (`useUI` is write‑only).
+- `key` → becomes `data-{key}` on `<body>`.
+- `defaultValue` → optional, prevents FOUC.
+- **Note:** the returned `staleValue` does **not** update (`useUI` is write‑only).
 
 ### Tailwind variants
 
@@ -172,12 +162,12 @@ Any `data-{key}="{value}"` pair becomes a variant: `{key}-{value}:`.
 
 ## ✅ Features
 
-* **Zero React re‑renders** for UI‑only state.
-* **Global setters** — call from any component or util.
-* **Tiny**: < 1 KB gzipped runtime.
-* **TypeScript‑first**.
-* **SSR‑friendly** (Next.js & Vite SSR).
-* **Framework‑agnostic CSS** — generated classes work in plain HTML / Vue / Svelte as well.
+- **Zero React re‑renders** for UI‑only state.
+- **Global setters** — call from any component or util.
+- **Tiny**: < 1 KB gzipped runtime.
+- **TypeScript‑first**.
+- **SSR‑friendly** (Next.js & Vite SSR).
+- **Framework‑agnostic CSS** — generated classes work in plain HTML / Vue / Svelte as well.
 
 ---
 

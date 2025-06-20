@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { rmSync } from 'node:fs';
+import { overwriteFile } from './overwriteFile';
 
 /**
  * Reset everything the Zero-UI CLI generates inside a fixture.
@@ -26,84 +27,85 @@ export async function resetZeroUiState(projectDir, isNext = false) {
 	/* ─── 2. Next.js cleanup (tsconfig + postcss)  ──────────────────────── */
 	if (isNext) {
 		console.log('[Reset] 🔧 Running Next.js cleanup');
-		const tsconfigPath = path.join(projectDir, 'tsconfig.json');
-		const postcssConfigPath = path.join(projectDir, 'postcss.config.mjs');
+		await overwriteFile(path.join(projectDir, 'tsconfig.json'), defaultTsconfigContent);
 
-		/* tsconfig.json → remove path alias */
-		if (fs.existsSync(tsconfigPath)) {
-			console.log('[Reset] ✅ Processing tsconfig.json');
-			const tsconf = JSON.parse(fs.readFileSync(tsconfigPath, 'utf8'));
-			if (tsconf.compilerOptions?.paths?.['@zero-ui/attributes']) {
-				console.log('[Reset]   - Removing @zero-ui/attributes path alias');
-				delete tsconf.compilerOptions.paths['@zero-ui/attributes'];
-				fs.writeFileSync(tsconfigPath, JSON.stringify(tsconf, null, 2));
-			} else {
-				console.log('[Reset]   - No @zero-ui/attributes alias found');
-			}
-		} else {
-			console.log('[Reset] ⏭️  tsconfig.json not found, skipping');
-		}
-
-		/* postcss.config.mjs → strip Zero-UI plugin */
-		if (fs.existsSync(postcssConfigPath)) {
-			console.log('[Reset] ✅ Processing postcss.config.mjs');
-			const originalSrc = fs.readFileSync(postcssConfigPath, 'utf8');
-			const cleanedSrc = originalSrc
-				// Remove import line
-				.replace(/import\s+.*react-zero-ui\/postcss['"].*\r?\n?/g, '')
-				// Remove plugin from object format: '@austinserb/react-zero-ui/postcss': {}
-				.replace(/['"]@austinserb\/react-zero-ui\/postcss['"]:\s*\{[^}]*\},?\s*/g, '')
-				// Remove plugin from array format: '@austinserb/react-zero-ui/postcss'
-				.replace(/['"]@austinserb\/react-zero-ui\/postcss['"],?\s*/g, '')
-				// Remove function call format: zeroUI()
-				.replace(/,?\s*zeroUI\(\)\s*,?/g, '')
-				// Clean up empty lines and trailing commas
-				.replace(/,(\s*[}\]])/g, '$1')
-				.replace(/\n\s*\n/g, '\n');
-
-			if (originalSrc !== cleanedSrc) {
-				console.log('[Reset]   - Removed Zero-UI plugin references');
-				fs.writeFileSync(postcssConfigPath, cleanedSrc);
-			} else {
-				console.log('[Reset]   - No Zero-UI plugin references found');
-			}
-		} else {
-			console.log('[Reset] ⏭️  postcss.config.mjs not found, skipping');
-		}
-	} else {
-		console.log('[Reset] ⏭️  Skipping Next.js cleanup (not a Next.js project)');
+		await overwriteFile(path.join(projectDir, 'app/layout.tsx'), defaultLayoutContent);
+		await overwriteFile(path.join(projectDir, 'postcss.config.mjs'), defaultPostcssConfigContent);
 	}
-
 	/* ─── 3. Vite cleanup (vite.config.ts)  ─────────────────────────────── */
 	if (!isNext) {
 		console.log('[Reset] ⚡ Running Vite cleanup');
-		const viteCfg = path.join(projectDir, 'vite.config.ts');
-		if (fs.existsSync(viteCfg)) {
-			console.log('[Reset] ✅ Processing vite.config.ts');
-			const originalContent = fs.readFileSync(viteCfg, 'utf8');
-			const cleanedContent = originalContent
-				// Remove import line
-				.replace(/import\s+.*react-zero-ui\/vite['"].*\r?\n?/g, '')
-				// Remove plugin call from plugins array (handle different positions)
-				.replace(/,\s*zeroUI\(\)\s*/g, '') // middle/end position
-				.replace(/zeroUI\(\)\s*,\s*/g, '') // start position
-				.replace(/zeroUI\(\)/g, '') // only plugin
-				// Clean up empty lines
-				.replace(/\n\s*\n/g, '\n');
-
-			if (originalContent !== cleanedContent) {
-				console.log('[Reset]   - Removed Zero-UI plugin references');
-				fs.writeFileSync(viteCfg, cleanedContent);
-			} else {
-				console.log('[Reset]   - No Zero-UI plugin references found');
-			}
-		} else {
-			console.log('[Reset] ⏭️  vite.config.ts not found, skipping');
-		}
-	} else {
-		console.log('[Reset] ⏭️  Skipping Vite cleanup (not a Vite project)');
+		await overwriteFile(path.join(projectDir, 'vite.config.ts'), defaultViteConfigContent);
 	}
-
 	console.log('[Reset] ✨ Reset complete!');
 	return;
+
 }
+
+
+const defaultLayoutContent = `import './globals.css';
+
+export default function RootLayout({ children }) {
+	return (
+		<html lang="en">
+			<body
+				className="bg-red test-ww this is to test the body tag"
+				id="88">
+				{children}
+			</body>
+		</html>
+	);
+}
+`;
+
+const defaultPostcssConfigContent = `// postcss.config.mjs
+const config = {
+  plugins: ['@tailwindcss/postcss']
+};
+export default config;
+`;
+
+const defaultViteConfigContent = `import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react()],
+});`;
+
+const defaultTsconfigContent = `{
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noEmit": true,
+    "incremental": true,
+    "module": "ESNext",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "target": "ES2017",
+  },
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}`;

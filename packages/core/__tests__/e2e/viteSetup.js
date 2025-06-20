@@ -16,4 +16,10 @@ export default async function globalSetup() {
 	await zeroUiCli([]);
 
 	console.log('[Global Setup] ✅ Vite fixture setup complete!✅');
+
+	// Wait for 10 seconds to make sure the file system is stable
+	console.log('[Global Setup] ⏳ Waiting 5 seconds for file system to stabilize...');
+	await new Promise(resolve => setTimeout(resolve, 5000));
+	return;
+
 }

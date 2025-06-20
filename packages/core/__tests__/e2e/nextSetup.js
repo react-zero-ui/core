@@ -15,5 +15,10 @@ export default async function globalSetup() {
 	const zeroUiCli = await loadCliFromFixture(projectDir);
 	await zeroUiCli([]);
 
+	// Wait for 5 seconds to make sure the file system is stable
+	console.log('[Global Setup] ⏳ Waiting 5 seconds for file system to stabilize...');
+	await new Promise(resolve => setTimeout(resolve, 5000));
+
 	console.log('[Global Setup] ✅ Next.js fixture setup complete!✅');
+
 }

@@ -13,16 +13,24 @@ export default defineConfig({
 	workers: 2,
 	timeout: 30_000,
 	expect: { timeout: 15_000 },
-	reporter: 'html',
+	reporter: [
+		['list'], // Shows test results in terminal
+		['html'] // Also keep HTML report
+	],
 
-	use: { headless: true, baseURL: BASE_URL },
+	use: {
+		headless: true,
+		baseURL: BASE_URL,
+		// Show console logs from page/browser
+		trace: 'retain-on-failure',
+	},
+
+	globalSetup: '../e2e/viteSetup.js',
 
 	// One project = one fixture app (Next, Vite, etc.)
 	projects: [
-		{ name: 'setup', testMatch: /viteSetup\.js/ },
 		{
 			name: 'vite-cli-e2e',
-			dependencies: ['setup'],
 			testMatch: /cli-vite\.spec\.js/, // Matches both cli-vite.spec.js and vite.spec.js
 		},
 		{

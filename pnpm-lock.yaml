@@ -50,6 +50,9 @@ importers:
       '@babel/traverse':
         specifier: ^7.27.4
         version: 7.27.4
+      '@babel/types':
+        specifier: ^7.27.4
+        version: 7.27.6
       '@tailwindcss/postcss':
         specifier: ^4.1.10
         version: 4.1.10

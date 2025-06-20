@@ -12,7 +12,7 @@ function getAttrFile() {
 }
 
 // Helper to create temp directory and run test
-async function runTest(testName, files, callback) {
+async function runTest(files, callback) {
 	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-test'));
 	const originalCwd = process.cwd();
 

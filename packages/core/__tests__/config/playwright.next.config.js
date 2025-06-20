@@ -13,13 +13,21 @@ export default defineConfig({
 	workers: 2,
 	timeout: 30_000,
 	expect: { timeout: 15_000 },
-	reporter: 'html',
+	reporter: [
+		['list'], // Shows test results in terminal
+	],
 
-	use: { headless: true, baseURL: BASE_URL },
+	use: {
+		headless: true,
+		baseURL: BASE_URL,
+		// Show console logs from page/browser
+		trace: 'retain-on-failure',
+	},
+
+	globalSetup: '../e2e/nextSetup.js',
 
 	projects: [
-		{ name: 'setup', testMatch: /nextSetup\.js/ },
-		{ name: 'next-cli-e2e', dependencies: ['setup'], testMatch: /cli-next\.spec\.js/ },
+		{ name: 'next-cli-e2e', testMatch: /cli-next\.spec\.js/ },
 		{ name: 'next-e2e', dependencies: ['next-cli-e2e'], testMatch: /next\.spec\.js/ },
 	],
 	webServer: {
