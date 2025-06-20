@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@austinserb/react-zero-ui": "^1.0.19",
+    "@vercel/analytics": "^1.5.0",
     "clsx": "^2.1.1",
     "motion": "^12.16.0",
     "next": "15.3.3",

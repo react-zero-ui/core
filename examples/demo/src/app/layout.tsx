@@ -1,6 +1,7 @@
 import { bodyAttributes } from '@zero-ui/attributes';
 import './globals.css';
 import { TopBarV2 } from './components/TopBar';
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata = {
   title: 'React Zero UI Demo',
@@ -10,6 +11,7 @@ export const metadata = {
   },
 };
 
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -17,9 +19,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`py-24 md:py-10 antialiased`} {...bodyAttributes}>
+      <body className="py-24 md:py-10 antialiased" {...bodyAttributes}>
         <TopBarV2 />
         {children}
+        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
   );

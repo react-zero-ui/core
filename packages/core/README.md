@@ -117,7 +117,7 @@ export default {
 
 ## 🏄‍♂️ Usage
 
-![react zero ui usage explained](docs/assets/useui-explained.webp)
+![react zero ui usage explained](https://raw.githubusercontent.com/Austin1serb/React-Zero-UI/2b8198e08382dd6a6fe6f887ef77a4297ebebeff/docs/assets/useui-explained.webp)
 
 ---
 
