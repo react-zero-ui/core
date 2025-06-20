@@ -1,11 +1,11 @@
 name: Release
 
 on:
+  workflow_dispatch:
   workflow_run:
     workflows: ['CI']
     types: [completed]
     branches: [main]
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -14,12 +14,13 @@ permissions:
 
 jobs:
   release:
-    runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: googleapis/release-please-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          release-type: node
-          include-component-in-tag: true
+          config-file: .release-please-manifest.json
+          manifest-file: .release-please-manifest.json
