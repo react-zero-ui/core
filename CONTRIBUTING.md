@@ -14,6 +14,7 @@
 It's fast because it **skips the VDOM entirely** — no state triggers, no diffing, no component redraws.
 
 ### If you contribute:
+
 Stay **pre-rendered, declarative, and brutally fast.**
 
 ---
@@ -50,15 +51,15 @@ For questions, proposals, or early feedback. Share ideas before building.
 
 Use the templates.
 
-* **Bug** → Include steps to reproduce, expected vs. actual behavior.
-* **Feature** → Explain the *why*, and sketch a possible approach.
+- **Bug** → Include steps to reproduce, expected vs. actual behavior.
+- **Feature** → Explain the _why_, and sketch a possible approach.
 
 ### 3. Pull Requests
 
-* Use semantic commit prefixes: `feat:`, `fix:`, `chore:`, `refactor:`
-* Add tests if you touch logic, CLI, or rendering behavior.
-* Keep PRs focused — one change per pull.
-* Fill out the PR template — no empty descriptions.
+- Use semantic commit prefixes: `feat:`, `fix:`, `chore:`, `refactor:`
+- Add tests if you touch logic, CLI, or rendering behavior.
+- Keep PRs focused — one change per pull.
+- Fill out the PR template — no empty descriptions.
 
 ---
 
@@ -84,4 +85,3 @@ Keep it respectful. Push ideas hard, not people.
 
 > Got a big idea? DM me:  
 > [linkedin.com/in/austin-serb](https://www.linkedin.com/in/austin-serb/)
-
