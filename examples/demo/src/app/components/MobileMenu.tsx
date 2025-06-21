@@ -13,7 +13,11 @@ export const MobileMenu: React.FC<{ navItems: { name: string; href: string }[] }
           className="mobile-menu-item transform text-lg transition-all duration-300 ease-in-out"
           style={{ '--index': index } as React.CSSProperties}
         >
-          <Link href={item.href} onClick={() => setMenuOpen(prev => (prev === 'closed' ? 'open' : 'closed'))} className="block pt-4 font-medium">
+          <Link
+            href={item.href}
+            onClick={() => setMenuOpen(prev => (prev === 'closed' ? 'open' : 'closed'))}
+            className="block pt-4 font-medium"
+          >
             {item.name}
           </Link>
         </li>

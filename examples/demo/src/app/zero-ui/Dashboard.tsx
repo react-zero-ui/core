@@ -22,7 +22,10 @@ export const Dashboard: React.FC = () => {
           }
           )
         </button>
-        <Link href="/react" className="rounded-md px-4 py-2 text-blue-500 underline transition-colors">
+        <Link
+          href="/react"
+          className="rounded-md px-4 py-2 text-blue-500 underline transition-colors"
+        >
           React 10k Node Test
         </Link>
       </div>

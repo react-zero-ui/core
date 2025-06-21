@@ -16,17 +16,17 @@ export const MobileMenuButton: React.FC = () => {
     setMobileMenu('closed');
   });
 
-  useMotionValueEvent(scrollY, 'change', (current) => {
+  useMotionValueEvent(scrollY, 'change', current => {
     if (!isDesktop) return;
-  
+
     const previous = scrollY.getPrevious() ?? current;
     const diff = current - previous;
-  
+
     if (Math.abs(diff) < 10) return; // Ignore minor scrolls
-  
+
     setScrolled(diff > 0 ? 'down' : 'up');
   });
-  
+
   return (
     <button
       type="button"

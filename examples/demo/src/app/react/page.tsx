@@ -9,16 +9,13 @@ export const metadata = {
 };
 
 export default function Page() {
-
   return (
-<div className="flex flex-col items-center">
-  <div className="p-2.5">
-    <h1 className="text-3xl font-bold text-gray-900 mb-4 pt-10">React State Demo</h1>
-    <p className="text-gray-500 mb-4">
-    React re-renders 10,000 components per toggle. Expect noticeable lag.
-    </p>
-  </div>
-  <Dashboard />
-</div>
+    <div className="flex flex-col items-center">
+      <div className="p-2.5">
+        <h1 className="mb-4 pt-10 text-3xl font-bold text-gray-900">React State Demo</h1>
+        <p className="mb-4 text-gray-500">React re-renders 10,000 components per toggle. Expect noticeable lag.</p>
+      </div>
+      <Dashboard />
+    </div>
   );
 }

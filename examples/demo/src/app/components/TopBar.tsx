@@ -18,16 +18,30 @@ export const TopBarV2: React.FC = () => {
             {/* Top Row (always visible) */}
             <div className="flex items-center gap-4 px-4 py-3 md:gap-8 md:py-2.5">
               {/* Logo */}
-              <Link href="/" className="flex items-center gap-2 font-medium text-nowrap">
-                <Icon name="serbyte" height={24} width={24} className="rounded shadow-md" />
+              <Link
+                href="/"
+                className="flex items-center gap-2 font-medium text-nowrap"
+              >
+                <Icon
+                  name="serbyte"
+                  height={24}
+                  width={24}
+                  className="rounded shadow-md"
+                />
                 Serbyte Development
               </Link>
 
               {/* Desktop Navigation */}
               <ul className="desktop-menu-container md:scrolled-down:opacity-0 md:scrolled-down:max-w-0 md:scrolled-up:opacity-100 md:scrolled-up:max-w-96 hidden items-center gap-4 font-medium transition-all duration-300 ease-in-out md:flex">
                 {navItems.map(item => (
-                  <li key={item.name} className="flex">
-                    <Link href={item.href} className="bubble-hover p-1 px-2">
+                  <li
+                    key={item.name}
+                    className="flex"
+                  >
+                    <Link
+                      href={item.href}
+                      className="bubble-hover p-1 px-2"
+                    >
                       {item.name}
                     </Link>
                   </li>
@@ -38,7 +52,12 @@ export const TopBarV2: React.FC = () => {
                     target="_blank"
                     className="bubble-hover hidden w-fit !flex-row items-center gap-2 rounded-full border border-gray-200 px-3 py-1 font-medium shadow-md duration-300 hover:translate-y-0.5 hover:border-white hover:shadow-none md:flex"
                   >
-                    <Icon name="github" height={24} width={24} className="text-black" />
+                    <Icon
+                      name="github"
+                      height={24}
+                      width={24}
+                      className="text-black"
+                    />
                     GitHub
                   </Link>
                 </li>

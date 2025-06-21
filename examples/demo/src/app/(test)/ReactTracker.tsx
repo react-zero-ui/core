@@ -130,9 +130,16 @@ export function RenderTracker() {
               </button>
             </div>
 
-            <motion.div className="space-y-0.5 overflow-hidden" animate={{ maxHeight: showTracker ? '275px' : '0px' }} transition={{ duration: 0.3 }}>
+            <motion.div
+              className="space-y-0.5 overflow-hidden"
+              animate={{ maxHeight: showTracker ? '275px' : '0px' }}
+              transition={{ duration: 0.3 }}
+            >
               {Array.from(renderMetrics.entries()).map(([id, metrics]) => (
-                <div key={id} className="flex items-center justify-between gap-2">
+                <div
+                  key={id}
+                  className="flex items-center justify-between gap-2"
+                >
                   <span className="flex-1 truncate font-mono text-[10px] text-gray-300">{id.replace('Component', '').replace('Deep', 'D.')}</span>
                   <span className="font-bold text-white tabular-nums">{metrics.count}</span>
                 </div>

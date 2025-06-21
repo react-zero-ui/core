@@ -22,23 +22,28 @@ export const Dashboard: React.FC = () => {
         >
           Toggle Theme (Current: {theme})
         </button>
-        <Link href="/zero-ui" className="rounded-md px-4 py-2 text-blue-500 underline transition-colors">
+        <Link
+          href="/zero-ui"
+          className="rounded-md px-4 py-2 text-blue-500 underline transition-colors"
+        >
           Zero-UI 10k Node Test
         </Link>
       </div>
       <div className="text-lg text-gray-500">10,000 nodes with Nested Node using React State</div>
       <div
-        className="grid aspect-square border-1 border-red-300 gap-0.5 text-xs"
+        className="grid aspect-square gap-0.5 border-1 border-red-300 text-xs"
         style={{
           gridTemplateColumns: 'repeat(100, 1fr)',
           gridTemplateRows: 'repeat(100, 1fr)',
           width: 'min(90vw, 90vh)',
           height: 'min(90vw, 80vh)',
-        
         }}
       >
         {Array.from({ length: 10000 }).map((_, index) => (
-          <div key={index} className={`${itemClasses} flex items-center justify-center rounded-sm`}>
+          <div
+            key={index}
+            className={`${itemClasses} flex items-center justify-center rounded-sm`}
+          >
             <InnerDot itemClasses2={itemClasses2} />
           </div>
         ))}

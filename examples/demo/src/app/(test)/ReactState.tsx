@@ -13,7 +13,7 @@ export function TestComponentWithState() {
   return (
     <div
       ref={ref}
-      className={`space-y-4 py-8 flex h-full w-full flex-col justify-between **:transition-all **:duration-300 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}
+      className={`flex h-full w-full flex-col justify-between space-y-4 py-8 **:transition-all **:duration-300 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}
     >
       <Header theme={theme} />
       <ThemeSwitcher
@@ -68,16 +68,14 @@ function ThemeSwitcher({ theme, setTheme }: { theme: 'light' | 'dark'; setTheme:
       <button
         aria-label="button"
         onClick={() => setTheme('light')}
-        className={`rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105
-           ${theme === 'light' ? 'bg-gray-900 text-white' : 'bg-gray-700 text-gray-200'}`}
+        className={`rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105 ${theme === 'light' ? 'bg-gray-900 text-white' : 'bg-gray-700 text-gray-200'}`}
       >
         ☀️ Light
       </button>
       <button
         aria-label="button"
         onClick={() => setTheme('dark')}
-        className={`rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105
-           ${theme === 'dark' ? 'bg-white text-gray-900' : 'bg-gray-200 text-gray-600'} `}
+        className={`rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105 ${theme === 'dark' ? 'bg-white text-gray-900' : 'bg-gray-200 text-gray-600'} `}
       >
         🌙 Dark
       </button>
@@ -107,24 +105,17 @@ function AccentPicker({
         <button
           aria-label="button"
           onClick={() => setAccent('violet')}
-          className={`h-12 w-12 rounded-full bg-violet-500 hover:scale-110 
-            ${accent === 'violet' ? 'ring-6 ring-violet-200' : 'bg-violet-500/50 ring-violet-900'} 
-            ${theme === 'dark' && "ring-violet-900"}
-            `}
+          className={`h-12 w-12 rounded-full bg-violet-500 hover:scale-110 ${accent === 'violet' ? 'ring-6 ring-violet-200' : 'bg-violet-500/50 ring-violet-900'} ${theme === 'dark' && 'ring-violet-900'} `}
         />
         <button
           aria-label="button"
           onClick={() => setAccent('emerald')}
-          className={`h-12 w-12 rounded-full bg-emerald-500 hover:scale-110 ${accent === 'emerald' ? 'ring-6 ring-emerald-200' : 'bg-emerald-500/50 ring-emerald-900'}
-            ${theme === 'dark' && "ring-emerald-900"}
-          `}
+          className={`h-12 w-12 rounded-full bg-emerald-500 hover:scale-110 ${accent === 'emerald' ? 'ring-6 ring-emerald-200' : 'bg-emerald-500/50 ring-emerald-900'} ${theme === 'dark' && 'ring-emerald-900'} `}
         />
         <button
           aria-label="button"
           onClick={() => setAccent('amber')}
-          className={`h-12 w-12 rounded-full bg-amber-500 hover:scale-110 ${accent === 'amber' ? 'ring-6 ring-amber-200' : 'bg-amber-500/50 ring-amber-900'}
-            ${theme === 'dark' && "ring-amber-900"}
-          `}
+          className={`h-12 w-12 rounded-full bg-amber-500 hover:scale-110 ${accent === 'amber' ? 'ring-6 ring-amber-200' : 'bg-amber-500/50 ring-amber-900'} ${theme === 'dark' && 'ring-amber-900'} `}
         />
       </div>
     </div>
@@ -146,34 +137,29 @@ function InteractiveCard({
   const ref = useRenderTracker('InteractiveCard');
 
   return (
-      <div
-       ref={ref}
-        className={`relative mx-auto max-w-md overflow-hidden rounded-2xl border border-gray-200 shadow-lg transition-all duration-0!
-           ${theme === 'light' ? 'bg-gray-50 shadow-gray-200' : 'bg-gray-700 shadow-black/50'}`}
-      >
-        <div className="space-y-4 p-6">
-          <h3 className={`text-xl font-semibold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>Open Menu Demo</h3>
+    <div
+      ref={ref}
+      className={`relative mx-auto max-w-md overflow-hidden rounded-2xl border border-gray-200 shadow-lg transition-all duration-0! ${theme === 'light' ? 'bg-gray-50 shadow-gray-200' : 'bg-gray-700 shadow-black/50'}`}
+    >
+      <div className="space-y-4 p-6">
+        <h3 className={`text-xl font-semibold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>Open Menu Demo</h3>
 
-          <button
-            aria-label="button"
-            onClick={() => setMenuOpen(!menuOpen)}
-            className={`w-full rounded-lg py-3 font-medium text-white hover:scale-[1.02]
-             ${accent === 'violet' && 'bg-violet-500' }
-             ${accent === 'emerald' && 'bg-emerald-500' }
-             ${accent === 'amber' && 'bg-amber-500' }`}
-          >
-            {menuOpen ? 'Close Menu' : 'Open Menu'}
-          </button>
-        </div>
+        <button
+          aria-label="button"
+          onClick={() => setMenuOpen(!menuOpen)}
+          className={`w-full rounded-lg py-3 font-medium text-white hover:scale-[1.02] ${accent === 'violet' && 'bg-violet-500'} ${accent === 'emerald' && 'bg-emerald-500'} ${accent === 'amber' && 'bg-amber-500'}`}
+        >
+          {menuOpen ? 'Close Menu' : 'Open Menu'}
+        </button>
+      </div>
 
-        {/* Sliding Menu */}
-        <div className={`overflow-hidden ${menuOpen ? 'max-h-[160px]' : 'max-h-0'} `}>
-          <div className={`border-t p-6 border-gray-200 transition-all duration-0! ${theme === 'dark' ? ' bg-gray-700' : ' bg-white'}`}>
-            <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>✨ This panel slides open and has to re-render!</p>
-          </div>
+      {/* Sliding Menu */}
+      <div className={`overflow-hidden ${menuOpen ? 'max-h-[160px]' : 'max-h-0'} `}>
+        <div className={`border-t border-gray-200 p-6 transition-all duration-0! ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'}`}>
+          <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>✨ This panel slides open and has to re-render!</p>
         </div>
       </div>
-  
+    </div>
   );
 }
 
