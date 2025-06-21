@@ -13,6 +13,17 @@ A clear and concise description of what the problem is. Ex. I'm always frustrate
 **Describe the solution you'd like**
 A clear and concise description of what you want to happen.
 
+**Reproduction or use case**
+Provide steps or a short scenario that demonstrates when this feature would be useful.
+
+**Environment info**
+ - OS: [e.g. macOS 14]
+ - Browser: [e.g. Chrome 116]
+ - Node version: [e.g. 20.x]
+
+**Expected behavior**
+What outcome do you expect when this feature is implemented?
+
 **Describe alternatives you've considered**
 A clear and concise description of any alternative solutions or features you've considered.
 
