@@ -2,51 +2,51 @@ type RenderEnv = 'client' | 'server';
 type HandoffState = 'pending' | 'complete';
 
 class Env {
-  current: RenderEnv = this.detect();
-  handoffState: HandoffState = 'pending';
-  currentId = 0;
+	current: RenderEnv = this.detect();
+	handoffState: HandoffState = 'pending';
+	currentId = 0;
 
-  set(env: RenderEnv): void {
-    if (this.current === env) return;
+	set(env: RenderEnv): void {
+		if (this.current === env) return;
 
-    this.handoffState = 'pending';
-    this.currentId = 0;
-    this.current = env;
-  }
+		this.handoffState = 'pending';
+		this.currentId = 0;
+		this.current = env;
+	}
 
-  reset(): void {
-    this.set(this.detect());
-  }
+	reset(): void {
+		this.set(this.detect());
+	}
 
-  nextId() {
-    return ++this.currentId;
-  }
+	nextId() {
+		return ++this.currentId;
+	}
 
-  get isServer(): boolean {
-    return this.current === 'server';
-  }
+	get isServer(): boolean {
+		return this.current === 'server';
+	}
 
-  get isClient(): boolean {
-    return this.current === 'client';
-  }
+	get isClient(): boolean {
+		return this.current === 'client';
+	}
 
-  private detect(): RenderEnv {
-    if (typeof window === 'undefined' || typeof document === 'undefined') {
-      return 'server';
-    }
+	private detect(): RenderEnv {
+		if (typeof window === 'undefined' || typeof document === 'undefined') {
+			return 'server';
+		}
 
-    return 'client';
-  }
+		return 'client';
+	}
 
-  handoff(): void {
-    if (this.handoffState === 'pending') {
-      this.handoffState = 'complete';
-    }
-  }
+	handoff(): void {
+		if (this.handoffState === 'pending') {
+			this.handoffState = 'complete';
+		}
+	}
 
-  get isHandoffComplete(): boolean {
-    return this.handoffState === 'complete';
-  }
+	get isHandoffComplete(): boolean {
+		return this.handoffState === 'complete';
+	}
 }
 
 // eslint-disable-next-line prefer-const

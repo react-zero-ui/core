@@ -1,4 +1,3 @@
-/examples
 pnpm-lock.yaml
 packages/core/__tests__/fixtures/vite/vite.config.ts
 packages/core/__tests__/fixtures/next/tsconfig.json
