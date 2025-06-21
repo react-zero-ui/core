@@ -1,37 +1,35 @@
 {
-  "name": "react-zero",
-  "version": "0.1.0",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "lint:fix": "next lint --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "type-check": "tsc --noEmit",
-    "clean": "rm -rf .next"
-  },
-  "dependencies": {
-    "@austinserb/react-zero-ui": "^1.0.21",
-    "@vercel/analytics": "^1.5.0",
-    "clsx": "^2.1.1",
-    "motion": "^12.16.0",
-    "next": "15.3.3",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.10",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "postcss": "^8.5.5",
-    "prettier": "^3.5.3",
-    "prettier-plugin-tailwindcss": "^0.6.12",
-    "tailwindcss": "^4.1.10",
-    "typescript": "^5"
-  }
+	"name": "react-zero",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "next lint",
+		"lint:fix": "next lint --fix",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"type-check": "tsc --noEmit",
+		"clean": "rm -rf .next"
+	},
+	"dependencies": {
+		"@austinserb/react-zero-ui": "^1.0.21",
+		"@vercel/analytics": "^1.5.0",
+		"clsx": "^2.1.1",
+		"motion": "^12.16.0",
+		"next": "15.3.3",
+		"react": "^19.0.0",
+		"react-dom": "^19.0.0"
+	},
+	"devDependencies": {
+		"@tailwindcss/postcss": "^4.1.10",
+		"@types/node": "^20",
+		"@types/react": "^19",
+		"@types/react-dom": "^19",
+		"postcss": "^8.5.5",
+		"tailwindcss": "^4.1.10",
+		"typescript": "^5"
+	}
 }
