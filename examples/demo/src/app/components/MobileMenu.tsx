@@ -4,7 +4,7 @@ import clsx from 'clsx';
 import Link from 'next/link';
 
 export const MobileMenu: React.FC<{ navItems: { name: string; href: string }[] }> = ({ navItems }) => {
-  const [, setMenuOpen] = useUI<'closed' | 'open'>('mobileMenu', 'closed');
+  const [, setMenuOpen] = useUI<'closed' | 'open'>('mobile-menu', 'closed');
   return (
     <ul className={clsx('mobile-menu-container flex flex-col gap-3 rounded-b-lg border-gray-200 px-4 transition-all duration-300 ease-in-out md:hidden')}>
       {navItems.map((item, index) => (

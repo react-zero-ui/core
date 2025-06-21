@@ -136,3 +136,12 @@ body[data-mobile-menu='open'] {
     background-position: 0% 0%;
   }
 }
+
+
+@layer base{
+
+
+.pill {
+  @apply rounded-full border border-gray-200 bg-white/20 backdrop-blur-sm ring-1 ring-black/5 text-gray-900 py-1 text-center font-medium  duration-300 hover:border-white max-md:text-xs text-nowrap;
+}
+}

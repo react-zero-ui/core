@@ -4,7 +4,7 @@ export const bodyAttributes = {
   "data-active": "zero",
   "data-menu-open": "false",
   "data-mobile-menu": "closed",
-  "data-scrolled": "down",
+  "data-scrolled": "up",
   "data-theme": "light",
   "data-theme-test": "light"
 };

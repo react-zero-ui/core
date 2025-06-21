@@ -1,14 +1,20 @@
 'use client';
 
 import useUI from '@austinserb/react-zero-ui';
+import { useRenderTracker } from './ReactTracker';
 
 export function TestComponent() {
+  const ref = useRenderTracker('TestComponent');
   const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
   const [, setAccent] = useUI<'violet' | 'emerald' | 'amber'>('accent', 'violet');
   const [, setMenuOpen] = useUI<boolean>('menuOpen', false);
 
   return (
-    <div className="theme-light:bg-gray-100 theme-dark:bg-gray-900 flex h-full w-full flex-col justify-between space-y-4 py-8 **:transition-all **:duration-300">
+    <div
+      ref={ref}
+      className="space-y-4 py-8 flex h-full w-full flex-col justify-between  **:transition-all **:duration-300
+      theme-light:bg-gray-100 theme-dark:bg-gray-900"
+    >
       <Header />
       <ThemeSwitcher setTheme={setTheme} />
       <AccentPicker setAccent={setAccent} />
@@ -20,14 +26,20 @@ export function TestComponent() {
 
 // Header Component - Never re-renders!
 function Header() {
+  const ref = useRenderTracker('Header');
+
   return (
-    <div className="space-y-2 text-center">
-      <h1 className="theme-light:text-gray-900 theme-dark:text-white text-3xl font-bold">Zero UI State Management</h1>
+    <div
+      ref={ref}
+      className="space-y-2 text-center"
+    >
+      <h1 className="text-3xl font-bold theme-light:text-gray-900 theme-dark:text-white">Zero UI</h1>
+      
       <p className="theme-light:text-gray-600 theme-dark:text-gray-400">
         Reactive state without re-rendering OR prop drilling. <br />
-        <span className="text-sm text-gray-500">
-          <span className="font-bold">Zero</span> re-renders, <span className="font-bold">Reactive</span> state, <span className="font-bold">Global</span> &{' '}
-          <span className="font-bold">Scoped</span> state,{' '}
+        <span className="text-sm ">
+          <span className="font-bold theme-light:text-gray-900 theme-dark:text-white">Zero</span>
+          {' '}re-renders, <span className="font-bold theme-light:text-gray-900 theme-dark:text-white">Reactive</span> & <span className="font-bold theme-light:text-gray-900 theme-dark:text-white">Global</span>  state.
         </span>
       </p>
     </div>
@@ -36,19 +48,26 @@ function Header() {
 
 // Theme Switcher - Never re-renders!
 function ThemeSwitcher({ setTheme }: { setTheme: (t: 'light' | 'dark') => void }) {
+  const ref = useRenderTracker('ThemeSwitcher');
+
   return (
-    <div className="flex justify-center gap-2">
+    <div
+      ref={ref}
+      className="flex justify-center gap-2"
+    >
       <button
         aria-label="button"
         onClick={() => setTheme('light')}
-        className={`theme-light:bg-gray-900 theme-light:text-white theme-dark:bg-gray-700 theme-dark:text-gray-200 rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105`}
+        className={`rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105
+          theme-light:bg-gray-900 theme-light:text-white theme-dark:bg-gray-700 theme-dark:text-gray-200`}
       >
         ☀️ Light
       </button>
       <button
         aria-label="button"
         onClick={() => setTheme('dark')}
-        className={`theme-dark:bg-white theme-dark:text-gray-900 theme-light:bg-gray-200 theme-light:text-gray-600 rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105`}
+        className={`rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105
+          theme-dark:bg-white theme-dark:text-gray-900 theme-light:bg-gray-200 theme-light:text-gray-600 `}
       >
         🌙 Dark
       </button>
@@ -58,14 +77,23 @@ function ThemeSwitcher({ setTheme }: { setTheme: (t: 'light' | 'dark') => void }
 
 // Accent Picker - Never re-renders!
 function AccentPicker({ setAccent }: { setAccent: (a: 'violet' | 'emerald' | 'amber') => void }) {
+  const ref = useRenderTracker('AccentPicker');
+
   return (
-    <div className="space-y-4 pb-2">
-      <h2 className="theme-light:text-gray-800 theme-dark:text-gray-200 text-center text-lg font-semibold">Choose Accent</h2>
+    <div
+      ref={ref}
+      className="space-y-4 pb-2"
+    >
+      <h2 className="text-center text-lg font-semibold theme-light:text-gray-800 theme-dark:text-gray-200 ">Choose Accent</h2>
       <div className="flex justify-center gap-3">
         <button
           aria-label="button"
           onClick={() => setAccent('violet')}
-          className="accent-violet:ring-6 accent-violet:ring-violet-200 theme-dark:accent-violet:ring-violet-900 accent-violet:bg-violet-500 h-12 w-12 rounded-full bg-violet-500/50 hover:scale-110"
+          className="h-12 w-12 rounded-full bg-violet-500/50 hover:scale-110
+          ring-violet-900
+           accent-violet:ring-6 accent-violet:ring-violet-200 
+          accent-violet:bg-violet-500
+          theme-dark:accent-violet:ring-violet-900"
         />
         <button
           aria-label="button"
@@ -84,26 +112,33 @@ function AccentPicker({ setAccent }: { setAccent: (a: 'violet' | 'emerald' | 'am
 
 // Interactive Card - Never re-renders!
 function InteractiveCard({ toggleMenu }: { toggleMenu: () => void }) {
+  const ref = useRenderTracker('InteractiveCard');
+
   return (
-    <div className="theme-light:bg-gray-50 theme-dark:bg-gray-700 theme-light:shadow-gray-200 theme-dark:shadow-black/50 relative mx-auto max-w-md overflow-hidden rounded-2xl border border-gray-200 shadow-lg transition-all duration-0!">
+    <div
+      ref={ref}
+      className="relative mx-auto max-w-md overflow-hidden rounded-2xl border border-gray-200 shadow-lg transition-all duration-0!
+      theme-light:bg-gray-50 theme-light:shadow-gray-200
+      theme-dark:bg-gray-700  theme-dark:shadow-black/50"
+    >
       <div className="space-y-4 p-6">
-        <h3 className="theme-light:text-gray-900 theme-dark:text-white text-xl font-semibold">Open Menu Demo</h3>
-        <div className="show-theme" />
-        <button
+        <h3 className=" text-xl font-semibold theme-light:text-gray-900 theme-dark:text-white">Open Menu Demo</h3>
+         <button
           aria-label="button"
           onClick={toggleMenu}
-          className="accent-violet:bg-violet-500 accent-violet:hover:bg-violet-600 accent-emerald:bg-emerald-500 accent-emerald:hover:bg-emerald-600 accent-amber:bg-amber-500 accent-amber:hover:bg-amber-600 w-full rounded-lg py-3 font-medium text-white hover:scale-[1.02]"
+          className="w-full rounded-lg py-3 font-medium text-white hover:scale-[1.02] 
+          accent-violet:bg-violet-500  accent-emerald:bg-emerald-500 
+          accent-amber:bg-amber-500"
         >
           <span className="menu-open-true:hidden">Close Panel</span>
           <span className="menu-open-false:hidden">Open Panel</span>
-          <span className="menu-open-true:hidden"></span>
-        </button>
+         </button>
       </div>
 
       {/* Sliding Panel */}
-      <div className="menu-open-true:max-h-40 menu-open-false:max-h-0 overflow-hidden ">
-        <div className="border-gray-200 theme-light:bg-white theme-dark:bg-gray-700/50 border-t p-6 transition-all duration-0!">
-          <p className="theme-light:text-gray-600 theme-dark:text-gray-300">✨ This panel slides open without re-rendering!</p>
+      <div className="overflow-hidden menu-open-true:max-h-[160px] menu-open-false:max-h-0 ">
+        <div className="border-t p-6 border-gray-200 transition-all duration-0! theme-dark:bg-gray-700 theme-light:bg-white">
+          <p className="theme-dark:text-gray-300 theme-light:text-gray-600">✨ This panel slides open without re-rendering!</p>
         </div>
       </div>
     </div>
@@ -112,8 +147,12 @@ function InteractiveCard({ toggleMenu }: { toggleMenu: () => void }) {
 
 // State Display - Never re-renders!
 function StateDisplay() {
-  return (
-    <div>
+  const ref = useRenderTracker('StateDisplay');
+
+    return (
+    <div
+      ref={ref}
+    >
       <div className="theme-light:text-gray-500 theme-dark:text-gray-400 **:accent-violet:text-violet-500 **:accent-emerald:text-emerald-500 **:accent-amber:text-amber-500 mt-5 flex justify-center gap-4 space-y-1 text-center font-mono text-sm capitalize">
         <div className="flex gap-1 text-nowrap **:text-nowrap">
           theme: <span className="theme-dark:hidden">Light</span>

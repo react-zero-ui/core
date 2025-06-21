@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     
     <html lang="en">
-      <body className="py-24 md:py-10 antialiased" {...bodyAttributes}>
+      <body className="h-full w-full flex items-center justify-center antialiased bg-gray-100" {...bodyAttributes}>
         <TopBarV2 />
         {children}
         {process.env.NODE_ENV === 'production' && <Analytics />}

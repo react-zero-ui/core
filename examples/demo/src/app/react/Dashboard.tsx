@@ -28,12 +28,13 @@ export const Dashboard: React.FC = () => {
       </div>
       <div className="text-lg text-gray-500">10,000 nodes with Nested Node using React State</div>
       <div
-        className="grid aspect-square max-h-full w-full max-w-full gap-0.5 text-xs"
+        className="grid aspect-square border-1 border-red-300 gap-0.5 text-xs"
         style={{
           gridTemplateColumns: 'repeat(100, 1fr)',
           gridTemplateRows: 'repeat(100, 1fr)',
-          width: 'min(100vw - 2.5rem, 100vh - 8rem)',
-          height: 'min(100vw - 2.5rem, 100vh - 8rem)',
+          width: 'min(90vw, 90vh)',
+          height: 'min(90vw, 80vh)',
+        
         }}
       >
         {Array.from({ length: 10000 }).map((_, index) => (

@@ -32,8 +32,8 @@ export const Dashboard: React.FC = () => {
         style={{
           gridTemplateColumns: 'repeat(100, 1fr)',
           gridTemplateRows: 'repeat(100, 1fr)',
-          width: 'min(100vw - 2.5rem, 100vh - 8rem)',
-          height: 'min(100vw - 2.5rem, 100vh - 8rem)',
+          width: 'min(90vw, 90vh)',
+          height: 'min(90vw, 80vh)',
         }}
       >
         {Array.from({ length: 10000 }).map((_, index) => (

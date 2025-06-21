@@ -15,7 +15,7 @@
     "clean": "rm -rf .next"
   },
   "dependencies": {
-    "@austinserb/react-zero-ui": "^1.0.19",
+    "@austinserb/react-zero-ui": "^1.0.21",
     "@vercel/analytics": "^1.5.0",
     "clsx": "^2.1.1",
     "motion": "^12.16.0",

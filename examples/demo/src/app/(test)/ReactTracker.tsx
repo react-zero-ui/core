@@ -118,7 +118,7 @@ export function RenderTracker() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed right-2 bottom-2 z-40 w-48 rounded bg-black/70 p-2 text-xs text-white shadow-xl backdrop-blur-sm"
+            className="fixed right-2 bottom-2 z-40 w-48 rounded bg-black/70 p-2 text-xs text-white shadow-xl backdrop-blur-sm max-md:hidden"
           >
             <div className="mb-1 flex items-center justify-between">
               <h3 className="font-bold text-gray-100">Renders</h3>

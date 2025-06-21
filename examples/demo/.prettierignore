@@ -23,5 +23,4 @@ yarn-error.log*
 t.py
 todo.md
 
-# keep these files
-!next-env.d.ts
+
