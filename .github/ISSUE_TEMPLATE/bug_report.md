@@ -1,33 +1,53 @@
 ---
-name: Bug report
-about: Create a report to help us improve
-title: ''
-labels: ''
+name: 🐛 Bug report
+about: Report a problem so we can fix it
+title: '[Bug]: '
+labels: ['bug']
 assignees: ''
+---
+
+## 🐞 Description
+
+Clear and concise description of the bug.
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+## 🔁 Reproduction Steps
 
-**Reproduction steps**
-Provide step-by-step instructions so we can reproduce the issue. Include a minimal repo or code snippet if possible.
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+1. Go to `…`
+2. Perform `…`
+3. Observe `…`
 
-**Environment info**
- - OS: [e.g. macOS 14]
- - Browser: [e.g. Chrome 116]
- - Node version: [e.g. 20.x]
- - Package version: [e.g. react-zero-ui@1.0.20]
+_Provide a minimal reproduction (CodeSandbox, repo, etc.) if possible._
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+---
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+## ✅ Expected Behavior
 
-**Additional context**
-Add any other context about the problem here.
+What you expected to happen.
+
+---
+
+## 🚫 Actual Behavior
+
+What actually happened.
+
+---
+
+## 🖥 Environment
+
+- **OS:** [e.g. macOS 14.5]
+- **Browser / Runtime:** [e.g. Chrome 125, Node 18.18.2]
+- **Package Version:** [`@austinserb/react-zero-ui@1.0.21`]
+
+---
+
+## 📸 Screenshots / Logs (if applicable)
+
+_Please add visual proof or error logs here._
+
+---
+
+## 🧩 Additional Context
+
+Any other details? Custom config, frameworks in use, relevant links?

@@ -4,10 +4,9 @@
 
 Pre‑render your UI once, flip a `data-*` attribute to update — that's it.
 
-<a href="https://bundlephobia.com/package/@austinserb/react-zero-ui@1.0.19" target="_blank" rel="noopener noreferrer"><img src="https://badgen.net/bundlephobia/min/@austinserb/react-zero-ui@1.0.19" alt="npm version" /> </a><a href="https://www.npmjs.com/package/@austinserb/react-zero-ui" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/npm/v/@austinserb/react-zero-ui" alt="npm version" /></a> <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a> ![CI](https://github.com/austin1serb/react-zero-ui/actions/workflows/ci.yml/badge.svg?branch=main)
+<a href="https://bundlephobia.com/package/@austinserb/react-zero-ui@1.0.19" target="_blank" rel="noopener noreferrer"><img src="https://badgen.net/bundlephobia/minzip/@austinserb/react-zero-ui@1.0.19" alt="npm version" /> </a><a href="https://www.npmjs.com/package/@austinserb/react-zero-ui" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/npm/v/@austinserb/react-zero-ui" alt="npm version" /></a> <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a> ![CI](https://github.com/austin1serb/react-zero-ui/actions/workflows/ci.yml/badge.svg?branch=main)
 
 ---
-
 
 ## 📚 Quick Links
 
@@ -130,7 +129,7 @@ const [staleValue, setValue] = useUI<'open' | 'closed'>('sidebar', 'closed');
 ```
 
 - `key` → becomes `data-{key}` on `<body>`.
-- `defaultValue` → optional, prevents FOUC.
+- `defaultValue` → SSR, prevents FOUC.
 - **Note:** the returned `staleValue` does **not** update (`useUI` is write‑only).
 
 ### Tailwind variants
@@ -148,7 +147,7 @@ Any `data-{key}="{value}"` pair becomes a variant: `{key}-{value}:`.
 1. **`useUI`** → writes to `data-*` attributes on `<body>`.
 2. **Babel plugin** → scans code, finds every `key/value`, injects them into **PostCSS**.
 3. **PostCSS plugin** → generates static Tailwind classes **at build‑time**.
-4. **Runtime** → changing state only touches the attribute — no VDOM, no reconciliation, no re‑paint.
+4. **Runtime** → changing state only touches the attribute — no VDOM, no reconciliation, ZERO re‑renders.
 
 ---
 
@@ -156,10 +155,10 @@ Any `data-{key}="{value}"` pair becomes a variant: `{key}-{value}:`.
 
 - **Zero React re‑renders** for UI‑only state.
 - **Global setters** — call from any component or util.
-- **Tiny**: < 1 KB gzipped runtime.
+- **Tiny**: < 391 Byte gzipped runtime.
 - **TypeScript‑first**.
 - **SSR‑friendly** (Next.js & Vite SSR).
-- **Framework‑agnostic CSS** — generated classes work in plain HTML / Vue / Svelte as well.
+- **Framework‑agnostic CSS** — generated classes work in plain HTML / Vue / Svelte as well with extra config.
 
 ---
 

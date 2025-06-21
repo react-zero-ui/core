@@ -8,7 +8,6 @@ Pre‑render your UI once, flip a `data-*` attribute to update — that's it.
 
 ---
 
-
 ## 📚 Quick Links
 
 - [⚡️ Quick Start](#️-quick-start)
@@ -117,7 +116,7 @@ export default {
 
 ## 🏄‍♂️ Usage
 
-![react zero ui usage explained](https://raw.githubusercontent.com/Austin1serb/React-Zero-UI/2b8198e08382dd6a6fe6f887ef77a4297ebebeff/docs/assets/useui-explained.webp)
+![react zero ui usage explained](https://raw.githubusercontent.com/Austin1serb/React-Zero-UI/main/docs/assets/useui-explained.webp)
 
 ---
 
@@ -169,12 +168,6 @@ Any `data-{key}="{value}"` pair becomes a variant: `{key}-{value}:`.
 2. **Business logic stays in React** → fetching, data mutation, etc.
 3. **Kebab‑case keys** → e.g. `sidebar-open`.
 4. **Provide defaults** to avoid Flash‑Of‑Unstyled‑Content.
-
----
-
-## 🤝 Contributing
-
-PRs & issues welcome! Please read the [Contributing Guide](CONTRIBUTING.md).
 
 ---
 

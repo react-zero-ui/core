@@ -27,8 +27,8 @@ importers:
   packages/cli:
     dependencies:
       '@austinserb/react-zero-ui':
-        specifier: ^1.0.20
-        version: 1.0.20(@tailwindcss/postcss@4.1.10)(postcss@8.5.6)(react@19.1.0)(tailwindcss@4.1.10)
+        specifier: ^1.0.21
+        version: 1.0.21(@tailwindcss/postcss@4.1.10)(postcss@8.5.6)(react@19.1.0)(tailwindcss@4.1.10)
       '@tailwindcss/postcss':
         specifier: ^4.1.8
         version: 4.1.10
@@ -80,8 +80,8 @@ packages:
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
 
-  '@austinserb/react-zero-ui@1.0.20':
-    resolution: {integrity: sha512-UTq9p5TX4/vKSNs2fuLKWYCtX6kkrO+B1hFV3rson7+QJyM0uAGOw1zbN9bVtrHn2ns0aUDgWXJp7/HhpGRWYw==}
+  '@austinserb/react-zero-ui@1.0.21':
+    resolution: {integrity: sha512-AHWH6uTn4j2FHF8ewUglX6PEiUAud92UzHsdz7tZ45pBc1+GKmayl0NvraccEIp+dITUHgwS3WYvoWjexp4JXw==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       '@tailwindcss/postcss': ^4.1.10
@@ -1372,7 +1372,7 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@austinserb/react-zero-ui@1.0.20(@tailwindcss/postcss@4.1.10)(postcss@8.5.6)(react@19.1.0)(tailwindcss@4.1.10)':
+  '@austinserb/react-zero-ui@1.0.21(@tailwindcss/postcss@4.1.10)(postcss@8.5.6)(react@19.1.0)(tailwindcss@4.1.10)':
     dependencies:
       '@babel/generator': 7.27.5
       '@babel/parser': 7.27.5

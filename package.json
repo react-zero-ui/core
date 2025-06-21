@@ -9,24 +9,18 @@
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
 		"reset": "git clean -fdx && pnpm install --frozen-lockfile && pnpm prepack:core && pnpm i-tarball",
+		"bootstrap": "pnpm install --frozen-lockfile && pnpm prepack:core && pnpm i-tarball",
 		"test": "cd packages/core && pnpm test:all",
+		"test:all": "pnpm install --frozen-lockfile && pnpm prepack:core && pnpm lint && pnpm i-tarball && cd packages/core && pnpm test:all",
 		"prepack:core": "pnpm -F @austinserb/react-zero-ui pack --pack-destination ./dist",
 		"i-tarball": "node scripts/install-local-tarball.js",
-		"lint": "eslint .",
-		"lint:fix": "eslint . --fix",
-		"test:all": "pnpm install --frozen-lockfile && pnpm prepack:core && pnpm lint && pnpm i-tarball && cd packages/core && pnpm test:all",
 		"test:vite": "cd packages/core && pnpm test:vite",
 		"test:next": "cd packages/core && pnpm test:next",
 		"test:unit": "cd packages/core && pnpm test:unit",
 		"test:cli": "cd packages/core && pnpm test:cli",
 		"format": "prettier --write .",
-		"format:check": "prettier --check .",
-		"version:core:patch": "cd packages/core && pnpm version patch",
-		"version:core:minor": "cd packages/core && pnpm version minor",
-		"version:core:major": "cd packages/core && pnpm version major",
-		"version:cli:patch": "cd packages/cli && pnpm version patch",
-		"version:cli:minor": "cd packages/cli && pnpm version minor",
-		"version:cli:major": "cd packages/cli && pnpm version major"
+		"lint": "eslint .",
+		"lint:fix": "eslint . --fix"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.0.0",

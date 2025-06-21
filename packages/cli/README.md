@@ -40,10 +40,10 @@ npx create-zero-ui
 
 That's it — you'll get:
 
-* `.zero-ui/attributes.js` autogen
-* Working PostCSS + Tailwind integration
-* Babel config patched if needed
-* Ready to use `useUI()` in components
+- `.zero-ui/attributes.js` autogen
+- Working PostCSS + Tailwind integration
+- Babel config patched if needed
+- Ready to use `useUI()` in components
 
 ---
 
@@ -52,7 +52,7 @@ That's it — you'll get:
 Powered by:
 
 ```json
-"@austinserb/react-zero-ui": "^1.0.20"
+"@austinserb/react-zero-ui": "^1.0.21"
 ```
 
 Full docs and live benchmarks:
@@ -62,19 +62,17 @@ Full docs and live benchmarks:
 
 ## 🧬 Example Usage
 
-
 ## 🏄‍♂️ Usage
 
-![react zero ui usage explained](https://raw.githubusercontent.com/Austin1serb/React-Zero-UI/2b8198e08382dd6a6fe6f887ef77a4297ebebeff/docs/assets/useui-explained.webp)
-
+![react zero ui usage explained](https://raw.githubusercontent.com/Austin1serb/React-Zero-UI/main/docs/assets/useui-explained.webp)
 
 ---
 
 ## 🛠 Tech Notes
 
-* This CLI only supports Tailwind v4+ projects
-* It does **not** install Tailwind for you — install Tailwind first
-* You must restart your dev server after running the CLI to see effects
+- This CLI only supports Tailwind v4+ projects
+- It does **not** install Tailwind for you — install Tailwind first
+- You must restart your dev server after running the CLI to see effects
 
 ---
 

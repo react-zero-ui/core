@@ -1,31 +1,33 @@
 ---
-name: Feature request
-about: Suggest an idea for this project
-title: ''
-labels: ''
+name: 🚀 Feature request
+about: Suggest an improvement or new idea for React Zero-UI
+title: '[Feature]: '
+labels: ['enhancement']
 assignees: ''
+---
+
+## ✨ Problem
+
+Is your feature request related to a problem or pain point?
+
+> Ex: "I'm often frustrated when trying to do X because…"
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+## ✅ Proposed Solution
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+How would you like this to work? Be specific.
 
-**Reproduction or use case**
-Provide steps or a short scenario that demonstrates when this feature would be useful.
+---
 
-**Environment info**
- - OS: [e.g. macOS 14]
- - Browser: [e.g. Chrome 116]
- - Node version: [e.g. 20.x]
+## 🔄 Alternatives Considered
 
-**Expected behavior**
-What outcome do you expect when this feature is implemented?
+Have you tried workarounds or other approaches? Share them here.
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+---
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+## 📎 Additional Context
+
+Add screenshots, references, or related discussions if relevant.
+
+---

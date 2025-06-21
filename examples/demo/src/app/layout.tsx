@@ -18,6 +18,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    
     <html lang="en">
       <body className="py-24 md:py-10 antialiased" {...bodyAttributes}>
         <TopBarV2 />

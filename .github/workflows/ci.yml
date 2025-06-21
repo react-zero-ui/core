@@ -8,6 +8,7 @@ on:
       - '.github/workflows/ci.yml'
       - 'scripts/**'
       - 'pnpm-lock.yaml'
+      - '!packages/**/README.md'
   pull_request:
 
 concurrency:
