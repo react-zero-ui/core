@@ -3,7 +3,7 @@
 import useUI from '@austinserb/react-zero-ui';
 import { useRenderTracker } from './ReactTracker';
 
-export function TestComponent() {
+export function TestComponentZero() {
 	const ref = useRenderTracker('TestComponent');
 	const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
 	const [, setAccent] = useUI<'violet' | 'emerald' | 'amber'>('accent', 'violet');
@@ -112,13 +112,13 @@ function InteractiveCard({ toggleMenu }: { toggleMenu: () => void }) {
 					aria-label="button"
 					onClick={toggleMenu}
 					className="accent-violet:bg-violet-500 accent-emerald:bg-emerald-500 accent-amber:bg-amber-500 w-full rounded-lg py-3 font-medium text-white hover:scale-[1.02]">
-					<span className="menu-open-true:hidden">Close Panel</span>
-					<span className="menu-open-false:hidden">Open Panel</span>
+					<span className="menu-open-false:hidden">Close Panel</span>
+					<span className="menu-open-true:hidden">Open Panel</span>
 				</button>
 			</div>
 
 			{/* Sliding Panel */}
-			<div className="menu-open-true:max-h-[160px] menu-open-false:max-h-0 overflow-hidden">
+			<div className="menu-open-true:max-h-[80px] menu-open-false:max-h-0 overflow-hidden">
 				<div className="theme-dark:bg-gray-700 theme-light:bg-white border-t border-gray-200 p-6 transition-all duration-0!">
 					<p className="theme-dark:text-gray-300 theme-light:text-gray-600">✨ This panel slides open without re-rendering!</p>
 				</div>
@@ -146,8 +146,8 @@ function StateDisplay() {
 				</div>
 				<div className="flex gap-1 text-nowrap **:text-nowrap">
 					menu:
-					<span className="menu-open-true:hidden">Open</span>
-					<span className="menu-open-false:hidden">Closed</span>
+					<span className="menu-open-false:hidden">Open</span>
+					<span className="menu-open-true:hidden">Closed</span>
 				</div>
 			</div>
 		</div>
