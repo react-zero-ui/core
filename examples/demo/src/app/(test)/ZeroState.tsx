@@ -33,7 +33,7 @@ function Header() {
 			<h1 className="theme-light:text-gray-900 theme-dark:text-white text-3xl font-bold">Zero UI</h1>
 
 			<p className="theme-light:text-gray-600 theme-dark:text-gray-400">
-				Reactive state without re-rendering OR prop drilling. <br />
+				Reactive state without re-rendering .<br />
 				<span className="text-sm">
 					<span className="theme-light:text-gray-900 theme-dark:text-white font-bold">Zero</span> re-renders,{' '}
 					<span className="theme-light:text-gray-900 theme-dark:text-white font-bold">Reactive</span> &{' '}
@@ -120,7 +120,7 @@ function InteractiveCard({ toggleMenu }: { toggleMenu: () => void }) {
 			{/* Sliding Panel */}
 			<div className="menu-open-true:max-h-[80px] menu-open-false:max-h-0 overflow-hidden">
 				<div className="theme-dark:bg-gray-700 theme-light:bg-white border-t border-gray-200 p-6 transition-all duration-0!">
-					<p className="theme-dark:text-gray-300 theme-light:text-gray-600">✨ This panel slides open without re-rendering!</p>
+					<p className="theme-dark:text-gray-300 theme-light:text-gray-600 text-center">✨ This panel slides open without re-rendering!</p>
 				</div>
 			</div>
 		</div>
@@ -132,7 +132,9 @@ function StateDisplay() {
 	const ref = useRenderTracker('StateDisplay');
 
 	return (
-		<div ref={ref}>
+		<div
+			ref={ref}
+			className="max-[450px]:hidden">
 			<div className="theme-light:text-gray-500 theme-dark:text-gray-400 **:accent-violet:text-violet-500 **:accent-emerald:text-emerald-500 **:accent-amber:text-amber-500 mt-5 flex justify-center gap-4 space-y-1 text-center font-mono text-sm capitalize">
 				<div className="flex gap-1 text-nowrap **:text-nowrap">
 					theme: <span className="theme-dark:hidden">Light</span>
@@ -146,8 +148,8 @@ function StateDisplay() {
 				</div>
 				<div className="flex gap-1 text-nowrap **:text-nowrap">
 					menu:
-					<span className="menu-open-false:hidden">Open</span>
-					<span className="menu-open-true:hidden">Closed</span>
+					<span className="menu-open-true:hidden">Open</span>
+					<span className="menu-open-false:hidden">Closed</span>
 				</div>
 			</div>
 		</div>
