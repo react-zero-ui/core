@@ -2,7 +2,7 @@
 
 import { Icon } from '@/app/components/Icon';
 import { TestComponentWithState } from './ReactState';
-import { TestComponent } from './ZeroState';
+import { TestComponentZero } from './ZeroState';
 import { useUI } from '@austinserb/react-zero-ui';
 
 export default function Page() {
@@ -36,7 +36,7 @@ export default function Page() {
 
 					<div className="h-full w-full overflow-hidden rounded-b-lg border border-t-0 border-gray-200">
 						<div className="active-zero:translate-x-0 active-react:translate-x-[-50%] grid h-full w-[200%] grid-cols-2 items-center justify-start transition-transform duration-300">
-							<TestComponent />
+							<TestComponentZero />
 							<TestComponentWithState />
 						</div>
 					</div>

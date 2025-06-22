@@ -47,9 +47,14 @@ function Header({ theme }: { theme: 'light' | 'dark' }) {
 		<div
 			ref={ref}
 			className="space-y-2 text-center">
-			<h1 className={`text-3xl font-bold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>React State Management</h1>
+			<h1 className={`text-3xl font-bold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
+				React State <span className="max-[450px]:hidden">Management</span>
+			</h1>
 
-			<p className={`${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>Reactive state management with React</p>
+			<p className={`${theme === 'light' ? 'text-gray-600' : 'text-gray-400'}`}>
+				Reactive state management with React <br />
+				<span className="text-xs text-gray-500">Re-renders O(n)</span>
+			</p>
 		</div>
 	);
 }
@@ -148,7 +153,7 @@ function InteractiveCard({
 			{/* Sliding Menu */}
 			<div className={`overflow-hidden ${menuOpen ? 'max-h-[160px]' : 'max-h-0'} `}>
 				<div className={`border-t border-gray-200 p-6 transition-all duration-0! ${theme === 'dark' ? 'bg-gray-700' : 'bg-white'}`}>
-					<p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>✨ This panel slides open and has to re-render!</p>
+					<p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} text-center`}>✨ This panel slides open and has to re-render!</p>
 				</div>
 			</div>
 		</div>
@@ -160,9 +165,11 @@ function StateDisplay({ theme, accent, menuOpen }: { theme: 'light' | 'dark'; ac
 	const ref = useRenderTracker('StateDisplay');
 
 	return (
-		<div ref={ref}>
+		<div
+			ref={ref}
+			className="max-[450px]:hidden">
 			<div
-				className={`mt-5 flex justify-center gap-4 space-y-1 text-center font-mono text-sm capitalize ${accent === 'violet' ? 'text-violet-500' : accent === 'emerald' ? 'text-emerald-500' : 'text-amber-500'}`}>
+				className={`mt-5 **:text-nowrap flex justify-center gap-4 space-y-1 text-center font-mono text-sm capitalize ${accent === 'violet' ? 'text-violet-500' : accent === 'emerald' ? 'text-emerald-500' : 'text-amber-500'}`}>
 				<div className="flex gap-1">theme: {theme} </div>
 				<div className="flex gap-1">accent: {accent}</div>
 				<div className="flex gap-1">menu: {menuOpen ? 'Open' : 'Closed'}</div>

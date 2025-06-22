@@ -3,7 +3,7 @@
 import useUI from '@austinserb/react-zero-ui';
 import { useRenderTracker } from './ReactTracker';
 
-export function TestComponent() {
+export function TestComponentZero() {
 	const ref = useRenderTracker('TestComponent');
 	const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
 	const [, setAccent] = useUI<'violet' | 'emerald' | 'amber'>('accent', 'violet');
@@ -33,7 +33,7 @@ function Header() {
 			<h1 className="theme-light:text-gray-900 theme-dark:text-white text-3xl font-bold">Zero UI</h1>
 
 			<p className="theme-light:text-gray-600 theme-dark:text-gray-400">
-				Reactive state without re-rendering OR prop drilling. <br />
+				Reactive state without re-rendering .<br />
 				<span className="text-sm">
 					<span className="theme-light:text-gray-900 theme-dark:text-white font-bold">Zero</span> re-renders,{' '}
 					<span className="theme-light:text-gray-900 theme-dark:text-white font-bold">Reactive</span> &{' '}
@@ -112,15 +112,15 @@ function InteractiveCard({ toggleMenu }: { toggleMenu: () => void }) {
 					aria-label="button"
 					onClick={toggleMenu}
 					className="accent-violet:bg-violet-500 accent-emerald:bg-emerald-500 accent-amber:bg-amber-500 w-full rounded-lg py-3 font-medium text-white hover:scale-[1.02]">
-					<span className="menu-open-true:hidden">Close Panel</span>
-					<span className="menu-open-false:hidden">Open Panel</span>
+					<span className="menu-open-false:hidden">Close Panel</span>
+					<span className="menu-open-true:hidden">Open Panel</span>
 				</button>
 			</div>
 
 			{/* Sliding Panel */}
-			<div className="menu-open-true:max-h-[160px] menu-open-false:max-h-0 overflow-hidden">
+			<div className="menu-open-true:max-h-[80px] menu-open-false:max-h-0 overflow-hidden">
 				<div className="theme-dark:bg-gray-700 theme-light:bg-white border-t border-gray-200 p-6 transition-all duration-0!">
-					<p className="theme-dark:text-gray-300 theme-light:text-gray-600">✨ This panel slides open without re-rendering!</p>
+					<p className="theme-dark:text-gray-300 theme-light:text-gray-600 text-center">✨ This panel slides open without re-rendering!</p>
 				</div>
 			</div>
 		</div>
@@ -132,7 +132,9 @@ function StateDisplay() {
 	const ref = useRenderTracker('StateDisplay');
 
 	return (
-		<div ref={ref}>
+		<div
+			ref={ref}
+			className="max-[450px]:hidden">
 			<div className="theme-light:text-gray-500 theme-dark:text-gray-400 **:accent-violet:text-violet-500 **:accent-emerald:text-emerald-500 **:accent-amber:text-amber-500 mt-5 flex justify-center gap-4 space-y-1 text-center font-mono text-sm capitalize">
 				<div className="flex gap-1 text-nowrap **:text-nowrap">
 					theme: <span className="theme-dark:hidden">Light</span>
