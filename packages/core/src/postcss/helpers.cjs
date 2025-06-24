@@ -101,7 +101,7 @@ function buildCss(variants) {
 		const keySlug = toKebabCase(key);
 		for (const val of values) {
 			const valSlug = toKebabCase(val);
-			css += `@variant ${keySlug}-${valSlug} (body[data-${keySlug}="${valSlug}"] &);\n`;
+			css += `@variant ${keySlug}-${valSlug} (:where(body[data-${keySlug}="${valSlug}"] &), &[data-${keySlug}="${valSlug}"], [data-${keySlug}="${valSlug}"] &);\n`;
 		}
 	}
 	return css;

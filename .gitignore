@@ -19,11 +19,9 @@ yarn-error.log*
 # tarballs produced during local tests
 *.tgz
 
-# local scratch files 
-t.py
-todo.md
+# local scratch file
+internal.md
 
 # keep these files
 !next-env.d.ts
 
- 
