@@ -164,9 +164,9 @@ test('CLI script installs correct dependencies', async () => {
         const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
         
         // Handle production dependency
-        if (process.argv.slice(2).includes('@austinserb/react-zero-ui') && !process.argv.slice(2).includes('--save-dev')) {
+        if (process.argv.slice(2).includes('@react-zero-ui/core') && !process.argv.slice(2).includes('--save-dev')) {
           if (!pkg.dependencies) pkg.dependencies = {};
-          pkg.dependencies['@austinserb/react-zero-ui'] = '^1.0.0';
+          pkg.dependencies['@react-zero-ui/core'] = '^1.0.0';
         }
         
         // Handle dev dependencies
@@ -204,7 +204,7 @@ test('CLI script installs correct dependencies', async () => {
 				console.log('NPM calls:', npmCalls);
 
 				assert(npmCalls.includes('install'), 'npm install should be called');
-				assert(npmCalls.includes('@austinserb/react-zero-ui'), 'Should install react-zero-ui');
+				assert(npmCalls.includes('@react-zero-ui/core'), 'Should install react-zero-ui');
 				assert(npmCalls.includes('tailwindcss'), 'Should install tailwindcss');
 				assert(npmCalls.includes('postcss'), 'Should install postcss');
 				assert(npmCalls.includes('@tailwindcss/postcss'), 'Should install @tailwindcss/postcss');
@@ -214,7 +214,7 @@ test('CLI script installs correct dependencies', async () => {
 			const finalPackageJson = JSON.parse(fs.readFileSync(path.join(testDir, 'package.json'), 'utf-8'));
 
 			// Updated assertion - react-zero-ui should be in dependencies (production), not devDependencies
-			assert(finalPackageJson.dependencies['@austinserb/react-zero-ui'], 'react-zero-ui should be in dependencies');
+			assert(finalPackageJson.dependencies['@react-zero-ui/core'], 'react-zero-ui should be in dependencies');
 			assert(finalPackageJson.devDependencies['tailwindcss'], 'tailwindcss should be in devDependencies');
 			assert(finalPackageJson.devDependencies['postcss'], 'postcss should be in devDependencies');
 			assert(finalPackageJson.devDependencies['@tailwindcss/postcss'], '@tailwindcss/postcss should be in devDependencies');
@@ -300,7 +300,7 @@ test('CLI script imports and executes library CLI', async () => {
 
 		// Create package.json for the mock module
 		const mockPackageJson = {
-			name: '@austinserb/react-zero-ui',
+			name: '@react-zero-ui/core',
 			main: 'index.js',
 			exports: { './cli': { types: './cli.d.ts', require: './cli.cjs', import: './cli.cjs' } },
 		};
@@ -346,7 +346,7 @@ test('Library CLI initializes project correctly', async () => {
 		fs.mkdirSync(componentDir, { recursive: true });
 
 		const testComponent = `
-import { useUI } from '@austinserb/react-zero-ui';
+import { useUI } from '@react-zero-ui/core';
 
 export function TestComponent() {
   const [count, setCount] = useUI(0);
@@ -576,7 +576,7 @@ test('CLI script returns appropriate exit codes', async () => {
 
 		fs.writeFileSync(path.join(nodeModulesDir, 'cli.cjs'), mockCLI);
 
-		const mockPackageJson = { name: '@austinserb/react-zero-ui', exports: { './cli': { require: './cli.cjs', import: './cli.cjs' } } };
+		const mockPackageJson = { name: '@react-zero-ui/core', exports: { './cli': { require: './cli.cjs', import: './cli.cjs' } } };
 		fs.writeFileSync(path.join(nodeModulesDir, 'package.json'), JSON.stringify(mockPackageJson));
 
 		const originalPath = process.env.PATH;
@@ -631,7 +631,7 @@ test('Library CLI processes useUI hooks correctly', async () => {
 		fs.mkdirSync(componentsDir, { recursive: true });
 
 		const component1 = `
-import { useUI } from '@austinserb/react-zero-ui';
+import { useUI } from '@react-zero-ui/core';
 
 export function Counter() {
   const [count, setCount] = useUI(0);
@@ -649,7 +649,7 @@ export function Counter() {
 `;
 
 		const component2 = `
-import { useUI } from '@austinserb/react-zero-ui';
+import { useUI } from '@react-zero-ui/core';
 
 export function Toggle() {
   const [isOpen, setIsOpen] = useUI(false);

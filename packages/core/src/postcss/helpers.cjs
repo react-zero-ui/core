@@ -247,7 +247,7 @@ async function patchPostcssConfig() {
 		isESModule = true;
 	}
 
-	const zeroUiPlugin = '@austinserb/react-zero-ui/postcss';
+	const zeroUiPlugin = '@react-zero-ui/core/postcss';
 
 	let createMjs = false;
 
@@ -294,7 +294,7 @@ export default {
 	} else if (updatedConfig === null) {
 		const configFileName = path.basename(postcssConfigPath);
 		console.log(`[Zero-UI] PostCSS config exists but missing Zero-UI plugin.`);
-		console.warn(`[Zero-UI] Please manually add "@austinserb/react-zero-ui/postcss" before Tailwind in your ${configFileName}`);
+		console.warn(`[Zero-UI] Please manually add "@react-zero-ui/core/postcss" before Tailwind in your ${configFileName}`);
 	}
 }
 
@@ -321,7 +321,7 @@ async function patchViteConfig() {
 		return; // No Vite config found, skip patching
 	}
 
-	const zeroUiPlugin = '@austinserb/react-zero-ui/vite';
+	const zeroUiPlugin = '@react-zero-ui/core/vite';
 
 	try {
 		// Read existing config

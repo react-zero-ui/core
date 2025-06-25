@@ -1,4 +1,4 @@
-import zeroUI from "@austinserb/react-zero-ui/vite";
+import zeroUI from "@react-zero-ui/core/vite";
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 

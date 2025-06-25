@@ -45,7 +45,7 @@ export const TopBarV2: React.FC = () => {
 								))}
 								<li className="flex">
 									<Link
-										href="https://github.com/Austin1serb/React-Zero-UI"
+										href="https://github.com/react-zero-ui/core"
 										target="_blank"
 										className="bubble-hover hidden w-fit !flex-row items-center gap-2 rounded-full border border-gray-200 px-3 py-1 font-medium shadow-md duration-300 hover:translate-y-0.5 hover:border-white hover:shadow-none md:flex">
 										<Icon

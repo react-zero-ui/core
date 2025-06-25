@@ -3,7 +3,7 @@
 import { Icon } from '@/app/components/Icon';
 import { TestComponentWithState } from './ReactState';
 import { TestComponentZero } from './ZeroState';
-import { useUI } from '@austinserb/react-zero-ui';
+import { useUI } from '@react-zero-ui/core';
 
 export default function Page() {
 	const [, setActive] = useUI<'react' | 'zero'>('active', 'zero');

@@ -22,8 +22,8 @@ test('Vite CLI scaffolds .zero-ui + vite.config', async () => {
 		.poll(() => {
 			if (!existsSync(vite)) return false;
 			const src = readFileSync(vite, 'utf8');
-			return /from ['"]@austinserb\/react-zero-ui\/vite['"]/.test(src) && /\bplugins:\s*\[.*zeroUI\(\).*]/s.test(src);
+			return /from ['"]@react-zero-ui\/core\/vite['"]/.test(src) && /\bplugins:\s*\[.*zeroUI\(\).*]/s.test(src);
 		})
 		.toBeTruthy();
-	console.log('[Vite CLI] vite', vite);
+	console.log('[Vite CLI] vite CLI completed');
 });

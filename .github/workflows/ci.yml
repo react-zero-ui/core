@@ -55,7 +55,7 @@ jobs:
 
       - name: Install Playwright browsers (if cache miss)
         if: steps.pw-cache.outputs.cache-hit != 'true'
-        run: pnpm --filter @austinserb/react-zero-ui exec playwright install --with-deps
+        run: pnpm --filter @react-zero-ui/core exec playwright install --with-deps
 
       - name: Save Playwright cache
         if: steps.pw-cache.outputs.cache-hit != 'true'
