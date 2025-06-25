@@ -15,13 +15,14 @@ const exec = (cmd, args) => spawnSync(pm, [cmd, ...args], { cwd: target, stdio: 
 if (!existsSync(resolve(target, 'package.json'))) exec('init', ['-y']);
 
 /* 2️⃣ runtime dependency */
-exec(pm === 'yarn' ? 'add' : 'install', ['@austinserb/react-zero-ui']);
+exec(pm === 'yarn' ? 'add' : 'install', ['@react-zero-ui/core']);
 
 /* 3️⃣ dev deps */
+// TODO figure out if we can do it without tailwindcss and only the postcss plugin
 exec(pm === 'yarn' ? 'add' : 'install', ['postcss', 'tailwindcss', '@tailwindcss/postcss', '--save-dev']);
 
 /* 4️⃣ handoff */
-const { default: zeroUiCli } = await import('@austinserb/react-zero-ui/cli');
+const { default: zeroUiCli } = await import('@react-zero-ui/core/cli');
 if (typeof zeroUiCli === 'function') {
 	zeroUiCli(process.argv.slice(3));
 	console.log(`\n🎉  Zero-UI installed. Run \`${pm} run dev\`!\n`);

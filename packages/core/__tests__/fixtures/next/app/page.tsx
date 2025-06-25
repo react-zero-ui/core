@@ -1,6 +1,6 @@
 'use client';
 
-import useUI from '@austinserb/react-zero-ui';
+import useUI from '@react-zero-ui/core';
 import { useEffect, useState } from 'react';
 
 // Component that automatically cycles through themes using useEffect

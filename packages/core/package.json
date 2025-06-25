@@ -1,7 +1,7 @@
 {
-	"name": "@austinserb/react-zero-ui",
-	"version": "1.0.21",
-	"description": "Zero re-render UI state management for React",
+	"name": "@react-zero-ui/core",
+	"version": "0.1.0",
+	"description": "Zero re-render, global UI state management for React",
 	"private": false,
 	"type": "module",
 	"main": "./src/index.js",
@@ -58,13 +58,13 @@
 	"license": "MIT",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/austin1serb/react-zero-ui.git",
+		"url": "git+https://github.com/react-zero-ui/core.git",
 		"directory": "packages/core"
 	},
 	"bugs": {
-		"url": "https://github.com/austin1serb/react-zero-ui/issues"
+		"url": "https://github.com/react-zero-ui/core/issues"
 	},
-	"homepage": "https://github.com/austin1serb/react-zero-ui#readme",
+	"homepage": "https://github.com/react-zero-ui/core#readme",
 	"engines": {
 		"node": ">=18.0.0"
 	},

@@ -23,7 +23,7 @@ Stay **pre-rendered, declarative, and brutally fast.**
 
 ```
 packages/
-├── core     → @austinserb/react-zero-ui (library logic + postcss)
+├── core     → @react-zero-ui/core (library logic + postcss)
 └── cli      → create-zero-ui (npx installer)
 ```
 
@@ -43,11 +43,11 @@ pnpm test         # runs all tests (unit + E2E)
 
 ## ✅ Contribution Flow
 
-### 1. [Start a Discussion](https://github.com/Austin1serb/React-Zero-UI/discussions)
+### 1. [Start a Discussion](https://github.com/react-zero-ui/core/discussions)
 
 For questions, proposals, or early feedback. Share ideas before building.
 
-### 2. [Open an Issue](https://github.com/Austin1serb/React-Zero-UI/issues)
+### 2. [Open an Issue](https://github.com/react-zero-ui/core/issues)
 
 Use the templates.
 
