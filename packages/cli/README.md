@@ -25,8 +25,8 @@ It works by:
 2. Pre-generating Tailwind variants for each UI state
 3. Updating `data-*` attributes on `<body>` to drive the UI instantly
 
-👉 Live Demo: [https://react-zero-ui.vercel.app](https://react-zero-ui.vercel.app)
-👉 Package: [https://www.npmjs.com/package/@react-zero-ui/core](https://www.npmjs.com/package/@react-zero-ui/core)
+👉 Live Demo: [https://zero-ui.dev](https://zero-ui.dev)
+👉 Package: [@react-zero-ui/core](https://www.npmjs.com/package/@react-zero-ui/core)
 
 ---
 
@@ -52,7 +52,7 @@ That's it — you'll get:
 Powered by:
 
 ```json
-"@react-zero-ui/core": "^1.0.21"
+"@react-zero-ui/core": "^0.1.0"
 ```
 
 Full docs and live benchmarks:
