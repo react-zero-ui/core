@@ -66,7 +66,7 @@ That's it — the CLI patch‑installs the required Babel & PostCSS plugins and 
 ### Manual Install
 
 ```bash
-npm install @austinserb/react-zero-ui
+npm install @react-zero-ui/core
 ```
 
 Then follow **Setup →** for your bundler.
@@ -79,7 +79,7 @@ Then follow **Setup →** for your bundler.
 
 ```js
 // vite.config.*
-import { zeroUIPlugin } from '@austinserb/react-zero-ui/vite';
+import { zeroUIPlugin } from '@react-zero-ui/core/vite';
 
 export default {
 	// ❗️Remove the default `tailwindcss()` plugin — Zero‑UI extends it internally
@@ -93,7 +93,7 @@ export default {
 
    ```tsx
    // app/layout.tsx
-   import { bodyAttributes } from '@austinserb/react-zero-ui/attributes';
+   import { bodyAttributes } from '@zero-ui/attributes';
    // or:  import { bodyAttributes } from '../.zero-ui/attributes';
 
    export default function RootLayout({ children }) {
@@ -109,7 +109,7 @@ export default {
 
    ```js
    // postcss.config.js
-   module.exports = { plugins: { '@austinserb/react-zero-ui/postcss': {}, tailwindcss: {} } };
+   module.exports = { plugins: { '@react-zero-ui/core/postcss': {}, tailwindcss: {} } };
    ```
 
 ---
