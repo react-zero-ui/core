@@ -1,5 +1,7 @@
+'use client';
 import { domAnimation, LazyMotion } from 'motion/react';
 import { RenderTracker } from './ReactTracker';
+import './layout.css'
 
 const layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	return (
