@@ -22,11 +22,11 @@ function findAllSourceFiles(rootDirs = ['src', 'app']) {
 	const files = [];
 	const cwd = process.cwd();
 
-	rootDirs.forEach(dir => {
+	rootDirs.forEach((dir) => {
 		const dirPath = path.join(cwd, dir);
 		if (!fs.existsSync(dirPath)) return;
 
-		const walk = current => {
+		const walk = (current) => {
 			try {
 				for (const entry of fs.readdirSync(current)) {
 					const full = path.join(current, entry);
@@ -34,7 +34,7 @@ function findAllSourceFiles(rootDirs = ['src', 'app']) {
 					// TODO upgrade to fast-glob
 					if (stat.isDirectory() && !entry.startsWith('.') && !IGNORE_DIRS.has(entry)) {
 						walk(full);
-					} else if (stat.isFile() && exts.some(ext => full.endsWith(ext))) {
+					} else if (stat.isFile() && exts.some((ext) => full.endsWith(ext))) {
 						files.push(full);
 					}
 				}
@@ -57,7 +57,7 @@ function findAllSourceFiles(rootDirs = ['src', 'app']) {
  */
 async function processVariants(files = null) {
 	const sourceFiles = files || findAllSourceFiles();
-	const allVariants = sourceFiles.flatMap(file => {
+	const allVariants = sourceFiles.flatMap((file) => {
 		return extractVariants(file);
 	});
 
@@ -76,7 +76,7 @@ async function processVariants(files = null) {
 		}
 
 		if (Array.isArray(values)) {
-			values.forEach(v => variantMap.get(key).add(v));
+			values.forEach((v) => variantMap.get(key).add(v));
 		}
 	}
 
@@ -95,16 +95,20 @@ async function processVariants(files = null) {
 	return { finalVariants, initialValues, sourceFiles };
 }
 
+// TODO build css for local and global variants separately based on scoped/global
 function buildCss(variants) {
-	let css = CONFIG.HEADER + '\n';
-	for (const { key, values } of variants) {
+	const lines = variants.flatMap(({ key, values }) => {
 		const keySlug = toKebabCase(key);
-		for (const val of values) {
-			const valSlug = toKebabCase(val);
-			css += `@variant ${keySlug}-${valSlug} (:where(body[data-${keySlug}="${valSlug}"] &), &[data-${keySlug}="${valSlug}"], [data-${keySlug}="${valSlug}"] &);\n`;
-		}
-	}
-	return css;
+		return values.map((v) => {
+			const valSlug = toKebabCase(v);
+			return `@custom-variant ${keySlug}-${valSlug} (&[data-${keySlug}="${valSlug}"],[data-${keySlug}="${valSlug}"] &, :where(body[data-${keySlug}="${valSlug}"] &));`;
+			// @custom-variant ${keySlug}-${valSlug} eg.     - theme-light
+			//   1. &[data-${keySlug}="${valSlug}"]          - element itself (wins ties)
+			//   2. [data-${keySlug}="${valSlug}"] &         - nearest ancestor wrapper
+			//   3. :where(body[data-${keySlug}="${valSlug}"] &)  - global <body> fallback
+		});
+	});
+	return CONFIG.HEADER + '\n' + lines.join('\n') + '\n';
 }
 
 async function generateAttributesFile(finalVariants, initialValues) {
@@ -117,7 +121,7 @@ async function generateAttributesFile(finalVariants, initialValues) {
 	const attrExport = `${CONFIG.HEADER}\nexport const bodyAttributes = ${JSON.stringify(initialValues, null, 2)};\n`;
 
 	// Generate TypeScript definitions
-	const toLiteral = v => (typeof v === 'string' ? `"${v.replace(/"/g, '\\"')}"` : v);
+	const toLiteral = (v) => (typeof v === 'string' ? `"${v.replace(/"/g, '\\"')}"` : v);
 	const variantLines = finalVariants.map(({ key, values }) => {
 		const slug = `data-${toKebabCase(key)}`;
 		const union = values.length ? values.map(toLiteral).join(' | ') : 'string'; // ← fallback
@@ -357,7 +361,7 @@ async function patchViteConfig() {
 function hasViteConfig() {
 	const cwd = process.cwd();
 	const viteConfigFiles = ['vite.config.ts', 'vite.config.js', 'vite.config.mjs'];
-	return viteConfigFiles.some(configFile => fs.existsSync(path.join(cwd, configFile)));
+	return viteConfigFiles.some((configFile) => fs.existsSync(path.join(cwd, configFile)));
 }
 
 module.exports = {

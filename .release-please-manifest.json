@@ -1,7 +1,13 @@
 {
 	"packages": {
-		"packages/core": { "package-name": "@austinserb/react-zero-ui", "release-type": "node" },
-		"packages/cli": { "package-name": "create-zero-ui", "release-type": "node" }
+		"packages/core": {
+			"package-name": "react-zero-ui",
+			"release-type": "node"
+		},
+		"packages/cli": {
+			"package-name": "create-zero-ui",
+			"release-type": "node"
+		}
 	},
 	"monorepo-tags": true,
 	"include-component-in-tag": true
