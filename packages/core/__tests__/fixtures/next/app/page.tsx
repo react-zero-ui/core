@@ -21,7 +21,7 @@ export default function Page() {
 				data-testid="theme-container">
 				<button
 					type="button"
-					onClick={() => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))}
+					onClick={() => setTheme(prev => (prev === 'light' ? 'dark' : 'light'))}
 					className="border-2 border-red-500"
 					data-testid="theme-toggle">
 					Toggle Theme (default)
@@ -38,7 +38,7 @@ export default function Page() {
 				data-testid="theme-container-secondary">
 				<button
 					type="button"
-					onClick={() => setTheme2((prev) => (prev === 'light' ? 'dark' : 'light'))}
+					onClick={() => setTheme2(prev => (prev === 'light' ? 'dark' : 'light'))}
 					className="border-2 border-red-500"
 					data-testid="theme-toggle-secondary">
 					Toggle Theme Secondary (w/ number)
@@ -55,7 +55,7 @@ export default function Page() {
 				data-testid="theme-container-3">
 				<button
 					type="button"
-					onClick={() => setThemeThree((prev) => (prev === 'light' ? 'dark' : 'light'))}
+					onClick={() => setThemeThree(prev => (prev === 'light' ? 'dark' : 'light'))}
 					className="border-2 border-red-500"
 					data-testid="theme-toggle-3">
 					Toggle Theme 3 (w/ camelCase)
@@ -72,7 +72,7 @@ export default function Page() {
 				data-testid="theme-container-3">
 				<button
 					type="button"
-					onClick={() => setToggle((prev) => !prev)}
+					onClick={() => setToggle(prev => !prev)}
 					className="border-2 border-red-500"
 					data-testid="toggle-boolean">
 					Toggle Boolean ({`w/ boolean + prev => !prev`})
@@ -88,7 +88,7 @@ export default function Page() {
 				data-testid="number-container">
 				<button
 					type="button"
-					onClick={() => setNumber((prev) => (prev === 1 ? 2 : 1))}
+					onClick={() => setNumber(prev => (prev === 1 ? 2 : 1))}
 					className="border-2 border-red-500"
 					data-testid="toggle-number">
 					Toggle Number ({`w/ number + prev => prev === 1 ? 2 : 1`})

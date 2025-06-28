@@ -74,8 +74,8 @@ test('generates body attributes file correctly', async () => {
 			assert(content.includes('"data-sidebar": "expanded"'), 'Should have sidebar attribute');
 
 			// Verify CSS variants
-			assert(result.css.includes('@variant theme-light'), 'Should have theme-light variant');
-			assert(result.css.includes('@variant sidebar-expanded'), 'Should have sidebar-expanded variant');
+			assert(result.css.includes('@custom-variant theme-light'), 'Should have theme-light variant');
+			assert(result.css.includes('@custom-variant sidebar-expanded'), 'Should have sidebar-expanded variant');
 		}
 	);
 });
@@ -110,8 +110,8 @@ test('generates body attributes file correctly when kebab-case is used', async (
 			assert(content.includes('"data-sidebar-new": "expanded"'), 'Should have sidebar-new attribute');
 
 			// Verify CSS variants
-			assert(result.css.includes('@variant theme-secondary-light'), 'Should have theme-secondary-light variant');
-			assert(result.css.includes('@variant sidebar-new-expanded'), 'Should have sidebar-new-expanded variant');
+			assert(result.css.includes('@custom-variant theme-secondary-light'), 'Should have theme-secondary-light variant');
+			assert(result.css.includes('@custom-variant sidebar-new-expanded'), 'Should have sidebar-new-expanded variant');
 		}
 	);
 });
@@ -134,7 +134,7 @@ test('handles TypeScript generic types', async () => {
 			// Check all variants were generated
 			const variants = ['idle', 'loading', 'success', 'error'];
 			variants.forEach(variant => {
-				assert(result.css.includes(`@variant status-${variant}`), `Should have status-${variant} variant`);
+				assert(result.css.includes(`@custom-variant status-${variant}`), `Should have status-${variant} variant`);
 			});
 
 			// Check attributes file
@@ -176,7 +176,7 @@ test('detects JavaScript setValue calls', async () => {
 
 			const states = ['closed', 'open', 'minimized', 'fullscreen'];
 			states.forEach(state => {
-				assert(result.css.includes(`@variant modal-${state}`), `Should detect modal-${state}`);
+				assert(result.css.includes(`@custom-variant modal-${state}`), `Should detect modal-${state}`);
 			});
 
 			const content = fs.readFileSync(getAttrFile(), 'utf-8');
@@ -206,10 +206,10 @@ test('handles boolean values', async () => {
 		result => {
 			console.log('\n🔍 Boolean Values Test:');
 
-			assert(result.css.includes('@variant drawer-true'), 'Should have drawer-true');
-			assert(result.css.includes('@variant drawer-false'), 'Should have drawer-false');
-			assert(result.css.includes('@variant checkbox-true'), 'Should have checkbox-true');
-			assert(result.css.includes('@variant checkbox-false'), 'Should have checkbox-false');
+			assert(result.css.includes('@custom-variant drawer-true'), 'Should have drawer-true');
+			assert(result.css.includes('@custom-variant drawer-false'), 'Should have drawer-false');
+			assert(result.css.includes('@custom-variant checkbox-true'), 'Should have checkbox-true');
+			assert(result.css.includes('@custom-variant checkbox-false'), 'Should have checkbox-false');
 
 			const content = fs.readFileSync(getAttrFile(), 'utf-8');
 			console.log('Boolean attributes:', content);
@@ -240,10 +240,10 @@ test('handles kebab-case conversion', async () => {
 			console.log('\n🔍 Kebab-case Test:');
 
 			// Check CSS has kebab-case
-			assert(result.css.includes('@variant primary-color-deep-blue'), 'Should convert to kebab-case');
-			assert(result.css.includes('@variant primary-color-dark-red'), 'Should convert to kebab-case');
-			assert(result.css.includes('@variant background-color-light-gray'), 'Should convert to kebab-case');
-			assert(result.css.includes('@variant background-color-pale-yellow'), 'Should convert to kebab-case');
+			assert(result.css.includes('@custom-variant primary-color-deep-blue'), 'Should convert to kebab-case');
+			assert(result.css.includes('@custom-variant primary-color-dark-red'), 'Should convert to kebab-case');
+			assert(result.css.includes('@custom-variant background-color-light-gray'), 'Should convert to kebab-case');
+			assert(result.css.includes('@custom-variant background-color-pale-yellow'), 'Should convert to kebab-case');
 
 			// Check attributes use kebab-case keys
 			const content = fs.readFileSync(getAttrFile(), 'utf-8');
@@ -284,7 +284,7 @@ test('handles conditional expressions', async () => {
 
 			const expectedStates = ['default', 'active', 'inactive', 'night', 'day', 'fallback'];
 			expectedStates.forEach(state => {
-				assert(result.css.includes(`@variant state-${state}`), `Should detect state-${state}`);
+				assert(result.css.includes(`@custom-variant state-${state}`), `Should detect state-${state}`);
 			});
 		}
 	);
@@ -321,11 +321,11 @@ test('handles multiple files and deduplication', async () => {
 			// Should combine all theme values from all files
 			const themeVariants = ['light', 'dark', 'blue', 'auto'];
 			themeVariants.forEach(variant => {
-				assert(result.css.includes(`@variant theme-${variant}`), `Should have theme-${variant}`);
+				assert(result.css.includes(`@custom-variant theme-${variant}`), `Should have theme-${variant}`);
 			});
 
 			// Count occurrences - should be deduplicated
-			const lightCount = (result.css.match(/@variant theme-light/g) || []).length;
+			const lightCount = (result.css.match(/@custom-variant theme-light/g) || []).length;
 			assert.equal(lightCount, 1, 'Should deduplicate variants');
 		}
 	);
@@ -353,7 +353,7 @@ test('handles parsing errors gracefully', async () => {
 			console.log('\n🔍 Parse Error Test:');
 			console.log('result: ', result.css);
 			// Should still process valid files
-			assert(result.css.includes('@variant valid-working'), 'Should process valid files');
+			assert(result.css.includes('@custom-variant valid-working'), 'Should process valid files');
 
 			// Should not crash on invalid files
 			assert(result.css.includes('AUTO-GENERATED'), 'Should complete processing');
@@ -380,8 +380,8 @@ test('valid edge cases: underscores + missing initial', async () => {
 		},
 		result => {
 			console.log('result: ', result.css);
-			assert(result.css.includes('@variant only-setter-key-set-later'));
-			assert(!result.css.includes('@variant no-initial-value'));
+			assert(result.css.includes('@custom-variant only-setter-key-set-later'));
+			assert(!result.css.includes('@custom-variant no-initial-value'));
 		}
 	);
 });
@@ -404,7 +404,7 @@ test('watches for file changes', async () => {
 		},
 		async result => {
 			// Initial state
-			assert(result.css.includes('@variant watch-test-initial'));
+			assert(result.css.includes('@custom-variant watch-test-initial'));
 
 			// Add a new file
 			fs.writeFileSync(
@@ -424,7 +424,7 @@ test('watches for file changes', async () => {
 			// Re-process to check if watcher picked up changes
 			const result2 = await postcss([plugin()]).process('', { from: undefined });
 
-			assert(result2.css.includes('@variant watch-test-updated'), 'Should detect new state');
+			assert(result2.css.includes('@custom-variant watch-test-updated'), 'Should detect new state');
 		}
 	);
 });
@@ -456,7 +456,7 @@ test('ignores node_modules and hidden directories', async () => {
 		},
 		result => {
 			console.log('result: ', result.css);
-			assert(result.css.includes('@variant valid-yes'), 'Should process valid files');
+			assert(result.css.includes('@custom-variant valid-yes'), 'Should process valid files');
 			assert(!result.css.includes('ignored'), 'Should ignore node_modules');
 			assert(!result.css.includes('hidden'), 'Should ignore hidden directories');
 		}
@@ -475,8 +475,8 @@ test('handles deeply nested file structures', async () => {
     `,
 		},
 		result => {
-			assert(result.css.includes('@variant auth-state-logged-out'));
-			assert(result.css.includes('@variant auth-state-logged-in'));
+			assert(result.css.includes('@custom-variant auth-state-logged-out'));
+			assert(result.css.includes('@custom-variant auth-state-logged-in'));
 		}
 	);
 });
@@ -506,7 +506,7 @@ test('handles complex TypeScript scenarios', async () => {
 		result => {
 			// Should extract all size variants
 			['xs', 'sm', 'md', 'lg', 'xl', '2xl'].forEach(size => {
-				assert(result.css.includes(`@variant size-${size}`), `Should have size-${size}`);
+				assert(result.css.includes(`@custom-variant size-${size}`), `Should have size-${size}`);
 			});
 			// Check attributes file
 			const content = fs.readFileSync(getAttrFile(), 'utf-8');
@@ -540,7 +540,7 @@ test('handles large projects efficiently', async function () {
 		console.log(`\n⚡ Performance: Processed 50 files in ${duration}ms`);
 
 		// Should process all files
-		assert(result.css.includes('@variant state49-value49'), 'Should process all files');
+		assert(result.css.includes('@custom-variant state49-value49'), 'Should process all files');
 
 		// Should complete in reasonable time
 		assert(duration < 300, 'Should process 50 files in under 300ms');
@@ -565,9 +565,9 @@ test('handles special characters in values', async () => {
     `,
 		},
 		result => {
-			assert(result.css.includes('@variant special-with-dash'));
-			assert(result.css.includes('@variant special-with-underscore'));
-			assert(result.css.includes('@variant special-123numeric'));
+			assert(result.css.includes('@custom-variant special-with-dash'));
+			assert(result.css.includes('@custom-variant special-with-underscore'));
+			assert(result.css.includes('@custom-variant special-123numeric'));
 		}
 	);
 });
