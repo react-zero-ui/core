@@ -1,5 +1,5 @@
 // postcss.config.mjs
 const config = {
-  plugins: ["@austinserb/react-zero-ui/postcss", '@tailwindcss/postcss']
+  plugins: ["@react-zero-ui/core/postcss", '@tailwindcss/postcss']
 };
 export default config;

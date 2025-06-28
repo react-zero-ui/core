@@ -12,7 +12,7 @@
 		"bootstrap": "pnpm install --frozen-lockfile && pnpm prepack:core && pnpm i-tarball",
 		"test": "cd packages/core && pnpm test:all",
 		"test:all": "pnpm install --frozen-lockfile && pnpm prepack:core && pnpm lint && pnpm i-tarball && cd packages/core && pnpm test:all",
-		"prepack:core": "pnpm -F @austinserb/react-zero-ui pack --pack-destination ./dist",
+		"prepack:core": "pnpm -F @react-zero-ui/core pack --pack-destination ./dist",
 		"i-tarball": "node scripts/install-local-tarball.js",
 		"test:vite": "cd packages/core && pnpm test:vite",
 		"test:next": "cd packages/core && pnpm test:next",

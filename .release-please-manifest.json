@@ -1,7 +1,7 @@
 {
 	"packages": {
 		"packages/core": {
-			"package-name": "react-zero-ui",
+			"package-name": "@react-zero-ui/core",
 			"release-type": "node"
 		},
 		"packages/cli": {

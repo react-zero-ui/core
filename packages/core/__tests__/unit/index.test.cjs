@@ -835,7 +835,7 @@ test('PostCSS config - creates new .js config for Next.js project', async () => 
 		console.log('\n📄 Generated PostCSS config:');
 		console.log(configContent);
 
-		assert(configContent.includes('@austinserb/react-zero-ui/postcss'), 'Should include Zero-UI plugin');
+		assert(configContent.includes('@react-zero-ui/core/postcss'), 'Should include Zero-UI plugin');
 		assert(configContent.includes('@tailwindcss/postcss'), 'Should include Tailwind plugin');
 		assert(configContent.includes('module.exports'), 'Should use CommonJS format');
 	} finally {
@@ -871,7 +871,7 @@ test('PostCSS config - updates existing .js config', async () => {
 		console.log('\n📄 Updated PostCSS config:');
 		console.log(updatedContent);
 
-		assert(updatedContent.includes('@austinserb/react-zero-ui/postcss'), 'Should add Zero-UI plugin');
+		assert(updatedContent.includes('@react-zero-ui/core/postcss'), 'Should add Zero-UI plugin');
 		assert(updatedContent.includes('autoprefixer'), 'Should preserve existing plugins');
 		assert(updatedContent.includes('@tailwindcss/postcss'), 'Should preserve Tailwind');
 	} finally {
@@ -909,7 +909,7 @@ export default config;`;
 		console.log('\n📄 Updated .mjs PostCSS config:');
 		console.log(updatedContent);
 
-		assert(updatedContent.includes('@austinserb/react-zero-ui/postcss'), 'Should add Zero-UI plugin');
+		assert(updatedContent.includes('@react-zero-ui/core/postcss'), 'Should add Zero-UI plugin');
 		assert(updatedContent.includes('export default'), 'Should preserve ES module format');
 		assert(updatedContent.includes('autoprefixer'), 'Should preserve existing plugins');
 	} finally {
@@ -931,7 +931,7 @@ test('PostCSS config - skips if Zero-UI already configured', async () => {
 		// Create PostCSS config with Zero-UI already configured
 		const existingConfig = `module.exports = {
   plugins: {
-    '@austinserb/react-zero-ui/postcss': {},
+    '@react-zero-ui/core/postcss': {},
     '@tailwindcss/postcss': {}
   }
 };`;
@@ -986,12 +986,12 @@ test('PostCSS config - handles complex existing configs w/comments', async () =>
 		console.log('\n📄 Complex config update:');
 		console.log(updatedContent);
 
-		assert(updatedContent.includes('@austinserb/react-zero-ui/postcss'), 'Should add Zero-UI plugin');
+		assert(updatedContent.includes('@react-zero-ui/core/postcss'), 'Should add Zero-UI plugin');
 		assert(updatedContent.includes('postcss-flexbugs-fixes'), 'Should preserve existing plugins');
 		assert(updatedContent.includes('postcss-preset-env'), 'Should preserve complex plugin configs');
 
 		// Verify Zero-UI comes before other plugins
-		const zeroUiIndex = updatedContent.indexOf('@austinserb/react-zero-ui/postcss');
+		const zeroUiIndex = updatedContent.indexOf('@react-zero-ui/core/postcss');
 		const tailwindIndex = updatedContent.indexOf('@tailwindcss/postcss');
 		assert(zeroUiIndex < tailwindIndex, 'Zero-UI should come before Tailwind');
 	} finally {
@@ -1044,7 +1044,7 @@ export default config;`
 		const updatedJsContent = fs.readFileSync('postcss.config.js', 'utf-8');
 		const updatedMjsContent = fs.readFileSync('postcss.config.mjs', 'utf-8');
 
-		assert(updatedJsContent.includes('@austinserb/react-zero-ui/postcss'), 'Should modify .js config');
+		assert(updatedJsContent.includes('@react-zero-ui/core/postcss'), 'Should modify .js config');
 		assert.equal(originalMjsContent, updatedMjsContent, 'Should not modify .mjs config when .js exists');
 	} finally {
 		process.chdir(originalCwd);
@@ -1079,7 +1079,7 @@ export default defineConfig({
 		console.log('\n📄 Updated Vite config:');
 		console.log(updatedContent);
 
-		assert(updatedContent.includes('@austinserb/react-zero-ui/vite'), 'Should add Zero-UI import');
+		assert(updatedContent.includes('@react-zero-ui/core/vite'), 'Should add Zero-UI import');
 		assert(updatedContent.includes('zeroUI()'), 'Should add zeroUI plugin');
 		assert(updatedContent.includes('react()'), 'Should preserve existing plugins');
 	} finally {
@@ -1116,7 +1116,7 @@ export default defineConfig({
 		console.log('\n📄 Vite config with Tailwind replaced:');
 		console.log(updatedContent);
 
-		assert(updatedContent.includes('@austinserb/react-zero-ui/vite'), 'Should add Zero-UI import');
+		assert(updatedContent.includes('@react-zero-ui/core/vite'), 'Should add Zero-UI import');
 		assert(updatedContent.includes('zeroUI()'), 'Should add zeroUI plugin');
 		assert(!updatedContent.includes('@tailwindcss/vite'), 'Should remove Tailwind import');
 		assert(!updatedContent.includes('tailwindcss()'), 'Should replace Tailwind plugin');
@@ -1216,7 +1216,7 @@ test('Vite config - skips if zeroUI already configured', async () => {
 		// Create Vite config with zeroUI already configured
 		const existingConfig = `import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import zeroUI from '@austinserb/react-zero-ui/vite'
+import zeroUI from '@react-zero-ui/core/vite'
 
 export default defineConfig({
   plugins: [
@@ -1298,7 +1298,7 @@ export default defineConfig({
 		console.log('\n📄 Complex config update:');
 		console.log(updatedContent);
 
-		assert(updatedContent.includes('@austinserb/react-zero-ui/vite'), 'Should add Zero-UI import');
+		assert(updatedContent.includes('@react-zero-ui/core/vite'), 'Should add Zero-UI import');
 		assert(updatedContent.includes('zeroUI()'), 'Should add zeroUI plugin');
 		assert(!updatedContent.includes('@tailwindcss/vite'), 'Should remove Tailwind import');
 		assert(!updatedContent.includes('tailwindcss()'), 'Should replace Tailwind plugin');
@@ -1379,7 +1379,7 @@ export default config`;
 		console.log('\n📄 Variable assignment config:');
 		console.log(updatedContent);
 
-		assert(updatedContent.includes('@austinserb/react-zero-ui/vite'), 'Should add Zero-UI import');
+		assert(updatedContent.includes('@react-zero-ui/core/vite'), 'Should add Zero-UI import');
 		assert(updatedContent.includes('zeroUI()'), 'Should add zeroUI plugin');
 		assert(!updatedContent.includes('tailwindcss()'), 'Should replace Tailwind plugin');
 	} finally {
@@ -1446,7 +1446,7 @@ export default defineConfig({
 		const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
 		console.log(updatedContent);
 
-		assert(updatedContent.includes('@austinserb/react-zero-ui/vite'), 'Should add Zero-UI import');
+		assert(updatedContent.includes('@react-zero-ui/core/vite'), 'Should add Zero-UI import');
 		assert(updatedContent.includes('zeroUI()'), 'Should add zeroUI plugin');
 		assert(updatedContent.includes('plugins:'), 'Should add plugins array');
 	} finally {
@@ -1477,7 +1477,7 @@ export default defineConfig({
 		const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
 		console.log(updatedContent);
 
-		assert(updatedContent.includes('@austinserb/react-zero-ui/vite'), 'Should add Zero-UI import');
+		assert(updatedContent.includes('@react-zero-ui/core/vite'), 'Should add Zero-UI import');
 		assert(updatedContent.includes('zeroUI()'), 'Should add zeroUI plugin to empty array');
 	} finally {
 		process.chdir(originalCwd);

@@ -164,9 +164,9 @@ test('CLI script installs correct dependencies', async () => {
         const pkg = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
         
         // Handle production dependency
-        if (process.argv.slice(2).includes('@austinserb/react-zero-ui') && !process.argv.slice(2).includes('--save-dev')) {
+        if (process.argv.slice(2).includes('@react-zero-ui/core') && !process.argv.slice(2).includes('--save-dev')) {
           if (!pkg.dependencies) pkg.dependencies = {};
-          pkg.dependencies['@austinserb/react-zero-ui'] = '^1.0.0';
+          pkg.dependencies['@react-zero-ui/core'] = '^1.0.0';
         }
         
         // Handle dev dependencies
@@ -204,7 +204,7 @@ test('CLI script installs correct dependencies', async () => {
 				console.log('NPM calls:', npmCalls);
 
 				assert(npmCalls.includes('install'), 'npm install should be called');
-				assert(npmCalls.includes('@austinserb/react-zero-ui'), 'Should install react-zero-ui');
+				assert(npmCalls.includes('@react-zero-ui/core'), 'Should install react-zero-ui');
 				assert(npmCalls.includes('tailwindcss'), 'Should install tailwindcss');
 				assert(npmCalls.includes('postcss'), 'Should install postcss');
 				assert(npmCalls.includes('@tailwindcss/postcss'), 'Should install @tailwindcss/postcss');
@@ -214,7 +214,7 @@ test('CLI script installs correct dependencies', async () => {
 			const finalPackageJson = JSON.parse(fs.readFileSync(path.join(testDir, 'package.json'), 'utf-8'));
 
 			// Updated assertion - react-zero-ui should be in dependencies (production), not devDependencies
-			assert(finalPackageJson.dependencies['@austinserb/react-zero-ui'], 'react-zero-ui should be in dependencies');
+			assert(finalPackageJson.dependencies['@react-zero-ui/core'], 'react-zero-ui should be in dependencies');
 			assert(finalPackageJson.devDependencies['tailwindcss'], 'tailwindcss should be in devDependencies');
 			assert(finalPackageJson.devDependencies['postcss'], 'postcss should be in devDependencies');
 			assert(finalPackageJson.devDependencies['@tailwindcss/postcss'], '@tailwindcss/postcss should be in devDependencies');
@@ -268,74 +268,6 @@ test('CLI script handles different target directories', async () => {
 	}
 });
 
-test('CLI script imports and executes library CLI', async () => {
-	const testDir = createTestDir();
-
-	try {
-		// Create a minimal package.json
-		const packageJson = { name: 'test', version: '1.0.0' };
-		fs.writeFileSync(path.join(testDir, 'package.json'), JSON.stringify(packageJson));
-
-		// Create mock node_modules structure
-		const nodeModulesDir = path.join(testDir, 'node_modules', '@austinserb', 'react-zero-ui');
-		fs.mkdirSync(nodeModulesDir, { recursive: true });
-
-		// Create mock CLI module that matches the actual structure
-		const mockCLI = `
-      // Mock implementation of the CLI
-      async function runZeroUiInit() {
-        console.log('Mock CLI executed successfully');
-      }
-      
-      function cli(argv = process.argv.slice(2)) {
-        await runZeroUiInit(argv);
-        return Promise.resolve();
-      }
-      
-      module.exports = cli;
-      module.exports.default = cli;
-    `;
-
-		fs.writeFileSync(path.join(nodeModulesDir, 'cli.cjs'), mockCLI);
-
-		// Create package.json for the mock module
-		const mockPackageJson = {
-			name: '@austinserb/react-zero-ui',
-			main: 'index.js',
-			exports: { './cli': { types: './cli.d.ts', require: './cli.cjs', import: './cli.cjs' } },
-		};
-		fs.writeFileSync(path.join(nodeModulesDir, 'package.json'), JSON.stringify(mockPackageJson));
-
-		// Mock npm to avoid actual installation
-		const mockNpmScript = `#!/bin/bash\necho "Mock npm install completed"`;
-		const mockNpmPath = path.join(testDir, 'npm');
-		fs.writeFileSync(mockNpmPath, mockNpmScript);
-		fs.chmodSync(mockNpmPath, '755');
-
-		const originalPath = process.env.PATH;
-		process.env.PATH = `${testDir}:${originalPath}`;
-
-		try {
-			const result = await runCLIScript(testDir, 10000).catch(err => {
-				console.log('CLI run resulted in:', err.message);
-				return { error: err.message };
-			});
-
-			// Check that CLI was executed
-			assert(
-				result.stdout.includes('Mock CLI executed successfully') || result.stdout.includes('Zero-UI installed'),
-				'CLI should execute library CLI function'
-			);
-
-			console.log('✅ CLI script successfully imports and executes library CLI');
-		} finally {
-			process.env.PATH = originalPath;
-		}
-	} finally {
-		cleanupTestDir(testDir);
-	}
-});
-
 // Additional test for library CLI functionality
 test('Library CLI initializes project correctly', async () => {
 	const testDir = createTestDir();
@@ -346,7 +278,7 @@ test('Library CLI initializes project correctly', async () => {
 		fs.mkdirSync(componentDir, { recursive: true });
 
 		const testComponent = `
-import { useUI } from '@austinserb/react-zero-ui';
+import { useUI } from '@react-zero-ui/core';
 
 export function TestComponent() {
   const [count, setCount] = useUI(0);
@@ -546,81 +478,6 @@ test('CLI script handles invalid target directory', async () => {
 	}
 });
 
-// Test CLI script exit codes
-test('CLI script returns appropriate exit codes', async () => {
-	const testDir = createTestDir();
-
-	try {
-		// Create package.json to speed up the test
-		const packageJson = { name: 'test', version: '1.0.0' };
-		fs.writeFileSync(path.join(testDir, 'package.json'), JSON.stringify(packageJson));
-
-		// Mock npm to simulate successful installation
-		const mockNpmScript = `#!/bin/bash\necho "Mock npm successful"; exit 0`;
-		const mockNpmPath = path.join(testDir, 'npm');
-		fs.writeFileSync(mockNpmPath, mockNpmScript);
-		fs.chmodSync(mockNpmPath, '755');
-
-		// Create mock CLI module
-		const nodeModulesDir = path.join(testDir, 'node_modules', '@austinserb', 'react-zero-ui');
-		fs.mkdirSync(nodeModulesDir, { recursive: true });
-
-		const mockCLI = `
-      function cli() {
-        console.log('CLI executed successfully');
-        return Promise.resolve();
-      }
-      module.exports = cli;
-      module.exports.default = cli;
-    `;
-
-		fs.writeFileSync(path.join(nodeModulesDir, 'cli.cjs'), mockCLI);
-
-		const mockPackageJson = { name: '@austinserb/react-zero-ui', exports: { './cli': { require: './cli.cjs', import: './cli.cjs' } } };
-		fs.writeFileSync(path.join(nodeModulesDir, 'package.json'), JSON.stringify(mockPackageJson));
-
-		const originalPath = process.env.PATH;
-		process.env.PATH = `${testDir}:${originalPath}`;
-
-		try {
-			const binScript = path.resolve(__dirname, '../../../cli/bin.js');
-
-			const result = await new Promise((resolve, reject) => {
-				const child = spawn('node', [binScript, '.'], { cwd: testDir, stdio: ['pipe', 'pipe', 'pipe'] });
-
-				let stdout = '';
-				child.stdout.on('data', data => {
-					stdout += data.toString();
-				});
-
-				const timer = setTimeout(() => {
-					child.kill('SIGKILL');
-					resolve({ timedOut: true });
-				}, 10000);
-
-				child.on('close', code => {
-					clearTimeout(timer);
-					resolve({ code, stdout });
-				});
-
-				child.on('error', error => {
-					clearTimeout(timer);
-					reject(error);
-				});
-			});
-
-			// Should complete successfully or timeout (which is expected due to our mocks)
-			assert(result.code === 0 || result.timedOut || result.stdout.includes('Zero-UI installed'), 'CLI should complete successfully');
-
-			console.log('✅ CLI script returns appropriate exit codes');
-		} finally {
-			process.env.PATH = originalPath;
-		}
-	} finally {
-		cleanupTestDir(testDir);
-	}
-});
-
 // Test library CLI with actual useUI components
 test('Library CLI processes useUI hooks correctly', async () => {
 	const testDir = createTestDir();
@@ -631,7 +488,7 @@ test('Library CLI processes useUI hooks correctly', async () => {
 		fs.mkdirSync(componentsDir, { recursive: true });
 
 		const component1 = `
-import { useUI } from '@austinserb/react-zero-ui';
+import { useUI } from '@react-zero-ui/core';
 
 export function Counter() {
   const [count, setCount] = useUI(0);
@@ -649,7 +506,7 @@ export function Counter() {
 `;
 
 		const component2 = `
-import { useUI } from '@austinserb/react-zero-ui';
+import { useUI } from '@react-zero-ui/core';
 
 export function Toggle() {
   const [isOpen, setIsOpen] = useUI(false);

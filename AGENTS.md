@@ -37,7 +37,6 @@ const [staleValue, setValue] = useUI<'open' | 'closed'>('sidebar', 'closed');
 - ✅ Do **NOT** use the first value from `useUI()` for logic — it DOES NOT UPDATE.
 - ✅ You can call setters **from anywhere** in the app — no prop drilling or context needed.
 - ✅ Tailwind classes must use `key-value:` pattern:
-
   - `theme-dark:bg-black`
   - `accent-blue:text-blue-500`
   - `sidebar-open:translate-x-0`

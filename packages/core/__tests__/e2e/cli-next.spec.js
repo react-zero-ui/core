@@ -27,7 +27,8 @@ test('Next CLI scaffolds .zero-ui + tsconfig + postcss', async () => {
 	await expect
 		.poll(() => {
 			if (!existsSync(post)) return false;
-			return readFileSync(post, 'utf8').includes('@austinserb/react-zero-ui/postcss');
+			return readFileSync(post, 'utf8').includes('@react-zero-ui/core/postcss');
 		})
 		.toBeTruthy();
+	console.log('[Next CLI] Next CLI completed');
 });

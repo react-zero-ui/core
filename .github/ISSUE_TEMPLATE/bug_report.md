@@ -38,7 +38,7 @@ What actually happened.
 
 - **OS:** [e.g. macOS 14.5]
 - **Browser / Runtime:** [e.g. Chrome 125, Node 18.18.2]
-- **Package Version:** [`@austinserb/react-zero-ui@1.0.21`]
+- **Package Version:** [`@react-zero-ui/core@1.0.21`]
 
 ---
 

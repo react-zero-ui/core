@@ -4,14 +4,14 @@
 
 Pre‑render your UI once, flip a `data-*` attribute to update — that's it.
 
-<a href="https://bundlephobia.com/package/@austinserb/react-zero-ui@1.0.19" target="_blank" rel="noopener noreferrer"><img src="https://badgen.net/bundlephobia/min/@austinserb/react-zero-ui@1.0.19" alt="npm version" /> </a><a href="https://www.npmjs.com/package/@austinserb/react-zero-ui" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/npm/v/@austinserb/react-zero-ui" alt="npm version" /></a> <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a> ![CI](https://github.com/austin1serb/react-zero-ui/actions/workflows/ci.yml/badge.svg?branch=main)
+<a href="https://bundlephobia.com/package/@austinserb/react-zero-ui@1.0.19" target="_blank" rel="noopener noreferrer"><img src="https://badgen.net/bundlephobia/minzip/@austinserb/react-zero-ui@1.0.19" alt="npm version" /> </a><a href="https://www.npmjs.com/package/@react-zero-ui/core" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/npm/v/@react-zero-ui/core" alt="npm version" /></a> <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a> ![CI](https://github.com/react-zero-ui/core/actions/workflows/ci.yml/badge.svg?branch=main)
 
 ---
 
 ## 📚 Quick Links
 
 - [⚡️ Quick Start](#️-quick-start)
-- [🏄‍♂️ Usage](#-usage)
+- [🏄 Usage](#-usage)
 - [🧬 How it works](#-how-it-works)
 - [✅ Features](#-features)
 - [🏗 Best Practices](#-best-practices)
@@ -20,11 +20,11 @@ Pre‑render your UI once, flip a `data-*` attribute to update — that's it.
 
 ## 🚀 Live Demo
 
-| Example                                 | Link                                                                                                                                                        | What it shows                                                 | Link to Code                                                                                                                                        |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Interactive menu with render tracker    | <a href="https://react-zero-ui.vercel.app/" target="_blank" rel="noopener noreferrer"><strong>Main Demo↗</strong></a>                                      | Compare Zero‑UI vs. React side‑by‑side while toggling a menu. | <a href="https://github.com/Austin1serb/React-Zero-UI/tree/main/examples/demo" target="_blank" rel="noopener noreferrer">Github</a>                 |
-| React benchmark (10 000 nested nodes)   | <a href="https://react-zero-ui.vercel.app/react" target="_blank" rel="noopener noreferrer"><strong>React 10k↗</strong></a>                                 | How long the traditional React render path takes.             | <a href="https://github.com/Austin1serb/React-Zero-UI/tree/main/examples/demo/src/app/react" target="_blank" rel="noopener noreferrer">Github</a>   |
-| Zero‑UI benchmark (10 000 nested nodes) | <a href="https://react-zero-ui.vercel.app/zero-ui" target="_blank" rel="noopener noreferrer"><strong style="text-align: nowrap;">Zero‑UI 10k↗</strong></a> | Identical DOM, but powered by Zero‑UI's `data-*` switch.      | <a href="https://github.com/Austin1serb/React-Zero-UI/tree/main/examples/demo/src/app/zero-ui" target="_blank" rel="noopener noreferrer">Github</a> |
+| Example                                 | Link                                                                                                                                           | What it shows                                                 | Link to Code                                                                                                                                 |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Interactive menu with render tracker    | <a href="https://zero-ui.dev/" target="_blank" rel="noopener noreferrer"><strong>Main Demo↗</strong></a>                                      | Compare Zero‑UI vs. React side‑by‑side while toggling a menu. | <a href="https://github.com/react-zero-ui/core/tree/main/examples/demo" target="_blank" rel="noopener noreferrer">Github</a>                 |
+| React benchmark (10 000 nested nodes)   | <a href="https://zero-ui.dev/react" target="_blank" rel="noopener noreferrer"><strong>React 10k↗</strong></a>                                 | How long the traditional React render path takes.             | <a href="https://github.com/react-zero-ui/core/tree/main/examples/demo/src/app/react" target="_blank" rel="noopener noreferrer">Github</a>   |
+| Zero‑UI benchmark (10 000 nested nodes) | <a href="https://zero-ui.dev/zero-ui" target="_blank" rel="noopener noreferrer"><strong style="text-align: nowrap;">Zero‑UI 10k↗</strong></a> | Identical DOM, but powered by Zero‑UI's `data-*` switch.      | <a href="https://github.com/react-zero-ui/core/tree/main/examples/demo/src/app/zero-ui" target="_blank" rel="noopener noreferrer">Github</a> |
 
 ---
 
@@ -66,7 +66,7 @@ That's it — the CLI patch‑installs the required Babel & PostCSS plugins and 
 ### Manual Install
 
 ```bash
-npm install @austinserb/react-zero-ui
+npm install @react-zero-ui/core
 ```
 
 Then follow **Setup →** for your bundler.
@@ -79,7 +79,7 @@ Then follow **Setup →** for your bundler.
 
 ```js
 // vite.config.*
-import { zeroUIPlugin } from '@austinserb/react-zero-ui/vite';
+import { zeroUIPlugin } from '@react-zero-ui/core/vite';
 
 export default {
 	// ❗️Remove the default `tailwindcss()` plugin — Zero‑UI extends it internally
@@ -93,7 +93,7 @@ export default {
 
    ```tsx
    // app/layout.tsx
-   import { bodyAttributes } from '@austinserb/react-zero-ui/attributes';
+   import { bodyAttributes } from '@react-zero-ui/core/attributes';
    // or:  import { bodyAttributes } from '../.zero-ui/attributes';
 
    export default function RootLayout({ children }) {
@@ -109,14 +109,14 @@ export default {
 
    ```js
    // postcss.config.js
-   module.exports = { plugins: { '@austinserb/react-zero-ui/postcss': {}, tailwindcss: {} } };
+   module.exports = { plugins: { '@react-zero-ui/core/postcss': {}, tailwindcss: {} } };
    ```
 
 ---
 
-## 🏄‍♂️ Usage
+## 🏄 Usage
 
-![react zero ui usage explained](https://raw.githubusercontent.com/Austin1serb/React-Zero-UI/main/docs/assets/useui-explained.webp)
+![react zero ui usage explained](https://raw.githubusercontent.com/react-zero-ui/core/main/docs/assets/useui-explained.webp)
 
 ---
 
