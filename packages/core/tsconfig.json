@@ -1,0 +1,19 @@
+// packages/core/tsconfig.ast-v2.json
+{
+  "extends": "../../tsconfig.base.json",
+  /* — compile exactly one file — */
+  "include": [
+    "src/postcss/ast-v2.ts"
+  ],
+  /* — compiler output — */
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "rootDir": "./src", // keeps relative paths clean
+    "outDir": "build/postcss", // compiled JS → build/
+    // "declarationDir": "build/postcss", // .d.ts alongside JS
+    // "declaration": false, // not needed for now
+    "composite": false, // flip to true when you add references
+    "incremental": true // speeds up "one-file" rebuilds
+  }
+}

@@ -1,7 +1,8 @@
 # package artifacts
 node_modules/
 **/.next/
-dist/
+**/dist/
+**/build/
 coverage/
 test-results/
 .pnpm-store/

@@ -33,6 +33,7 @@
 		}
 	},
 	"scripts": {
+		"build": "tsc -p tsconfig.json",
 		"test:next": "playwright test -c __tests__/config/playwright.next.config.js",
 		"test:vite": "playwright test -c __tests__/config/playwright.vite.config.js",
 		"test:unit": "node --test __tests__/unit/index.test.cjs",
@@ -69,10 +70,10 @@
 		"node": ">=18.0.0"
 	},
 	"peerDependencies": {
+		"@tailwindcss/postcss": "^4.1.10",
 		"postcss": "^8.5.5",
 		"react": ">=16.8.0",
-		"tailwindcss": "^4.1.10",
-		"@tailwindcss/postcss": "^4.1.10"
+		"tailwindcss": "^4.1.10"
 	},
 	"dependencies": {
 		"@babel/generator": "^7.27.5",
@@ -81,6 +82,7 @@
 		"@babel/types": "^7.27.4"
 	},
 	"devDependencies": {
-		"@playwright/test": "^1.53.0"
+		"@playwright/test": "^1.53.0",
+		"@types/babel__traverse": "^7.20.7"
 	}
 }

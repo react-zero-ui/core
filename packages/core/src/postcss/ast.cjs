@@ -10,106 +10,40 @@ const path = require('path');
 const fs = require('fs');
 const { CONFIG } = require('../config.cjs');
 
+async function collectUseUISetters(ast) {
+	console.log('collectUseUISetters');
+	const setters = [];
+	traverse(ast, {
+		VariableDeclarator(path) {
+			const { id, init } = path.node;
+			// Match: const [ , setX ] = useUI(...)
+			if (t.isArrayPattern(id) && id.elements.length === 2 && t.isCallExpression(init) && t.isIdentifier(init.callee, { name: CONFIG.HOOK_NAME })) {
+				const [, setterEl] = id.elements;
+				if (!t.isIdentifier(setterEl)) return; // hole or non-identifier
+				// Validate & grab hook args
+				const [keyArg, initialArg] = init.arguments;
+				if (!t.isStringLiteral(keyArg)) return; // dynamic keys are ignored
+				setters.push({
+					binding: path.scope.getBinding(setterEl.name), // never null here
+					setterName: setterEl.name,
+					stateKey: keyArg.value,
+					initialValue: literalToString(initialArg),
+				});
+			}
+		},
+	});
+	return setters;
+}
+/* ————— helpers ————— */
+function literalToString(node) {
+	if (!node) return null;
+	if (t.isStringLiteral(node) || t.isNumericLiteral(node)) return String(node.value);
+	if (t.isBooleanLiteral(node)) return node.value ? 'true' : 'false';
+	return null; // non-literal ⇒ treat as dynamic
+}
+
 // Cache for parsed files
 const fileCache = new Map();
-
-// function extractVariants(filePath) {
-// 	try {
-// 		const code = fs.readFileSync(filePath, 'utf-8');
-// 		if (!code.includes(CONFIG.HOOK_NAME)) return [];
-// 		// Check cache
-// 		const hash = crypto.createHash('md5').update(code).digest('hex');
-// 		const cached = fileCache.get(filePath);
-// 		if (cached && cached.hash === hash) {
-// 			return cached.variants;
-// 		}
-// 		let ast;
-// 		ast = parser.parse(code, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
-// 		const variants = CONFIG.SUPPORTED_EXTENSIONS.TYPESCRIPT.includes(path.extname(filePath).toLowerCase())
-// 			? extractTypeScriptVariants(ast)
-// 			: extractJavaScriptVariants(ast);
-
-// 		// Update cache
-// 		fileCache.set(filePath, { hash, variants });
-
-// 		return variants;
-// 	} catch (error) {
-// 		console.error(`Error processing ${filePath}:`, error.message);
-// 		return [];
-// 	}
-// }
-
-// function extractTypeScriptVariants(ast) {
-// 	const extractedUIStates = [];
-
-// 	traverse(ast, {
-// 		CallExpression(path) {
-// 			const callee = path.get('callee');
-
-// 			if (!callee.isIdentifier() || callee.node.name !== CONFIG.HOOK_NAME) return;
-
-// 			// useUI('theme', 'light') -> hookArguments = ['theme', 'light']
-// 			const hookArguments = path.node.arguments;
-// 			const typeScriptGenericTypes = path.node.typeParameters ? path.node.typeParameters.params : undefined;
-
-// 			// First arg: the state key (e.g., 'theme', 'modal', 'sidebar')
-// 			const stateKeyArgument = hookArguments[0];
-// 			if (stateKeyArgument.type !== 'StringLiteral') return;
-// 			const stateKey = stateKeyArgument.value;
-
-// 			let possibleStateValues = [];
-// 			let initialStateValue = null;
-
-// 			// First, try to get values from TypeScript generic type
-// 			if (typeScriptGenericTypes && typeScriptGenericTypes[0]) {
-// 				const genericType = typeScriptGenericTypes[0];
-
-// 				if (genericType.type === 'TSBooleanKeyword') {
-// 					possibleStateValues = ['true', 'false'];
-// 				} else if (genericType.type === 'TSUnionType') {
-// 					// useUI<'light' | 'dark' | 'auto'>
-// 					possibleStateValues = genericType.types
-// 						.filter(unionMember => unionMember.type === 'TSLiteralType')
-// 						.map(unionMember => unionMember.literal.value)
-// 						.filter(Boolean)
-// 						.map(String);
-// 				}
-// 			}
-
-// 			// If no TypeScript types found, infer from initial value
-// 			if (possibleStateValues.length === 0) {
-// 				// Second arg: the initial value (e.g., 'light', false, 'closed')
-// 				const initialValueArgument = hookArguments[1];
-
-// 				if (initialValueArgument.type === 'BooleanLiteral') {
-// 					possibleStateValues = ['true', 'false'];
-// 					initialStateValue = String(initialValueArgument.value);
-// 				} else if (initialValueArgument.type === 'StringLiteral') {
-// 					possibleStateValues = [initialValueArgument.value];
-// 					initialStateValue = initialValueArgument.value;
-// 				}
-// 			} else {
-// 				// We do have TypeScript types, and still need to extract initial value
-// 				const initialValueArgument = hookArguments[1];
-// 				if (initialValueArgument.type === 'StringLiteral') {
-// 					initialStateValue = initialValueArgument.value;
-// 				} else if (initialValueArgument.type === 'BooleanLiteral') {
-// 					initialStateValue = String(initialValueArgument.value);
-// 				}
-// 			}
-
-// 			if (possibleStateValues.length > 0) {
-// 				extractedUIStates.push({
-// 					key: stateKey,
-// 					values: possibleStateValues,
-// 					initialValue: initialStateValue, // Track initial value explicitly
-// 				});
-// 			}
-// 		},
-// 	});
-
-// 	return extractedUIStates;
-// }
 
 function extractVariants(filePath) {
 	const code = fs.readFileSync(filePath, 'utf8');
@@ -121,6 +55,9 @@ function extractVariants(filePath) {
 
 	// Parse TS but treat it as 'JS with types'
 	const ast = parser.parse(code, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
+
+	const setters = collectUseUISetters(ast);
+	console.log('setters: ', setters);
 
 	const variants = extractJavaScriptVariants(ast);
 
@@ -212,7 +149,7 @@ function checkExpressionForSetters(node, setterToKey, variants, path) {
 	if (node.type === 'ArrowFunctionExpression') {
 		const body = node.body;
 
-		const expressions = body.type === 'BlockStatement' ? findCallExpressionsInBlock(body) : [body];
+		const expressions = body.type === 'BlockStatement' ? collectCallExpressions(body) : [body];
 
 		expressions.forEach((expr) => {
 			if (expr.type === 'CallExpression' && expr.callee.type === 'Identifier' && setterToKey.has(expr.callee.name)) {
@@ -224,13 +161,35 @@ function checkExpressionForSetters(node, setterToKey, variants, path) {
 	}
 }
 
-function findCallExpressionsInBlock(block) {
-	const calls = [];
-	block.body.forEach((statement) => {
-		if (statement.type === 'ExpressionStatement' && statement.expression.type === 'CallExpression') {
-			calls.push(statement.expression);
-		}
-	});
+function collectCallExpressions(node, calls = []) {
+	if (!node) return calls;
+
+	switch (node.type) {
+		case 'CallExpression':
+			calls.push(node);
+			break;
+
+		case 'BlockStatement':
+			// prev => { return 'dark'; }
+			node.body.forEach((stmt) => collectCallExpressions(stmt, calls));
+			break;
+
+		case 'IfStatement':
+			// prev => isActive ? 'react' : 'zero'
+			collectCallExpressions(node.consequent, calls);
+			if (node.alternate) collectCallExpressions(node.alternate, calls);
+			break;
+
+		// handle other container nodes you care about; or just fall through…
+		default:
+			// Generic fallback: walk every enumerable child you might care about
+			for (const key in node) {
+				const child = node[key];
+				if (Array.isArray(child)) child.forEach((n) => collectCallExpressions(n, calls));
+				else if (child && typeof child.type === 'string') collectCallExpressions(child, calls);
+			}
+	}
+
 	return calls;
 }
 
@@ -241,14 +200,17 @@ function extractArgumentValues(node, path) {
 
 	switch (node.type) {
 		case 'StringLiteral':
+			// 'light' -> 'light'
 			values.add(node.value);
 			break;
 		case 'BooleanLiteral':
-			values.add(String(node.value));
+			// true -> 'true'
+			values.add(node.value + '');
 			break;
 
 		case 'NumericLiteral':
-			values.add(String(node.value));
+			// 100 -> '100'
+			values.add(node.value + '');
 			break;
 
 		case 'ConditionalExpression':
@@ -258,6 +220,8 @@ function extractArgumentValues(node, path) {
 			break;
 
 		case 'LogicalExpression':
+			// isActive || 'react'
+			// isActive ?? 'react'
 			if (node.operator === '||' || node.operator === '??') {
 				extractArgumentValues(node.left, path).forEach((v) => values.add(v));
 				extractArgumentValues(node.right, path).forEach((v) => values.add(v));
@@ -265,6 +229,7 @@ function extractArgumentValues(node, path) {
 			break;
 
 		case 'Identifier':
+			// prev => prev === 'light' ? 'dark' : 'light'
 			{
 				const binding = path.scope.getBinding(node.name);
 				if (binding && binding.path.isVariableDeclarator()) {
@@ -281,8 +246,25 @@ function extractArgumentValues(node, path) {
 				values.add(node.property.name.toLowerCase());
 			}
 			break;
-	}
 
+		/* Handles updater fns like prev => prev === 'light' ? 'dark' : 'light' */
+		case 'ArrowFunctionExpression':
+		case 'FunctionExpression': {
+			const body = node.body;
+
+			// implicit return  (single expression)
+			if (body.type !== 'BlockStatement') {
+				extractArgumentValues(body, path).forEach((v) => values.add(v));
+			} else {
+				for (const stmt of body.body) {
+					if (stmt.type === 'ReturnStatement' && stmt.argument) {
+						extractArgumentValues(stmt.argument, path).forEach((v) => values.add(v));
+					}
+				}
+			}
+			break;
+		}
+	}
 	return values;
 }
 
@@ -617,4 +599,4 @@ async function patchNextBodyTag() {
 	console.log(`[Zero-UI] ✅ Patched <body> in ${filePath} with {...bodyAttributes}`);
 }
 
-module.exports = { extractVariants, parseJsonWithBabel, parseAndUpdatePostcssConfig, parseAndUpdateViteConfig, patchNextBodyTag };
+module.exports = { extractVariants, parseJsonWithBabel, parseAndUpdatePostcssConfig, parseAndUpdateViteConfig, patchNextBodyTag, collectUseUISetters };

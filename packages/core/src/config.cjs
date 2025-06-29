@@ -8,4 +8,5 @@ const CONFIG = {
 };
 
 const IGNORE_DIRS = new Set(['node_modules', '.next', '.turbo', '.vercel', '.git', 'coverage', 'out', 'public', 'dist', 'build']);
+
 module.exports = { CONFIG, IGNORE_DIRS };
