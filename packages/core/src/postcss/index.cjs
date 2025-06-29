@@ -17,6 +17,7 @@ module.exports = () => {
 
 				// Generate CSS
 				const cssBlock = buildCss(finalVariants);
+				console.log('cssBlock: ', cssBlock);
 
 				// Inject new CSS - prepend so it's before any @tailwind directives
 				if (cssBlock.trim()) {
@@ -24,7 +25,7 @@ module.exports = () => {
 				}
 
 				// Register dependencies - CRITICAL for file watching
-				sourceFiles.forEach(file => {
+				sourceFiles.forEach((file) => {
 					result.messages.push({ type: 'dependency', plugin: 'postcss-react-zero-ui', file: file, parent: result.opts.from });
 				});
 

@@ -15,11 +15,12 @@ function useUI(key, initialValue) {
 		const registry = typeof globalThis !== 'undefined' ? (globalThis.__useUIRegistry ||= new Map()) : new Map();
 
 		const prev = registry.get(key);
+		// TODO try to add per page error boundaries
 		if (prev !== undefined && prev !== initialValue) {
 			console.error(
 				`[useUI] Inconsistent initial values for key "${key}": ` +
-					`expected "${prev}", got "${initialValue}". ` +
-					`Use the same initial value everywhere or namespace your keys.`
+				`expected "${prev}", got "${initialValue}". ` +
+				`Use the same initial value everywhere or namespace your keys.`
 			);
 		} else if (prev === undefined) {
 			registry.set(key, initialValue);
@@ -62,12 +63,12 @@ function useUI(key, initialValue) {
 					!value
 						? initialValue
 						: // If initial was boolean, parse "true"/"false" string to boolean
-							typeof initialValue === 'boolean'
+						typeof initialValue === 'boolean'
 							? value === 'true'
 							: // If initial was number, convert string to number with NaN fallback
-								typeof initialValue === 'number'
+							typeof initialValue === 'number'
 								? // The double conversion of +value is very fast and is the same as isNaN check without the function overhead
-									+value === +value
+								+value === +value
 									? +value
 									: initialValue
 								: value
@@ -98,9 +99,9 @@ function useUI(key, initialValue) {
 						throw new Error(
 							// TODO add documentation link
 							`[useUI] Multiple ref attachments detected for key "${key}". ` +
-								`Each useUI hook supports only one ref attachment per component. ` +
-								`Solution: Create separate component. and reuse.\n` +
-								`Example: <FAQ/>  <FAQ/> instead of multiple refs in one component.`
+							`Each useUI hook supports only one ref attachment per component. ` +
+							`Solution: Create separate component. and reuse.\n` +
+							`Example: <FAQ/>  <FAQ/> instead of multiple refs in one component.`
 						);
 					}
 				} else {

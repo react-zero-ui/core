@@ -95,19 +95,22 @@ async function processVariants(files = null) {
 	return { finalVariants, initialValues, sourceFiles };
 }
 
-// TODO build css for local and global variants separately based on scoped/global
 function buildCss(variants) {
 	const lines = variants.flatMap(({ key, values }) => {
+		if (values.length === 0) return [];
 		const keySlug = toKebabCase(key);
-		return values.map((v) => {
+
+		// Double-ensure sorted order, even if extractor didn't sort
+		return [...values].sort().map((v) => {
 			const valSlug = toKebabCase(v);
-			return `@custom-variant ${keySlug}-${valSlug} (&[data-${keySlug}="${valSlug}"],[data-${keySlug}="${valSlug}"] &, :where(body[data-${keySlug}="${valSlug}"] &));`;
-			// @custom-variant ${keySlug}-${valSlug} eg.     - theme-light
-			//   1. &[data-${keySlug}="${valSlug}"]          - element itself (wins ties)
-			//   2. [data-${keySlug}="${valSlug}"] &         - nearest ancestor wrapper
-			//   3. :where(body[data-${keySlug}="${valSlug}"] &)  - global <body> fallback
+
+			return `@custom-variant ${keySlug}-${valSlug} {
+  &:where(body[data-${keySlug}="${valSlug}"] *) { @slot; }
+  [data-${keySlug}="${valSlug}"] &, &[data-${keySlug}="${valSlug}"] { @slot; }
+}`;
 		});
 	});
+
 	return CONFIG.HEADER + '\n' + lines.join('\n') + '\n';
 }
 

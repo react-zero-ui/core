@@ -1,18 +1,16 @@
 'use client';
 
 import useUI from '@react-zero-ui/core';
-import UseEffectComponent from './UseEffectComponent';
-import FAQ from './FAQ';
+import UseEffectComponent from '../UseEffectComponent';
+import FAQ from '../FAQ';
 
 export default function Page() {
-	const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
-	const [, setTheme2] = useUI<'light' | 'dark'>('theme-2', 'light');
-	const [, setThemeThree] = useUI<'light' | 'dark'>('themeThree', 'light');
-	const [, setToggle] = useUI<boolean>('toggle-boolean', true);
-	const [, setNumber] = useUI<1 | 2>('number', 1);
-	const [, setOpen] = useUI<'open' | 'closed'>('faq', 'closed'); // Same key everywhere!
-	const [, setScope] = useUI<'off' | 'on'>('scope', 'off');
-	const [, setMobile] = useUI<boolean>('mobile', false);
+	const [, setTheme] = useUI('theme', 'light');
+	const [, setTheme2] = useUI('theme-2', 'light');
+	const [, setThemeThree] = useUI('themeThree', 'light');
+	const [, setToggle] = useUI('toggle-boolean', true);
+	const [, setNumber] = useUI('number', 1);
+ 	const [, setScope] = useUI('scope', 'off');
 
 	return (
 		<div className="p-8">
@@ -124,36 +122,6 @@ export default function Page() {
 					<div className="scope-on:bg-blue-900 scope-off:bg-blue-100 ">
 						Scope: <span className="scope-off:block scope-on:hidden">False</span>
 						<span className="scope-on:block scope-off:hidden">True</span>
-					</div>
-				</div>
-				<hr />
-
-				<div
-					className="mobile-false:bg-blue-100 mobile-true:bg-blue-900 mobile-true:text-white"
-					data-testid="mobile-container"
-					//this ref tells the hook to flip the data key here
-					ref={setMobile.ref}>
-					<button
-						type="button"
-						onClick={() => {
-							if (typeof window !== 'undefined') {
-								if (window.innerWidth > 768) {
-									// allow the user to toggle the mobile state
-									setMobile((prev) => (prev === true ? false : true));
-								}
-								if (window.innerWidth < 768) {
-									// force the mobile state to false on click
-									setMobile(false);
-								}
-							}
-						}}
-						className="border-2 border-red-500"
-						data-testid="mobile-toggle">
-						Toggle Mobile
-					</button>
-					<div className="mobile-false:bg-blue-100 mobile-true:bg-blue-900 ">
-						Mobile: <span className="mobile-false:block mobile-true:hidden">False</span>
-						<span className="mobile-true:block mobile-false:hidden">True</span>
 					</div>
 				</div>
 			</div>
