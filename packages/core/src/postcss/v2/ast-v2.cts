@@ -154,7 +154,7 @@ function extractLiteralsRecursively(node: t.Expression, path: NodePath): string[
 		results.push(...extractLiteralsRecursively(node.right, path));
 	}
 
-	// Arrow functions: () => 'value'
+	// Arrow functions: () => 'value' or prev => prev==='a' ? 'b':'a'
 	else if (t.isArrowFunctionExpression(node)) {
 		if (t.isExpression(node.body)) {
 			results.push(...extractLiteralsRecursively(node.body, path));

@@ -18,36 +18,16 @@ function toKebabCase(str) {
 		.toLowerCase();
 }
 
-function findAllSourceFiles(rootDirs = ['src', 'app']) {
-	const exts = ['.ts', '.tsx', '.js', '.jsx'];
-	const files = [];
+function findAllSourceFiles(patterns = CONFIG.CONTENT) {
+	const { globSync } = require('glob');
 	const cwd = process.cwd();
 
-	rootDirs.forEach((dir) => {
-		const dirPath = path.join(cwd, dir);
-		if (!fs.existsSync(dirPath)) return;
-
-		const walk = (current) => {
-			try {
-				for (const entry of fs.readdirSync(current)) {
-					const full = path.join(current, entry);
-					const stat = fs.statSync(full);
-					// TODO upgrade to fast-glob
-					if (stat.isDirectory() && !entry.startsWith('.') && !IGNORE_DIRS.has(entry)) {
-						walk(full);
-					} else if (stat.isFile() && exts.some((ext) => full.endsWith(ext))) {
-						files.push(full);
-					}
-				}
-			} catch (error) {
-				console.warn(`[Zero-UI] Error reading directory ${current}:`, error.message);
-			}
-		};
-
-		walk(dirPath);
-	});
-
-	return files;
+	try {
+		return globSync(patterns, { cwd, ignore: Array.from(IGNORE_DIRS), absolute: true });
+	} catch (error) {
+		console.warn('[Zero-UI] Error finding source files:', error.message);
+		return [];
+	}
 }
 
 /**

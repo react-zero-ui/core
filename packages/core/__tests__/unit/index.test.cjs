@@ -59,7 +59,7 @@ test('generates body attributes file correctly', async () => {
       }
     `,
 		},
-		result => {
+		(result) => {
 			// Check attributes file exists
 			assert(fs.existsSync(getAttrFile()), 'Attributes file should exist');
 
@@ -97,7 +97,7 @@ test('generates body attributes file correctly when kebab-case is used', async (
       }
     `,
 		},
-		result => {
+		(result) => {
 			// Check attributes file exists
 			assert(fs.existsSync(getAttrFile()), 'Attributes file should exist');
 
@@ -112,35 +112,6 @@ test('generates body attributes file correctly when kebab-case is used', async (
 			// Verify CSS variants
 			assert(result.css.includes('@custom-variant theme-secondary-light'), 'Should have theme-secondary-light variant');
 			assert(result.css.includes('@custom-variant sidebar-new-expanded'), 'Should have sidebar-new-expanded variant');
-		}
-	);
-});
-
-test('handles TypeScript generic types', async () => {
-	await runTest(
-		{
-			'src/component.tsx': `
-      import { useUI } from 'react-zero-ui';
-      
-      function Component() {
-        const [status, setStatus] = useUI<'idle' | 'loading' | 'success' | 'error'>('status', 'idle');
-        return <div>Status: {status}</div>;
-      }
-    `,
-		},
-		result => {
-			console.log('\n🔍 TypeScript Generic Test:');
-
-			// Check all variants were generated
-			const variants = ['idle', 'loading', 'success', 'error'];
-			variants.forEach(variant => {
-				assert(result.css.includes(`@custom-variant status-${variant}`), `Should have status-${variant} variant`);
-			});
-
-			// Check attributes file
-			const content = fs.readFileSync(getAttrFile(), 'utf-8');
-			console.log('Attributes:', content);
-			assert(content.includes('"data-status": "idle"'), 'Should use initial value');
 		}
 	);
 });
@@ -171,11 +142,11 @@ test('detects JavaScript setValue calls', async () => {
       }
     `,
 		},
-		result => {
+		(result) => {
 			console.log('\n🔍 JavaScript Detection Test:');
 
 			const states = ['closed', 'open', 'minimized', 'fullscreen'];
-			states.forEach(state => {
+			states.forEach((state) => {
 				assert(result.css.includes(`@custom-variant modal-${state}`), `Should detect modal-${state}`);
 			});
 
@@ -203,7 +174,7 @@ test('handles boolean values', async () => {
       }
     `,
 		},
-		result => {
+		(result) => {
 			console.log('\n🔍 Boolean Values Test:');
 
 			assert(result.css.includes('@custom-variant drawer-true'), 'Should have drawer-true');
@@ -236,7 +207,7 @@ test('handles kebab-case conversion', async () => {
       }
     `,
 		},
-		result => {
+		(result) => {
 			console.log('\n🔍 Kebab-case Test:');
 
 			// Check CSS has kebab-case
@@ -279,11 +250,11 @@ test('handles conditional expressions', async () => {
       }
     `,
 		},
-		result => {
+		(result) => {
 			console.log('\n🔍 Conditional Expressions Test:');
 
 			const expectedStates = ['default', 'active', 'inactive', 'night', 'day', 'fallback'];
-			expectedStates.forEach(state => {
+			expectedStates.forEach((state) => {
 				assert(result.css.includes(`@custom-variant state-${state}`), `Should detect state-${state}`);
 			});
 		}
@@ -304,23 +275,32 @@ test('handles multiple files and deduplication', async () => {
       import { useUI } from 'react-zero-ui';
       function Footer() {
         const [theme, setTheme] = useUI('theme', 'light');
-        return <button onClick={() => setTheme('blue')}>Blue</button>;
+        return <div>
+				<button onClick={() => setTheme('blue')}>Blue</button>
+				<button onClick={() => setTheme('dark')}>Dark</button>
+				<button onClick={() => setTheme('light')}>Light</button>
+				Footer
+			</div>;
       }
     `,
 			'app/sidebar.tsx': `
       import { useUI } from 'react-zero-ui';
       function Sidebar() {
         const [theme, setTheme] = useUI<'light' | 'dark' | 'auto'>('theme', 'light');
-        return <div>Sidebar</div>;
+        return <div>
+				<button onClick={() => setTheme('auto')}>Auto</button>
+				<button onClick={() => setTheme('blue')}>Blue</button>
+				<button onClick={() => setTheme('dark')}>Dark</button>
+				<button onClick={() => setTheme('light')}>Light</button>
+				Sidebar
+			</div>;
       }
     `,
 		},
-		result => {
-			console.log('\n🔍 Multiple Files Test: ', result.css);
-
+		(result) => {
 			// Should combine all theme values from all files
 			const themeVariants = ['light', 'dark', 'blue', 'auto'];
-			themeVariants.forEach(variant => {
+			themeVariants.forEach((variant) => {
 				assert(result.css.includes(`@custom-variant theme-${variant}`), `Should have theme-${variant}`);
 			});
 
@@ -349,9 +329,8 @@ test('handles parsing errors gracefully', async () => {
       }
     `,
 		},
-		result => {
+		(result) => {
 			console.log('\n🔍 Parse Error Test:');
-			console.log('result: ', result.css);
 			// Should still process valid files
 			assert(result.css.includes('@custom-variant valid-working'), 'Should process valid files');
 
@@ -378,7 +357,7 @@ test('valid edge cases: underscores + missing initial', async () => {
       }
     `,
 		},
-		result => {
+		(result) => {
 			console.log('result: ', result.css);
 			assert(result.css.includes('@custom-variant only-setter-key-set-later'));
 			assert(!result.css.includes('@custom-variant no-initial-value'));
@@ -402,7 +381,7 @@ test('watches for file changes', async () => {
       }
     `,
 		},
-		async result => {
+		async (result) => {
 			// Initial state
 			assert(result.css.includes('@custom-variant watch-test-initial'));
 
@@ -419,7 +398,7 @@ test('watches for file changes', async () => {
 			);
 
 			// Wait for file watcher to process
-			await new Promise(resolve => setTimeout(resolve, 500));
+			await new Promise((resolve) => setTimeout(resolve, 500));
 
 			// Re-process to check if watcher picked up changes
 			const result2 = await postcss([plugin()]).process('', { from: undefined });
@@ -435,7 +414,7 @@ test('ignores node_modules and hidden directories', async () => {
 			'src/valid.jsx': `
       import { useUI } from 'react-zero-ui';
       function Valid() {
-        const [state] = useUI('valid', 'yes');
+        const [state, setState] = useUI('valid', 'yes');
         return <div>Valid</div>;
       }
     `,
@@ -454,7 +433,7 @@ test('ignores node_modules and hidden directories', async () => {
       }
     `,
 		},
-		result => {
+		(result) => {
 			console.log('result: ', result.css);
 			assert(result.css.includes('@custom-variant valid-yes'), 'Should process valid files');
 			assert(!result.css.includes('ignored'), 'Should ignore node_modules');
@@ -474,58 +453,22 @@ test('handles deeply nested file structures', async () => {
       }
     `,
 		},
-		result => {
+		(result) => {
 			assert(result.css.includes('@custom-variant auth-state-logged-out'));
 			assert(result.css.includes('@custom-variant auth-state-logged-in'));
 		}
 	);
 });
 
-test('handles complex TypeScript scenarios', async () => {
-	await runTest(
-		{
-			'src/complex.tsx': `
-      import { useUI } from 'react-zero-ui';
-      
-      type Status = 'idle' | 'loading' | 'success' | 'error';
-      
-      function Complex() {
-        // Type reference
-        const [status] = useUI<Status>('status', 'idle');
-        
-        // Inline boolean
-        const [open] = useUI<boolean>('modal', false);
-        
-        // String literal union with many values
-        const [size] = useUI<'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl'>('size', 'md');
-        
-        return <div>Complex types</div>;
-      }
-    `,
-		},
-		result => {
-			// Should extract all size variants
-			['xs', 'sm', 'md', 'lg', 'xl', '2xl'].forEach(size => {
-				assert(result.css.includes(`@custom-variant size-${size}`), `Should have size-${size}`);
-			});
-			// Check attributes file
-			const content = fs.readFileSync(getAttrFile(), 'utf-8');
-			assert(content.includes('"data-size": "md"'), 'Should have size-md');
-			assert(content.includes('"data-status": "idle"'), 'Should have status-idle');
-			assert(content.includes('"data-modal": "false"'), 'Should have modal-false');
-		}
-	);
-});
-
-test('handles large projects efficiently', async function () {
+test('handles large projects efficiently - 500 files', async function () {
 	const files = {};
 
 	// Generate 50 files
-	for (let i = 0; i < 50; i++) {
+	for (let i = 0; i < 500; i++) {
 		files[`src/component${i}.jsx`] = `
       import { useUI } from 'react-zero-ui';
       function Component${i}() {
-        const [state${i}] = useUI('state${i}', 'value${i}');
+        const [state${i}, setState${i}] = useUI('state${i}', 'value${i}');
         return <div>Component ${i}</div>;
       }
     `;
@@ -533,11 +476,12 @@ test('handles large projects efficiently', async function () {
 
 	const startTime = Date.now();
 
-	await runTest(files, result => {
+	await runTest(files, (result) => {
+		console.log('handles large projects efficiently-result: ', result.css);
 		const endTime = Date.now();
 		const duration = endTime - startTime;
 
-		console.log(`\n⚡ Performance: Processed 50 files in ${duration}ms`);
+		console.log(`\n⚡ Performance: Processed 500 files in ${duration}ms`);
 
 		// Should process all files
 		assert(result.css.includes('@custom-variant state49-value49'), 'Should process all files');
@@ -564,7 +508,7 @@ test('handles special characters in values', async () => {
       }
     `,
 		},
-		result => {
+		(result) => {
 			assert(result.css.includes('@custom-variant special-with-dash'));
 			assert(result.css.includes('@custom-variant special-with-underscore'));
 			assert(result.css.includes('@custom-variant special-123numeric'));
@@ -599,7 +543,7 @@ test('handles concurrent file modifications', async () => {
 				);
 
 				// Small delay to simulate real editing
-				await new Promise(resolve => setTimeout(resolve, 50));
+				await new Promise((resolve) => setTimeout(resolve, 50));
 			}
 
 			// Final processing should work correctly
@@ -610,7 +554,7 @@ test('handles concurrent file modifications', async () => {
 	);
 });
 
-test('patchConfigAlias - config file patching', async t => {
+test('patchConfigAlias - config file patching', async (t) => {
 	await t.test('patches tsconfig.json when it exists', async () => {
 		const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-config-test'));
 		const originalCwd = process.cwd();

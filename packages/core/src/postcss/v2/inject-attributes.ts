@@ -2,9 +2,9 @@ import { parse } from '@babel/parser';
 import * as babelTraverse from '@babel/traverse';
 import { NodePath } from '@babel/traverse';
 import * as t from '@babel/types';
-import generate from '@babel/generator';
-import type { RefLocation, RefLocationTracker } from './collect-refs.cts';
-import type { VariantData } from './ast-v2.cts';
+import { generate } from '@babel/generator';
+import type { RefLocation, RefLocationTracker } from './collect-refs.cjs';
+import type { VariantData } from './ast-v2.cjs';
 
 const traverse = (babelTraverse as any).default;
 

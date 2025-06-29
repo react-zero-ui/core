@@ -25,4 +25,5 @@ internal.md
 
 # keep these files
 !next-env.d.ts
+!packages/core/src/dist/
 

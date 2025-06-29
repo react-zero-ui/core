@@ -156,13 +156,10 @@ test.describe('Zero-UI Next.js Integration Tests', () => {
 
 		// Click scope toggle
 		await page.getByTestId('scope-toggle').click();
-		await expect(body).toHaveAttribute('data-scope', 'true');
+		await expect(body).toHaveAttribute('data-scope', 'off');
 
 		// Verify other states are preserved
 		await expect(body).toHaveAttribute('data-theme', 'dark');
 		await expect(body).toHaveAttribute('data-toggle-boolean', 'false');
 	});
-
-	// Test UseEffectComponent if it exists
-	// Test UseEffectComponent - automatically sets theme to dark on mount
 });

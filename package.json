@@ -9,7 +9,7 @@
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
 		"reset": "git clean -fdx && pnpm install --frozen-lockfile && pnpm prepack:core && pnpm i-tarball",
-		"bootstrap": "pnpm install --frozen-lockfile && pnpm prepack:core && pnpm i-tarball",
+		"bootstrap": "pnpm install --frozen-lockfile && pnpm build && pnpm prepack:core && pnpm i-tarball",
 		"build": "cd packages/core && pnpm build",
 		"test": "cd packages/core && pnpm test:all",
 		"test:all": "pnpm install --frozen-lockfile && pnpm prepack:core && pnpm lint && pnpm i-tarball && cd packages/core && pnpm test:all",

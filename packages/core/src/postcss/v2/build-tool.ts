@@ -1,8 +1,8 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { glob } from 'glob';
-import { extractVariantsFromFiles } from './ast-v2.cts';
-import { batchInjectDataAttributes, SEMANTIC_CONFIG } from './inject-attributes.cts';
-import { RefLocationTracker } from './collect-refs.cts';
+import { extractVariantsFromFiles } from './ast-v2.cjs';
+import { batchInjectDataAttributes, SEMANTIC_CONFIG } from './inject-attributes.js';
+import { RefLocationTracker } from './collect-refs.cjs';
 
 const globalRefTracker = new RefLocationTracker();
 
@@ -104,40 +104,42 @@ export function createViteUIPlugin() {
 
 /**
  * Webpack loader example
- */
-export function createWebpackUILoader() {
-	return function uiDataAttributeLoader(source: string) {
-		const callback = this.async();
-		const resourcePath = this.resourcePath;
+//  */
+// export function createWebpackUILoader() {
+// 	return function uiDataAttributeLoader(source: string) {
+// 		const callback = this.async();
+// 		const resourcePath = this.resourcePath;
 
-		// Only process relevant files
-		if (!/\.(tsx?|jsx?)$/.test(resourcePath)) {
-			return callback(null, source);
-		}
+// 		// Only process relevant files
+// 		if (!/\.(tsx?|jsx?)$/.test(resourcePath)) {
+// 			return callback(null, source);
+// 		}
 
-		try {
-			// Get ref locations for this file
-			const refLocations = globalRefTracker.getRefsByFile(resourcePath);
+// 		try {
+// 			// Get ref locations for this file
+// 			const refLocations = globalRefTracker.getRefsByFile(resourcePath);
 
-			if (refLocations.length === 0) {
-				return callback(null, source);
-			}
+// 			if (refLocations.length === 0) {
+// 				return callback(null, source);
+// 			}
 
-			// Get all variants (you'd need to make this available globally)
-			const variants = []; // This would come from your build context
+// 			// Get all variants (you'd need to make this available globally)
+// 			const variants = []; // This would come from your build context
 
-			const { injectDataAttributes } = require('./data_attribute_injector');
-			const transformedSource = injectDataAttributes(source, refLocations, variants, SEMANTIC_CONFIG);
+// 			const { injectDataAttributes } = require('./data_attribute_injector');
+// 			const transformedSource = injectDataAttributes(source, refLocations, variants, SEMANTIC_CONFIG);
 
-			callback(null, transformedSource);
-		} catch (error) {
-			callback(error);
-		}
-	};
-}
+// 			callback(null, transformedSource);
+// 		} catch (error) {
+// 			callback(error);
+// 		}
+// 	};
+// }
 
 /**
  * Generate CSS based on variants
+ * TODO MAKE ONE GLOBAL GENERATE CSS FILE Function
+ * TODO MAKE ONE LOCAL GENERATE CSS FILE Function
  */
 function generateCSS(variants: any[]) {
 	const cssRules: string[] = [];

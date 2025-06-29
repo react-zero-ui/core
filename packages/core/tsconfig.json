@@ -9,6 +9,9 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    // "allowImportingTsExtensions": true,
     "rootDir": "./src", // keeps relative paths clean
     "outDir": "./src/dist", // compiled JS → dist/
     // "declarationDir": "build/postcss", // .d.ts alongside JS
