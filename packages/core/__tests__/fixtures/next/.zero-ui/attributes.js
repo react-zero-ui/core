@@ -8,5 +8,6 @@ export const bodyAttributes = {
   "data-theme-2": "light",
   "data-theme-three": "light",
   "data-toggle-boolean": "true",
+  "data-toggle-function": "white",
   "data-use-effect-theme": "light"
 };

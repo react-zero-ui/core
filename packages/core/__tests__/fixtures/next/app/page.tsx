@@ -14,6 +14,12 @@ export default function Page() {
 	const [, setScope] = useUI<'off' | 'on'>('scope', 'off');
 	const [, setMobile] = useUI<boolean>('mobile', false);
 
+	const [, setToggleFunction] = useUI<'white' | 'black'>('toggle-function', 'white');
+
+	const toggleFunction = () => {
+		setToggleFunction((prev) => (prev === 'white' ? 'black' : 'white'));
+	};
+
 	return (
 		<div className="p-8">
 			<h1 className="text-2xl font-bold py-5">Global State</h1>
@@ -103,6 +109,22 @@ export default function Page() {
 						Number: <span className="number-1:block hidden">1</span> <span className="number-2:block hidden">2</span>
 					</div>
 				</div>
+				<hr />
+
+				<div
+					className="toggle-function-white:bg-gray-100 toggle-function-black:bg-gray-900 toggle-function-black:text-white toggle-function-red:bg-red-500 toggle-function-green:bg-green-500 toggle-function-blue:bg-blue-500"
+					data-testid="toggle-function-container">
+					<button
+						type="button"
+						onClick={toggleFunction}
+						className="border-2 border-red-500"
+						data-testid="toggle-function">
+						Toggle Function
+					</button>
+					<div className="toggle-function-white:bg-gray-100 toggle-function-black:bg-gray-900">
+						Function: <span className="toggle-function-white:block hidden">White</span> <span className="toggle-function-black:block hidden">Black</span>
+					</div>
+				</div>
 			</div>
 			<hr />
 			<h1 className="text-2xl font-bold py-5">Scoped Style Tests</h1>
@@ -143,7 +165,7 @@ export default function Page() {
 								}
 								if (window.innerWidth < 768) {
 									// force the mobile state to false on click
-									setMobile(false);
+									setMobile(true);
 								}
 							}
 						}}

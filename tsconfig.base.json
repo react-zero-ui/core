@@ -2,9 +2,9 @@
   // Shared defaults
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ES2022",
-    "moduleResolution": "NodeNext",
-    "verbatimModuleSyntax": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    // "verbatimModuleSyntax": true,
     /* Gradual-migration flags */
     "allowJs": true, // <- JS still builds
     "checkJs": false, // <- flip to true later for type-checking JS

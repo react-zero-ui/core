@@ -8,5 +8,6 @@ export declare const bodyAttributes: {
   "data-theme-2": "dark" | "light";
   "data-theme-three": "dark" | "light";
   "data-toggle-boolean": "false" | "true";
+  "data-toggle-function": "black" | "white";
   "data-use-effect-theme": "dark" | "light";
 };

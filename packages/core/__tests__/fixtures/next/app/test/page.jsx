@@ -10,7 +10,15 @@ export default function Page() {
 	const [, setThemeThree] = useUI('themeThree', 'light');
 	const [, setToggle] = useUI('toggle-boolean', true);
 	const [, setNumber] = useUI('number', 1);
- 	const [, setScope] = useUI('scope', 'off');
+	const [, setOpen] = useUI('faq', 'closed'); // Same key everywhere!
+	const [, setScope] = useUI('scope', 'off');
+	const [, setMobile] = useUI('mobile', false);
+
+	const [, setToggleFunction] = useUI('toggle-function', 'white');
+
+	const toggleFunction = () => {
+		setToggleFunction((prev) => (prev === 'white' ? 'black' : 'white'));
+	};
 
 	return (
 		<div className="p-8">
@@ -101,6 +109,22 @@ export default function Page() {
 						Number: <span className="number-1:block hidden">1</span> <span className="number-2:block hidden">2</span>
 					</div>
 				</div>
+				<hr />
+
+				<div
+					className="toggle-function-white:bg-gray-100 toggle-function-black:bg-gray-900 toggle-function-black:text-white toggle-function-red:bg-red-500 toggle-function-green:bg-green-500 toggle-function-blue:bg-blue-500"
+					data-testid="toggle-function-container">
+					<button
+						type="button"
+						onClick={toggleFunction}
+						className="border-2 border-red-500"
+						data-testid="toggle-function">
+						Toggle Function
+					</button>
+					<div className="toggle-function-white:bg-gray-100 toggle-function-black:bg-gray-900">
+						Function: <span className="toggle-function-white:block hidden">White</span> <span className="toggle-function-black:block hidden">Black</span>
+					</div>
+				</div>
 			</div>
 			<hr />
 			<h1 className="text-2xl font-bold py-5">Scoped Style Tests</h1>
@@ -122,6 +146,36 @@ export default function Page() {
 					<div className="scope-on:bg-blue-900 scope-off:bg-blue-100 ">
 						Scope: <span className="scope-off:block scope-on:hidden">False</span>
 						<span className="scope-on:block scope-off:hidden">True</span>
+					</div>
+				</div>
+				<hr />
+
+				<div
+					className="mobile-false:bg-blue-100 mobile-true:bg-blue-900 mobile-true:text-white"
+					data-testid="mobile-container"
+					//this ref tells the hook to flip the data key here
+					ref={setMobile.ref}>
+					<button
+						type="button"
+						onClick={() => {
+							if (typeof window !== 'undefined') {
+								if (window.innerWidth > 768) {
+									// allow the user to toggle the mobile state
+									setMobile((prev) => (prev === true ? false : true));
+								}
+								if (window.innerWidth < 768) {
+									// force the mobile state to false on click
+									setMobile(true);
+								}
+							}
+						}}
+						className="border-2 border-red-500"
+						data-testid="mobile-toggle">
+						Toggle Mobile
+					</button>
+					<div className="mobile-false:bg-blue-100 mobile-true:bg-blue-900 ">
+						Mobile: <span className="mobile-false:block mobile-true:hidden">False</span>
+						<span className="mobile-true:block mobile-false:hidden">True</span>
 					</div>
 				</div>
 			</div>

@@ -2,7 +2,8 @@
 const fs = require('fs');
 const path = require('path');
 const { CONFIG, IGNORE_DIRS } = require('../config.cjs');
-const { extractVariants, parseJsonWithBabel, parseAndUpdatePostcssConfig, parseAndUpdateViteConfig } = require('./ast.cjs');
+const { parseJsonWithBabel, parseAndUpdatePostcssConfig, parseAndUpdateViteConfig } = require('./ast.cjs');
+const { extractVariants } = require('../dist/postcss/v2/ast-v2.cjs');
 
 function toKebabCase(str) {
 	if (typeof str !== 'string') {
@@ -370,7 +371,6 @@ function hasViteConfig() {
 module.exports = {
 	toKebabCase,
 	findAllSourceFiles,
-	extractVariants,
 	buildCss,
 	patchConfigAlias,
 	patchPostcssConfig,

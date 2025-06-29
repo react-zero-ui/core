@@ -10,7 +10,7 @@ const path = require('path');
 const fs = require('fs');
 const { CONFIG } = require('../config.cjs');
 
-async function collectUseUISetters(ast) {
+function collectUseUISetters(ast) {
 	console.log('collectUseUISetters');
 	const setters = [];
 	traverse(ast, {
@@ -56,8 +56,13 @@ function extractVariants(filePath) {
 	// Parse TS but treat it as 'JS with types'
 	const ast = parser.parse(code, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
 
+	// TODO REMOVE IN PROD
 	const setters = collectUseUISetters(ast);
+	console.log('setters: ', setters[0].binding.referencePaths);
 	console.log('setters: ', setters);
+	console.log('setters - length: ', setters.length);
+
+	// TODO REMOVE IN PROD
 
 	const variants = extractJavaScriptVariants(ast);
 

@@ -2,7 +2,7 @@
 node_modules/
 **/.next/
 **/dist/
-**/build/
+# **/build/
 coverage/
 test-results/
 .pnpm-store/
