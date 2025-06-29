@@ -7,7 +7,7 @@ const scenarios = [
 ];
 
 test.describe.configure({ mode: 'serial' }); // run one after another
-test.describe('Zero-UI Vite integration', () => {
+test.describe(`Zero-UI Vite integration ${scenarios.map(({ toggle }) => toggle).join(', ')}`, () => {
 	for (const { toggle, attr } of scenarios) {
 		test(`starts "light" and flips <${attr}> → "dark"`, async ({ page }) => {
 			console.log(`\n🧪 Testing ${toggle} with attribute ${attr}`);

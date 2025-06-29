@@ -1,6 +1,8 @@
 /* AUTO-GENERATED - DO NOT EDIT */
 export const bodyAttributes = {
+  "data-faq": "closed",
   "data-number": "1",
+  "data-scope": "true",
   "data-season": "off",
   "data-theme": "light",
   "data-theme-2": "light",

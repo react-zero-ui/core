@@ -30,6 +30,11 @@ function useUI(key, initialValue) {
 	// Create a ref to hold the DOM element that will receive the data-* attributes
 	// This allows scoping UI state to specific elements instead of always using document.body
 	const scopeRef = useRef(null);
+
+	/* ─ DEV-ONLY MULTIPLE REF GUARD (removed in production by modern bundlers) ─ */
+	const refAttachCount = process.env.NODE_ENV !== 'production' ? useRef(0) : null;
+	/* ─────────────────────────────────────────────────────────────────────── */
+
 	// Convert kebab-case key to camelCase for dataset property access
 	// e.g., "my-key" becomes "myKey" since dataset auto-lowercases after dashes
 	const camelKey = key.replace(/-([a-z])/g, (_, l) => l.toUpperCase());
@@ -80,9 +85,36 @@ function useUI(key, initialValue) {
 		[key] // camelKey depends on key, so no need to include it in the dependency array
 	);
 
+	//  -- DEV-ONLY MULTIPLE REF GUARD (removed in production by modern bundlers)  --
 	// Attach the ref to the setter function so users can write: <div ref={setValue.ref} />
 	// This creates a clean API where the ref and setter are bundled together
-	setValue.ref = scopeRef;
+	if (process.env.NODE_ENV !== 'production') {
+		// DEV: Wrap scopeRef to detect multiple attachments
+		setValue.ref = useCallback(
+			(node) => {
+				if (node !== null) {
+					refAttachCount.current++;
+					if (refAttachCount.current > 1) {
+						throw new Error(
+							// TODO add documentation link
+							`[useUI] Multiple ref attachments detected for key "${key}". ` +
+								`Each useUI hook supports only one ref attachment per component. ` +
+								`Solution: Create separate component. and reuse.\n` +
+								`Example: <FAQ/>  <FAQ/> instead of multiple refs in one component.`
+						);
+					}
+				} else {
+					// Handle cleanup when ref is detached
+					refAttachCount.current = Math.max(0, refAttachCount.current - 1);
+				}
+				scopeRef.current = node;
+			},
+			[key]
+		);
+	} else {
+		// PROD: Direct ref assignment for zero overhead
+		setValue.ref = scopeRef;
+	}
 
 	// Return tuple matching React's useState pattern: [currentValue, setter]
 	// Note: currentValue is always initialValue since this doesn't trigger re-renders
