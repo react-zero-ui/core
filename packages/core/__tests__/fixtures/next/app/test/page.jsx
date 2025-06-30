@@ -180,14 +180,14 @@ export default function Page() {
 				</div>
 			</div>
 
-			{/* <div ref={setOpen.ref}>
+			<div ref={setOpen.ref}>
 				<button
 					className="bg-blue-500 text-white p-2 rounded-md m-5"
 					onClick={() => setOpen((prev) => (prev === 'open' ? 'closed' : 'open'))}>
 					question 0 +
 				</button>
 				<div className="faq-open:block faq-closed:hidden">answer</div>
-			</div> */}
+			</div>
 
 			<FAQ
 				index={1}

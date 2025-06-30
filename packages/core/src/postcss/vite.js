@@ -9,7 +9,7 @@ export default function zeroUI() {
 		enforce: 'pre', // run before other Vite plugins
 		async config() {
 			const { default: zeroUiPostcss } = await import('./index.cjs');
-			return { css: { postcss: { plugins: [zeroUiPostcss(), tailwindcss] } } };
+			return { css: { postcss: { plugins: [zeroUiPostcss(), tailwindcss()] } } };
 		},
 		async transformIndexHtml(html) {
 			const { bodyAttributes } = await import(path.join(process.cwd(), './.zero-ui/attributes.js'));
