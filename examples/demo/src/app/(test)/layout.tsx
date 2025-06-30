@@ -1,4 +1,3 @@
-'use client';
 import { domAnimation, LazyMotion } from 'motion/react';
 import { RenderTracker } from './ReactTracker';
 
