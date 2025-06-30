@@ -34,6 +34,7 @@
 		}
 	},
 	"scripts": {
+		"prepare": "pnpm run build",
 		"build": "tsc -p tsconfig.json",
 		"test:next": "playwright test -c __tests__/config/playwright.next.config.js",
 		"test:vite": "playwright test -c __tests__/config/playwright.vite.config.js",
