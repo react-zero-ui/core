@@ -18,7 +18,7 @@
 		"@react-zero-ui/core": "^0.1.0",
 		"@vercel/analytics": "^1.5.0",
 		"clsx": "^2.1.1",
-		"motion": "^12.16.0",
+		"motion": "12.18.1",
 		"next": "15.3.3",
 		"react": "^19.0.0",
 		"react-dom": "^19.0.0"
