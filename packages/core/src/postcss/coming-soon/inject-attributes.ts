@@ -4,7 +4,7 @@ import { NodePath } from '@babel/traverse';
 import * as t from '@babel/types';
 import { generate } from '@babel/generator';
 import type { RefLocation, RefLocationTracker } from './collect-refs.cjs';
-import type { VariantData } from './ast-v2.cjs';
+import type { VariantData } from '../v2/ast-v2.cjs';
 
 const traverse = (babelTraverse as any).default;
 

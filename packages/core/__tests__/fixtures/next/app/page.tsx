@@ -21,7 +21,9 @@ export default function Page() {
 	};
 
 	return (
-		<div className="p-8">
+		<div
+			className="p-8 theme-light:bg-white theme-dark:bg-white bg-black"
+			data-testid="page-container">
 			<h1 className="text-2xl font-bold py-5">Global State</h1>
 			<hr />
 			<div className=" space-y-4 border-2">

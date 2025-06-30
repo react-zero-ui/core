@@ -62,6 +62,16 @@ const scenarios = [
 		initialText: 'Light',
 		toggledText: 'Dark',
 	},
+	{
+		name: 'Toggle Function',
+		toggle: 'toggle-function',
+		container: 'toggle-function-container',
+		attr: 'data-toggle-function',
+		initialValue: 'white',
+		toggledValue: 'black',
+		initialText: 'White',
+		toggledText: 'Black',
+	},
 ];
 
 test.describe.configure({ mode: 'serial' });
@@ -161,5 +171,10 @@ test.describe('Zero-UI Next.js Integration Tests', () => {
 		// Verify other states are preserved
 		await expect(body).toHaveAttribute('data-theme', 'dark');
 		await expect(body).toHaveAttribute('data-toggle-boolean', 'false');
+	});
+
+	test('Tailwind is generated correctly', async ({ page }) => {
+		const pageContainer = page.getByTestId('page-container');
+		await expect(pageContainer).toHaveCSS('background-color', 'rgb(255, 255, 255)');
 	});
 });

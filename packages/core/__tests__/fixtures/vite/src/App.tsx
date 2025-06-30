@@ -1,9 +1,9 @@
-'use client';
 import useUI from '@react-zero-ui/core';
 import UseEffectComponent from './UseEffectComponent';
 import FAQ from './FAQ';
+import './App.css';
 
-export default function Page() {
+export default function App() {
 	const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
 	const [, setTheme2] = useUI<'light' | 'dark'>('theme-2', 'light');
 	const [, setThemeThree] = useUI<'light' | 'dark'>('themeThree', 'light');
@@ -20,7 +20,9 @@ export default function Page() {
 	};
 
 	return (
-		<div className="p-8">
+		<div
+			className="p-8 theme-light:bg-white theme-dark:bg-white bg-black text-black"
+			data-testid="page-container">
 			<h1 className="text-2xl font-bold py-5">Global State</h1>
 			<hr />
 			<div className=" space-y-4 border-2">
