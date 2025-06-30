@@ -4,33 +4,33 @@
 	"description": "Zero re-render, global UI state management for React",
 	"private": false,
 	"type": "module",
-	"main": "./src/index.js",
-	"module": "./src/index.js",
-	"types": "./src/index.d.ts",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
 	"sideEffects": false,
 	"files": [
-		"src/**/*",
+		"dist/**/*",
 		"README.md",
 		"LICENSE",
-		"!src/postcss/coming-soon/**/*"
+		"!dist/postcss/coming-soon/**/*"
 	],
 	"exports": {
 		".": {
-			"types": "./src/index.d.ts",
-			"import": "./src/index.js"
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
 		},
 		"./postcss": {
-			"types": "./src/postcss/index.d.ts",
-			"require": "./src/postcss/index.cjs"
+			"types": "./dist/postcss/index.d.ts",
+			"require": "./dist/postcss/index.cjs"
 		},
 		"./vite": {
-			"types": "./src/postcss/vite.d.ts",
-			"import": "./src/postcss/vite.js"
+			"types": "./dist/postcss/vite.d.ts",
+			"import": "./dist/postcss/vite.js"
 		},
 		"./cli": {
-			"types": "./src/cli/init.d.ts",
-			"require": "./src/cli/init.cjs",
-			"import": "./src/cli/init.cjs"
+			"types": "./dist/cli/init.d.ts",
+			"require": "./dist/cli/init.cjs",
+			"import": "./dist/cli/init.cjs"
 		}
 	},
 	"scripts": {
@@ -86,6 +86,7 @@
 	"devDependencies": {
 		"@playwright/test": "^1.53.0",
 		"@types/babel__generator": "^7.27.0",
-		"@types/babel__traverse": "^7.20.7"
+		"@types/babel__traverse": "^7.20.7",
+		"@types/react": "^19.1.8"
 	}
 }

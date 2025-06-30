@@ -2,8 +2,8 @@
   // Shared defaults
   "compilerOptions": {
     "target": "ES2022",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     // "verbatimModuleSyntax": true,
     /* Gradual-migration flags */
     "allowJs": true, // <- JS still builds

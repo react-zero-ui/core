@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { glob } from 'glob';
-import { extractVariantsFromFiles } from '../v2/ast-v2.cjs';
+import { extractVariantsFromFiles } from '../ast-v2.cjs';
 import { batchInjectDataAttributes, SEMANTIC_CONFIG } from './inject-attributes.js';
 import { RefLocationTracker } from './collect-refs.cjs';
 

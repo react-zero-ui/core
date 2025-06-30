@@ -8,11 +8,11 @@ export default function Page() {
 	const [, setTheme] = useUI('theme', 'light');
 	const [, setTheme2] = useUI('theme-2', 'light');
 	const [, setThemeThree] = useUI('themeThree', 'light');
-	const [, setToggle] = useUI('toggle-boolean', true);
-	const [, setNumber] = useUI('number', 1);
+	const [, setToggle] = useUI('toggle-boolean', 'true');
+	const [, setNumber] = useUI('number', '1');
 	const [, setOpen] = useUI('faq', 'closed'); // Same key everywhere!
 	const [, setScope] = useUI('scope', 'off');
-	const [, setMobile] = useUI('mobile', false);
+	const [, setMobile] = useUI('mobile', 'false');
 
 	const [, setToggleFunction] = useUI('toggle-function', 'white');
 
@@ -84,7 +84,7 @@ export default function Page() {
 					data-testid="toggle-boolean-container">
 					<button
 						type="button"
-						onClick={() => setToggle((prev) => !prev)}
+						onClick={() => setToggle((prev) => (prev === 'true' ? 'false' : 'true'))}
 						className="border-2 border-red-500"
 						data-testid="toggle-boolean">
 						Toggle Boolean ({`w/ boolean + prev => !prev`})
@@ -100,7 +100,7 @@ export default function Page() {
 					data-testid="toggle-number-container">
 					<button
 						type="button"
-						onClick={() => setNumber((prev) => (prev === 1 ? 2 : 1))}
+						onClick={() => setNumber((prev) => (prev === '1' ? '2' : '1'))}
 						className="border-2 border-red-500"
 						data-testid="toggle-number">
 						Toggle Number ({`w/ number + prev => prev === 1 ? 2 : 1`})
@@ -161,11 +161,11 @@ export default function Page() {
 							if (typeof window !== 'undefined') {
 								if (window.innerWidth > 768) {
 									// allow the user to toggle the mobile state
-									setMobile((prev) => (prev === true ? false : true));
+									setMobile((prev) => (prev === 'true' ? 'false' : 'true'));
 								}
 								if (window.innerWidth < 768) {
 									// force the mobile state to false on click
-									setMobile(true);
+									setMobile('true');
 								}
 							}
 						}}

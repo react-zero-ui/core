@@ -1,7 +1,7 @@
 import * as t from '@babel/types';
 import { NodePath } from '@babel/traverse';
 import * as babelTraverse from '@babel/traverse';
-import type { SetterMeta } from '../v2/ast-v2.cjs';
+import type { SetterMeta } from '../ast-v2.cjs';
 const traverse = (babelTraverse as any).default;
 
 export interface RefLocation {

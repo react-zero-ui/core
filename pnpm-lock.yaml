@@ -136,6 +136,9 @@ importers:
       '@types/babel__traverse':
         specifier: ^7.20.7
         version: 7.20.7
+      '@types/react':
+        specifier: ^19.1.8
+        version: 19.1.8
 
 packages:
 

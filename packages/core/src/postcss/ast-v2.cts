@@ -1,12 +1,13 @@
-import { parse } from '@babel/parser';
+import { parse, parseExpression } from '@babel/parser';
 import * as babelTraverse from '@babel/traverse';
 import { Binding, NodePath } from '@babel/traverse';
 import * as t from '@babel/types';
-import { CONFIG } from '../../config.cjs';
+import { CONFIG } from '../config.cjs';
 import { readFileSync } from 'fs';
 import { createHash } from 'crypto';
-import parser from '@babel/parser';
 import { generate } from '@babel/generator';
+import * as fs from 'fs';
+import * as path from 'path';
 const traverse = (babelTraverse as any).default;
 
 export interface SetterMeta {
@@ -84,8 +85,11 @@ export function collectUseUISetters(ast: t.File): SetterMeta[] {
 }
 
 export interface VariantData {
+	/** The state key (e.g., 'theme') */
 	key: string;
+	/** Array of unique values discovered in the file */
 	values: string[];
+	/** Literal initial value as string, or `null` if non-literal */
 	initialValue: string | null;
 }
 
@@ -274,12 +278,14 @@ function resolveIdentifier(node: t.Identifier, path: NodePath): t.Expression | n
 	if (bindingPath.isImportSpecifier() || bindingPath.isImportDefaultSpecifier()) {
 		// For now, we can't easily resolve cross-file imports
 		// But we could enhance this later to parse the imported file
+		// TODO: Implement this
 		return null;
 	}
 
 	// Function declaration: function getName() { return 'value'; }
 	if (bindingPath.isFunctionDeclaration()) {
 		// Could try to extract return values, but that's complex
+		// TODO: Implement this
 		return null;
 	}
 
@@ -423,4 +429,335 @@ export function extractVariantsFromFiles(filePaths: string[]): VariantData[] {
 	return Array.from(allVariants.entries())
 		.map(([key, valueSet]) => ({ key, values: Array.from(valueSet).sort(), initialValue: initialValues.get(key) || null }))
 		.sort((a, b) => a.key.localeCompare(b.key));
+}
+
+/**
+ * Parse PostCSS config JavaScript file and add Zero-UI plugin if not present
+ * Uses Babel AST for robust parsing and modification
+ * Supports both CommonJS (.js) and ES Modules (.mjs) formats
+ * @param {string} source - The PostCSS config source code
+ * @param {string} zeroUiPlugin - The Zero-UI plugin name
+ * @param {boolean} isESModule - Whether the config is an ES module
+ * @returns {string | null} The modified config code or null if no changes were made
+ */
+export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string, isESModule: boolean = false): string | null {
+	try {
+		const ast = parse(source, { sourceType: 'module', plugins: ['jsonStrings'] });
+
+		let modified = false;
+
+		// Check if Zero-UI plugin already exists
+		if (source.includes(zeroUiPlugin)) {
+			return source; // Already configured
+		}
+
+		traverse(ast, {
+			// Handle CommonJS: module.exports = { ... } and exports = { ... }
+			AssignmentExpression(path: NodePath<t.AssignmentExpression>) {
+				const { left, right } = path.node;
+
+				// Check for module.exports or exports assignment
+				const isModuleExports =
+					t.isMemberExpression(left) && t.isIdentifier(left.object, { name: 'module' }) && t.isIdentifier(left.property, { name: 'exports' });
+				const isExportsAssignment = t.isIdentifier(left, { name: 'exports' });
+
+				if ((isModuleExports || isExportsAssignment) && t.isObjectExpression(right)) {
+					const pluginsProperty = right.properties.find(
+						(prop): prop is t.ObjectProperty => t.isObjectProperty(prop) && t.isIdentifier(prop.key, { name: 'plugins' })
+					);
+
+					if (pluginsProperty && t.isExpression(pluginsProperty.value)) {
+						modified = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
+					}
+				}
+			},
+
+			// Handle ES Modules: export default { ... }
+			ExportDefaultDeclaration(path: NodePath<t.ExportDefaultDeclaration>) {
+				if (isESModule && t.isObjectExpression(path.node.declaration)) {
+					const pluginsProperty = path.node.declaration.properties.find(
+						(prop): prop is t.ObjectProperty => t.isObjectProperty(prop) && t.isIdentifier(prop.key, { name: 'plugins' })
+					);
+
+					if (pluginsProperty && t.isExpression(pluginsProperty.value)) {
+						modified = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
+					}
+				}
+			},
+
+			// Handle: const config = { plugins: ... }; export default config
+			VariableDeclarator(path: NodePath<t.VariableDeclarator>) {
+				if (isESModule && path.node.init && t.isObjectExpression(path.node.init)) {
+					const pluginsProperty = path.node.init.properties.find(
+						(prop): prop is t.ObjectProperty => t.isObjectProperty(prop) && t.isIdentifier(prop.key, { name: 'plugins' })
+					);
+
+					if (pluginsProperty && t.isExpression(pluginsProperty.value)) {
+						modified = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
+					}
+				}
+			},
+		});
+
+		if (modified) {
+			return generate(ast).code;
+		} else {
+			return null; // Could not automatically modify
+		}
+	} catch (err: unknown) {
+		const errorMessage = err instanceof Error ? err.message : String(err);
+		console.warn(`[Zero-UI] Failed to parse PostCSS config: ${errorMessage}`);
+		return null;
+	}
+}
+
+/**
+ * Helper function to add Zero-UI plugin to plugins configuration
+ * Handles both object format {plugin: {}} and array format [plugin]
+ */
+function addZeroUiToPlugins(pluginsNode: t.Expression, zeroUiPlugin: string): boolean {
+	if (t.isObjectExpression(pluginsNode)) {
+		// Object format: { 'plugin': {} }
+		pluginsNode.properties.unshift(t.objectProperty(t.stringLiteral(zeroUiPlugin), t.objectExpression([])));
+		return true;
+	} else if (t.isArrayExpression(pluginsNode)) {
+		// Array format: ['plugin']
+		pluginsNode.elements.unshift(t.stringLiteral(zeroUiPlugin));
+		return true;
+	}
+	return false;
+}
+
+/**
+ * Helper to create a zeroUI() call AST node
+ */
+function createZeroUICallNode(): t.CallExpression {
+	return t.callExpression(t.identifier('zeroUI'), []);
+}
+
+/**
+ * Helper to create a zeroUI import AST node
+ */
+function createZeroUIImportNode(importPath: string): t.ImportDeclaration {
+	return t.importDeclaration([t.importDefaultSpecifier(t.identifier('zeroUI'))], t.stringLiteral(importPath));
+}
+
+/**
+ * Helper to process a plugins array - replaces Tailwind with zeroUI or adds zeroUI
+ */
+function processPluginsArray(pluginsArray: (t.Expression | t.SpreadElement | null)[]): boolean {
+	let tailwindIndex = -1;
+	let zeroUIIndex = -1;
+
+	// Find existing plugins
+	pluginsArray.forEach((element, index) => {
+		if (element && t.isCallExpression(element)) {
+			if (t.isIdentifier(element.callee, { name: 'tailwindcss' })) {
+				tailwindIndex = index;
+			} else if (t.isIdentifier(element.callee, { name: 'zeroUI' })) {
+				zeroUIIndex = index;
+			}
+		}
+	});
+
+	// Replace Tailwind with Zero-UI
+	if (tailwindIndex >= 0) {
+		pluginsArray[tailwindIndex] = createZeroUICallNode();
+		return true;
+	}
+	// Add Zero-UI if not present
+	else if (zeroUIIndex === -1) {
+		pluginsArray.push(createZeroUICallNode());
+		return true;
+	}
+
+	return false;
+}
+
+/**
+ * Helper to handle config object (creates plugins array if needed)
+ */
+function processConfigObject(configObject: t.ObjectExpression): boolean {
+	const pluginsProperty = configObject.properties.find(
+		(prop): prop is t.ObjectProperty => t.isObjectProperty(prop) && t.isIdentifier(prop.key, { name: 'plugins' })
+	);
+
+	if (pluginsProperty && t.isArrayExpression(pluginsProperty.value)) {
+		// Process existing plugins array
+		return processPluginsArray(pluginsProperty.value.elements);
+	} else if (!pluginsProperty) {
+		// Create new plugins array with zeroUI
+		configObject.properties.push(t.objectProperty(t.identifier('plugins'), t.arrayExpression([createZeroUICallNode()])));
+		return true;
+	}
+
+	return false;
+}
+
+/**
+ * Helper to add zeroUI import to program
+ * Uses the FAANG approach: add at the beginning and let tooling handle organization
+ */
+function addZeroUIImport(programPath: NodePath<t.Program>, zeroUiPlugin: string): void {
+	const zeroUIImport = createZeroUIImportNode(zeroUiPlugin);
+	// Simple approach: add at the beginning
+	programPath.node.body.unshift(zeroUIImport);
+}
+
+/**
+ * Parse Vite config TypeScript/JavaScript file and add Zero-UI plugin
+ * Replaces @tailwindcss/vite plugin if present, otherwise adds zeroUI plugin
+ * @param {string} source - The Vite config source code
+ * @param {string} zeroUiPlugin - The Zero-UI plugin import path
+ * @returns {string | null} The modified config code or null if no changes were made
+ */
+export function parseAndUpdateViteConfig(source: string, zeroUiPlugin: string): string | null {
+	try {
+		// Quick check - if already configured correctly, return original
+		const hasZeroUIImport = source.includes(zeroUiPlugin);
+		const hasZeroUIPlugin = source.includes('zeroUI()');
+		const hasTailwindPlugin = source.includes('@tailwindcss/vite');
+
+		if (hasZeroUIImport && hasZeroUIPlugin && !hasTailwindPlugin) {
+			return source;
+		}
+
+		const ast = parse(source, { sourceType: 'module', plugins: ['typescript', 'importMeta'] });
+
+		let modified = false;
+
+		traverse(ast, {
+			Program(path: NodePath<t.Program>) {
+				if (!hasZeroUIImport) {
+					addZeroUIImport(path, zeroUiPlugin);
+					modified = true;
+				}
+			},
+
+			// Handle both direct export and variable assignment patterns
+			CallExpression(path: NodePath<t.CallExpression>) {
+				if (t.isIdentifier(path.node.callee, { name: 'defineConfig' }) && path.node.arguments.length > 0 && t.isObjectExpression(path.node.arguments[0])) {
+					if (processConfigObject(path.node.arguments[0])) {
+						modified = true;
+					}
+				}
+			},
+
+			// Remove Tailwind import if we're replacing it
+			ImportDeclaration(path: NodePath<t.ImportDeclaration>) {
+				if (path.node.source.value === '@tailwindcss/vite' && hasTailwindPlugin) {
+					path.remove();
+					modified = true;
+				}
+			},
+		});
+
+		return modified ? generate(ast).code : null;
+	} catch (err: unknown) {
+		const errorMessage = err instanceof Error ? err.message : String(err);
+		console.warn(`[Zero-UI] Failed to parse Vite config: ${errorMessage}`);
+		return null;
+	}
+}
+
+function findLayoutWithBody(root = process.cwd()): string[] {
+	const matches: string[] = [];
+	function walk(dir: string): void {
+		for (const file of fs.readdirSync(dir)) {
+			const fullPath = path.join(dir, file);
+			const stat = fs.statSync(fullPath);
+			if (stat.isDirectory()) {
+				walk(fullPath);
+			} else if (/^layout\.(tsx|jsx|js|ts)$/.test(file)) {
+				const source = fs.readFileSync(fullPath, 'utf8');
+				if (source.includes('<body')) {
+					matches.push(fullPath);
+				}
+			}
+		}
+	}
+	walk(root);
+	return matches;
+}
+
+export async function patchNextBodyTag(): Promise<void> {
+	const matches = findLayoutWithBody();
+
+	if (matches.length !== 1) {
+		console.warn(`[Zero-UI] ⚠️ Found ${matches.length} layout files with <body> tags. ` + `Expected exactly one. Skipping automatic injection.`);
+		return;
+	}
+
+	const filePath = matches[0];
+	const code = fs.readFileSync(filePath, 'utf8');
+
+	// Parse the file into an AST
+	const ast = parse(code, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
+
+	let hasImport = false;
+	traverse(ast, {
+		ImportDeclaration(path: NodePath<t.ImportDeclaration>) {
+			const specifiers = path.node.specifiers;
+			const source = path.node.source.value;
+			if (source === '@zero-ui/attributes') {
+				for (const spec of specifiers) {
+					if (t.isImportSpecifier(spec) && t.isIdentifier(spec.imported) && spec.imported.name === 'bodyAttributes') {
+						hasImport = true;
+					}
+				}
+			}
+		},
+	});
+
+	traverse(ast, {
+		Program(path: NodePath<t.Program>) {
+			if (!hasImport) {
+				const importDecl = t.importDeclaration(
+					[t.importSpecifier(t.identifier('bodyAttributes'), t.identifier('bodyAttributes'))],
+					t.stringLiteral('@zero-ui/attributes')
+				);
+				path.node.body.unshift(importDecl);
+			}
+		},
+	});
+
+	// Inject JSX spread into <body>
+	let injected = false;
+	traverse(ast, {
+		JSXOpeningElement(path: NodePath<t.JSXOpeningElement>) {
+			if (!injected && t.isJSXIdentifier(path.node.name, { name: 'body' })) {
+				// Prevent duplicate injection
+				const hasSpread = path.node.attributes.some((attr) => t.isJSXSpreadAttribute(attr) && t.isIdentifier(attr.argument, { name: 'bodyAttributes' }));
+				if (!hasSpread) {
+					path.node.attributes.unshift(t.jsxSpreadAttribute(t.identifier('bodyAttributes')));
+					injected = true;
+				}
+			}
+		},
+	});
+
+	const output = generate(
+		ast,
+		{
+			/* retain lines, formatting */
+		},
+		code
+	).code;
+	fs.writeFileSync(filePath, output, 'utf8');
+	console.log(`[Zero-UI] ✅ Patched <body> in ${filePath} with {...bodyAttributes}`);
+}
+
+/**
+ * Parse a tsconfig/jsconfig JSON file using Babel (handles comments, trailing commas)
+ */
+export function parseJsonWithBabel(source: string): any {
+	try {
+		const ast = parseExpression(source, { sourceType: 'module', plugins: ['jsonStrings'] });
+		// Convert Babel AST back to plain JS object
+		return eval(`(${generate(ast).code})`);
+	} catch (err: unknown) {
+		const errorMessage = err instanceof Error ? err.message : String(err);
+		console.warn(`[Zero-UI] Failed to parse ${source}: ${errorMessage}`);
+		return null;
+	}
 }

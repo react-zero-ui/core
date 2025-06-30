@@ -1,18 +1,31 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, type RefObject } from 'react';
 
-function useUI(key, initialValue) {
+interface GlobalThis {
+	__useUIRegistry?: Map<string, string>;
+}
+
+export interface UISetterFn<T extends string = string> {
+	(valueOrUpdater: T | ((currentValue: T) => T)): void;
+	ref?: RefObject<any> | ((node: HTMLElement | null) => void);
+}
+
+function useUI<T extends string = string>(key: string, initialValue: T): [T, UISetterFn<T>] {
 	/* ─ DEV-ONLY COLLISION GUARD (removed in production by modern bundlers) ─ */
 	if (process.env.NODE_ENV !== 'production') {
 		// Validate inputs with helpful error messages
 		if (!key || typeof key !== 'string' || key.trim() === '') {
 			throw new Error(`useUI(key, initialValue); key must be a non-empty string, got "${key}"`);
 		}
+		// force string type for initialValue
+		if (typeof initialValue !== 'string') {
+			throw new Error(`useUI(key, initialValue); initialValue must be or resolve to a string, got "${typeof initialValue}"`);
+		}
 
 		if (initialValue === '' || initialValue == null) {
 			throw new Error(`useUI(key, initialValue); initialValue cannot be empty string, null, or undefined, got "${initialValue}"`);
 		}
 		// One shared registry per window / Node context
-		const registry = typeof globalThis !== 'undefined' ? (globalThis.__useUIRegistry ||= new Map()) : new Map();
+		const registry = typeof globalThis !== 'undefined' ? ((globalThis as GlobalThis).__useUIRegistry ||= new Map()) : new Map();
 
 		const prev = registry.get(key);
 		// TODO try to add per page error boundaries
@@ -30,7 +43,7 @@ function useUI(key, initialValue) {
 
 	// Create a ref to hold the DOM element that will receive the data-* attributes
 	// This allows scoping UI state to specific elements instead of always using document.body
-	const scopeRef = useRef(null);
+	const scopeRef = useRef<HTMLElement | null>(null);
 
 	/* ─ DEV-ONLY MULTIPLE REF GUARD (removed in production by modern bundlers) ─ */
 	const refAttachCount = process.env.NODE_ENV !== 'production' ? useRef(0) : null;
@@ -42,8 +55,8 @@ function useUI(key, initialValue) {
 
 	// Memoized setter function that updates data-* attributes on the target element
 	// useCallback prevents recreation on every render, essential for useEffect dependencies
-	const setValue = useCallback(
-		(valueOrUpdater) => {
+	const setValue: UISetterFn<T> = useCallback(
+		(valueOrUpdater: T | ((currentValue: T) => T)) => {
 			// SSR safety: bail out if running on server where window is undefined
 			if (typeof window === 'undefined') return;
 
@@ -51,35 +64,20 @@ function useUI(key, initialValue) {
 			// This enables both scoped UI state (with ref) and global UI state (without ref)
 			const target = scopeRef.current ?? document.body;
 
-			let newValue;
+			let newValue: T;
 			// Check if caller passed an updater function (like React's setState(prev => prev) pattern)
 			if (typeof valueOrUpdater === 'function') {
-				const value = target.dataset[camelKey];
+				const value = target.dataset[camelKey] as T;
 
-				// Parse the string value from dataset back to the original type
 				// Call the updater function with the parsed current value
-				newValue = valueOrUpdater(
-					// If no value exists, return the initial value
-					!value
-						? initialValue
-						: // If initial was boolean, parse "true"/"false" string to boolean
-							typeof initialValue === 'boolean'
-							? value === 'true'
-							: // If initial was number, convert string to number with NaN fallback
-								typeof initialValue === 'number'
-								? // The double conversion of +value is very fast and is the same as isNaN check without the function overhead
-									+value === +value
-									? +value
-									: initialValue
-								: value
-				);
+				newValue = valueOrUpdater(value);
 			} else {
 				// Direct value assignment (no updater function)
 				newValue = valueOrUpdater;
 			}
 
-			// Write the new value to the data-* attribute as a string
-			target.dataset[camelKey] = newValue + ''; // The fastest way to convert to string
+			// Write the new value to the data-* attribute
+			target.dataset[camelKey] = newValue;
 		},
 		// Recreate callback only when the key changes
 		// Note: initialValue intentionally excluded since it should be stable
@@ -91,11 +89,11 @@ function useUI(key, initialValue) {
 	// This creates a clean API where the ref and setter are bundled together
 	if (process.env.NODE_ENV !== 'production') {
 		// DEV: Wrap scopeRef to detect multiple attachments
-		setValue.ref = useCallback(
-			(node) => {
-				if (node !== null) {
-					refAttachCount.current++;
-					if (refAttachCount.current > 1) {
+		(setValue as UISetterFn<T>).ref = useCallback(
+			(node: HTMLElement | null) => {
+				if (node) {
+					refAttachCount!.current++;
+					if (refAttachCount!.current > 1) {
 						// TODO add documentation link
 						throw new Error(
 							`[useUI] Multiple ref attachments detected for key "${key}". ` +
@@ -106,7 +104,7 @@ function useUI(key, initialValue) {
 					}
 				} else {
 					// Handle cleanup when ref is detached
-					refAttachCount.current = Math.max(0, refAttachCount.current - 1);
+					refAttachCount!.current = Math.max(0, refAttachCount!.current - 1);
 				}
 				scopeRef.current = node;
 			},
@@ -117,8 +115,7 @@ function useUI(key, initialValue) {
 		setValue.ref = scopeRef;
 	}
 
-	// Return tuple matching React's useState pattern: [currentValue, setter]
-	// Note: currentValue is always initialValue since this doesn't trigger re-renders
+	// Return tuple matching React's useState pattern: [initialValue, setter]
 	return [initialValue, setValue];
 }
 

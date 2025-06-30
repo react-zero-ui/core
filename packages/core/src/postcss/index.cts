@@ -1,16 +1,17 @@
-// src/postcss/index.cjs
+// src/postcss/index.cts
 /**
  * @type {import('postcss').PluginCreator}
  */
-const { processVariants, buildCss, generateAttributesFile, isZeroUiInitialized } = require('./helpers.cjs');
-const { runZeroUiInit } = require('../cli/postInstall.cjs');
+import { processVariants, buildCss, generateAttributesFile, isZeroUiInitialized } from './helpers.cjs';
+import { runZeroUiInit } from '../cli/postInstall.cjs';
+import type { Result, Root } from 'postcss';
 
-module.exports = () => {
+const plugin = (): { postcssPlugin: string; Once: (root: Root, { result }: { result: Result }) => Promise<void> } => {
 	return {
 		postcssPlugin: 'postcss-react-zero-ui',
 
 		// Once runs BEFORE Root, so Tailwind will see our variants
-		async Once(root, { result }) {
+		async Once(root: Root, { result }: { result: Result }) {
 			try {
 				// Process all variants using the shared helper
 				const { finalVariants, initialValues, sourceFiles } = await processVariants();
@@ -23,7 +24,7 @@ module.exports = () => {
 				}
 
 				// Register dependencies - CRITICAL for file watching
-				sourceFiles.forEach((file) => {
+				sourceFiles.forEach((file: string) => {
 					result.messages.push({ type: 'dependency', plugin: 'postcss-react-zero-ui', file: file, parent: result.opts.from });
 				});
 
@@ -35,11 +36,16 @@ module.exports = () => {
 
 				// Generate body attributes file and TypeScript definitions
 				await generateAttributesFile(finalVariants, initialValues);
-			} catch (error) {
-				throw new Error('[Zero-UI] PostCSS plugin error: ', error.message);
+			} catch (error: unknown) {
+				const errorMessage = error instanceof Error ? error.message : String(error);
+				throw new Error(`[Zero-UI] PostCSS plugin error: ${errorMessage}`);
 			}
 		},
 	};
 };
 
-module.exports.postcss = true;
+// PostCSS plugin marker
+plugin.postcss = true;
+
+// For CommonJS compatibility when loaded as a string in PostCSS config
+export = plugin;

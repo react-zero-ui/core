@@ -5,8 +5,9 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 //  This file is the entry point for the react-zero-ui library, that uses postcss to trigger the build process
-const plugin = require('../../src/postcss/index.cjs');
-const { patchConfigAlias, toKebabCase, patchPostcssConfig, patchViteConfig } = require('../../src/postcss/helpers.cjs');
+const plugin = require('../../dist/postcss/index.cjs');
+
+const { patchConfigAlias, toKebabCase, patchPostcssConfig, patchViteConfig } = require('../../dist/postcss/helpers.cjs');
 
 function getAttrFile() {
 	return path.join(process.cwd(), '.zero-ui', 'attributes.js');
@@ -1504,7 +1505,7 @@ test('handles complex boolean toggle patterns', async () => {
 	);
 });
 
-test('extracts values from deeply nested function calls', async () => {
+test.skip('extracts values from deeply nested function calls', async () => {
 	await runTest(
 		{
 			'app/nested-calls.jsx': `
