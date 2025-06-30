@@ -68,7 +68,11 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      # 7 ▸ Pack → inject tar-ball → run whole test suite
+      # 7 ▸ Run Build
+      - name: Run Build
+        run: pnpm build
+
+      # 8 ▸ Pack → inject tar-ball → run whole test suite
       - name: Pack core tarball
         run: pnpm run prepack:core
 
