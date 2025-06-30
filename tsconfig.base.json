@@ -1,24 +1,21 @@
 {
-  // Shared defaults
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    // "verbatimModuleSyntax": true,
-    /* Gradual-migration flags */
-    "allowJs": true, // <- JS still builds
-    "checkJs": false, // <- flip to true later for type-checking JS
-    "strict": true, // <- tighten as we go
-    "declaration": true, // <- emit declaration files
-    "emitDeclarationOnly": false, // <- emit declaration files only
-    "outDir": "dist", // <- output directory
-    /* Maps for monorepo imports like "@react-zero-ui/core" */
-    "composite": true,
-    "rootDir": "src",
-    "forceConsistentCasingInFileNames": true
-  },
-  "exclude": [
-    "dist",
-    "node_modules"
-  ]
+	// Shared defaults
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		// "verbatimModuleSyntax": true,
+		/* Gradual-migration flags */
+		"allowJs": true, // <- JS still builds
+		"checkJs": false, // <- flip to true later for type-checking JS
+		"strict": true, // <- tighten as we go
+		"declaration": true, // <- emit declaration files
+		"emitDeclarationOnly": false, // <- emit declaration files only
+		"outDir": "dist", // <- output directory
+		/* Maps for monorepo imports like "@react-zero-ui/core" */
+		"composite": true,
+		"rootDir": "src",
+		"forceConsistentCasingInFileNames": true
+	},
+	"exclude": ["dist", "node_modules"]
 }

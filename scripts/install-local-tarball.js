@@ -4,7 +4,7 @@ import { execSync } from 'node:child_process';
 
 const dist = join(process.cwd(), 'dist');
 const pkg = readdirSync(dist)
-	.filter(f => f.endsWith('.tgz'))
+	.filter((f) => f.endsWith('.tgz'))
 	.sort((a, b) => statSync(join(dist, b)).mtimeMs - statSync(join(dist, a)).mtimeMs)[0];
 
 const fixtures = ['packages/core/__tests__/fixtures/next', 'packages/core/__tests__/fixtures/vite'];

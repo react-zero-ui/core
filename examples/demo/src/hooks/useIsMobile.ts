@@ -12,7 +12,7 @@ export function useIsMobile(breakpoint = 768, fn?: () => void) {
 	const store = getMediaQueryStore(breakpoint, fn);
 
 	return useSyncExternalStore(
-		cb => {
+		(cb) => {
 			store.subscribers.add(cb);
 			return () => store.subscribers.delete(cb);
 		},

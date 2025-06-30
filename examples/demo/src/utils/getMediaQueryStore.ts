@@ -28,7 +28,7 @@ export function getMediaQueryStore(breakpoint: number, fn?: () => void): MediaQu
 
 	const update = () => {
 		store.isMatch = mqList.matches;
-		store.subscribers.forEach(cb => cb());
+		store.subscribers.forEach((cb) => cb());
 		fn?.();
 	};
 

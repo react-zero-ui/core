@@ -15,6 +15,6 @@ export async function overwriteFile(filePath, content) {
 	fs.writeFileSync(filePath, content);
 	console.log(`[Reset] ✅ Overwrote: ${filePath}`);
 
-	await new Promise(resolve => setTimeout(resolve, 1000));
+	await new Promise((resolve) => setTimeout(resolve, 1000));
 	console.log(`[Reset] ✅ Wait complete, continuing...`);
 }

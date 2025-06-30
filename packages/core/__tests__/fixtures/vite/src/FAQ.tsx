@@ -1,6 +1,6 @@
 import { useUI } from '@react-zero-ui/core';
 
-function FAQ({ question, answer, index }) {
+function FAQ({ question, answer, index }: { question: string; answer: string; index: number }) {
 	const [, setOpen] = useUI<'open' | 'closed'>('faq', 'closed'); // Same key everywhere!
 
 	return (
