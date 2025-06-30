@@ -1,11 +1,11 @@
 // src/postcss/helpers.cjs
-const fs = require('fs');
-const path = require('path');
-const { CONFIG, IGNORE_DIRS } = require('../config.cjs');
-const { parseJsonWithBabel, parseAndUpdatePostcssConfig, parseAndUpdateViteConfig } = require('./ast.cjs');
-const { extractVariants } = require('../dist/postcss/v2/ast-v2.cjs');
+import fs from 'fs';
+import path from 'path';
+import { CONFIG, IGNORE_DIRS } from '../../config.cjs';
+import { parseJsonWithBabel, parseAndUpdatePostcssConfig, parseAndUpdateViteConfig } from '../ast.cjs';
+import { extractVariants } from './ast-v2.cjs';
 
-function toKebabCase(str) {
+function toKebabCase(str: string) {
 	if (typeof str !== 'string') {
 		throw new Error(`Expected string but got: ${typeof str}`);
 	}
@@ -23,9 +23,7 @@ function findAllSourceFiles(patterns = CONFIG.CONTENT) {
 	const cwd = process.cwd();
 
 	try {
-		const files = globSync(patterns, { cwd, ignore: Array.from(IGNORE_DIRS), absolute: true });
-		console.log('files: ', files);
-		return files;
+		return globSync(patterns, { cwd, ignore: Array.from(IGNORE_DIRS), absolute: true });
 	} catch (error) {
 		console.warn('[Zero-UI] Error finding source files:', error.message);
 		return [];

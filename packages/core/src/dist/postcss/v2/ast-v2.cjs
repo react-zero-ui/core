@@ -46,7 +46,30 @@ const fs_1 = require("fs");
 const crypto_1 = require("crypto");
 const traverse = babelTraverse.default;
 /**
- * Collects every `[ , setter ] = useUI('key', 'initial')` in a file.
+ * Check if the file imports useUI (or the configured hook name)
+ * @param ast - The parsed AST
+ * @returns true if useUI is imported, false otherwise
+ */
+function hasUseUIImport(ast) {
+    let hasImport = false;
+    traverse(ast, {
+        ImportDeclaration(path) {
+            const source = path.node.source.value;
+            // Check if importing from @react-zero-ui/core
+            if (source === config_cjs_1.CONFIG.IMPORT_NAME) {
+                // Only look for named import: import { useUI } from '...'
+                const hasUseUISpecifier = path.node.specifiers.some((spec) => t.isImportSpecifier(spec) && t.isIdentifier(spec.imported) && spec.imported.name === config_cjs_1.CONFIG.HOOK_NAME);
+                if (hasUseUISpecifier) {
+                    hasImport = true;
+                    path.stop(); // Early exit
+                }
+            }
+        },
+    });
+    return hasImport;
+}
+/**
+ * Collects every `[ staleValue, setterFn ] = useUI('key', 'initial')` in a file.
  * @returns SetterMeta[]
  */
 function collectUseUISetters(ast) {
@@ -178,6 +201,22 @@ function extractLiteralsRecursively(node, path) {
             results.push(...extractLiteralsRecursively(resolved, path));
         }
     }
+    // Member expressions: SIZES.SMALL, obj.prop, etc.
+    else if (t.isMemberExpression(node) && !node.computed && t.isIdentifier(node.property)) {
+        const objectResolved = resolveIdentifier(node.object, path);
+        if (objectResolved && t.isObjectExpression(objectResolved)) {
+            // Look for the property in the object
+            const propertyName = node.property.name;
+            for (const prop of objectResolved.properties) {
+                if (t.isObjectProperty(prop) && t.isIdentifier(prop.key) && prop.key.name === propertyName) {
+                    const propertyValue = literalToString(prop.value);
+                    if (propertyValue !== null) {
+                        results.push(propertyValue);
+                    }
+                }
+            }
+        }
+    }
     // Binary expressions: might contain literals in some cases
     else if (t.isBinaryExpression(node)) {
         // Only extract if it's a simple concatenation that might resolve to a literal
@@ -202,18 +241,40 @@ function extractFromBlockStatement(block, path) {
 }
 /**
  * Try to resolve an identifier to its value within the current scope
+ * @param node - The identifier to resolve
+ * @param path - The path to the identifier
+ * @returns The value of the identifier, or null if it cannot be resolved
  */
 function resolveIdentifier(node, path) {
     const binding = path.scope.getBinding(node.name);
     if (!binding)
         return null;
-    // Look at the binding's initialization
     const bindingPath = binding.path;
     // Variable declarator: const x = 'value'
     if (bindingPath.isVariableDeclarator() && bindingPath.node.init) {
         return bindingPath.node.init;
     }
-    // Function parameter, import, etc. - could be extended
+    // Import specifier: import { THEME_DARK } from './constants'
+    if (bindingPath.isImportSpecifier() || bindingPath.isImportDefaultSpecifier()) {
+        // For now, we can't easily resolve cross-file imports
+        // But we could enhance this later to parse the imported file
+        return null;
+    }
+    // Function declaration: function getName() { return 'value'; }
+    if (bindingPath.isFunctionDeclaration()) {
+        // Could try to extract return values, but that's complex
+        return null;
+    }
+    // Try to look at the scope for block-scoped variables
+    // that might be defined higher up
+    let currentScope = path.scope;
+    while (currentScope) {
+        const scopeBinding = currentScope.getOwnBinding(node.name);
+        if (scopeBinding && scopeBinding.path.isVariableDeclarator() && scopeBinding.path.node.init) {
+            return scopeBinding.path.node.init;
+        }
+        currentScope = currentScope.parent;
+    }
     return null;
 }
 /**

@@ -4,6 +4,7 @@ export namespace CONFIG {
         let JAVASCRIPT: string[];
     }
     let HOOK_NAME: string;
+    let IMPORT_NAME: string;
     let MIN_HOOK_ARGUMENTS: number;
     let MAX_HOOK_ARGUMENTS: number;
     let HEADER: string;

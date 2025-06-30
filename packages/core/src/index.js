@@ -123,4 +123,3 @@ function useUI(key, initialValue) {
 }
 
 export { useUI };
-export default useUI;

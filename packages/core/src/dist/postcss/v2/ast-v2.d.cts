@@ -11,7 +11,7 @@ export interface SetterMeta {
     initialValue: string | null;
 }
 /**
- * Collects every `[ , setter ] = useUI('key', 'initial')` in a file.
+ * Collects every `[ staleValue, setterFn ] = useUI('key', 'initial')` in a file.
  * @returns SetterMeta[]
  */
 export declare function collectUseUISetters(ast: t.File): SetterMeta[];

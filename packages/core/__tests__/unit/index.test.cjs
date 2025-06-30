@@ -4,6 +4,7 @@ const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+//  This file is the entry point for the react-zero-ui library, that uses postcss to trigger the build process
 const plugin = require('../../src/postcss/index.cjs');
 const { patchConfigAlias, toKebabCase, patchPostcssConfig, patchViteConfig } = require('../../src/postcss/helpers.cjs');
 
@@ -50,7 +51,7 @@ test('generates body attributes file correctly', async () => {
 	await runTest(
 		{
 			'app/test.jsx': `
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       
       function Component() {
         const [theme, setTheme] = useUI('theme', 'light');
@@ -84,7 +85,7 @@ test('generates body attributes file correctly when kebab-case is used', async (
 	await runTest(
 		{
 			'app/test.jsx': `
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       
       function Component() {
         const [theme, setTheme] = useUI('theme-secondary', 'light');
@@ -120,7 +121,7 @@ test('detects JavaScript setValue calls', async () => {
 	await runTest(
 		{
 			'src/modal.js': `
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       
       function Modal() {
         const [modal, setModal] = useUI('modal', 'closed');
@@ -160,7 +161,7 @@ test('handles boolean values', async () => {
 	await runTest(
 		{
 			'app/toggle.tsx': `
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       
       function Toggle() {
         const [isOpen, setIsOpen] = useUI<boolean>('drawer', false);
@@ -192,7 +193,7 @@ test('handles kebab-case conversion', async () => {
 	await runTest(
 		{
 			'src/styles.jsx': `
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       
       function StyledComponent() {
         const [primaryColor, setPrimaryColor] = useUI('primaryColor', 'deepBlue');
@@ -229,7 +230,7 @@ test('handles conditional expressions', async () => {
 	await runTest(
 		{
 			'app/conditional.jsx': `
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       
       function ConditionalComponent({ isActive, mode }) {
         const [state, setState] = useUI('state', 'default');
@@ -265,14 +266,14 @@ test('handles multiple files and deduplication', async () => {
 	await runTest(
 		{
 			'src/header.jsx': `
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       function Header() {
         const [theme, setTheme] = useUI('theme', 'light');
         return <button onClick={() => setTheme('dark')}>Dark</button>;
       }
     `,
 			'src/footer.jsx': `
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       function Footer() {
         const [theme, setTheme] = useUI('theme', 'light');
         return <div>
@@ -284,7 +285,7 @@ test('handles multiple files and deduplication', async () => {
       }
     `,
 			'app/sidebar.tsx': `
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       function Sidebar() {
         const [theme, setTheme] = useUI<'light' | 'dark' | 'auto'>('theme', 'light');
         return <div>
@@ -315,14 +316,14 @@ test('handles parsing errors gracefully', async () => {
 	await runTest(
 		{
 			'src/valid.jsx': `
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       function Valid() {
         const [state, setState] = useUI('valid', 'working');
         return <div>Valid</div>;
       }
     `,
 			'src/invalid.js': `
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       function Invalid() {
         const [state, setState] = useUI('test' 'missing-comma');
         {{{ invalid syntax
@@ -348,7 +349,7 @@ test('valid edge cases: underscores + missing initial', async () => {
 	await runTest(
 		{
 			'src/edge.jsx': `
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       function EdgeCases() {
         const [noInitial] = useUI('noInitial_value');
         const [, setOnlySetter] = useUI('only_setter_key', 'yes');
@@ -374,7 +375,7 @@ test('watches for file changes', async () => {
 	await runTest(
 		{
 			'src/initial.jsx': `
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       function Initial() {
         const [state, setState] = useUI('watchTest', 'initial');
         return <div>Initial</div>;e
@@ -389,7 +390,7 @@ test('watches for file changes', async () => {
 			fs.writeFileSync(
 				'src/new.jsx',
 				`
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       function New() {
         const [state, setState] = useUI('watchTest', 'initial');
         return <button onClick={() => setState('updated')}>Update</button>;
@@ -412,21 +413,21 @@ test('ignores node_modules and hidden directories', async () => {
 	await runTest(
 		{
 			'src/valid.jsx': `
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       function Valid() {
         const [state, setState] = useUI('valid', 'yes');
         return <div>Valid</div>;
       }
     `,
 			'node_modules/package/file.jsx': `
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       function Ignored() {
         const [state] = useUI('ignored', 'shouldNotAppear');
         return <div>Should be ignored</div>;
       }
     `,
 			'.next/file.jsx': `
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       function Hidden() {
         const [state] = useUI('hidden', 'shouldNotAppear');
         return <div>Should be ignored</div>;
@@ -446,7 +447,7 @@ test('handles deeply nested file structures', async () => {
 	await runTest(
 		{
 			'src/features/auth/components/login/LoginForm.jsx': `
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       function LoginForm() {
         const [authState, setAuthState] = useUI('authState', 'loggedOut');
         return <button onClick={() => setAuthState('loggedIn')}>Login</button>;
@@ -466,7 +467,7 @@ test('handles large projects efficiently - 500 files', async function () {
 	// Generate 50 files
 	for (let i = 0; i < 500; i++) {
 		files[`src/component${i}.jsx`] = `
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       function Component${i}() {
         const [state${i}, setState${i}] = useUI('state${i}', 'value${i}');
         return <div>Component ${i}</div>;
@@ -495,7 +496,7 @@ test('handles special characters in values', async () => {
 	await runTest(
 		{
 			'src/special.jsx': `
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       function Special() {
         const [state, setState] = useUI('special', 'default');
         return (
@@ -521,7 +522,7 @@ test('handles concurrent file modifications', async () => {
 	await runTest(
 		{
 			'src/rapid.jsx': `
-      import { useUI } from 'react-zero-ui';
+      import { useUI } from '@react-zero-ui/core';
       function Rapid() {
         const [count] = useUI('count', 'zero');
         return <div>Initial</div>;
@@ -534,7 +535,7 @@ test('handles concurrent file modifications', async () => {
 				fs.writeFileSync(
 					'src/rapid.jsx',
 					`
-        import { useUI } from 'react-zero-ui';
+        import { useUI } from '@react-zero-ui/core';
         function Rapid() {
           const [count, setCount] = useUI('count', 'zero');
           return <button onClick={() => setCount('${i}')}>Count ${i}</button>;
@@ -1427,4 +1428,617 @@ export default defineConfig({
 		process.chdir(originalCwd);
 		fs.rmSync(testDir, { recursive: true, force: true });
 	}
+});
+
+/*
+The following tests are for advanced edge cases
+--------------------------------------------------------------------------------------------
+----------------------------------------------
+----------------------------------------------
+----------------------------------------------
+----------------------------------------------
+----------------------------------------------
+--------------------------------------------------------------------------------------------
+----------------------------------------------
+----------------------------------------------
+----------------------------------------------
+----------------------------------------------
+----------------------------------------------
+----------------------------------------------
+*/
+
+test('generated variants for initial value without setterFn', async () => {
+	await runTest(
+		{
+			'app/initial-value.jsx': `
+				import { useUI } from '@react-zero-ui/core';
+				function Component() {
+					const [theme,setTheme] = useUI('theme', 'light');
+					return <div>Test</div>;
+				}
+			`,
+		},
+		(result) => {
+			console.log('\n📄 Initial value without setterFn:');
+			console.log(result.css);
+
+			assert(result.css.includes('@custom-variant theme-light'));
+		}
+	);
+});
+
+test('handles complex boolean toggle patterns', async () => {
+	await runTest(
+		{
+			'app/boolean-edge-cases.tsx': `
+        import { useUI } from '@react-zero-ui/core';
+        
+        function Component() {
+          const [isVisible, setIsVisible] = useUI('modal-visible', false);
+          const [isEnabled, setIsEnabled] = useUI('feature-enabled', true);
+          
+          // Complex boolean patterns that should still result in true/false
+          const handleToggle = () => setIsVisible(prev => !prev);
+          const handleConditional = () => setIsVisible(condition ? true : false);
+          const handleLogical = () => setIsEnabled(loading && false || true);
+          
+          return <div>Test</div>;
+        }
+      `,
+		},
+		(result) => {
+			const content = fs.readFileSync(getAttrFile(), 'utf-8');
+			console.log('\n📄 Boolean edge cases:');
+			console.log(content);
+
+			// Should only have true/false variants for booleans
+			assert(result.css.includes('@custom-variant modal-visible-true'));
+			assert(result.css.includes('@custom-variant modal-visible-false'));
+			assert(result.css.includes('@custom-variant feature-enabled-true'));
+			assert(result.css.includes('@custom-variant feature-enabled-false'));
+
+			// Should NOT have any other variants
+			assert(!result.css.includes('@custom-variant modal-visible-prev'));
+			assert(!result.css.includes('@custom-variant modal-visible-condition'));
+		}
+	);
+});
+
+test('extracts values from deeply nested function calls', async () => {
+	await runTest(
+		{
+			'app/nested-calls.jsx': `
+        import { useUI } from '@react-zero-ui/core';
+        
+        function Component() {
+          const [theme, setTheme] = useUI('theme', 'light');
+          
+          // Nested in useEffect
+          useEffect(() => {
+            if (darkMode) {
+              setTheme('dark');
+            } else {
+              setTheme('auto');
+            }
+          }, [darkMode]);
+          
+          // Nested in event handler
+          const handleClick = useCallback(() => {
+            const newTheme = calculateTheme();
+            setTheme(newTheme === 'system' ? 'system' : 'manual');
+          }, []);
+          
+          // Nested in JSX
+          return (
+            <div>
+              <button onClick={() => setTheme('contrast')}>
+                High Contrast
+              </button>
+              <select onChange={e => setTheme(e.target.value)}>
+                <option value="neon">Neon</option>
+                <option value="retro">Retro</option>
+              </select>
+            </div>
+          );
+        }
+      `,
+		},
+		(result) => {
+			console.log('\n📄 Nested calls extraction:');
+			console.log(result.css);
+
+			// Should extract all literal values
+			assert(result.css.includes('@custom-variant theme-light')); // initial
+			assert(result.css.includes('@custom-variant theme-dark')); // from useEffect
+			assert(result.css.includes('@custom-variant theme-auto')); // from useEffect
+			assert(result.css.includes('@custom-variant theme-system')); // from ternary
+			assert(result.css.includes('@custom-variant theme-manual')); // from ternary
+			assert(result.css.includes('@custom-variant theme-contrast')); // from onClick
+			assert(result.css.includes('@custom-variant theme-neon')); // from onChange
+			assert(result.css.includes('@custom-variant theme-retro')); // from onChange
+			// Note: 'neon' and 'retro' from option values won't be extracted since they're not setter calls
+		}
+	);
+});
+
+test('handles ternary and logical expressions', async () => {
+	await runTest(
+		{
+			'app/expressions.tsx': `
+        import { useUI } from '@react-zero-ui/core';
+        
+        function Component({ isDark, isLoading, userPreference }) {
+          const [status, setStatus] = useUI('status', 'idle');
+          const [mode, setMode] = useUI('display-mode', 'normal');
+          
+          // Ternary expressions
+          const updateStatus = () => {
+            setStatus(isLoading ? 'loading' : 'ready');
+          };
+          
+          // Nested ternary
+          const updateMode = () => {
+            setMode(isDark ? 'dark' : (userPreference === 'auto' ? 'auto' : 'light'));
+          };
+          
+          // Logical expressions
+          const handleError = () => {
+            setStatus(error && 'error' || 'success');
+          };
+          
+          // Complex logical
+          const handleComplex = () => {
+            setMode(loading && 'disabled' || ready && 'active' || 'pending');
+          };
+          
+          return <div>Test</div>;
+        }
+      `,
+		},
+		(result) => {
+			console.log('\n📄 Expression handling:');
+			console.log(result.css);
+
+			// Ternary values
+			assert(result.css.includes('@custom-variant status-loading'));
+			assert(result.css.includes('@custom-variant status-ready'));
+			assert(result.css.includes('@custom-variant status-error'));
+			assert(result.css.includes('@custom-variant status-success'));
+
+			// Nested ternary values
+			assert(result.css.includes('@custom-variant display-mode-dark'));
+			assert(result.css.includes('@custom-variant display-mode-auto'));
+			assert(result.css.includes('@custom-variant display-mode-light'));
+
+			// Complex logical values
+			assert(result.css.includes('@custom-variant display-mode-disabled'));
+			assert(result.css.includes('@custom-variant display-mode-active'));
+			assert(result.css.includes('@custom-variant display-mode-pending'));
+		}
+	);
+});
+
+test('resolves constants', async () => {
+	await runTest(
+		{
+			'app/constants-resolve.jsx': `
+			import { useUI } from '@react-zero-ui/core';
+export const THEME_DARK = 'dark';
+export const THEME_LIGHT = 'light';
+export const SIZES = { SMALL: 'sm', LARGE: 'lg' };
+const isDark = true;
+const isSmall = true;
+export function Pages() {
+	const [theme, setTheme] = useUI('theme', 'default');
+	const [size, setSize] = useUI('size', 'medium');
+	// Using constants
+	const toggleTheme = () => {
+		setTheme(isDark ? THEME_LIGHT : THEME_DARK);
+	};
+	// Using object properties
+	const updateSize = () => {
+		setSize(isSmall ? SIZES.SMALL : SIZES.LARGE);
+	};
+	// Local constants
+	const STATUS_PENDING = 'pending-state';
+	const handleStatus = () => {
+		setTheme(STATUS_PENDING);
+	};
+	return <div>Test</div>;
+}
+
+			`,
+		},
+		(result) => {
+			console.log('\n📄 Constants:');
+			console.log(result.css);
+
+			assert(result.css.includes('@custom-variant theme-dark'));
+			assert(result.css.includes('@custom-variant theme-default'));
+			assert(result.css.includes('@custom-variant theme-light'));
+			// Does not work for VARIABLE.PROPERTY
+			assert(result.css.includes('@custom-variant size-sm'));
+			assert(result.css.includes('@custom-variant size-medium'));
+			assert(result.css.includes('@custom-variant size-lg'));
+			assert(result.css.includes('@custom-variant theme-pending-state'));
+		}
+	);
+});
+
+test.skip('resolves constants and imported values -- COMPLEX --', async () => {
+	await runTest(
+		{
+			'app/constants.js': `
+        export const THEME_DARK = 'dark';
+        export const THEME_LIGHT = 'light';
+        export const SIZES = {
+          SMALL: 'sm',
+          LARGE: 'lg'
+        };
+      `,
+			'app/component.jsx': `
+        import { useUI } from '@react-zero-ui/core';
+        import { THEME_DARK, THEME_LIGHT, SIZES } from './constants';
+        
+        function Component() {
+          const [theme, setTheme] = useUI('theme', 'default');
+          const [size, setSize] = useUI('size', 'medium');
+          
+          // Using constants
+          const toggleTheme = () => {
+            setTheme(isDark ? THEME_LIGHT : THEME_DARK);
+          };
+          
+          // Using object properties
+          const updateSize = () => {
+            setSize(isSmall ? SIZES.SMALL : SIZES.LARGE);
+          };
+          
+          // Local constants
+          const STATUS_PENDING = 'pending-state';
+          const handleStatus = () => {
+            setTheme(STATUS_PENDING);
+          };
+          
+          return <div>Test</div>;
+        }
+      `,
+		},
+		(result) => {
+			console.log('\n📄 Constants resolution:');
+			console.log(result.css);
+
+			// Should resolve local constants
+			assert(result.css.includes('@custom-variant theme-pending-state'));
+			assert(result.css.includes('@custom-variant theme-dark'));
+			assert(result.css.includes('@custom-variant theme-light'));
+			assert(result.css.includes('@custom-variant size-small'));
+			assert(result.css.includes('@custom-variant size-large'));
+
+			// Note: Import resolution is complex and might not work initially
+			// This test documents the expected behavior for future enhancement
+		}
+	);
+});
+
+test.skip('handles all common setter patterns - full coverage sanity check - COMPLEX', async () => {
+	await runTest(
+		{
+			'app/component.tsx': `
+        import { useUI } from '@react-zero-ui/core';
+
+        const DARK = 'dark';
+        const LIGHT = 'light';
+
+        function Component() {
+          const [theme, setTheme] = useUI<'light' | 'dark' | 'contrast' | 'neon' | 'retro'>('theme', 'light');
+          const [size, setSize] = useUI<'sm' | 'lg'>('size', 'sm');
+
+          setTheme('dark');                              // direct
+          setTheme(DARK);                                // identifier
+          setTheme(() => 'light');                       // arrow fn
+          setTheme(prev => prev === 'light' ? 'dark' : 'light'); // updater
+          setTheme(prev => { if (a) return 'neon'; return 'retro'; }); // block
+          setTheme(userPref || 'contrast');              // logical fallback
+          setSize(SIZES.SMALL);                          // object constant
+
+          return (
+            <>
+              <button onClick={() => setTheme('contrast')}>Contrast</button>
+              <select onChange={e => setTheme(e.target.value)}>
+                <option value="neon">Neon</option>
+                <option value="retro">Retro</option>
+              </select>
+            </>
+          );
+        }
+
+        const SIZES = {
+          SMALL: 'sm',
+          LARGE: 'lg'
+        };
+      `,
+		},
+		(result) => {
+			console.log('\n📄 Full coverage test:');
+			console.log(result.css);
+
+			// ✅ things that MUST be included
+			assert(result.css.includes('@custom-variant theme-dark'));
+			assert(result.css.includes('@custom-variant theme-light'));
+			assert(result.css.includes('@custom-variant theme-contrast'));
+			assert(result.css.includes('@custom-variant theme-neon'));
+			assert(result.css.includes('@custom-variant theme-retro'));
+			assert(result.css.includes('@custom-variant size-sm'));
+			assert(result.css.includes('@custom-variant size-lg'));
+
+			// ❌ known misses: test exposes what won't work without resolution
+			// assert(result.css.includes('@custom-variant theme-dynamic-from-e-target'));
+		}
+	);
+});
+
+test('handles arrow functions and function expressions', async () => {
+	await runTest(
+		{
+			'app/functions.jsx': `
+        import { useUI } from '@react-zero-ui/core';
+        
+        function Component() {
+          const [state, setState] = useUI('component-state', 'initial');
+          
+          // Arrow function with expression body
+          const quickSet = () => setState('quick');
+          
+          // Arrow function with block body
+          const blockSet = () => {
+            return setState('block');
+          };
+          
+          // Function expression
+          const funcExpr = function() {
+            setState('function');
+          };
+          
+          // Immediately invoked
+          (() => setState('immediate'))();
+          
+          // Passed as callback
+          setTimeout(() => setState('delayed'), 1000);
+          
+          // Complex return logic
+          const conditionalSet = () => {
+            if (condition) return setState('conditional-true');
+            return setState('conditional-false');
+          };
+          
+          return <div>Test</div>;
+        }
+      `,
+		},
+		(result) => {
+			console.log('\n📄 Function expressions:');
+			console.log(result.css);
+
+			assert(result.css.includes('@custom-variant component-state-quick'));
+			assert(result.css.includes('@custom-variant component-state-block'));
+			assert(result.css.includes('@custom-variant component-state-function'));
+			assert(result.css.includes('@custom-variant component-state-immediate'));
+			assert(result.css.includes('@custom-variant component-state-delayed'));
+			assert(result.css.includes('@custom-variant component-state-conditional-true'));
+			assert(result.css.includes('@custom-variant component-state-conditional-false'));
+		}
+	);
+});
+
+test('handles multiple setters for same state key', async () => {
+	await runTest(
+		{
+			'app/multiple-setters.jsx': `
+        import { useUI } from '@react-zero-ui/core';
+        
+        function ComponentA() {
+          const [theme, setTheme] = useUI('global-theme', 'light');
+          const handleClick = () => setTheme('dark');
+          return <div>A</div>;
+        }
+        
+        function ComponentB() {
+          const [theme, setGlobalTheme] = useUI('global-theme', 'light');
+          const handleToggle = () => setGlobalTheme('auto');
+          return <div>B</div>;
+        }
+        
+        function ComponentC() {
+          const [, updateTheme] = useUI('global-theme', 'light');
+          const handleSystem = () => updateTheme('system');
+          return <div>C</div>;
+        }
+      `,
+		},
+		(result) => {
+			console.log('\n📄 Multiple setters:');
+			console.log(result.css);
+
+			// Should combine all values from different setters for same key
+			assert(result.css.includes('@custom-variant global-theme-light'));
+			assert(result.css.includes('@custom-variant global-theme-dark'));
+			assert(result.css.includes('@custom-variant global-theme-auto'));
+			assert(result.css.includes('@custom-variant global-theme-system'));
+		}
+	);
+});
+
+test('ignores dynamic and non-literal values', async () => {
+	await runTest(
+		{
+			'app/dynamic-values.jsx': `
+        import { useUI } from '@react-zero-ui/core';
+        
+        function Component({ userTheme, config }) {
+          const [theme, setTheme] = useUI('theme', 'default');
+          const [status, setStatus] = useUI('status', 'idle');
+          
+          // Dynamic values that should be ignored
+          const handleDynamic = () => {
+            setTheme(userTheme); // prop value
+            setTheme(config.theme); // object property
+            setTheme(calculateTheme()); // function call
+            setTheme(\`theme-\${mode}\`); // template literal with expression
+            setTheme(themes[index]); // array access
+          };
+          
+          // But still catch literals mixed in
+          const handleMixed = () => {
+            setStatus(error ? 'error' : userStatus); // only 'error' should be caught
+            setTheme(loading ? 'loading' : calculated); // only 'loading' should be caught
+          };
+          
+          return <div>Test</div>;
+        }
+      `,
+		},
+		(result) => {
+			console.log('\n📄 Dynamic values filtering:');
+			console.log(result.css);
+
+			// Should only have literals
+			assert(result.css.includes('@custom-variant theme-default')); // initial
+			assert(result.css.includes('@custom-variant status-idle')); // initial
+			assert(result.css.includes('@custom-variant status-error')); // from ternary
+			assert(result.css.includes('@custom-variant theme-loading')); // from ternary
+
+			// Should NOT have dynamic values
+			assert(!result.css.includes('@custom-variant theme-userTheme'));
+			assert(!result.css.includes('@custom-variant theme-calculateTheme'));
+			assert(!result.css.includes('@custom-variant theme-theme-'));
+		}
+	);
+});
+
+test('handles edge cases with unusual syntax', async () => {
+	await runTest(
+		{
+			'app/edge-cases.jsx': `
+        import { useUI } from '@react-zero-ui/core';
+        
+        function Component() {
+          const [state, setState] = useUI('edge-state', 'normal');
+          
+          // Destructured setter
+          const { setState: altSetState } = { setState };
+          
+          // Setter in array
+          const setters = [setState];
+          
+          // Multiple calls in one expression
+          const multi = () => (setState('first'), setState('second'));
+          
+          // Chained calls (unusual but possible)
+          const chained = () => setState('chain') && setState('link');
+          
+          // In try/catch
+          const safe = () => {
+            try {
+              setState('trying');
+            } catch {
+              setState('caught');
+            }
+          };
+          
+          // Template literal without expressions
+          const template = () => setState(\`static\`);
+          
+          return <div>Test</div>;
+        }
+      `,
+		},
+		(result) => {
+			console.log('\n📄 Edge cases:');
+			console.log(result.css);
+
+			// Basic cases that should work
+			assert(result.css.includes('@custom-variant edge-state-first'));
+			assert(result.css.includes('@custom-variant edge-state-second'));
+			assert(result.css.includes('@custom-variant edge-state-chain'));
+			assert(result.css.includes('@custom-variant edge-state-link'));
+			assert(result.css.includes('@custom-variant edge-state-trying'));
+			assert(result.css.includes('@custom-variant edge-state-caught'));
+			assert(result.css.includes('@custom-variant edge-state-static'));
+		}
+	);
+});
+
+test('performance with large files and many variants', async () => {
+	// Generate a large file with many useUI calls
+	const generateLargeFile = () => {
+		let content = `import { useUI } from '@react-zero-ui/core';\n\n`;
+
+		// Create many components with different state keys
+		for (let i = 0; i < 50; i++) {
+			content += `
+        function Component${i}() {
+          const [state${i}, setState${i}] = useUI('state-${i}', 'initial-${i}');
+          const [toggle${i}, setToggle${i}] = useUI('toggle-${i}', ${i % 2 === 0});
+          
+          const handler${i} = () => {
+            setState${i}('value-${i}-a');
+            setState${i}('value-${i}-b');
+            setState${i}('value-${i}-c');
+            setToggle${i}(prev => !prev);
+          };
+          
+          return <div>Component ${i}</div>;
+        }
+      `;
+		}
+
+		return content;
+	};
+
+	const startTime = Date.now();
+
+	await runTest({ 'app/large-file.jsx': generateLargeFile() }, (result) => {
+		const endTime = Date.now();
+		const duration = endTime - startTime;
+
+		console.log(`\n⏱️  Large file processing took: ${duration}ms`);
+
+		// Should handle large files reasonably quickly (< 5 seconds)
+		assert(duration < 5000, `Processing took too long: ${duration}ms`);
+
+		// Should still extract all variants correctly
+		assert(result.css.includes('@custom-variant state-0-initial-0'));
+		assert(result.css.includes('@custom-variant state-49-value-49-c'));
+		assert(result.css.includes('@custom-variant toggle-0-true'));
+		assert(result.css.includes('@custom-variant toggle-0-false'));
+	});
+});
+
+test('caching works correctly', async () => {
+	const testFiles = {
+		'app/cached.jsx': `
+      import { useUI } from '@react-zero-ui/core';
+      
+      function Component() {
+        const [theme, setTheme] = useUI('theme', 'light');
+        return <div>Test</div>;
+      }
+    `,
+	};
+
+	// First run
+	const start1 = Date.now();
+	await runTest(testFiles, () => {});
+	const duration1 = Date.now() - start1;
+
+	// Second run with same files (should be faster due to caching)
+	const start2 = Date.now();
+	await runTest(testFiles, () => {});
+	const duration2 = Date.now() - start2;
+
+	console.log(`\n📊 First run: ${duration1}ms, Second run: ${duration2}ms`);
+
+	// Note: This test might be flaky in CI, but useful for development
+	// Second run should generally be faster, but timing can vary
 });

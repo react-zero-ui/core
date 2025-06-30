@@ -5,6 +5,8 @@ import * as t from '@babel/types';
 import { CONFIG } from '../../config.cjs';
 import { readFileSync } from 'fs';
 import { createHash } from 'crypto';
+import parser from '@babel/parser';
+import { generate } from '@babel/generator';
 const traverse = (babelTraverse as any).default;
 
 export interface SetterMeta {
@@ -19,7 +21,37 @@ export interface SetterMeta {
 }
 
 /**
- * Collects every `[ , setter ] = useUI('key', 'initial')` in a file.
+ * Check if the file imports useUI (or the configured hook name)
+ * @param ast - The parsed AST
+ * @returns true if useUI is imported, false otherwise
+ */
+function hasUseUIImport(ast: t.File): boolean {
+	let hasImport = false;
+
+	traverse(ast, {
+		ImportDeclaration(path: any) {
+			const source = path.node.source.value;
+
+			// Check if importing from @react-zero-ui/core
+			if (source === CONFIG.IMPORT_NAME) {
+				// Only look for named import: import { useUI } from '...'
+				const hasUseUISpecifier = path.node.specifiers.some(
+					(spec: any) => t.isImportSpecifier(spec) && t.isIdentifier(spec.imported) && spec.imported.name === CONFIG.HOOK_NAME
+				);
+
+				if (hasUseUISpecifier) {
+					hasImport = true;
+					path.stop(); // Early exit
+				}
+			}
+		},
+	});
+
+	return hasImport;
+}
+
+/**
+ * Collects every `[ staleValue, setterFn ] = useUI('key', 'initial')` in a file.
  * @returns SetterMeta[]
  */
 export function collectUseUISetters(ast: t.File): SetterMeta[] {
@@ -177,6 +209,23 @@ function extractLiteralsRecursively(node: t.Expression, path: NodePath): string[
 		}
 	}
 
+	// Member expressions: SIZES.SMALL, obj.prop, etc.
+	else if (t.isMemberExpression(node) && !node.computed && t.isIdentifier(node.property)) {
+		const objectResolved = resolveIdentifier(node.object as t.Identifier, path);
+		if (objectResolved && t.isObjectExpression(objectResolved)) {
+			// Look for the property in the object
+			const propertyName = node.property.name;
+			for (const prop of objectResolved.properties) {
+				if (t.isObjectProperty(prop) && t.isIdentifier(prop.key) && prop.key.name === propertyName) {
+					const propertyValue = literalToString(prop.value as t.Expression);
+					if (propertyValue !== null) {
+						results.push(propertyValue);
+					}
+				}
+			}
+		}
+	}
+
 	// Binary expressions: might contain literals in some cases
 	else if (t.isBinaryExpression(node)) {
 		// Only extract if it's a simple concatenation that might resolve to a literal
@@ -206,12 +255,14 @@ function extractFromBlockStatement(block: t.BlockStatement, path: NodePath): str
 
 /**
  * Try to resolve an identifier to its value within the current scope
+ * @param node - The identifier to resolve
+ * @param path - The path to the identifier
+ * @returns The value of the identifier, or null if it cannot be resolved
  */
 function resolveIdentifier(node: t.Identifier, path: NodePath): t.Expression | null {
 	const binding = path.scope.getBinding(node.name);
 	if (!binding) return null;
 
-	// Look at the binding's initialization
 	const bindingPath = binding.path;
 
 	// Variable declarator: const x = 'value'
@@ -219,7 +270,30 @@ function resolveIdentifier(node: t.Identifier, path: NodePath): t.Expression | n
 		return bindingPath.node.init as t.Expression;
 	}
 
-	// Function parameter, import, etc. - could be extended
+	// Import specifier: import { THEME_DARK } from './constants'
+	if (bindingPath.isImportSpecifier() || bindingPath.isImportDefaultSpecifier()) {
+		// For now, we can't easily resolve cross-file imports
+		// But we could enhance this later to parse the imported file
+		return null;
+	}
+
+	// Function declaration: function getName() { return 'value'; }
+	if (bindingPath.isFunctionDeclaration()) {
+		// Could try to extract return values, but that's complex
+		return null;
+	}
+
+	// Try to look at the scope for block-scoped variables
+	// that might be defined higher up
+	let currentScope = path.scope;
+	while (currentScope) {
+		const scopeBinding = currentScope.getOwnBinding(node.name);
+		if (scopeBinding && scopeBinding.path.isVariableDeclarator() && scopeBinding.path.node.init) {
+			return scopeBinding.path.node.init as t.Expression;
+		}
+		currentScope = currentScope.parent;
+	}
+
 	return null;
 }
 
