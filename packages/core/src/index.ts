@@ -12,6 +12,11 @@ export interface UISetterFn<T extends string = string> {
 function useUI<T extends string = string>(key: string, initialValue: T): [T, UISetterFn<T>] {
 	/* ─ DEV-ONLY COLLISION GUARD (removed in production by modern bundlers) ─ */
 	if (process.env.NODE_ENV !== 'production') {
+		//validate key and initialValue make sure there are no spaces
+		if (key.includes(' ') || initialValue.includes(' ')) {
+			throw new Error(`[Zero-UI] useUI(key, initialValue); key and initialValue must not contain spaces, got "${key}" and "${initialValue}"`);
+		}
+
 		// Validate inputs with helpful error messages
 		if (!key || typeof key !== 'string' || key.trim() === '') {
 			throw new Error(`useUI(key, initialValue); key must be a non-empty string, got "${key}"`);

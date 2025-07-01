@@ -1,3 +1,5 @@
+// src/core/postcss/ast-v2.cts
+
 import { parse, parseExpression } from '@babel/parser';
 import * as babelTraverse from '@babel/traverse';
 import { Binding, NodePath } from '@babel/traverse';
@@ -8,6 +10,7 @@ import { createHash } from 'crypto';
 import { generate } from '@babel/generator';
 import * as fs from 'fs';
 import * as path from 'path';
+import { literalFromNode } from './resolvers.cjs';
 const traverse = (babelTraverse as any).default;
 
 export interface SetterMeta {
@@ -21,70 +24,83 @@ export interface SetterMeta {
 	initialValue: string | null;
 }
 
+// /**
+//  * Check if the file imports useUI (or the configured hook name)
+//  * @param ast - The parsed AST
+//  * @returns true if useUI is imported, false otherwise
+//  */
+// function hasUseUIImport(ast: t.File): boolean {
+// 	let hasImport = false;
+
+// 	traverse(ast, {
+// 		ImportDeclaration(path: any) {
+// 			const source = path.node.source.value;
+
+// 			// Check if importing from @react-zero-ui/core
+// 			if (source === CONFIG.IMPORT_NAME) {
+// 				// Only look for named import: import { useUI } from '...'
+// 				const hasUseUISpecifier = path.node.specifiers.some(
+// 					(spec: any) => t.isImportSpecifier(spec) && t.isIdentifier(spec.imported) && spec.imported.name === CONFIG.HOOK_NAME
+// 				);
+
+// 				if (hasUseUISpecifier) {
+// 					hasImport = true;
+// 					path.stop(); // Early exit
+// 				}
+// 			}
+// 		},
+// 	});
+
+// 	return hasImport;
+// }
 /**
- * Check if the file imports useUI (or the configured hook name)
- * @param ast - The parsed AST
- * @returns true if useUI is imported, false otherwise
- */
-function hasUseUIImport(ast: t.File): boolean {
-	let hasImport = false;
-
-	traverse(ast, {
-		ImportDeclaration(path: any) {
-			const source = path.node.source.value;
-
-			// Check if importing from @react-zero-ui/core
-			if (source === CONFIG.IMPORT_NAME) {
-				// Only look for named import: import { useUI } from '...'
-				const hasUseUISpecifier = path.node.specifiers.some(
-					(spec: any) => t.isImportSpecifier(spec) && t.isIdentifier(spec.imported) && spec.imported.name === CONFIG.HOOK_NAME
-				);
-
-				if (hasUseUISpecifier) {
-					hasImport = true;
-					path.stop(); // Early exit
-				}
-			}
-		},
-	});
-
-	return hasImport;
-}
-
-/**
- * Collects every `[ staleValue, setterFn ] = useUI('key', 'initial')` in a file.
- * @returns SetterMeta[]
+ * Collect every `[ value, setterFn ] = useUI('key', 'initial')` in a file.
+ * Re-uses `literalFromNode` so **initialArg** can be:
+ *   • literal           `'dark'`
+ *   • local const       `DARK`
+ *   • static template   `` `da${'rk'}` ``
+ * Throws if the key is dynamic or if the initial value cannot be
+ * reduced to a space-free string.
  */
 export function collectUseUISetters(ast: t.File): SetterMeta[] {
 	const setters: SetterMeta[] = [];
 
 	traverse(ast, {
-		VariableDeclarator(path: any) {
+		VariableDeclarator(path: NodePath<t.VariableDeclarator>) {
 			const { id, init } = path.node;
 
-			// Match: const [ , setX ] = useUI(...)
-			if (t.isArrayPattern(id) && id.elements.length === 2 && t.isCallExpression(init) && t.isIdentifier(init.callee, { name: CONFIG.HOOK_NAME })) {
-				const [, setterEl] = id.elements;
-				if (!t.isIdentifier(setterEl)) return; // hole or non-identifier
+			// match: const [ , setX ] = useUI(...)
+			if (!t.isArrayPattern(id) || !t.isCallExpression(init) || !t.isIdentifier(init.callee, { name: CONFIG.HOOK_NAME })) return;
 
-				// Validate & grab hook args
-				const [keyArg, initialArg] = init.arguments;
-				if (!t.isStringLiteral(keyArg)) return; // dynamic keys are ignored
-
-				// Since useUI now only accepts strings, validate initial value
-				const initialValue = literalToString(initialArg as t.Expression);
-				if (initialValue === null) {
-					console.error(`[Zero-UI] Non-string initial value found for key "${keyArg.value}". Only string literals are supported.`);
-					return;
-				}
-
-				setters.push({
-					binding: path.scope.getBinding(setterEl.name)!, // never null here
-					setterName: setterEl.name,
-					stateKey: keyArg.value,
-					initialValue,
-				});
+			if (id.elements.length !== 2) {
+				throw path.buildCodeFrameError(`[Zero-UI] useUI() must destructure two values: [value, setter].`);
 			}
+
+			const [, setterEl] = id.elements;
+			if (!setterEl || !t.isIdentifier(setterEl)) {
+				throw path.buildCodeFrameError(`[Zero-UI] useUI() setter must be a variable name.`);
+			}
+
+			const [keyArg, initialArg] = init.arguments;
+
+			// key must be string literal
+			if (!t.isStringLiteral(keyArg)) {
+				throw path.buildCodeFrameError(`[Zero-UI] useUI() key must be a string literal.`);
+			}
+
+			// resolve initial value with new helpers
+			const initialValue = literalFromNode(initialArg as t.Expression, path as unknown as NodePath<t.Node>);
+
+			if (initialValue === null) {
+				throw path.buildCodeFrameError(`[Zero-UI] Initial value for "${keyArg.value}" must be a local, space-free string literal.`);
+			}
+
+			const binding = path.scope.getBinding(setterEl.name);
+			if (!binding) {
+				throw path.buildCodeFrameError(`[Zero-UI] Could not resolve binding for setter "${setterEl.name}".`);
+			}
+
+			setters.push({ binding, setterName: setterEl.name, stateKey: keyArg.value, initialValue });
 		},
 	});
 
@@ -294,7 +310,9 @@ function resolveIdentifier(node: t.Identifier, path: NodePath): t.Expression | n
 	}
 
 	// Import specifier: import { THEME_DARK } from './constants'
+
 	if (bindingPath.isImportSpecifier() || bindingPath.isImportDefaultSpecifier()) {
+		console.log('import specifier: ', bindingPath.node);
 		// For now, we can't easily resolve cross-file imports
 		// But we could enhance this later to parse the imported file
 		// TODO: Implement this
@@ -339,22 +357,19 @@ function literalToString(node: t.Expression): string | null {
 /**
  * Convert the harvested variants map to the final output format
  */
-export function normalizeVariants(variants: Map<string, Set<string>>, setters: SetterMeta[]): VariantData[] {
+export function normalizeVariants(variants: Map<string, Set<string>>, setters: SetterMeta[], shouldSort = true): VariantData[] {
+	const setterMap = new Map(setters.map((s) => [s.stateKey, s]));
 	const result: VariantData[] = [];
 
 	for (const [stateKey, valueSet] of variants) {
-		// Find the initial value from the original setter
-		const setter = setters.find((s) => s.stateKey === stateKey);
-		const initialValue = setter?.initialValue || null;
-
-		// Sort values for deterministic output
-		const sortedValues = Array.from(valueSet).sort();
-
-		result.push({ key: stateKey, values: sortedValues, initialValue });
+		const initialValue = setterMap.get(stateKey)?.initialValue || null;
+		const values = Array.from(valueSet);
+		if (shouldSort) values.sort();
+		result.push({ key: stateKey, values, initialValue });
 	}
 
-	// Sort by key for deterministic output
-	return result.sort((a, b) => a.key.localeCompare(b.key));
+	if (shouldSort) result.sort((a, b) => a.key.localeCompare(b.key));
+	return result;
 }
 
 // File cache to avoid re-parsing unchanged files
@@ -386,12 +401,19 @@ export function extractVariants(filePath: string): VariantData[] {
 		const ast = parse(sourceCode, {
 			sourceType: 'module',
 			plugins: ['jsx', 'typescript', 'decorators-legacy'],
-			allowImportExportEverywhere: true,
-			allowReturnOutsideFunction: true,
+			allowImportExportEverywhere: false,
+			allowReturnOutsideFunction: false,
+			attachComment: false,
+			createImportExpressions: true,
 		});
 
 		// Pass 1: Collect all useUI setters and their initial values
 		const setters = collectUseUISetters(ast);
+		// returns an array of objects with the following properties:
+		// - stateKey: string
+		// - initialValue: string | null
+		// - binding: NodePath<t.Identifier>
+		// - setterName: string
 
 		// Early return if no setters found
 		if (setters.length === 0) {
@@ -402,9 +424,17 @@ export function extractVariants(filePath: string): VariantData[] {
 
 		// Pass 2: Harvest all values from setter calls
 		const variantsMap = harvestSetterValues(setters);
+		// returns a Map of keys, and a Set of values
+		// Map{'theme' => Set(2) { 'light', 'dark' },}
 
 		// Normalize to final format
 		const variants = normalizeVariants(variantsMap, setters);
+		console.log('variants: ', variants);
+		// returns an array of objects with the following properties:
+		// - key: string
+		// - values: string[]
+		// - initialValue: string | null
+		// [{ key: 'theme', values: [ 'dark', 'light' ], initialValue: 'light' },]
 
 		// Cache and return
 		fileCache.set(filePath, { hash: fileHash, variants });

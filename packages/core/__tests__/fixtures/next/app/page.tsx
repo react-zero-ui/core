@@ -2,6 +2,7 @@
 import { useUI } from '@react-zero-ui/core';
 import UseEffectComponent from './UseEffectComponent';
 import FAQ from './FAQ';
+import { THEMES } from './variables';
 
 export default function Page() {
 	const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
@@ -12,6 +13,7 @@ export default function Page() {
 	const [, setOpen] = useUI<'open' | 'closed'>('faq', 'closed'); // Same key everywhere!
 	const [, setScope] = useUI<'off' | 'on'>('scope', 'off');
 	const [, setMobile] = useUI<'true' | 'false'>('mobile', 'false');
+	const [, setThemeBlue] = useUI<string>(`theme-${THEMES.blueee}`, THEMES.blueee);
 
 	const [, setToggleFunction] = useUI<'white' | 'black'>('toggle-function', 'white');
 

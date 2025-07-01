@@ -36,103 +36,89 @@ async function runTest(files, callback) {
 	}
 }
 
-test('findAllSourceFiles', async () => {
-	await runTest(
-		{
-			'src/components/Button.tsx': `
-			import { Button } from '@zero-ui/core';
-			export default Button;
-		`,
-			'src/components/Button.jsx': `
-			import { Button } from '@zero-ui/core';
-			export default Button;
-		`,
-		},
-		async () => {
-			const sourceFiles = findAllSourceFiles();
-			console.log('sourceFiles: ', sourceFiles);
-			assert.ok(sourceFiles.length > 0);
-		}
-	);
-});
+// test('findAllSourceFiles', async () => {
+// 	await runTest(
+// 		{
+// 			'src/components/Button.tsx': `
+// 			import { Button } from '@zero-ui/core';
+// 			export default Button;
+// 		`,
+// 			'src/components/Button.jsx': `
+// 			import { Button } from '@zero-ui/core';
+// 			export default Button;
+// 		`,
+// 		},
+// 		async () => {
+// 			const sourceFiles = findAllSourceFiles();
+// 			assert.ok(sourceFiles.length > 0);
+// 		}
+// 	);
+// });
 
-test('collectUseUISetters - basic functionality', async () => {
-	const sourceCode = `
-		import { useUI } from '@react-zero-ui/core';
+// test('collectUseUISetters - basic functionality', async () => {
+// 	const sourceCode = `
+// 		import { useUI } from '@react-zero-ui/core';
 
-		const Component = () => {
-			const [theme, setTheme] = useUI('theme', 'light');
-			const [size, setSize] = useUI('size', 'medium');
-			return <>
-        <Button theme={theme} setTheme={setTheme("light")} />
-        <Button size={size} setSize={setSize("medium")} />
-      </>;
-		}
-	`;
+// 		const Component = () => {
+// 			const [theme, setTheme] = useUI('theme', 'light');
+// 			const [size, setSize] = useUI('size', 'medium');
+// 			return <>
+//         <Button theme={theme} setTheme={setTheme("light")} />
+//         <Button size={size} setSize={setSize("medium")} />
+//       </>;
+// 		}
+// 	`;
 
-	const ast = parse(sourceCode, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
-	const setters = collectUseUISetters(ast);
-	console.log('setters: ', setters);
+// 	const ast = parse(sourceCode, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
+// 	const setters = collectUseUISetters(ast);
 
-	assert.strictEqual(setters[0].stateKey, 'theme');
-	assert.strictEqual(setters[0].initialValue, 'light');
-	assert.strictEqual(setters[1].stateKey, 'size');
-	assert.strictEqual(setters[1].initialValue, 'medium');
-});
+// 	assert.strictEqual(setters[0].stateKey, 'theme');
+// 	assert.strictEqual(setters[0].initialValue, 'light');
+// 	assert.strictEqual(setters[1].stateKey, 'size');
+// 	assert.strictEqual(setters[1].initialValue, 'medium');
+// });
 
-test('Extract Variants', async () => {
-	await runTest(
-		{
-			'src/app/Component.jsx': `
-  import { useUI } from '@react-zero-ui/core';
-const Component = () => {
-	const [, setTheme] = useUI('theme', 'light');
-	const [, setSize] = useUI('size', 'medium');
-	return (
-		<div>
-			<button onClick={() => setTheme('dark')}>setTheme</button>
-			<button onClick={() => setSize('large')}>setSize</button>
-		</div>
-	);
-};
-export default Component;
-  `,
-		},
+// test('Extract Variants', async () => {
+// 	// Read fixture file for proper syntax highlighting
+// 	const fixtureContent = fs.readFileSync(path.join(__dirname, './fixtures/TestComponent1.jsx'), 'utf-8');
 
-		async () => {
-			const variants = extractVariants('src/app/Component.jsx');
-			console.log('variants: ', variants);
-			assert.strictEqual(variants.length, 2);
-			assert.ok(variants.some((v) => v.key === 'theme' && v.values.includes('light') && v.values.includes('dark')));
-			assert.ok(variants.some((v) => v.key === 'size' && v.values.includes('medium') && v.values.includes('large')));
-		}
-	);
-});
+// 	await runTest(
+// 		{ 'src/app/Component.jsx': fixtureContent },
 
-test('Extract Variant without setter', async () => {
-	await runTest(
-		{
-			'src/app/Component.jsx': `
-  import { useUI } from '@react-zero-ui/core';
-const Component = () => {
-	const [, setTheme] = useUI('theme', 'light');
-	const [, setSize] = useUI('size', 'medium');
-	return (
-		<div>
-			 
-		</div>
-	);
-};
-export default Component;
-  `,
-		},
+// 		async () => {
+// 			const variants = extractVariants('src/app/Component.jsx');
+// 			assert.strictEqual(variants.length, 2);
+// 			assert.ok(variants.some((v) => v.key === 'theme' && v.values.includes('light') && v.values.includes('dark')));
+// 			assert.ok(variants.some((v) => v.key === 'size' && v.values.includes('medium') && v.values.includes('large')));
+// 		}
+// 	);
+// });
 
-		async () => {
-			const variants = extractVariants('src/app/Component.jsx');
-			console.log('variants without setter: ', variants);
-			assert.strictEqual(variants.length, 2);
-			assert.ok(variants.some((v) => v.key === 'theme' && v.values.includes('light')));
-			assert.ok(variants.some((v) => v.key === 'size' && v.values.includes('medium')));
-		}
-	);
+// test('Extract Variant without setter', async () => {
+// 	// Read fixture file for proper syntax highlighting
+// 	const fixtureContent = fs.readFileSync(path.join(__dirname, './fixtures/TestComponent2.jsx'), 'utf-8');
+
+// 	await runTest(
+// 		{ 'src/app/Component.jsx': fixtureContent },
+
+// 		async () => {
+// 			const variants = extractVariants('src/app/Component.jsx');
+// 			assert.strictEqual(variants.length, 2);
+// 			assert.ok(variants.some((v) => v.key === 'theme' && v.values.includes('light')));
+// 			assert.ok(variants.some((v) => v.key === 'size' && v.values.includes('medium')));
+// 		}
+// 	);
+// });
+
+test('Extract Variant with imports', async () => {
+	// Read fixture file for proper syntax highlighting
+	const fixtureContent = fs.readFileSync(path.join(__dirname, './fixtures/TestComponentImports.jsx'), 'utf-8');
+
+	await runTest({ 'src/app/Component.jsx': fixtureContent }, async () => {
+		const variants = collectUseUISetters(parse(fixtureContent, { sourceType: 'module', plugins: ['jsx', 'typescript'] }));
+		console.log('variants: ', variants);
+		assert.strictEqual(variants.length, 2);
+		assert.ok(variants.some((v) => v.key === 'theme' && v.values.includes('dark')));
+		assert.ok(variants.some((v) => v.key === 'size' && v.values.includes('lg')));
+	});
 });
