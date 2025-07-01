@@ -158,26 +158,31 @@ test('detects JavaScript setValue calls', async () => {
 	);
 });
 
-test('handles boolean values', async () => {
+test('handles string boolean values', async () => {
 	await runTest(
 		{
 			'app/toggle.tsx': `
       import { useUI } from '@react-zero-ui/core';
       
       function Toggle() {
-        const [isOpen, setIsOpen] = useUI<boolean>('drawer', false);
-        const [checked, setChecked] = useUI<boolean>('checkbox', true);
+        const [isOpen, setIsOpen] = useUI<'true' | 'false'>('drawer', 'false');
+        const [checked, setChecked] = useUI<'true' | 'false'>('checkbox', 'true');
         
         return (
-          <button onClick={() => setIsOpen(!isOpen)}>
-            Toggle
+          <div>
+            <button onClick={() => setIsOpen(isOpen === 'false' ? 'true' : 'false')}>
+              Toggle Drawer
           </button>
+            <button onClick={() => setChecked(checked === 'true' ? 'false' : 'true')}>
+              Toggle Checkbox
+            </button>
+          </div>
         );
       }
     `,
 		},
 		(result) => {
-			console.log('\n🔍 Boolean Values Test:');
+			console.log('\n🔍 String Boolean Values Test:');
 
 			assert(result.css.includes('@custom-variant drawer-true'), 'Should have drawer-true');
 			assert(result.css.includes('@custom-variant drawer-false'), 'Should have drawer-false');
@@ -185,7 +190,7 @@ test('handles boolean values', async () => {
 			assert(result.css.includes('@custom-variant checkbox-false'), 'Should have checkbox-false');
 
 			const content = fs.readFileSync(getAttrFile(), 'utf-8');
-			console.log('Boolean attributes:', content);
+			console.log('String boolean attributes:', content);
 		}
 	);
 });
@@ -1468,20 +1473,20 @@ test('generated variants for initial value without setterFn', async () => {
 	);
 });
 
-test('handles complex boolean toggle patterns', async () => {
+test('handles complex string boolean toggle patterns', async () => {
 	await runTest(
 		{
 			'app/boolean-edge-cases.tsx': `
         import { useUI } from '@react-zero-ui/core';
         
         function Component() {
-          const [isVisible, setIsVisible] = useUI('modal-visible', false);
-          const [isEnabled, setIsEnabled] = useUI('feature-enabled', true);
+          const [isVisible, setIsVisible] = useUI('modal-visible', 'false');
+          const [isEnabled, setIsEnabled] = useUI('feature-enabled', 'true');
           
-          // Complex boolean patterns that should still result in true/false
-          const handleToggle = () => setIsVisible(prev => !prev);
-          const handleConditional = () => setIsVisible(condition ? true : false);
-          const handleLogical = () => setIsEnabled(loading && false || true);
+          // Complex string boolean patterns that should result in true/false
+          const handleToggle = () => setIsVisible(prev => prev === 'false' ? 'true' : 'false');
+          const handleConditional = () => setIsVisible(condition ? 'true' : 'false');
+          const handleLogical = () => setIsEnabled(loading ? 'false' : 'true');
           
           return <div>Test</div>;
         }
@@ -1489,10 +1494,10 @@ test('handles complex boolean toggle patterns', async () => {
 		},
 		(result) => {
 			const content = fs.readFileSync(getAttrFile(), 'utf-8');
-			console.log('\n📄 Boolean edge cases:');
+			console.log('\n📄 String boolean edge cases:');
 			console.log(content);
 
-			// Should only have true/false variants for booleans
+			// Should only have true/false variants for string booleans
 			assert(result.css.includes('@custom-variant modal-visible-true'));
 			assert(result.css.includes('@custom-variant modal-visible-false'));
 			assert(result.css.includes('@custom-variant feature-enabled-true'));
@@ -1666,10 +1671,10 @@ export function Pages() {
 	);
 });
 
-test.skip('resolves constants and imported values -- COMPLEX --', async () => {
+test('resolves constants and imported values -- COMPLEX --', async () => {
 	await runTest(
 		{
-			'app/constants.js': `
+			'app/constants.ts': `
         export const THEME_DARK = 'dark';
         export const THEME_LIGHT = 'light';
         export const SIZES = {
@@ -1680,7 +1685,7 @@ test.skip('resolves constants and imported values -- COMPLEX --', async () => {
 			'app/component.jsx': `
         import { useUI } from '@react-zero-ui/core';
         import { THEME_DARK, THEME_LIGHT, SIZES } from './constants';
-        
+        console.log('THEME_DARK', THEME_DARK);
         function Component() {
           const [theme, setTheme] = useUI('theme', 'default');
           const [size, setSize] = useUI('size', 'medium');
@@ -1977,16 +1982,17 @@ test('performance with large files and many variants', async () => {
 
 		// Create many components with different state keys
 		for (let i = 0; i < 50; i++) {
+			const toggleInitial = i % 2 === 0 ? "'true'" : "'false'";
 			content += `
         function Component${i}() {
           const [state${i}, setState${i}] = useUI('state-${i}', 'initial-${i}');
-          const [toggle${i}, setToggle${i}] = useUI('toggle-${i}', ${i % 2 === 0});
+          const [toggle${i}, setToggle${i}] = useUI('toggle-${i}', ${toggleInitial});
           
           const handler${i} = () => {
             setState${i}('value-${i}-a');
             setState${i}('value-${i}-b');
             setState${i}('value-${i}-c');
-            setToggle${i}(prev => !prev);
+            setToggle${i}(prev => prev === 'true' ? 'false' : 'true');
           };
           
           return <div>Component ${i}</div>;

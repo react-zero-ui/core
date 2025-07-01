@@ -71,11 +71,18 @@ export function collectUseUISetters(ast: t.File): SetterMeta[] {
 				const [keyArg, initialArg] = init.arguments;
 				if (!t.isStringLiteral(keyArg)) return; // dynamic keys are ignored
 
+				// Since useUI now only accepts strings, validate initial value
+				const initialValue = literalToString(initialArg as t.Expression);
+				if (initialValue === null) {
+					console.error(`[Zero-UI] Non-string initial value found for key "${keyArg.value}". Only string literals are supported.`);
+					return;
+				}
+
 				setters.push({
 					binding: path.scope.getBinding(setterEl.name)!, // never null here
 					setterName: setterEl.name,
 					stateKey: keyArg.value,
-					initialValue: literalToString(initialArg as t.Expression),
+					initialValue,
 				});
 			}
 		},
@@ -115,14 +122,6 @@ export function harvestSetterValues(setters: SetterMeta[]): Map<string, Set<stri
 	for (const setter of setters) {
 		const valueSet = variants.get(setter.stateKey)!;
 
-		// Boolean optimization: if initial value is 'true' or 'false',
-		// we know all possible values without traversing
-		if (setter.initialValue === 'true' || setter.initialValue === 'false') {
-			valueSet.add('true');
-			valueSet.add('false');
-			continue; // Skip traversal for this setter
-		}
-
 		// Look at every place this setter is referenced
 		for (const referencePath of setter.binding.referencePaths) {
 			// Check if this reference is being called as a function
@@ -146,27 +145,38 @@ export function harvestSetterValues(setters: SetterMeta[]): Map<string, Set<stri
  * Handles: setTheme('dark'), obj.setTheme('dark'), etc.
  */
 function findCallExpression(referencePath: NodePath): NodePath<t.CallExpression> | null {
-	const parent = referencePath.parent;
+	try {
+		const parent = referencePath.parent;
 
-	// Direct call: setTheme('dark')
-	if (t.isCallExpression(parent) && parent.callee === referencePath.node) {
-		return referencePath.parentPath as NodePath<t.CallExpression>;
-	}
-
-	// Member expression call: obj.setTheme('dark')
-	if (t.isMemberExpression(parent) && parent.property === referencePath.node) {
-		const grandParent = referencePath.parentPath?.parent;
-		if (t.isCallExpression(grandParent) && grandParent.callee === parent) {
-			return referencePath.parentPath?.parentPath as NodePath<t.CallExpression>;
+		// Direct call: setTheme('dark')
+		if (t.isCallExpression(parent) && parent.callee === referencePath.node) {
+			return referencePath.parentPath as NodePath<t.CallExpression>;
 		}
-	}
 
-	return null;
+		// Member expression call: obj.setTheme('dark')
+		if (t.isMemberExpression(parent) && parent.property === referencePath.node) {
+			const grandParent = referencePath.parentPath?.parent;
+			if (t.isCallExpression(grandParent) && grandParent.callee === parent) {
+				return referencePath.parentPath?.parentPath as NodePath<t.CallExpression>;
+			}
+		}
+		console.warn(`[Zero-UI] Failed to find call expression for ${referencePath.node.type} in ${referencePath.opts?.filename}`);
+
+		return null;
+	} catch (error) {
+		console.warn(`[Zero-UI] Failed to find call expression for ${referencePath.node.type} in ${referencePath.opts?.filename}`);
+		return null;
+	}
 }
 
 /**
- * Recursively extract literal values from an expression
- * Handles: literals, ternaries, logical expressions, functions, identifiers
+ * Recursively extract string literal values from an expression
+ * Optimized for common useUI patterns:
+ * - Direct strings: 'light', 'dark'
+ * - Ternaries: condition ? 'light' : 'dark'
+ * - Constants: THEMES.LIGHT
+ * - Functions: prev => prev === 'light' ? 'dark' : 'light'
+ * - Member expressions: obj.prop, obj.prop.prop, etc.
  */
 function extractLiteralsRecursively(node: t.Expression, path: NodePath): string[] {
 	const results: string[] = [];
@@ -177,69 +187,78 @@ function extractLiteralsRecursively(node: t.Expression, path: NodePath): string[
 		results.push(literal);
 		return results;
 	}
+	try {
+		// Ternary: condition ? 'value1' : 'value2'
+		if (t.isConditionalExpression(node)) {
+			results.push(...extractLiteralsRecursively(node.consequent, path));
+			results.push(...extractLiteralsRecursively(node.alternate, path));
+		}
 
-	// Ternary: condition ? 'value1' : 'value2'
-	if (t.isConditionalExpression(node)) {
-		results.push(...extractLiteralsRecursively(node.consequent, path));
-		results.push(...extractLiteralsRecursively(node.alternate, path));
-	}
+		// Logical expressions: a && 'value' || 'default'
+		else if (t.isLogicalExpression(node)) {
+			results.push(...extractLiteralsRecursively(node.left, path));
+			results.push(...extractLiteralsRecursively(node.right, path));
+		}
 
-	// Logical expressions: a && 'value' || 'default'
-	else if (t.isLogicalExpression(node)) {
-		results.push(...extractLiteralsRecursively(node.left, path));
-		results.push(...extractLiteralsRecursively(node.right, path));
-	}
+		// Arrow functions: () => 'value' or prev => prev==='a' ? 'b':'a'
+		else if (t.isArrowFunctionExpression(node)) {
+			if (t.isExpression(node.body)) {
+				results.push(...extractLiteralsRecursively(node.body, path));
+			} else if (t.isBlockStatement(node.body)) {
+				// Look for return statements
+				// example: const a = () => 'a' + 'b'
+				results.push(...extractFromBlockStatement(node.body, path));
+			}
+		}
 
-	// Arrow functions: () => 'value' or prev => prev==='a' ? 'b':'a'
-	else if (t.isArrowFunctionExpression(node)) {
-		if (t.isExpression(node.body)) {
-			results.push(...extractLiteralsRecursively(node.body, path));
-		} else if (t.isBlockStatement(node.body)) {
-			// Look for return statements
+		// Function expressions: function() { return 'value'; }
+		else if (t.isFunctionExpression(node)) {
+			// example: function() { return 'a' + 'b' }
 			results.push(...extractFromBlockStatement(node.body, path));
 		}
-	}
 
-	// Function expressions: function() { return 'value'; }
-	else if (t.isFunctionExpression(node)) {
-		results.push(...extractFromBlockStatement(node.body, path));
-	}
-
-	// Identifiers: resolve to their values if possible
-	else if (t.isIdentifier(node)) {
-		const resolved = resolveIdentifier(node, path);
-		if (resolved) {
-			results.push(...extractLiteralsRecursively(resolved, path));
+		// Identifiers: resolve to their values if possible
+		else if (t.isIdentifier(node)) {
+			const resolved = resolveIdentifier(node, path);
+			if (resolved) {
+				// example: const a = 'a' + 'b'
+				results.push(...extractLiteralsRecursively(resolved, path));
+			}
 		}
-	}
 
-	// Member expressions: SIZES.SMALL, obj.prop, etc.
-	else if (t.isMemberExpression(node) && !node.computed && t.isIdentifier(node.property)) {
-		const objectResolved = resolveIdentifier(node.object as t.Identifier, path);
-		if (objectResolved && t.isObjectExpression(objectResolved)) {
-			// Look for the property in the object
-			const propertyName = node.property.name;
-			for (const prop of objectResolved.properties) {
-				if (t.isObjectProperty(prop) && t.isIdentifier(prop.key) && prop.key.name === propertyName) {
-					const propertyValue = literalToString(prop.value as t.Expression);
-					if (propertyValue !== null) {
-						results.push(propertyValue);
+		// Member expressions: SIZES.SMALL, obj.prop, etc.
+		else if (t.isMemberExpression(node) && !node.computed && t.isIdentifier(node.property)) {
+			const objectResolved = resolveIdentifier(node.object as t.Identifier, path);
+			if (objectResolved && t.isObjectExpression(objectResolved)) {
+				// Look for the property in the object
+				const propertyName = node.property.name;
+				for (const prop of objectResolved.properties) {
+					if (t.isObjectProperty(prop) && t.isIdentifier(prop.key) && prop.key.name === propertyName) {
+						const propertyValue = literalToString(prop.value as t.Expression);
+						if (propertyValue !== null) {
+							// example: const a = { b: 'c' }
+							results.push(propertyValue);
+						}
 					}
 				}
 			}
 		}
-	}
 
-	// Binary expressions: might contain literals in some cases
-	else if (t.isBinaryExpression(node)) {
-		// Only extract if it's a simple concatenation that might resolve to a literal
-		if (node.operator === '+') {
-			results.push(...extractLiteralsRecursively(node.left as t.Expression, path));
-			results.push(...extractLiteralsRecursively(node.right as t.Expression, path));
+		// Binary expressions: might contain literals in some cases
+		else if (t.isBinaryExpression(node)) {
+			// Only extract if it's a simple concatenation that might resolve to a literal
+			if (node.operator === '+') {
+				// example: 'a' + 'b'
+				results.push(...extractLiteralsRecursively(node.left as t.Expression, path));
+				results.push(...extractLiteralsRecursively(node.right as t.Expression, path));
+			}
 		}
+	} catch (error) {
+		console.warn(`[Zero-UI] Failed to extract literals from ${node.type} in ${path?.opts?.filename}`, error);
+		return [];
+	} finally {
+		return results;
 	}
-
-	return results;
 }
 
 /**
@@ -304,17 +323,11 @@ function resolveIdentifier(node: t.Identifier, path: NodePath): t.Expression | n
 }
 
 /**
- * Convert various literal types to strings
+ * Convert string literals to strings (only strings are supported)
  */
 function literalToString(node: t.Expression): string | null {
-	if (t.isStringLiteral(node) || t.isNumericLiteral(node)) {
-		return String(node.value);
-	}
-	if (t.isBooleanLiteral(node)) {
-		return node.value ? 'true' : 'false';
-	}
-	if (t.isNullLiteral(node)) {
-		return 'null';
+	if (t.isStringLiteral(node)) {
+		return node.value;
 	}
 	if (t.isTemplateLiteral(node) && node.expressions.length === 0) {
 		// Simple template literal with no expressions: `hello`
@@ -397,7 +410,9 @@ export function extractVariants(filePath: string): VariantData[] {
 		fileCache.set(filePath, { hash: fileHash, variants });
 		return variants;
 	} catch (error) {
-		console.error(`Error extracting variants from ${filePath}:`, error);
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		console.warn(`[Zero-UI] Failed to parse ${filePath}: ${errorMessage}`);
+		console.warn(`[Zero-UI] Ensure useUI calls use string literals only: useUI('key', 'value')`);
 		return [];
 	}
 }
@@ -502,6 +517,7 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 		if (modified) {
 			return generate(ast).code;
 		} else {
+			console.warn(`[Zero-UI] Failed to automatically modify PostCSS config: ${source}`);
 			return null; // Could not automatically modify
 		}
 	} catch (err: unknown) {

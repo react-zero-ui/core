@@ -65,7 +65,7 @@ function useUI<T extends string = string>(key: string, initialValue: T): [T, UIS
 			const target = scopeRef.current ?? document.body;
 
 			let newValue: T;
-			// Check if caller passed an updater function (like React's setState(prev => prev) pattern)
+			// Check if caller passed an updater function (like React's setState(prev => prev === 'true' ? 'false' : 'true') pattern)
 			if (typeof valueOrUpdater === 'function') {
 				const value = target.dataset[camelKey] as T;
 

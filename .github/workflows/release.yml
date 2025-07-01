@@ -18,12 +18,12 @@ jobs:
         run: |
           # Get the latest CI workflow run for this branch
           CI_STATUS=$(gh run list --workflow=ci.yml --branch=${{ github.ref_name }} --limit=1 --json conclusion --jq '.[0].conclusion')
-          
+
           if [[ "$CI_STATUS" != "success" ]]; then
             echo "❌ CI must pass before releasing. Current status: $CI_STATUS"
             exit 1
           fi
-          
+
           echo "✅ CI passed. Proceeding with release..."
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -53,7 +53,7 @@ jobs:
         run: |
           # Check which packages were released and publish them
           echo "Releases created: ${{ steps.release.outputs.releases_created }}"
-          
+
           # Publish core package if it was released
           if [[ '${{ steps.release.outputs.packages_core--release_created }}' == 'true' ]]; then
             echo "📦 Publishing @react-zero-ui/core..."
@@ -61,7 +61,7 @@ jobs:
             npm publish --access public
             cd ../..
           fi
-          
+
           # Publish CLI package if it was released
           if [[ '${{ steps.release.outputs.packages_cli--release_created }}' == 'true' ]]; then
             echo "📦 Publishing create-zero-ui..."
