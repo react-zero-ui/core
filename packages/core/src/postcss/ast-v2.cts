@@ -5,7 +5,6 @@ import * as babelTraverse from '@babel/traverse';
 import { Binding, NodePath } from '@babel/traverse';
 import * as t from '@babel/types';
 import { CONFIG } from '../config.cjs';
-import { readFileSync } from 'fs';
 import { createHash } from 'crypto';
 import { generate } from '@babel/generator';
 import * as fs from 'fs';
@@ -428,8 +427,12 @@ export function extractVariants(filePath: string): VariantData[] {
 		// console.log(`[CACHE] MISS: ${filePath} (parsing...)`);
 		// Parse the file
 		const ast = parse(source, { sourceType: 'module', plugins: ['jsx', 'typescript', 'decorators-legacy'], sourceFilename: filePath });
+
+		// Collect useUI setters
 		const setters = collectUseUISetters(ast, source);
 		if (!setters.length) return [];
+
+		// Normalize variants
 		const variants = normalizeVariants(harvestSetterValues(setters), setters);
 
 		// Store with signature for fast future lookups
@@ -450,6 +453,8 @@ export function extractVariants(filePath: string): VariantData[] {
 		const ast = parse(source, { sourceType: 'module', plugins: ['jsx', 'typescript', 'decorators-legacy'], sourceFilename: filePath });
 		const setters = collectUseUISetters(ast, source);
 		if (!setters.length) return [];
+
+		// final normalization of variants
 		const variants = normalizeVariants(harvestSetterValues(setters), setters);
 
 		fileCache.set(filePath, { hash, variants });

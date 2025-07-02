@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { performance } = require('node:perf_hooks');
-// const { findAllSourceFiles } = require('../../dist/postcss/helpers.cjs');
+const { findAllSourceFiles } = require('../../dist/postcss/helpers.cjs');
 const { collectUseUISetters, extractVariants } = require('../../dist/postcss/ast-v2.cjs');
 
 const ComponentImports = readFile(path.join(__dirname, './fixtures/test-components.jsx'));
@@ -43,159 +43,138 @@ async function runTest(files, callback) {
 	}
 }
 
-// test('findAllSourceFiles', async () => {
-// 	await runTest(
-// 		{
-// 			'src/components/Button.tsx': `
-// 			import { Button } from '@zero-ui/core';
-// 			export default Button;
-// 		`,
-// 			'src/components/Button.jsx': `
-// 			import { Button } from '@zero-ui/core';
-// 			export default Button;
-// 		`,
-// 		},
-// 		async () => {
-// 			const sourceFiles = findAllSourceFiles();
-// 			assert.ok(sourceFiles.length > 0);
-// 		}
-// 	);
-// });
+test('findAllSourceFiles', async () => {
+	await runTest(
+		{
+			'src/components/Button.tsx': `
+			import { Button } from '@zero-ui/core';
+			export default Button;
+		`,
+			'src/components/Button.jsx': `
+			import { Button } from '@zero-ui/core';
+			export default Button;
+		`,
+		},
+		async () => {
+			const sourceFiles = findAllSourceFiles();
+			assert.ok(sourceFiles.length > 0);
+		}
+	);
+});
 
-// test('collectUseUISetters - basic functionality', async () => {
-// 	const sourceCode = `
-// 		import { useUI } from '@react-zero-ui/core';
+test('collectUseUISetters - basic functionality', async () => {
+	const sourceCode = `
+		import { useUI } from '@react-zero-ui/core';
 
-// 		const Component = () => {
-// 			const [theme, setTheme] = useUI('theme', 'light');
-// 			const [size, setSize] = useUI('size', 'medium');
-// 			return <>
-//         <Button theme={theme} setTheme={setTheme("light")} />
-//         <Button size={size} setSize={setSize("medium")} />
-//       </>;
-// 		}
-// 	`;
-
-// 	const ast = parse(sourceCode, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
-// 	const setters = collectUseUISetters(ast);
-
-// 	assert.strictEqual(setters[0].stateKey, 'theme');
-// 	assert.strictEqual(setters[0].initialValue, 'light');
-// 	assert.strictEqual(setters[1].stateKey, 'size');
-// 	assert.strictEqual(setters[1].initialValue, 'medium');
-// });
-
-// test('Extract Variants', async () => {
-// 	// Read fixture file for proper syntax highlighting
-// 	const fixtureContent = fs.readFileSync(path.join(__dirname, './fixtures/TestComponent1.jsx'), 'utf-8');
-
-// 	await runTest(
-// 		{ 'src/app/Component.jsx': fixtureContent },
-
-// 		async () => {
-// 			const variants = extractVariants('src/app/Component.jsx');
-// 			assert.strictEqual(variants.length, 2);
-// 			assert.ok(variants.some((v) => v.key === 'theme' && v.values.includes('light') && v.values.includes('dark')));
-// 			assert.ok(variants.some((v) => v.key === 'size' && v.values.includes('medium') && v.values.includes('large')));
-// 		}
-// 	);
-// });
-
-// test('Extract Variant without setter', async () => {
-// 	// Read fixture file for proper syntax highlighting
-// 	const fixtureContent = fs.readFileSync(path.join(__dirname, './fixtures/TestComponent2.jsx'), 'utf-8');
-
-// 	await runTest(
-// 		{ 'src/app/Component.jsx': fixtureContent },
-
-// 		async () => {
-// 			const variants = extractVariants('src/app/Component.jsx');
-// 			assert.strictEqual(variants.length, 2);
-// 			assert.ok(variants.some((v) => v.key === 'theme' && v.values.includes('light')));
-// 			assert.ok(variants.some((v) => v.key === 'size' && v.values.includes('medium')));
-// 		}
-// 	);
-// });
-
-// test('Extract Variant with imports and throw error', async () => {
-// 	await runTest({ 'src/app/Component.jsx': ComponentImports }, async () => {
-// 		assert.throws(() => {
-// 			collectUseUISetters(parse(ComponentImports, { sourceType: 'module', plugins: ['jsx', 'typescript'] }), ComponentImports);
-// 			// tests that the error message contains the correct text
-// 		}, /const VARSLocal = VARS/);
-// 	});
-// });
-
-// test('testKeyInitialValue', async () => {
-// 	await runTest({ 'src/app/Component.jsx': AllPatternsComponent }, async () => {
-// 		const setters = collectUseUISetters(parse(AllPatternsComponent, { sourceType: 'module', plugins: ['jsx', 'typescript'] }), AllPatternsComponent);
-// 		assert.strictEqual(setters[0].stateKey, 'theme');
-// 		assert.strictEqual(setters[0].initialValue, 'light');
-// 		assert.strictEqual(setters[1].stateKey, 'altTheme');
-// 		assert.strictEqual(setters[1].initialValue, 'dark');
-// 		assert.strictEqual(setters[2].stateKey, 'variant');
-// 		assert.strictEqual(setters[2].initialValue, 'th-dark');
-// 		assert.strictEqual(setters[3].stateKey, 'size');
-// 		assert.strictEqual(setters[3].initialValue, 'lg');
-// 		assert.strictEqual(setters[4].stateKey, 'mode');
-// 		assert.strictEqual(setters[4].initialValue, 'auto');
-// 		assert.strictEqual(setters[5].stateKey, 'color');
-// 		assert.strictEqual(setters[5].initialValue, 'bg-blue');
-// 		assert.strictEqual(setters[6].initialValue, 'th-dark');
-// 		assert.strictEqual(setters[7].initialValue, 'th-blue');
-// 		assert.strictEqual(setters[8].initialValue, 'th-blue-inverse');
-// 		assert.strictEqual(setters[9].initialValue, 'blue-inverse');
-// 		assert.strictEqual(setters[10].initialValue, 'blue-th-dark');
-// 		assert.strictEqual(setters[11].initialValue, 'th-blue-th-dark');
-// 		assert.strictEqual(setters[12].initialValue, 'th-light');
-// 		assert.strictEqual(setters[13].initialValue, 'blue');
-// 		assert.strictEqual(setters[14].initialValue, 'th-light');
-// 	});
-// });
-
-// test('speed', async () => {
-// 	// Simple inline component with a few useUI hooks, no conflicting constants
-// 	const simpleComponent = `
-// 		function TestComponent() {
-// 			const [theme, setTheme] = useUI('theme', 'light');
-// 			const [size, setSize] = useUI('size', 'medium');
-// 			const [color, setColor] = useUI('color', 'blue');
-// 			const [variant, setVariant] = useUI('variant', 'primary');
-
-// 			return <div>
-// 				<button onClick={() => setTheme('dark')}>Set Dark</button>
-// 				<button onClick={() => setSize('large')}>Set Large</button>
-// 				<button onClick={() => setColor('red')}>Set Red</button>
-// 				<button onClick={() => setVariant('secondary')}>Set Secondary</button>
-// 			</div>;
-// 		}
-// 	`;
-
-// 	// Create 1000 copies of the same component with unique names
-// 	const components = Array.from({ length: 1000 }, (_, i) => {
-// 		return simpleComponent.replace(/TestComponent/g, `TestComponent${i}`);
-// 	});
-
-// 	const bigFile = `import { useUI } from '@zero-ui/core';\n\n` + components.join('\n\n');
-
-// 	await runTest({ 'src/app/Component.jsx': bigFile }, async () => {
-// 		const start = Date.now();
-// 		const ast = parse(bigFile, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
-// 		const setters = collectUseUISetters(ast, bigFile);
-// 		const end = Date.now();
-
-// 		console.log(`Processed 1000 components in ${end - start}ms`);
-// 		console.log(`Total setters found: ${setters.length}`);
-// 	});
-// });
-
-test('cache performance', async () => {
-	const simpleComponent = `
-		import { useUI } from '@zero-ui/core';
-		
-		function TestComponent() {
+		const Component = () => {
 			const [theme, setTheme] = useUI('theme', 'light');
 			const [size, setSize] = useUI('size', 'medium');
+			return <>
+        <Button theme={theme} setTheme={setTheme("light")} />
+        <Button size={size} setSize={setSize("medium")} />
+      </>;
+		}
+	`;
+
+	const ast = parse(sourceCode, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
+	const setters = collectUseUISetters(ast);
+
+	assert.strictEqual(setters[0].stateKey, 'theme');
+	assert.strictEqual(setters[0].initialValue, 'light');
+	assert.strictEqual(setters[1].stateKey, 'size');
+	assert.strictEqual(setters[1].initialValue, 'medium');
+});
+
+test('Extract Variant without setter', async () => {
+	// Read fixture file for proper syntax highlighting
+	await runTest(
+		{
+			'src/app/Component.jsx': `
+export function ComponentSimple() {
+	const [, setTheme] = useUI('theme', 'light');
+	const [, setSize] = useUI('size', 'medium');
+	return (
+		<div>
+			<button onClick={() => setTheme('dark')}>setTheme</button>
+			<button onClick={() => setSize('large')}>setSize</button>
+		</div>
+	);
+}
+`,
+		},
+
+		async () => {
+			const variants = extractVariants('src/app/Component.jsx');
+			assert.strictEqual(variants.length, 2);
+			assert.ok(variants.some((v) => v.key === 'theme' && v.values.includes('light')));
+			assert.ok(variants.some((v) => v.key === 'size' && v.values.includes('medium')));
+		}
+	);
+});
+
+test('Extract Variant with imports and throw error', async () => {
+	await runTest({ 'src/app/Component.jsx': ComponentImports }, async () => {
+		assert.throws(() => {
+			collectUseUISetters(parse(ComponentImports, { sourceType: 'module', plugins: ['jsx', 'typescript'] }), ComponentImports);
+			// tests that the error message contains the correct text
+		}, /const VARSLocal = VARS/);
+	});
+});
+
+test('testKeyInitialValue', async () => {
+	await runTest({ 'src/app/Component.jsx': AllPatternsComponent }, async () => {
+		const setters = collectUseUISetters(parse(AllPatternsComponent, { sourceType: 'module', plugins: ['jsx', 'typescript'] }), AllPatternsComponent);
+		assert.strictEqual(setters[0].stateKey, 'theme');
+		assert.strictEqual(setters[0].initialValue, 'light');
+		assert.strictEqual(setters[1].stateKey, 'altTheme');
+		assert.strictEqual(setters[1].initialValue, 'dark');
+		assert.strictEqual(setters[2].stateKey, 'variant');
+		assert.strictEqual(setters[2].initialValue, 'th-dark');
+		assert.strictEqual(setters[3].stateKey, 'size');
+		assert.strictEqual(setters[3].initialValue, 'lg');
+		assert.strictEqual(setters[4].stateKey, 'mode');
+		assert.strictEqual(setters[4].initialValue, 'auto');
+		assert.strictEqual(setters[5].stateKey, 'color');
+		assert.strictEqual(setters[5].initialValue, 'bg-blue');
+		assert.strictEqual(setters[6].initialValue, 'th-dark');
+		assert.strictEqual(setters[7].initialValue, 'th-blue');
+		assert.strictEqual(setters[8].initialValue, 'th-blue-inverse');
+		assert.strictEqual(setters[9].initialValue, 'blue-inverse');
+		assert.strictEqual(setters[10].initialValue, 'blue-th-dark');
+		assert.strictEqual(setters[11].initialValue, 'th-blue-th-dark');
+		assert.strictEqual(setters[12].initialValue, 'th-light');
+		assert.strictEqual(setters[13].initialValue, 'blue');
+		assert.strictEqual(setters[14].initialValue, 'th-light');
+	});
+});
+
+test('cache performance', async () => {
+	// Simple inline component with a few useUI hooks, no conflicting constants
+	const simpleComponent = `
+		import { useUI } from '@zero-ui/core';
+		const DARK = 'dark' as const;
+		const PREFIX = \`th-\${DARK}\` as const;
+		const SIZES = { small: 'sm', large: 'lg' } as const;
+		const MODES = ['auto', 'manual'] as const;
+
+		const COLORS = { primary: 'blue', secondary: 'green' } as const;
+		const VARIANTS = { dark: \`th-\${DARK}\`, light: COLORS.primary } as const;
+		function TestComponent() {
+		/* ① literal */
+	const [theme, setTheme] = useUI('theme', 'light');
+	/* ② identifier */
+	const [altTheme, setAltTheme] = useUI('altTheme', DARK);
+	/* ③ static template literal */
+	const [variant, setVariant] = useUI('variant', PREFIX);
+	/* ④ object-member */
+	const [size, setSize] = useUI('size', SIZES.large);
+	/* ⑤ array-index */
+	const [mode, setMode] = useUI('mode', MODES[0]);
+	/* ⑥ nested template + member */
+	const [color, setColor] = useUI('color', \`bg-\${COLORS.primary}\`);
+	/* ⑦ object-member */
+	const [variant2, setVariant2] = useUI('variant', VARIANTS.dark);
+
 			return <div onClick={() => setTheme('dark')}>Test</div>;
 		}
 	`;

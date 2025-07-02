@@ -50,6 +50,8 @@ export function AllPatternsComponent() {
 	/* ⑮  Optional-chaining w/ unresolvable member */
 	// @ts-ignore
 	const [variant10, setVariant10] = useUI('variant', VARIANTS.light?.primary ?? 'th-light');
+	/* ⑯ local const identifier */
+	const [variant11, setVariant11] = useUI('variant', VARIANTS['blue']);
 
 	/* ── setters exercised in every allowed style ── */
 	const clickHandler = () => {

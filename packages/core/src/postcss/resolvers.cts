@@ -21,7 +21,6 @@ export interface ResolveOpts {
  * @returns The string literal or null if the node is not a string literal or template literal with no expressions or identifier bound to local const
  */
 
-// TODO: add memoization
 export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts: ResolveOpts): string | null {
 	// String / template (no ${})
 	if (t.isStringLiteral(node)) return node.value;
@@ -104,7 +103,7 @@ export function resolveLocalConstIdentifier(
 							: opts.hook === 'setterName'
 								? `setterFunction(${node.name}Local)`
 								: ''
-				}`
+				}\n`
 		);
 	}
 
