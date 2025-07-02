@@ -13,6 +13,7 @@ import * as path from 'path';
 import { literalFromNode } from './resolvers.cjs';
 import { codeFrameColumns } from '@babel/code-frame';
 const traverse = (babelTraverse as any).default;
+import { LRUCache as LRU } from 'lru-cache';
 
 export interface SetterMeta {
 	/** Babel binding object — use `binding.referencePaths` in Pass 2 */
@@ -392,78 +393,69 @@ export function normalizeVariants(variants: Map<string, Set<string>>, setters: S
 }
 
 // File cache to avoid re-parsing unchanged files
-interface CacheEntry {
+export interface CacheEntry {
 	hash: string;
 	variants: VariantData[];
 }
 
-const fileCache = new Map<string, CacheEntry>();
+const fileCache = new LRU<string, CacheEntry>({ max: 5000 });
 
-/**
- * Main function: Extract all variant tokens from a JS/TS file
- * @param filePath - Path to the source file
- * @returns Array of variant data objects
- */
 export function extractVariants(filePath: string): VariantData[] {
-	try {
-		// Read and hash the file for caching
-		const sourceCode = readFileSync(filePath, 'utf-8');
-		const fileHash = createHash('md5').update(sourceCode).digest('hex');
+	// console.log(`[CACHE] Checking: ${filePath}`);
 
-		// Check cache first
+	try {
+		const { mtimeMs, size } = fs.statSync(filePath);
+		const sig = `${mtimeMs}:${size}`;
+
 		const cached = fileCache.get(filePath);
-		if (cached && cached.hash === fileHash) {
+		if (cached && cached.hash === sig) {
+			// console.log(`[CACHE] HIT (sig): ${filePath}`);
+			return cached.variants; // Fast path: file unchanged
+		}
+
+		const source = fs.readFileSync(filePath, 'utf8');
+		const hash = createHash('md5').update(source).digest('hex');
+
+		// Fallback: content unchanged despite mtime/size change
+		if (cached && cached.hash === hash) {
+			// console.log(`[CACHE] HIT (hash): ${filePath}`);
+			// Update cache with new sig for next time
+			const entry = { hash: sig, variants: cached.variants };
+			fileCache.set(filePath, entry);
 			return cached.variants;
 		}
 
-		// Parse the file once
-		const ast = parse(sourceCode, {
-			sourceType: 'module',
-			plugins: ['jsx', 'typescript', 'decorators-legacy'],
-			allowImportExportEverywhere: false,
-			allowReturnOutsideFunction: false,
-			attachComment: false,
-			createImportExpressions: true,
-			sourceFilename: filePath,
-		});
+		// console.log(`[CACHE] MISS: ${filePath} (parsing...)`);
+		// Parse the file
+		const ast = parse(source, { sourceType: 'module', plugins: ['jsx', 'typescript', 'decorators-legacy'], sourceFilename: filePath });
+		const setters = collectUseUISetters(ast, source);
+		if (!setters.length) return [];
+		const variants = normalizeVariants(harvestSetterValues(setters), setters);
 
-		// Pass 1: Collect all useUI setters and their initial values
-		const setters = collectUseUISetters(ast, sourceCode);
-		// returns an array of objects with the following properties:
-		// - stateKey: string
-		// - initialValue: string | null
-		// - binding: NodePath<t.Identifier>
-		// - setterName: string
-
-		// Early return if no setters found
-		if (setters.length === 0) {
-			const result: VariantData[] = [];
-			fileCache.set(filePath, { hash: fileHash, variants: result });
-			return result;
-		}
-
-		// Pass 2: Harvest all values from setter calls
-		const variantsMap = harvestSetterValues(setters);
-		// returns a Map of keys, and a Set of values
-		// Map{'theme' => Set(2) { 'light', 'dark' },}
-
-		// Normalize to final format
-		const variants = normalizeVariants(variantsMap, setters);
-		// returns an array of objects with the following properties:
-		// [{ key: 'theme', values: [ 'dark', 'light' ], initialValue: 'light' },]
-
-		// Cache and return
-		//TODO better cache
-		fileCache.set(filePath, { hash: fileHash, variants });
+		// Store with signature for fast future lookups
+		fileCache.set(filePath, { hash: sig, variants });
 		return variants;
 	} catch (error) {
-		const errorMessage = error instanceof Error ? error.message : String(error);
-		console.warn(`[Zero-UI] Failed to parse ${filePath}: ${errorMessage}`);
-		console.warn(`[Zero-UI] Ensure useUI calls use string literals only: useUI('key', 'value')`);
-		return [];
+		// console.log(`[CACHE] ERROR (fallback): ${filePath}`);
+		// Fallback for virtual/non-existent files - use content hash only
+		const source = fs.readFileSync(filePath, 'utf8');
+		const hash = createHash('md5').update(source).digest('hex');
+
+		const cached = fileCache.get(filePath);
+		if (cached && cached.hash === hash) {
+			return cached.variants;
+		}
+
+		// Parse and cache...
+		const ast = parse(source, { sourceType: 'module', plugins: ['jsx', 'typescript', 'decorators-legacy'], sourceFilename: filePath });
+		const setters = collectUseUISetters(ast, source);
+		if (!setters.length) return [];
+		const variants = normalizeVariants(harvestSetterValues(setters), setters);
+
+		fileCache.set(filePath, { hash, variants });
+		return variants;
 	}
 }
-
 /**
  * Extract variants from multiple files
  * @param filePaths - Array of file paths to analyze

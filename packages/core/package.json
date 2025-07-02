@@ -34,7 +34,7 @@
 		}
 	},
 	"scripts": {
-		"prepare": "pnpm run build",
+		"prepack": "pnpm run build",
 		"build": "tsc -p tsconfig.json",
 		"test:next": "playwright test -c __tests__/config/playwright.next.config.js",
 		"test:vite": "playwright test -c __tests__/config/playwright.vite.config.js",
@@ -90,6 +90,7 @@
 		"@types/babel__code-frame": "^7.0.6",
 		"@types/babel__generator": "^7.27.0",
 		"@types/babel__traverse": "^7.20.7",
-		"@types/react": "^19.1.8"
+		"@types/react": "^19.1.8",
+		"lru-cache": "^10.4.3"
 	}
 }
