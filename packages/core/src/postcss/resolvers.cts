@@ -1,24 +1,134 @@
 import * as t from '@babel/types';
 import { NodePath } from '@babel/traverse';
+import { throwCodeFrame } from './ast-v2.cjs';
+
+export interface ResolveOpts {
+	throwOnFail?: boolean; // default false
+	source?: string; // optional; fall back to path.hub.file.code
+	hook?: 'stateKey' | 'initialValue' | 'setterName'; // default 'stateKey'
+}
+
+/**
+ * This function will decide which function to call based on the node type
+ *
+ * 1. String literal
+ * 2. Template literal with no expressions
+ * 3. Identifier bound to local const
+ * 4. Template literal with expressions
+ * 5. Everything else is illegal
+ * @param node - The node to convert
+ * @param path - The path to the node
+ * @returns The string literal or null if the node is not a string literal or template literal with no expressions or identifier bound to local const
+ */
+export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts: ResolveOpts): string | null {
+	// String / template (no ${})
+	if (t.isStringLiteral(node)) return node.value;
+	if (t.isTemplateLiteral(node) && node.expressions.length === 0) {
+		const text = node.quasis[0].value.cooked ?? node.quasis[0].value.raw;
+		return text;
+	}
+	if (t.isBinaryExpression(node) && node.operator === '+') {
+		const left = literalFromNode(node.left as t.Expression, path, opts);
+		const right = literalFromNode(node.right as t.Expression, path, opts);
+		return left !== null && right !== null ? left + right : null;
+	}
+
+	/* ── Logical fallback  (a || b ,  a ?? b) ───────────── */
+	if (t.isLogicalExpression(node) && (node.operator === '||' || node.operator === '??')) {
+		// try left; if it resolves, use it, otherwise fall back to right
+		const left = literalFromNode(node.left as t.Expression, path, opts);
+		if (left !== null) return left;
+		return literalFromNode(node.right as t.Expression, path, opts);
+	}
+
+	// Identifier bound to local const (also handles object/array literals
+	// via the recursive call inside resolveLocalConstIdentifier)
+	const idLit = resolveLocalConstIdentifier(node, path, opts);
+	if (idLit !== null) return idLit;
+
+	// Template literal with ${expr} or ${CONSTANT}
+	if (t.isTemplateLiteral(node)) {
+		return resolveTemplateLiteral(node, path, literalFromNode, opts);
+	}
+
+	if (t.isMemberExpression(node)) {
+		return resolveMemberExpression(node, path, literalFromNode, opts);
+	}
+
+	return null; // everything else is illegal
+}
 
 /*──────────────────────────────────────────────────────────*\
-  importedVariableErr
-  -------------------
-  Centralized error helper: **always** throw the same, actionable message
-  whenever we detect a value coming from an *imported* binding.
+  resolveLocalConstIdentifier
+  ---------------------------
+  Resolve an **Identifier** node to a *space-free string literal* **only when**
 
-  Why centralize?
-  • We'll call this from `resolveTemplateLiteral`, `literalFromNode`, and the
-    setter-value pass — consistency matters.
+  1. It is bound in the **same file** (Program scope),
+  2. Declared with **`const`** (not `let` / `var`),
+  3. Initialised to a **string literal** or a **static template literal**,
+  4. The final string has **no whitespace** (`/^\S+$/`).
+
+  Anything else (inner-scope `const`, dynamic value, imported binding, spaces)
+  ➜ return `null` — the caller will decide whether to throw or keep searching.
+
+  If the binding is *imported*, we delegate to `importedVariableErr()` so the
+  developer gets a consistent, actionable error message.
 \*──────────────────────────────────────────────────────────*/
-export function importedVariableErr(path: NodePath, ident: t.Identifier): never {
-	throw path.buildCodeFrameError(
-		`[Zero-UI] "${ident.name}" is imported.  ` +
-			'Inline it or alias to a local const first:\n' +
-			'  import { theme } from "lib";\n' +
-			'  const THEME = theme;\n' +
-			'  useUI("theme", THEME);'
-	);
+export function resolveLocalConstIdentifier(
+	node: t.Expression, // <- widened
+	path: NodePath<t.Node>,
+	opts: ResolveOpts
+): string | null {
+	/* Fast-exit when node isn't an Identifier */
+	if (!t.isIdentifier(node)) return null;
+
+	const binding = path.scope.getBinding(node.name);
+	if (!binding) return null;
+
+	/* 1. Reject imported bindings */
+	if (binding.path.isImportSpecifier() || binding.path.isImportDefaultSpecifier() || binding.path.isImportNamespaceSpecifier()) {
+		throwCodeFrame(
+			path,
+			path.opts?.filename,
+			opts.source ?? path.opts?.source?.code,
+			`[Zero-UI] Cannot use imported variables. Assign to a local const first.\n` +
+				`Example:\n import { ${node.name} } from "./filePath";\n ` +
+				`const ${node.name}Local = ${node.name};\n\n ` +
+				`${
+					opts.hook === 'stateKey'
+						? `useUI(${node.name}Local, initialValue);`
+						: opts.hook === 'initialValue'
+							? `useUI(stateKey, ${node.name}Local);`
+							: opts.hook === 'setterName'
+								? `setterFunction(${node.name}Local)`
+								: ''
+				}`
+		);
+	}
+
+	/* 2. Allow only top-level `const` */
+	if (!binding.path.isVariableDeclarator() || binding.scope.block.type !== 'Program' || (binding.path.parent as t.VariableDeclaration).kind !== 'const') {
+		return null;
+	}
+
+	/* 3. Inspect initializer */
+	let init = binding.path.node.init;
+	if (!init) return null;
+	/* unwrap  '... as const'  or  <const>foo  */
+	// @ts-expect-error Babel lacks helper for TSConstAssertion
+	if (t.isTSAsExpression(init) || t.isTSTypeAssertion(init) || init.type === 'TSConstAssertion') {
+		init = (init as any).expression; // step into the real value
+	}
+
+	let text: string | null = null;
+
+	if (t.isStringLiteral(init)) {
+		text = init.value;
+	} else if (t.isTemplateLiteral(init)) {
+		text = resolveTemplateLiteral(init, binding.path, literalFromNode, opts);
+	}
+
+	return text;
 }
 
 /*──────────────────────────────────────────────────────────*\
@@ -44,14 +154,15 @@ export function importedVariableErr(path: NodePath, ident: t.Identifier): never 
 export function resolveTemplateLiteral(
 	node: t.TemplateLiteral,
 	path: NodePath,
-	literalFromNode: (expr: t.Expression, p: NodePath) => string | null
+	literalFromNode: (expr: t.Expression, p: NodePath, opts: ResolveOpts) => string | null,
+	opts: ResolveOpts
 ): string | null {
 	let result = '';
 
 	// ── fast path: `` `dark` ``
 	if (node.expressions.length === 0) {
 		const text = node.quasis[0].value.cooked ?? node.quasis[0].value.raw;
-		return text && /^\S+$/.test(text) ? text : null;
+		return text;
 	}
 
 	// ── slow path: template with ${}
@@ -59,111 +170,21 @@ export function resolveTemplateLiteral(
 		// 1. Add quasi piece
 		const q = node.quasis[i];
 		const text = q.value.cooked ?? q.value.raw;
-		if (!text || /\s/.test(text)) return null; // contains space
+		if (text == null) return null;
 		result += text;
 
 		// 2. Add expression piece (if any)
 		const expr = node.expressions[i];
 		if (expr) {
-			const lit = literalFromNode(expr as t.Expression, path);
-			if (lit === null) return null; // dynamic or invalid
-
-			if (/\s/.test(lit)) return null; // space inside expr literal
+			const lit = literalFromNode(expr as t.Expression, path, opts);
+			if (lit === null && opts.throwOnFail) {
+				throwCodeFrame(path, path.opts?.filename, opts.source ?? path.opts?.source?.code, '[Zero-UI] Template literal must resolve to a space-free string.');
+			}
 			result += lit;
 		}
 	}
 
-	// Guard: final string still space-free?
-	return /^\S+$/.test(result) ? result : null;
-}
-
-/*──────────────────────────────────────────────────────────*\
-  resolveLocalConstIdentifier
-  ---------------------------
-  Resolve an **Identifier** node to a *space-free string literal* **only when**
-
-  1. It is bound in the **same file** (Program scope),
-  2. Declared with **`const`** (not `let` / `var`),
-  3. Initialised to a **string literal** or a **static template literal**,
-  4. The final string has **no whitespace** (`/^\S+$/`).
-
-  Anything else (inner-scope `const`, dynamic value, imported binding, spaces)
-  ➜ return `null` — the caller will decide whether to throw or keep searching.
-
-  If the binding is *imported*, we delegate to `importedVariableErr()` so the
-  developer gets a consistent, actionable error message.
-\*──────────────────────────────────────────────────────────*/
-export function resolveLocalConstIdentifier(
-	node: t.Expression, // <- widened
-	path: NodePath<t.Node>
-): string | null {
-	/* Fast-exit when node isn't an Identifier */
-	if (!t.isIdentifier(node)) return null;
-
-	const binding = path.scope.getBinding(node.name);
-	if (!binding) return null;
-
-	/* 1. Reject imported bindings */
-	if (binding.path.isImportSpecifier() || binding.path.isImportDefaultSpecifier() || binding.path.isImportNamespaceSpecifier()) {
-		importedVariableErr(path, node); // throws
-	}
-
-	/* 2. Allow only top-level `const` */
-	if (!binding.path.isVariableDeclarator() || binding.scope.block.type !== 'Program' || (binding.path.parent as t.VariableDeclaration).kind !== 'const') {
-		return null;
-	}
-
-	/* 3. Inspect initializer */
-	const init = binding.path.node.init;
-	if (!init) return null;
-
-	let text: string | null = null;
-
-	if (t.isStringLiteral(init)) {
-		text = init.value;
-	} else if (t.isTemplateLiteral(init)) {
-		text = resolveTemplateLiteral(init, binding.path, resolveLocalConstIdentifier);
-	}
-
-	/* 4. Final space-free check */
-	return text && /^\S+$/.test(text) ? text : null;
-}
-
-/**
- * This function will decide which function to call based on the node type
- *
- * 1. String literal
- * 2. Template literal with no expressions
- * 3. Identifier bound to local const
- * 4. Template literal with expressions
- * 5. Everything else is illegal
- * @param node - The node to convert
- * @param path - The path to the node
- * @returns The string literal or null if the node is not a string literal or template literal with no expressions or identifier bound to local const
- */
-export function literalFromNode(node: t.Expression, path: NodePath<t.Node>): string | null {
-	// String / template (no ${})
-	if (t.isStringLiteral(node)) return /^\S+$/.test(node.value) ? node.value : null;
-	if (t.isTemplateLiteral(node) && node.expressions.length === 0) {
-		const text = node.quasis[0].value.cooked ?? node.quasis[0].value.raw;
-		return text && /^\S+$/.test(text) ? text : null;
-	}
-
-	// Identifier bound to local const (also handles object/array literals
-	// via the recursive call inside resolveLocalConstIdentifier)
-	const idLit = resolveLocalConstIdentifier(node, path);
-	if (idLit !== null) return idLit;
-
-	// Template literal with ${expr}
-	if (t.isTemplateLiteral(node)) {
-		return resolveTemplateLiteral(node, path, literalFromNode);
-	}
-
-	if (t.isMemberExpression(node)) {
-		return resolveMemberExpression(node, path, literalFromNode);
-	}
-
-	return null; // everything else is illegal
+	return result;
 }
 
 /*────────────────────────────────────*\
@@ -191,7 +212,8 @@ export function literalFromNode(node: t.Expression, path: NodePath<t.Node>): str
 export function resolveMemberExpression(
 	node: t.MemberExpression,
 	path: NodePath<t.Node>,
-	literalFromNode: (expr: t.Expression, p: NodePath) => string | null
+	literalFromNode: (expr: t.Expression, p: NodePath, opts: ResolveOpts) => string | null,
+	opts: ResolveOpts
 ): string | null {
 	/** Collect the property chain (deep → shallow) */
 	const props: (string | number)[] = [];
@@ -203,12 +225,11 @@ export function resolveMemberExpression(
 		if (current.computed) {
 			// obj['prop']  or  obj[0]
 			if (t.isStringLiteral(current.property)) {
-				if (/\s/.test(current.property.value)) return null;
 				props.unshift(current.property.value);
 			} else if (t.isNumericLiteral(current.property)) {
 				props.unshift(current.property.value);
 			} else if (t.isTemplateLiteral(current.property)) {
-				const lit = resolveTemplateLiteral(current.property, path, literalFromNode);
+				const lit = resolveTemplateLiteral(current.property, path, literalFromNode, opts);
 				if (lit === null) return null;
 				props.unshift(lit);
 			} else {
@@ -233,7 +254,12 @@ export function resolveMemberExpression(
 
 	// Imported? -> hard error
 	if (binding.path.isImportSpecifier() || binding.path.isImportDefaultSpecifier() || binding.path.isImportNamespaceSpecifier()) {
-		importedVariableErr(path, current);
+		throwCodeFrame(
+			path,
+			path.opts?.filename,
+			opts.source ?? path.opts?.source?.code,
+			`[Zero-UI] Imports Not Allowed: \n\n Inline it or alias to a local const first.`
+		);
 	}
 
 	// Must be `const` in Program scope
@@ -245,6 +271,10 @@ export function resolveMemberExpression(
 
 	/* Traverse the collected property chain */
 	for (const key of props) {
+		// unwrap  `... as const`
+		if (t.isTSAsExpression(value)) {
+			value = value.expression;
+		}
 		if (t.isObjectExpression(value)) {
 			const objLit = value;
 			value = resolveObjectValue(objLit, String(key));
@@ -256,12 +286,21 @@ export function resolveMemberExpression(
 		if (!value) return null;
 	}
 
+	/* Unwrap  x as const  once more */
+	if (t.isTSAsExpression(value)) value = value.expression;
+
+	/* If we landed on another member chain, recurse */
+	if (t.isMemberExpression(value)) {
+		return resolveMemberExpression(value, path, literalFromNode, opts);
+	}
+
 	/* Final value must be a space-free string */
+	if (t.isTSAsExpression(value)) value = value.expression;
 	if (t.isStringLiteral(value)) {
 		return /^\S+$/.test(value.value) ? value.value : null;
 	}
 	if (t.isTemplateLiteral(value)) {
-		return resolveTemplateLiteral(value, path, literalFromNode);
+		return resolveTemplateLiteral(value, path, literalFromNode, opts);
 	}
 
 	return null; // not a string

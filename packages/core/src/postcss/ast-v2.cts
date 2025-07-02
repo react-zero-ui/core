@@ -11,6 +11,7 @@ import { generate } from '@babel/generator';
 import * as fs from 'fs';
 import * as path from 'path';
 import { literalFromNode } from './resolvers.cjs';
+import { codeFrameColumns } from '@babel/code-frame';
 const traverse = (babelTraverse as any).default;
 
 export interface SetterMeta {
@@ -62,7 +63,7 @@ export interface SetterMeta {
  * Throws if the key is dynamic or if the initial value cannot be
  * reduced to a space-free string.
  */
-export function collectUseUISetters(ast: t.File): SetterMeta[] {
+export function collectUseUISetters(ast: t.File, sourceCode: string): SetterMeta[] {
 	const setters: SetterMeta[] = [];
 
 	traverse(ast, {
@@ -73,34 +74,52 @@ export function collectUseUISetters(ast: t.File): SetterMeta[] {
 			if (!t.isArrayPattern(id) || !t.isCallExpression(init) || !t.isIdentifier(init.callee, { name: CONFIG.HOOK_NAME })) return;
 
 			if (id.elements.length !== 2) {
-				throw path.buildCodeFrameError(`[Zero-UI] useUI() must destructure two values: [value, setter].`);
+				throwCodeFrame(path, path.opts?.filename, sourceCode, `[Zero-UI] useUI() must destructure two values: [value, setter].`);
 			}
 
 			const [, setterEl] = id.elements;
 			if (!setterEl || !t.isIdentifier(setterEl)) {
-				throw path.buildCodeFrameError(`[Zero-UI] useUI() setter must be a variable name.`);
+				throwCodeFrame(path, path.opts?.filename, sourceCode, `[Zero-UI] useUI() setter must be a variable name.`);
 			}
 
 			const [keyArg, initialArg] = init.arguments;
 
-			// key must be string literal
-			if (!t.isStringLiteral(keyArg)) {
-				throw path.buildCodeFrameError(`[Zero-UI] useUI() key must be a string literal.`);
+			// resolve state key with new helpers
+			const stateKey = literalFromNode(keyArg as t.Expression, path as NodePath<t.Node>, { throwOnFail: true, source: sourceCode, hook: 'stateKey' });
+
+			if (stateKey === null) {
+				throwCodeFrame(
+					path,
+					path.opts?.filename,
+					sourceCode,
+					// TODO add link to docs
+					`[Zero-UI] State key for ${stateKey} must be a local, space-free string literal. - collectUseUISetters`
+				);
 			}
 
 			// resolve initial value with new helpers
-			const initialValue = literalFromNode(initialArg as t.Expression, path as unknown as NodePath<t.Node>);
+			const initialValue = literalFromNode(initialArg as t.Expression, path as NodePath<t.Node>, {
+				throwOnFail: true,
+				source: sourceCode,
+				hook: 'initialValue',
+			});
 
 			if (initialValue === null) {
-				throw path.buildCodeFrameError(`[Zero-UI] Initial value for "${keyArg.value}" must be a local, space-free string literal.`);
+				throwCodeFrame(
+					path,
+					path.opts?.filename,
+					sourceCode,
+					// TODO add link to docs
+					`[Zero-UI] Initial value for "${stateKey}" must be a local, space-free string literal. - collectUseUISetters`
+				);
 			}
 
 			const binding = path.scope.getBinding(setterEl.name);
 			if (!binding) {
-				throw path.buildCodeFrameError(`[Zero-UI] Could not resolve binding for setter "${setterEl.name}".`);
+				throwCodeFrame(path, path.opts?.filename, sourceCode, `[Zero-UI] Could not resolve binding for setter "${setterEl.name}".`);
 			}
 
-			setters.push({ binding, setterName: setterEl.name, stateKey: keyArg.value, initialValue });
+			setters.push({ binding, setterName: setterEl.name, stateKey, initialValue });
 		},
 	});
 
@@ -405,10 +424,11 @@ export function extractVariants(filePath: string): VariantData[] {
 			allowReturnOutsideFunction: false,
 			attachComment: false,
 			createImportExpressions: true,
+			sourceFilename: filePath,
 		});
 
 		// Pass 1: Collect all useUI setters and their initial values
-		const setters = collectUseUISetters(ast);
+		const setters = collectUseUISetters(ast, sourceCode);
 		// returns an array of objects with the following properties:
 		// - stateKey: string
 		// - initialValue: string | null
@@ -429,7 +449,6 @@ export function extractVariants(filePath: string): VariantData[] {
 
 		// Normalize to final format
 		const variants = normalizeVariants(variantsMap, setters);
-		console.log('variants: ', variants);
 		// returns an array of objects with the following properties:
 		// - key: string
 		// - values: string[]
@@ -806,4 +825,11 @@ export function parseJsonWithBabel(source: string): any {
 		console.warn(`[Zero-UI] Failed to parse ${source}: ${errorMessage}`);
 		return null;
 	}
+}
+
+export function throwCodeFrame(path: NodePath<t.Node>, filename: string, source: string, msg: string): never {
+	const loc = path.node.loc;
+	const head = loc ? `${filename}:${loc.start.line}:${loc.start.column}\n` : '';
+	const frame = loc ? codeFrameColumns(source, { start: loc.start, end: loc.end }, { highlightCode: true, linesAbove: 2, linesBelow: 2 }) : '';
+	throw new Error(`${head}${msg}\n${frame}`);
 }

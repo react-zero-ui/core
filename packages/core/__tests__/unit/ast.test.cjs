@@ -4,11 +4,18 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-const { findAllSourceFiles } = require('../../dist/postcss/helpers.cjs');
-const { collectUseUISetters, extractVariants } = require('../../dist/postcss/ast-v2.cjs');
+// const { findAllSourceFiles } = require('../../dist/postcss/helpers.cjs');
+const { collectUseUISetters } = require('../../dist/postcss/ast-v2.cjs');
+
+const ComponentImports = readFile(path.join(__dirname, './fixtures/test-components.jsx'));
+const AllPatternsComponent = readFile(path.join(__dirname, './fixtures/ts-test-components.tsx'));
 
 const { parse } = require('@babel/parser');
 
+// a helper to read a file and return the content
+function readFile(path) {
+	return fs.readFileSync(path, 'utf-8');
+}
 // Helper to create temp directory and run test
 async function runTest(files, callback) {
 	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-test-ast'));
@@ -110,15 +117,34 @@ async function runTest(files, callback) {
 // 	);
 // });
 
-test('Extract Variant with imports', async () => {
-	// Read fixture file for proper syntax highlighting
-	const fixtureContent = fs.readFileSync(path.join(__dirname, './fixtures/TestComponentImports.jsx'), 'utf-8');
+test('Extract Variant with imports and throw error', async () => {
+	await runTest({ 'src/app/Component.jsx': ComponentImports }, async () => {
+		assert.throws(() => {
+			collectUseUISetters(parse(ComponentImports, { sourceType: 'module', plugins: ['jsx', 'typescript'] }), ComponentImports);
+			// tests that the error message contains the correct text
+		}, /const VARSLocal = VARS/);
+	});
+});
 
-	await runTest({ 'src/app/Component.jsx': fixtureContent }, async () => {
-		const variants = collectUseUISetters(parse(fixtureContent, { sourceType: 'module', plugins: ['jsx', 'typescript'] }));
-		console.log('variants: ', variants);
-		assert.strictEqual(variants.length, 2);
-		assert.ok(variants.some((v) => v.key === 'theme' && v.values.includes('dark')));
-		assert.ok(variants.some((v) => v.key === 'size' && v.values.includes('lg')));
+test('testKeyInitialValue', async () => {
+	await runTest({ 'src/app/Component.jsx': AllPatternsComponent }, async () => {
+		const setters = collectUseUISetters(parse(AllPatternsComponent, { sourceType: 'module', plugins: ['jsx', 'typescript'] }), AllPatternsComponent);
+		console.log('setters: ', setters);
+		assert.strictEqual(setters[0].stateKey, 'theme');
+		assert.strictEqual(setters[0].initialValue, 'light');
+		assert.strictEqual(setters[1].stateKey, 'altTheme');
+		assert.strictEqual(setters[1].initialValue, 'dark');
+		assert.strictEqual(setters[2].stateKey, 'variant');
+		assert.strictEqual(setters[2].initialValue, 'th-dark');
+		assert.strictEqual(setters[3].stateKey, 'size');
+		assert.strictEqual(setters[3].initialValue, 'lg');
+		assert.strictEqual(setters[4].stateKey, 'mode');
+		assert.strictEqual(setters[4].initialValue, 'auto');
+		assert.strictEqual(setters[5].stateKey, 'color');
+		assert.strictEqual(setters[5].initialValue, 'bg-blue');
+		assert.strictEqual(setters[6].stateKey, 'variant');
+		assert.strictEqual(setters[6].initialValue, 'th-dark');
+		assert.strictEqual(setters[7].stateKey, 'variant');
+		assert.strictEqual(setters[7].initialValue, 'th-blue');
 	});
 });
