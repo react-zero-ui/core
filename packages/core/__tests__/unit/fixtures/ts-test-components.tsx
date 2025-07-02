@@ -1,6 +1,5 @@
 /* eslint-disable import/no-unresolved */
 
-import React, { useEffect } from 'react';
 // @ts-ignore
 import { useUI } from '@zero-ui/core';
 
@@ -10,9 +9,9 @@ import { useUI } from '@zero-ui/core';
 const DARK = 'dark' as const;
 const PREFIX = `th-${DARK}` as const;
 const SIZES = { small: 'sm', large: 'lg' } as const;
-const COLORS = { primary: 'blue', secondary: 'green' } as const;
 const MODES = ['auto', 'manual'] as const;
 
+const COLORS = { primary: 'blue', secondary: 'green' } as const;
 const VARIANTS = { dark: `th-${DARK}`, light: COLORS.primary } as const;
 
 /*───────────────────────────────────────────┐
@@ -43,12 +42,14 @@ export function AllPatternsComponent() {
 	const [variant6, setVariant6] = useUI('variant', `${VARIANTS.light}-${VARIANTS.dark}`);
 	/* ⑫ BinaryExpression (template + member) */
 	const [variant7, setVariant7] = useUI('variant', `th-${VARIANTS.light}-${VARIANTS.dark}`);
-	/* ⑬  Optional-chaining  */
-	// const [variant8, setVariant8] = useUI('variant', VARIANTS.light?.primary);
-	/* ⑭ nullish-coalesce */
-	const [variant9, setVariant9] = useUI('variant', VARIANTS.light.primary ?? 'th-light');
-	/* ⑮ Optional-chaining + nullish-coalesce  */
-	// const [variant10, setVariant10] = useUI('variant', VARIANTS.light?.primary ?? 'th-light');
+	/* ⑬  Optional-chaining w/ unresolvable member */
+	// @ts-ignore
+	const [variant8, setVariant8] = useUI('variant', VARIANTS?.light.d ?? 'th-light');
+	/* ⑭ nullish-coalesce  */
+	const [variant9, setVariant9] = useUI('variant', VARIANTS.light ?? 'th-light');
+	/* ⑮  Optional-chaining w/ unresolvable member */
+	// @ts-ignore
+	const [variant10, setVariant10] = useUI('variant', VARIANTS.light?.primary ?? 'th-light');
 
 	/* ── setters exercised in every allowed style ── */
 	const clickHandler = () => {

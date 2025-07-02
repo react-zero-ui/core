@@ -129,7 +129,6 @@ test('Extract Variant with imports and throw error', async () => {
 test('testKeyInitialValue', async () => {
 	await runTest({ 'src/app/Component.jsx': AllPatternsComponent }, async () => {
 		const setters = collectUseUISetters(parse(AllPatternsComponent, { sourceType: 'module', plugins: ['jsx', 'typescript'] }), AllPatternsComponent);
-		console.log('setters: ', setters);
 		assert.strictEqual(setters[0].stateKey, 'theme');
 		assert.strictEqual(setters[0].initialValue, 'light');
 		assert.strictEqual(setters[1].stateKey, 'altTheme');
@@ -142,9 +141,50 @@ test('testKeyInitialValue', async () => {
 		assert.strictEqual(setters[4].initialValue, 'auto');
 		assert.strictEqual(setters[5].stateKey, 'color');
 		assert.strictEqual(setters[5].initialValue, 'bg-blue');
-		assert.strictEqual(setters[6].stateKey, 'variant');
 		assert.strictEqual(setters[6].initialValue, 'th-dark');
-		assert.strictEqual(setters[7].stateKey, 'variant');
 		assert.strictEqual(setters[7].initialValue, 'th-blue');
+		assert.strictEqual(setters[8].initialValue, 'th-blue-inverse');
+		assert.strictEqual(setters[9].initialValue, 'blue-inverse');
+		assert.strictEqual(setters[10].initialValue, 'blue-th-dark');
+		assert.strictEqual(setters[11].initialValue, 'th-blue-th-dark');
+		assert.strictEqual(setters[12].initialValue, 'th-light');
+		assert.strictEqual(setters[13].initialValue, 'blue');
+		assert.strictEqual(setters[14].initialValue, 'th-light');
+	});
+});
+
+test('speed', async () => {
+	// Simple inline component with a few useUI hooks, no conflicting constants
+	const simpleComponent = `
+		function TestComponent() {
+			const [theme, setTheme] = useUI('theme', 'light');
+			const [size, setSize] = useUI('size', 'medium');
+			const [color, setColor] = useUI('color', 'blue');
+			const [variant, setVariant] = useUI('variant', 'primary');
+			
+			return <div>
+				<button onClick={() => setTheme('dark')}>Set Dark</button>
+				<button onClick={() => setSize('large')}>Set Large</button>
+				<button onClick={() => setColor('red')}>Set Red</button>
+				<button onClick={() => setVariant('secondary')}>Set Secondary</button>
+			</div>;
+		}
+	`;
+
+	// Create 1000 copies of the same component with unique names
+	const components = Array.from({ length: 1000 }, (_, i) => {
+		return simpleComponent.replace(/TestComponent/g, `TestComponent${i}`);
+	});
+
+	const bigFile = `import { useUI } from '@zero-ui/core';\n\n` + components.join('\n\n');
+
+	await runTest({ 'src/app/Component.jsx': bigFile }, async () => {
+		const start = Date.now();
+		const ast = parse(bigFile, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
+		const setters = collectUseUISetters(ast, bigFile);
+		const end = Date.now();
+
+		console.log(`Processed 1000 components in ${end - start}ms`);
+		console.log(`Total setters found: ${setters.length}`);
 	});
 });

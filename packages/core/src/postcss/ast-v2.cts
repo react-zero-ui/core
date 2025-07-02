@@ -450,12 +450,10 @@ export function extractVariants(filePath: string): VariantData[] {
 		// Normalize to final format
 		const variants = normalizeVariants(variantsMap, setters);
 		// returns an array of objects with the following properties:
-		// - key: string
-		// - values: string[]
-		// - initialValue: string | null
 		// [{ key: 'theme', values: [ 'dark', 'light' ], initialValue: 'light' },]
 
 		// Cache and return
+		//TODO better cache
 		fileCache.set(filePath, { hash: fileHash, variants });
 		return variants;
 	} catch (error) {
