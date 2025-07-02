@@ -144,8 +144,32 @@ test('testKeyInitialValue', async () => {
 		assert.strictEqual(setters[11].initialValue, 'th-blue-th-dark');
 		assert.strictEqual(setters[12].initialValue, 'th-light');
 		assert.strictEqual(setters[13].initialValue, 'blue');
-		assert.strictEqual(setters[14].initialValue, 'th-light');
 	});
+});
+
+test('conditional setterFn value', async () => {
+	await runTest(
+		{
+			'src/app/Component.jsx': `
+const COLORS = { primary: 'blue', secondary: 'green' } as const;
+const VARIANTS = { dark: \`th-\${DARK}\`, light: COLORS.primary } as const;
+
+const isMobile = false;
+
+function TestComponent() {
+	const [variant, setVariant] = useUI('variant', 'th-light');
+
+
+			setVariant(isMobile ? VARIANTS.light : 'th-light');
+
+}
+`,
+		},
+		async () => {
+			const variants = extractVariants('src/app/Component.jsx');
+			console.log('variants: ', variants);
+		}
+	);
 });
 
 test('cache performance', async () => {

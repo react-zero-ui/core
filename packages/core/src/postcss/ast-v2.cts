@@ -2,14 +2,14 @@
 
 import { parse, parseExpression } from '@babel/parser';
 import * as babelTraverse from '@babel/traverse';
-import { Binding, NodePath } from '@babel/traverse';
+import { Binding, NodePath, Node } from '@babel/traverse';
 import * as t from '@babel/types';
 import { CONFIG } from '../config.cjs';
 import { createHash } from 'crypto';
 import { generate } from '@babel/generator';
 import * as fs from 'fs';
 import * as path from 'path';
-import { literalFromNode } from './resolvers.cjs';
+import { literalFromNode, ResolveOpts } from './resolvers.cjs';
 import { codeFrameColumns } from '@babel/code-frame';
 const traverse = (babelTraverse as any).default;
 import { LRUCache as LRU } from 'lru-cache';
@@ -67,14 +67,20 @@ export function collectUseUISetters(ast: t.File, sourceCode: string): SetterMeta
 	const setters: SetterMeta[] = [];
 	/* ---------- cache resolved literals per AST node ---------- */
 	const memo = new WeakMap<t.Node, string | null>();
-	const optsBase = { throwOnFail: false, source: sourceCode } as const;
+	const optsBase = { throwOnFail: false, source: sourceCode } as ResolveOpts;
 
-	const lit = (node: t.Expression, path: NodePath, hook: 'stateKey' | 'initialValue' | 'setterName') => {
-		if (memo.has(node)) return memo.get(node)!;
-		const v = literalFromNode(node, path, { ...optsBase, hook });
-		memo.set(node, v);
-		return v;
-	};
+	function lit(node: t.Expression, p: NodePath<t.Node>, hook: 'stateKey' | 'initialValue' | 'setterName'): string | null {
+		optsBase.hook = hook;
+		if (!memo.has(node)) {
+			const ev = p.evaluate?.();
+			if (ev?.confident && typeof ev.value === 'string') {
+				memo.set(node, ev.value);
+			} else {
+				memo.set(node, literalFromNode(node, p, optsBase));
+			}
+		}
+		return memo.get(node)!;
+	}
 
 	traverse(ast, {
 		VariableDeclarator(path: NodePath<t.VariableDeclarator>) {
@@ -84,12 +90,13 @@ export function collectUseUISetters(ast: t.File, sourceCode: string): SetterMeta
 			if (!t.isArrayPattern(id) || !t.isCallExpression(init) || !t.isIdentifier(init.callee, { name: CONFIG.HOOK_NAME })) return;
 
 			if (id.elements.length !== 2) {
-				throwCodeFrame(path, path.opts?.filename, sourceCode, `[Zero-UI] useUI() must destructure two values: [value, setter].`);
+				throwCodeFrame(path, path.opts?.filename, sourceCode, `[Zero-UI] useUI() must destructure two values: [value, setterFn].`);
 			}
 
 			const [, setterEl] = id.elements;
+
 			if (!setterEl || !t.isIdentifier(setterEl)) {
-				throwCodeFrame(path, path.opts?.filename, sourceCode, `[Zero-UI] useUI() setter must be a variable name.`);
+				throwCodeFrame(path, path.opts?.filename, sourceCode, `[Zero-UI] useUI() setterFn must be a variable name.`);
 			}
 
 			const [keyArg, initialArg] = init.arguments;
@@ -99,11 +106,11 @@ export function collectUseUISetters(ast: t.File, sourceCode: string): SetterMeta
 
 			if (stateKey === null) {
 				throwCodeFrame(
-					path,
+					keyArg,
 					path.opts?.filename,
 					sourceCode,
 					// TODO add link to docs
-					`[Zero-UI] State key for ${stateKey} must be a local, space-free string literal. - collectUseUISetters`
+					`[Zero-UI] State key cannot be resolved at build-time.\n` + `Only local, fully-static strings are supported. - collectUseUISetters-stateKey`
 				);
 			}
 
@@ -112,11 +119,12 @@ export function collectUseUISetters(ast: t.File, sourceCode: string): SetterMeta
 
 			if (initialValue === null) {
 				throwCodeFrame(
-					path,
+					initialArg,
 					path.opts?.filename,
 					sourceCode,
 					// TODO add link to docs
-					`[Zero-UI] Initial value for "${stateKey}" must be a local, space-free string literal. - collectUseUISetters`
+					`[Zero-UI] initial value cannot be resolved at build-time.\n` +
+						`Only local, fully-static objects/arrays are supported. - collectUseUISetters-initialValue`
 				);
 			}
 
@@ -172,40 +180,31 @@ export function harvestSetterValues(
 	for (const { binding, stateKey } of setters) {
 		const bucket = variants.get(stateKey)!;
 
-		binding.referencePaths.forEach((refPath) => {
+		for (const refPath of binding.referencePaths) {
 			// Only care about  call expressions:  setX(...)
 			const call = refPath.parentPath;
-			if (!call?.isCallExpression() || call.node.callee !== refPath.node) return;
+			if (!call?.isCallExpression() || call.node.callee !== refPath.node) continue;
 
 			const arg = call.node.arguments[0] as t.Expression | undefined;
-			if (!arg) return;
+			if (!arg) continue;
 
 			/* ① plain literal / identifier / template / member etc. */
 			const direct = lit(arg, call);
 			if (direct) {
 				bucket.add(direct);
-				return;
+				continue;
 			}
 
 			/* ② conditional   setX(cond ? 'a' : 'b')   */
 			if (t.isConditionalExpression(arg)) {
-				['consequent', 'alternate'].forEach((k) => {
-					const v = lit(k === 'consequent' ? arg.consequent : arg.alternate, call);
-					if (v) bucket.add(v);
-				});
-				return;
+				const v1 = lit(arg.consequent, call);
+				if (v1) bucket.add(v1);
+				const v2 = lit(arg.alternate, call);
+				if (v2) bucket.add(v2);
+				continue;
 			}
 
-			/* ③ logical fallback   setX(a || 'b')   or   a ?? 'b' */
-			if (t.isLogicalExpression(arg) && (arg.operator === '||' || arg.operator === '??')) {
-				[arg.left, arg.right].forEach((side) => {
-					const v = lit(side as t.Expression, call);
-					if (v) bucket.add(v);
-				});
-				return;
-			}
-
-			/* ④ arrow / fn body   setX(() => 'dark') */
+			/* ③  arrow / fn body   setX(() => 'dark') */
 			if ((t.isArrowFunctionExpression(arg) || t.isFunctionExpression(arg)) && arg.body) {
 				const body = t.isBlockStatement(arg.body)
 					? // grab every `return value`
@@ -215,12 +214,12 @@ export function harvestSetterValues(
 							.filter(Boolean)
 					: [arg.body];
 
-				body.forEach((expr) => {
+				for (const expr of body) {
 					const v = lit(expr as t.Expression, call);
 					if (v) bucket.add(v);
-				});
+				}
 			}
-		});
+		}
 	}
 
 	return variants;
@@ -674,10 +673,15 @@ export function parseJsonWithBabel(source: string): any {
 		return null;
 	}
 }
+export function throwCodeFrame(nodeOrPath: Node | NodePath, filename: string, source: string, msg: string): never {
+	// Accept either a raw node or a NodePath
+	const node = (nodeOrPath as NodePath).node ?? (nodeOrPath as Node);
 
-export function throwCodeFrame(path: NodePath<t.Node>, filename: string, source: string, msg: string): never {
-	const loc = path.node.loc;
-	const head = loc ? `${filename}:${loc.start.line}:${loc.start.column}\n` : '';
-	const frame = loc ? codeFrameColumns(source, { start: loc.start, end: loc.end }, { highlightCode: true, linesAbove: 1, linesBelow: 1 }) : '';
-	throw new Error(`${head}${msg}\n${frame}`);
+	if (!node.loc) throw new Error(msg); // defensive
+
+	const { start, end } = node.loc;
+	const header = `${filename ?? ''}:${start.line}:${start.column}\n`;
+	const frame = codeFrameColumns(source, { start, end }, { highlightCode: true, linesAbove: 1, linesBelow: 1 });
+
+	throw new Error(`${header}${msg}\n${frame}`);
 }

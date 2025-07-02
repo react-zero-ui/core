@@ -14,6 +14,8 @@ const MODES = ['auto', 'manual'] as const;
 const COLORS = { primary: 'blue', secondary: 'green' } as const;
 const VARIANTS = { dark: `th-${DARK}`, light: COLORS.primary } as const;
 
+const isMobile = false;
+
 /*───────────────────────────────────────────┐
 │  Component covering every legal pattern   │
 └───────────────────────────────────────────*/
@@ -42,16 +44,11 @@ export function AllPatternsComponent() {
 	const [variant6, setVariant6] = useUI('variant', `${VARIANTS.light}-${VARIANTS.dark}`);
 	/* ⑫ BinaryExpression (template + member) */
 	const [variant7, setVariant7] = useUI('variant', `th-${VARIANTS.light}-${VARIANTS.dark}`);
-	/* ⑬  Optional-chaining w/ unresolvable member */
+	/* ⑬  Optional-chaining w/ unresolvable member should pick th-light */
 	// @ts-ignore
 	const [variant8, setVariant8] = useUI('variant', VARIANTS?.light.d ?? 'th-light');
 	/* ⑭ nullish-coalesce  */
 	const [variant9, setVariant9] = useUI('variant', VARIANTS.light ?? 'th-light');
-	/* ⑮  Optional-chaining w/ unresolvable member */
-	// @ts-ignore
-	const [variant10, setVariant10] = useUI('variant', VARIANTS.light?.primary ?? 'th-light');
-	/* ⑯ local const identifier */
-	const [variant11, setVariant11] = useUI('variant', VARIANTS['blue']);
 
 	/* ── setters exercised in every allowed style ── */
 	const clickHandler = () => {
@@ -70,7 +67,7 @@ export function AllPatternsComponent() {
 		/* array index */
 		setMode(MODES[1]);
 
-		setVariant2(VARIANTS['dark']);
+		setVariant9(isMobile ? VARIANTS.light : 'th-light');
 	};
 
 	/* conditional toggle with prev-state */

@@ -22,6 +22,10 @@ export interface ResolveOpts {
  */
 
 export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts: ResolveOpts): string | null {
+	/* ── Fast path via Babel constant-folder ───────────── */
+	const ev = fastEval(node, path);
+	if (ev.confident && typeof ev.value === 'string') return ev.value;
+
 	// String / template (no ${})
 	if (t.isStringLiteral(node)) return node.value;
 	if (t.isTemplateLiteral(node) && node.expressions.length === 0) {
@@ -333,4 +337,23 @@ function resolveObjectValue(obj: t.ObjectExpression, key: string): t.Expression 
 		}
 	}
 	return null;
+}
+
+function fastEval(node: t.Expression, path: NodePath<t.Node>) {
+	// ❶ If the node *is* the current visitor path, we can evaluate directly.
+	if (node === path.node && (path as any).evaluate) {
+		return (path as any).evaluate(); // safe, returns {confident, value}
+	}
+
+	// ❷ Otherwise try to locate a child-path that wraps `node`.
+	//    (Babel exposes .get() only for *named* keys, so we must scan.)
+	for (const key of Object.keys(path.node)) {
+		const sub = (path as any).get?.(key);
+		if (sub?.node === node && sub.evaluate) {
+			return sub.evaluate();
+		}
+	}
+
+	// ❸ Give up → undefined (caller falls back to manual resolver)
+	return { confident: false };
 }
