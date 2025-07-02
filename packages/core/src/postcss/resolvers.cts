@@ -1,7 +1,7 @@
 import * as t from '@babel/types';
 import { NodePath } from '@babel/traverse';
 import { throwCodeFrame } from './ast-v2.cjs';
-
+import { generate } from '@babel/generator';
 export interface ResolveOpts {
 	throwOnFail?: boolean; // default false
 	source?: string; // optional; fall back to path.hub.file.code
@@ -94,7 +94,7 @@ export function resolveLocalConstIdentifier(
 			opts.source ?? path.opts?.source?.code,
 			`[Zero-UI] Cannot use imported variables. Assign to a local const first.\n` +
 				`Example:\n import { ${node.name} } from "./filePath";\n ` +
-				`const ${node.name}Local = ${node.name};\n\n ` +
+				`const ${node.name}Local = ${node.name};\n ` +
 				`${
 					opts.hook === 'stateKey'
 						? `useUI(${node.name}Local, initialValue);`
@@ -222,25 +222,33 @@ export function resolveMemberExpression(
 
 	// Walk up until we hit the root Identifier
 	while (t.isMemberExpression(current)) {
-		// ── Step 1: push property key
 		if (current.computed) {
-			// obj['prop']  or  obj[0]
-			if (t.isStringLiteral(current.property)) {
-				props.unshift(current.property.value);
-			} else if (t.isNumericLiteral(current.property)) {
-				props.unshift(current.property.value);
-			} else if (t.isTemplateLiteral(current.property)) {
-				const lit = resolveTemplateLiteral(current.property, path, literalFromNode, opts);
-				if (lit === null) return null;
-				props.unshift(lit);
+			/** Any *expression* inside `[]` → run through the same pipeline  */
+			const expr = current.property as t.Expression;
+
+			/* fast paths for perf-critical hot cases */
+			if (t.isStringLiteral(expr)) {
+				props.unshift(expr.value);
+			} else if (t.isNumericLiteral(expr)) {
+				props.unshift(expr.value);
 			} else {
-				return null; // dynamic key
+				const lit = literalFromNode(expr, path, opts);
+				if (lit === null)
+					throwCodeFrame(
+						path,
+						path.opts?.filename,
+						opts.source ?? path.opts?.source?.code,
+						'[Zero-UI] Member expression must resolve to a static space-free string.'
+					);
+
+				/* ensure we store number vs string correctly */
+				const num = Number(lit);
+				props.unshift(Number.isFinite(num) ? num : lit);
 			}
 		} else {
 			// obj.prop
 			const pn = current.property as t.Identifier;
 			props.unshift(pn.name);
-			if (/\s/.test(pn.name)) return null;
 		}
 
 		current = current.object;
@@ -259,7 +267,7 @@ export function resolveMemberExpression(
 			path,
 			path.opts?.filename,
 			opts.source ?? path.opts?.source?.code,
-			`[Zero-UI] Imports Not Allowed: \n\n Inline it or alias to a local const first.`
+			`[Zero-UI] Imports Not Allowed:\n Inline it or alias to a local const first.`
 		);
 	}
 
@@ -270,41 +278,43 @@ export function resolveMemberExpression(
 
 	let value: t.Expression | null | undefined = binding.path.node.init;
 
-	/* Traverse the collected property chain */
+	/* ── walk the collected props ─────────────────────────── */
 	for (const key of props) {
-		// unwrap  `... as const`
-		if (t.isTSAsExpression(value)) {
-			value = value.expression;
-		}
+		if (t.isTSAsExpression(value)) value = value.expression; // unwrap  …as const
+
 		if (t.isObjectExpression(value)) {
-			const objLit = value;
-			value = resolveObjectValue(objLit, String(key));
+			value = resolveObjectValue(value, String(key));
 		} else if (t.isArrayExpression(value) && typeof key === 'number') {
 			value = value.elements[key] as t.Expression | null | undefined;
 		} else {
-			return null; // chain breaks (not an object/array)
+			value = null; // chain broke - handled below
+			break;
 		}
-		if (!value) return null;
 	}
 
-	/* Unwrap  x as const  once more */
+	/* ── NEW: bail-out with an explicit error if nothing was found ───────── */
+	if (value == null) {
+		throwCodeFrame(
+			path,
+			path.opts?.filename,
+			opts.source ?? path.opts?.source?.code,
+			`[Zero-UI] '${generate(node).code}' cannot be resolved at build-time.\n` + `Only local, fully-static objects/arrays are supported.`
+		);
+	}
+	/* ─────────────────────────────────────────────────────── */
+
+	/* existing tail logic (unwrap, recurse, return string)… */
 	if (t.isTSAsExpression(value)) value = value.expression;
 
-	/* If we landed on another member chain, recurse */
 	if (t.isMemberExpression(value)) {
 		return resolveMemberExpression(value, path, literalFromNode, opts);
 	}
 
-	/* Final value must be a space-free string */
-	if (t.isTSAsExpression(value)) value = value.expression;
-	if (t.isStringLiteral(value)) {
-		return /^\S+$/.test(value.value) ? value.value : null;
-	}
+	if (t.isStringLiteral(value)) return value.value;
 	if (t.isTemplateLiteral(value)) {
 		return resolveTemplateLiteral(value, path, literalFromNode, opts);
 	}
-
-	return null; // not a string
+	return null;
 }
 
 /*──────────────────────────────────────────────────────────*\

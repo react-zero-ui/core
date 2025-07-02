@@ -69,6 +69,8 @@ export function AllPatternsComponent() {
 
 		/* array index */
 		setMode(MODES[1]);
+
+		setVariant2(VARIANTS['dark']);
 	};
 
 	/* conditional toggle with prev-state */

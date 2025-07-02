@@ -65,6 +65,16 @@ export interface SetterMeta {
  */
 export function collectUseUISetters(ast: t.File, sourceCode: string): SetterMeta[] {
 	const setters: SetterMeta[] = [];
+	/* ---------- cache resolved literals per AST node ---------- */
+	const memo = new WeakMap<t.Node, string | null>();
+	const optsBase = { throwOnFail: false, source: sourceCode } as const;
+
+	const lit = (node: t.Expression, path: NodePath, hook: 'stateKey' | 'initialValue' | 'setterName') => {
+		if (memo.has(node)) return memo.get(node)!;
+		const v = literalFromNode(node, path, { ...optsBase, hook });
+		memo.set(node, v);
+		return v;
+	};
 
 	traverse(ast, {
 		VariableDeclarator(path: NodePath<t.VariableDeclarator>) {
@@ -85,7 +95,7 @@ export function collectUseUISetters(ast: t.File, sourceCode: string): SetterMeta
 			const [keyArg, initialArg] = init.arguments;
 
 			// resolve state key with new helpers
-			const stateKey = literalFromNode(keyArg as t.Expression, path as NodePath<t.Node>, { throwOnFail: true, source: sourceCode, hook: 'stateKey' });
+			const stateKey = lit(keyArg as t.Expression, path as NodePath<t.Node>, 'stateKey');
 
 			if (stateKey === null) {
 				throwCodeFrame(
@@ -98,11 +108,7 @@ export function collectUseUISetters(ast: t.File, sourceCode: string): SetterMeta
 			}
 
 			// resolve initial value with new helpers
-			const initialValue = literalFromNode(initialArg as t.Expression, path as NodePath<t.Node>, {
-				throwOnFail: true,
-				source: sourceCode,
-				hook: 'initialValue',
-			});
+			const initialValue = lit(initialArg as t.Expression, path as NodePath<t.Node>, 'initialValue');
 
 			if (initialValue === null) {
 				throwCodeFrame(
@@ -140,237 +146,84 @@ export interface VariantData {
  * @param setters - Array of SetterMeta from Pass 1
  * @returns Map of stateKey -> Set of discovered values
  */
-export function harvestSetterValues(setters: SetterMeta[]): Map<string, Set<string>> {
+export function harvestSetterValues(
+	setters: SetterMeta[],
+	fileSource: string // extra so we can throw frames
+): Map<string, Set<string>> {
+	/* ---------- bootstrap with initial values ---------- */
 	const variants = new Map<string, Set<string>>();
-
-	// Initialize with initial values from Pass 1
-	for (const setter of setters) {
-		if (!variants.has(setter.stateKey)) {
-			variants.set(setter.stateKey, new Set());
-		}
-		if (setter.initialValue) {
-			variants.get(setter.stateKey)!.add(setter.initialValue);
-		}
+	for (const { stateKey, initialValue } of setters) {
+		if (!variants.has(stateKey)) variants.set(stateKey, new Set());
+		if (initialValue) variants.get(stateKey)!.add(initialValue);
 	}
 
-	// Examine each setter's reference paths
-	for (const setter of setters) {
-		const valueSet = variants.get(setter.stateKey)!;
+	/* ---------- cache resolved literals per AST node ---------- */
+	const memo = new WeakMap<t.Node, string | null>();
+	const optsBase = { throwOnFail: false, source: fileSource, hook: 'setterName' } as const;
 
-		// Look at every place this setter is referenced
-		for (const referencePath of setter.binding.referencePaths) {
-			// Check if this reference is being called as a function
-			const callPath = findCallExpression(referencePath);
-			if (callPath) {
-				// Extract values from the first argument of the call
-				const firstArg = callPath.node.arguments[0];
-				if (firstArg) {
-					const extractedValues = extractLiteralsRecursively(firstArg as t.Expression, callPath);
-					extractedValues.forEach((value) => valueSet.add(value));
-				}
+	const lit = (node: t.Expression, path: NodePath) => {
+		if (memo.has(node)) return memo.get(node)!;
+		const v = literalFromNode(node, path, optsBase);
+		memo.set(node, v);
+		return v;
+	};
+
+	/* ---------- walk every setter reference ---------- */
+	for (const { binding, stateKey } of setters) {
+		const bucket = variants.get(stateKey)!;
+
+		binding.referencePaths.forEach((refPath) => {
+			// Only care about  call expressions:  setX(...)
+			const call = refPath.parentPath;
+			if (!call?.isCallExpression() || call.node.callee !== refPath.node) return;
+
+			const arg = call.node.arguments[0] as t.Expression | undefined;
+			if (!arg) return;
+
+			/* ① plain literal / identifier / template / member etc. */
+			const direct = lit(arg, call);
+			if (direct) {
+				bucket.add(direct);
+				return;
 			}
-		}
+
+			/* ② conditional   setX(cond ? 'a' : 'b')   */
+			if (t.isConditionalExpression(arg)) {
+				['consequent', 'alternate'].forEach((k) => {
+					const v = lit(k === 'consequent' ? arg.consequent : arg.alternate, call);
+					if (v) bucket.add(v);
+				});
+				return;
+			}
+
+			/* ③ logical fallback   setX(a || 'b')   or   a ?? 'b' */
+			if (t.isLogicalExpression(arg) && (arg.operator === '||' || arg.operator === '??')) {
+				[arg.left, arg.right].forEach((side) => {
+					const v = lit(side as t.Expression, call);
+					if (v) bucket.add(v);
+				});
+				return;
+			}
+
+			/* ④ arrow / fn body   setX(() => 'dark') */
+			if ((t.isArrowFunctionExpression(arg) || t.isFunctionExpression(arg)) && arg.body) {
+				const body = t.isBlockStatement(arg.body)
+					? // grab every `return value`
+						arg.body.body
+							.filter((ret) => t.isReturnStatement(ret))
+							.map((ret) => ret.argument)
+							.filter(Boolean)
+					: [arg.body];
+
+				body.forEach((expr) => {
+					const v = lit(expr as t.Expression, call);
+					if (v) bucket.add(v);
+				});
+			}
+		});
 	}
 
 	return variants;
-}
-
-/**
- * Check if a reference path is part of a function call
- * Handles: setTheme('dark'), obj.setTheme('dark'), etc.
- */
-function findCallExpression(referencePath: NodePath): NodePath<t.CallExpression> | null {
-	try {
-		const parent = referencePath.parent;
-
-		// Direct call: setTheme('dark')
-		if (t.isCallExpression(parent) && parent.callee === referencePath.node) {
-			return referencePath.parentPath as NodePath<t.CallExpression>;
-		}
-
-		// Member expression call: obj.setTheme('dark')
-		if (t.isMemberExpression(parent) && parent.property === referencePath.node) {
-			const grandParent = referencePath.parentPath?.parent;
-			if (t.isCallExpression(grandParent) && grandParent.callee === parent) {
-				return referencePath.parentPath?.parentPath as NodePath<t.CallExpression>;
-			}
-		}
-		console.warn(`[Zero-UI] Failed to find call expression for ${referencePath.node.type} in ${referencePath.opts?.filename}`);
-
-		return null;
-	} catch (error) {
-		console.warn(`[Zero-UI] Failed to find call expression for ${referencePath.node.type} in ${referencePath.opts?.filename}`);
-		return null;
-	}
-}
-
-/**
- * Recursively extract string literal values from an expression
- * Optimized for common useUI patterns:
- * - Direct strings: 'light', 'dark'
- * - Ternaries: condition ? 'light' : 'dark'
- * - Constants: THEMES.LIGHT
- * - Functions: prev => prev === 'light' ? 'dark' : 'light'
- * - Member expressions: obj.prop, obj.prop.prop, etc.
- */
-function extractLiteralsRecursively(node: t.Expression, path: NodePath): string[] {
-	const results: string[] = [];
-
-	// Base case: direct literals
-	const literal = literalToString(node);
-	if (literal !== null) {
-		results.push(literal);
-		return results;
-	}
-	try {
-		// Ternary: condition ? 'value1' : 'value2'
-		if (t.isConditionalExpression(node)) {
-			results.push(...extractLiteralsRecursively(node.consequent, path));
-			results.push(...extractLiteralsRecursively(node.alternate, path));
-		}
-
-		// Logical expressions: a && 'value' || 'default'
-		else if (t.isLogicalExpression(node)) {
-			results.push(...extractLiteralsRecursively(node.left, path));
-			results.push(...extractLiteralsRecursively(node.right, path));
-		}
-
-		// Arrow functions: () => 'value' or prev => prev==='a' ? 'b':'a'
-		else if (t.isArrowFunctionExpression(node)) {
-			if (t.isExpression(node.body)) {
-				results.push(...extractLiteralsRecursively(node.body, path));
-			} else if (t.isBlockStatement(node.body)) {
-				// Look for return statements
-				// example: const a = () => 'a' + 'b'
-				results.push(...extractFromBlockStatement(node.body, path));
-			}
-		}
-
-		// Function expressions: function() { return 'value'; }
-		else if (t.isFunctionExpression(node)) {
-			// example: function() { return 'a' + 'b' }
-			results.push(...extractFromBlockStatement(node.body, path));
-		}
-
-		// Identifiers: resolve to their values if possible
-		else if (t.isIdentifier(node)) {
-			const resolved = resolveIdentifier(node, path);
-			if (resolved) {
-				// example: const a = 'a' + 'b'
-				results.push(...extractLiteralsRecursively(resolved, path));
-			}
-		}
-
-		// Member expressions: SIZES.SMALL, obj.prop, etc.
-		else if (t.isMemberExpression(node) && !node.computed && t.isIdentifier(node.property)) {
-			const objectResolved = resolveIdentifier(node.object as t.Identifier, path);
-			if (objectResolved && t.isObjectExpression(objectResolved)) {
-				// Look for the property in the object
-				const propertyName = node.property.name;
-				for (const prop of objectResolved.properties) {
-					if (t.isObjectProperty(prop) && t.isIdentifier(prop.key) && prop.key.name === propertyName) {
-						const propertyValue = literalToString(prop.value as t.Expression);
-						if (propertyValue !== null) {
-							// example: const a = { b: 'c' }
-							results.push(propertyValue);
-						}
-					}
-				}
-			}
-		}
-
-		// Binary expressions: might contain literals in some cases
-		else if (t.isBinaryExpression(node)) {
-			// Only extract if it's a simple concatenation that might resolve to a literal
-			if (node.operator === '+') {
-				// example: 'a' + 'b'
-				results.push(...extractLiteralsRecursively(node.left as t.Expression, path));
-				results.push(...extractLiteralsRecursively(node.right as t.Expression, path));
-			}
-		}
-	} catch (error) {
-		console.warn(`[Zero-UI] Failed to extract literals from ${node.type} in ${path?.opts?.filename}`, error);
-		return [];
-	} finally {
-		return results;
-	}
-}
-
-/**
- * Extract literals from block statements by finding return statements
- */
-function extractFromBlockStatement(block: t.BlockStatement, path: NodePath): string[] {
-	const results: string[] = [];
-
-	for (const stmt of block.body) {
-		if (t.isReturnStatement(stmt) && stmt.argument) {
-			results.push(...extractLiteralsRecursively(stmt.argument as t.Expression, path));
-		}
-	}
-
-	return results;
-}
-
-/**
- * Try to resolve an identifier to its value within the current scope
- * @param node - The identifier to resolve
- * @param path - The path to the identifier
- * @returns The value of the identifier, or null if it cannot be resolved
- */
-function resolveIdentifier(node: t.Identifier, path: NodePath): t.Expression | null {
-	const binding = path.scope.getBinding(node.name);
-	if (!binding) return null;
-
-	const bindingPath = binding.path;
-
-	// Variable declarator: const x = 'value'
-	if (bindingPath.isVariableDeclarator() && bindingPath.node.init) {
-		return bindingPath.node.init as t.Expression;
-	}
-
-	// Import specifier: import { THEME_DARK } from './constants'
-
-	if (bindingPath.isImportSpecifier() || bindingPath.isImportDefaultSpecifier()) {
-		console.log('import specifier: ', bindingPath.node);
-		// For now, we can't easily resolve cross-file imports
-		// But we could enhance this later to parse the imported file
-		// TODO: Implement this
-		return null;
-	}
-
-	// Function declaration: function getName() { return 'value'; }
-	if (bindingPath.isFunctionDeclaration()) {
-		// Could try to extract return values, but that's complex
-		// TODO: Implement this
-		return null;
-	}
-
-	// Try to look at the scope for block-scoped variables
-	// that might be defined higher up
-	let currentScope = path.scope;
-	while (currentScope) {
-		const scopeBinding = currentScope.getOwnBinding(node.name);
-		if (scopeBinding && scopeBinding.path.isVariableDeclarator() && scopeBinding.path.node.init) {
-			return scopeBinding.path.node.init as t.Expression;
-		}
-		currentScope = currentScope.parent;
-	}
-
-	return null;
-}
-
-/**
- * Convert string literals to strings (only strings are supported)
- */
-function literalToString(node: t.Expression): string | null {
-	if (t.isStringLiteral(node)) {
-		return node.value;
-	}
-	if (t.isTemplateLiteral(node) && node.expressions.length === 0) {
-		// Simple template literal with no expressions: `hello`
-		return node.quasis[0]?.value.cooked || null;
-	}
-	return null;
 }
 
 /**
@@ -433,7 +286,7 @@ export function extractVariants(filePath: string): VariantData[] {
 		if (!setters.length) return [];
 
 		// Normalize variants
-		const variants = normalizeVariants(harvestSetterValues(setters), setters);
+		const variants = normalizeVariants(harvestSetterValues(setters, source), setters);
 
 		// Store with signature for fast future lookups
 		fileCache.set(filePath, { hash: sig, variants });
@@ -455,7 +308,7 @@ export function extractVariants(filePath: string): VariantData[] {
 		if (!setters.length) return [];
 
 		// final normalization of variants
-		const variants = normalizeVariants(harvestSetterValues(setters), setters);
+		const variants = normalizeVariants(harvestSetterValues(setters, source), setters);
 
 		fileCache.set(filePath, { hash, variants });
 		return variants;
@@ -825,6 +678,6 @@ export function parseJsonWithBabel(source: string): any {
 export function throwCodeFrame(path: NodePath<t.Node>, filename: string, source: string, msg: string): never {
 	const loc = path.node.loc;
 	const head = loc ? `${filename}:${loc.start.line}:${loc.start.column}\n` : '';
-	const frame = loc ? codeFrameColumns(source, { start: loc.start, end: loc.end }, { highlightCode: true, linesAbove: 2, linesBelow: 2 }) : '';
+	const frame = loc ? codeFrameColumns(source, { start: loc.start, end: loc.end }, { highlightCode: true, linesAbove: 1, linesBelow: 1 }) : '';
 	throw new Error(`${head}${msg}\n${frame}`);
 }
