@@ -20,7 +20,6 @@ export interface ResolveOpts {
  * @param path - The path to the node
  * @returns The string literal or null if the node is not a string literal or template literal with no expressions or identifier bound to local const
  */
-
 export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts: ResolveOpts): string | null {
 	/* ── Fast path via Babel constant-folder ───────────── */
 	const ev = fastEval(node, path);
