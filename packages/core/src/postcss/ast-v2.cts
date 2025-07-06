@@ -69,17 +69,17 @@ export function collectUseUISetters(ast: t.File, sourceCode: string): SetterMeta
 	const memo = new WeakMap<t.Node, string | null>();
 	const optsBase = { throwOnFail: false, source: sourceCode } as ResolveOpts;
 
-	function lit(node: t.Expression, p: NodePath<t.Node>, hook: 'stateKey' | 'initialValue' | 'setterName'): string | null {
-		optsBase.hook = hook;
-		if (!memo.has(node)) {
-			const ev = p.evaluate?.();
-			if (ev?.confident && typeof ev.value === 'string') {
-				memo.set(node, ev.value);
-			} else {
-				memo.set(node, literalFromNode(node, p, optsBase));
-			}
-		}
-		return memo.get(node)!;
+	function lit(node: t.Expression, p: NodePath<t.Node>, hook: ResolveOpts['hook']): string | null {
+		if (memo.has(node)) return memo.get(node)!;
+
+		// clone instead of mutate
+		const localOpts: ResolveOpts = { ...optsBase, hook };
+
+		const ev = (p as NodePath).evaluate?.();
+		const value = ev?.confident && typeof ev.value === 'string' ? ev.value : literalFromNode(node, p, localOpts);
+
+		memo.set(node, value);
+		return value;
 	}
 
 	traverse(ast, {
@@ -148,81 +148,205 @@ export interface VariantData {
 	/** Literal initial value as string, or `null` if non-literal */
 	initialValue: string | null;
 }
-
-/**
- * Pass 2: Harvest all values from setter calls by examining their reference paths
- * @param setters - Array of SetterMeta from Pass 1
- * @returns Map of stateKey -> Set of discovered values
- */
+// ────────────────────────────────────────────────────────────
+//  Pass 2 – harvest every literal that can possibly flow
+//           through a setter call ​setX(...)
+// ────────────────────────────────────────────────────────────
 export function harvestSetterValues(
 	setters: SetterMeta[],
-	fileSource: string // extra so we can throw frames
+	fileSource: string // for code-frame errors
 ): Map<string, Set<string>> {
-	/* ---------- bootstrap with initial values ---------- */
+	/* 1 ─ bootstrap with the initial values found in Pass 1 ───────── */
 	const variants = new Map<string, Set<string>>();
 	for (const { stateKey, initialValue } of setters) {
 		if (!variants.has(stateKey)) variants.set(stateKey, new Set());
 		if (initialValue) variants.get(stateKey)!.add(initialValue);
 	}
 
-	/* ---------- cache resolved literals per AST node ---------- */
+	/* 2 ─ one-shot memoised literal resolver ──────────────────────── */
 	const memo = new WeakMap<t.Node, string | null>();
-	const optsBase = { throwOnFail: false, source: fileSource, hook: 'setterName' } as const;
+	const litOpt = { throwOnFail: false, source: fileSource, hook: 'setterName' } as const;
 
 	const lit = (node: t.Expression, path: NodePath) => {
 		if (memo.has(node)) return memo.get(node)!;
-		const v = literalFromNode(node, path, optsBase);
+		const v = literalFromNode(node, path, litOpt);
 		memo.set(node, v);
 		return v;
 	};
 
-	/* ---------- walk every setter reference ---------- */
+	/* 3 ─ helper: extract every literal hidden in an *expression* ─── */
+	function extract(expr: t.Expression, p: NodePath, bucket: Set<string>) {
+		/* direct literal / identifier / member / template */
+		const vDir = lit(expr, p);
+		if (vDir) {
+			bucket.add(vDir);
+			return;
+		}
+
+		/* ternary  cond ? x : y  */
+		if (t.isConditionalExpression(expr)) {
+			extract(expr.consequent, p, bucket);
+			extract(expr.alternate, p, bucket);
+			return;
+		}
+
+		/* logical  a || b   a ?? b   */
+		if (t.isLogicalExpression(expr) && (expr.operator === '||' || expr.operator === '??')) {
+			extract(expr.left, p, bucket);
+			extract(expr.right, p, bucket);
+			return;
+		}
+
+		/* binary   'a' + 'b'  (only +) */
+		if (t.isBinaryExpression(expr) && expr.operator === '+') {
+			extract(expr.left as t.Expression, p, bucket);
+			extract(expr.right as t.Expression, p, bucket);
+			return;
+		}
+
+		/* nothing else produces compile-time strings */
+	}
+
+	/* 4 ─ walk every reference (call-site) of each setter ─────────── */
 	for (const { binding, stateKey } of setters) {
 		const bucket = variants.get(stateKey)!;
 
-		for (const refPath of binding.referencePaths) {
-			// Only care about  call expressions:  setX(...)
-			const call = refPath.parentPath;
-			if (!call?.isCallExpression() || call.node.callee !== refPath.node) continue;
+		binding.referencePaths.forEach((ref) => {
+			const call = ref.parentPath;
+			if (!call?.isCallExpression() || call.node.callee !== ref.node) return;
 
 			const arg = call.node.arguments[0] as t.Expression | undefined;
-			if (!arg) continue;
+			if (!arg) return;
 
-			/* ① plain literal / identifier / template / member etc. */
-			const direct = lit(arg, call);
-			if (direct) {
-				bucket.add(direct);
-				continue;
+			/* 4-a ▸ INLINE  () => …   function() {…}  ------------------ */
+			if (t.isArrowFunctionExpression(arg) || t.isFunctionExpression(arg)) {
+				consumeFunctionBody(arg, call, bucket);
+				return;
 			}
 
-			/* ② conditional   setX(cond ? 'a' : 'b')   */
-			if (t.isConditionalExpression(arg)) {
-				const v1 = lit(arg.consequent, call);
-				if (v1) bucket.add(v1);
-				const v2 = lit(arg.alternate, call);
-				if (v2) bucket.add(v2);
-				continue;
-			}
+			/* 4-b ▸ IDENTIFIER  setX(toggle)  -------------------------- */
+			if (t.isIdentifier(arg)) {
+				const bind = call.scope.getBinding(arg.name);
+				if (!bind) return; // unresolved → ignore
 
-			/* ③  arrow / fn body   setX(() => 'dark') */
-			if ((t.isArrowFunctionExpression(arg) || t.isFunctionExpression(arg)) && arg.body) {
-				const body = t.isBlockStatement(arg.body)
-					? // grab every `return value`
-						arg.body.body
-							.filter((ret) => t.isReturnStatement(ret))
-							.map((ret) => ret.argument)
-							.filter(Boolean)
-					: [arg.body];
-
-				for (const expr of body) {
-					const v = lit(expr as t.Expression, call);
-					if (v) bucket.add(v);
+				// ‼️ imported function ‼️
+				if (bind.path.isImportSpecifier() || bind.path.isImportDefaultSpecifier() || bind.path.isImportNamespaceSpecifier()) {
+					throwCodeFrame(call, call.opts?.filename, fileSource, `[Zero-UI] Setter functions must be defined locally – ` + `“${arg.name}” is imported.`);
 				}
+
+				// variable like  const toggle = () => 'dark'
+				if (
+					bind.path.isVariableDeclarator() &&
+					bind.path.node.init &&
+					(t.isArrowFunctionExpression(bind.path.node.init) || t.isFunctionExpression(bind.path.node.init))
+				) {
+					consumeFunctionBody(bind.path.node.init, bind.path, bucket);
+					return;
+				}
+
+				// plain identifier that eventually resolves to a literal
+				const v = lit(arg, call);
+				if (v) bucket.add(v);
+				return;
 			}
-		}
+
+			/* 4-c ▸ everything else (direct literals, ternaries, …) ----- */
+			extract(arg, call, bucket);
+		});
 	}
 
 	return variants;
+
+	/* ───────── local helper ── visits every `return …` ─────────── */
+	function consumeFunctionBody(fn: t.ArrowFunctionExpression | t.FunctionExpression, p: NodePath, set: Set<string>) {
+		if (t.isBlockStatement(fn.body)) {
+			fn.body.body.forEach((stmt) => {
+				if (t.isReturnStatement(stmt) && stmt.argument) {
+					extract(stmt.argument as t.Expression, p, set);
+				}
+			});
+		} else {
+			// concise body  () => expr
+			extract(fn.body as t.Expression, p, set);
+		}
+	}
+}
+
+/**
+ * Recursively collect every *string literal value* that can be proven at
+ * build-time inside `expr` (ternaries, logical fallbacks, arrow & fn bodies …).
+ *
+ * memo-ized per-node → O(N) over the whole file.
+ */
+export function gatherLiterals(
+	expr: t.Expression,
+	path: NodePath<t.Expression>,
+	opts: ResolveOpts,
+	/** WeakMap cache seeded once per file  */
+	memo: WeakMap<t.Node, string[]>
+): string[] {
+	/* ─── memo fast path ──────────────────────────────── */
+	if (memo.has(expr)) return memo.get(expr)!;
+
+	/* ─── confident string via Babel-s partial evaluator ─*/
+	const evalRes = path.evaluate?.() ?? { confident: false };
+	if (evalRes.confident && typeof evalRes.value === 'string') {
+		memo.set(expr, [evalRes.value]);
+		return [evalRes.value];
+	}
+
+	/* ─── try single-step literal resolver ────────────── */
+	const lit = literalFromNode(expr, path, opts);
+	if (lit !== null) {
+		memo.set(expr, [lit]);
+		return [lit];
+	}
+
+	/* ─── recursive syntactic cases  ─────────────────────*/
+	let out: string[] = [];
+
+	/* 1. a ? b : c */
+	if (t.isConditionalExpression(expr)) {
+		out = [...gatherLiterals(expr.consequent, path, opts, memo), ...gatherLiterals(expr.alternate, path, opts, memo)];
+	} else if (t.isLogicalExpression(expr) && (expr.operator === '||' || expr.operator === '??')) {
+		/* 2. a || b   or   a ?? b */
+		out = [...gatherLiterals(expr.left, path, opts, memo), ...gatherLiterals(expr.right, path, opts, memo)];
+	} else if (t.isBinaryExpression(expr, { operator: '+' })) {
+		/* 3. 'a' + 'b'  (pure string concatenation)          */
+		const left = gatherLiterals(expr.left as t.Expression, path, opts, memo);
+		const right = gatherLiterals(expr.right as t.Expression, path, opts, memo);
+		// concat only when each side collapses to exactly ONE literal
+		if (left.length === 1 && right.length === 1) {
+			out = [left[0] + right[0]];
+		}
+	} else if ((t.isArrowFunctionExpression(expr) || t.isFunctionExpression(expr)) && expr.body) {
+		/* 4. () => 'x'   /   prev => prev==='a'?'b':'a'       */
+		const bodies: t.Expression[] = [];
+
+		if (t.isExpression(expr.body)) {
+			bodies.push(expr.body);
+		} else if (t.isBlockStatement(expr.body)) {
+			// every `return <expr>`
+			expr.body.body.forEach((stmt) => {
+				if (t.isReturnStatement(stmt) && stmt.argument) {
+					bodies.push(stmt.argument as t.Expression);
+				}
+			});
+		}
+
+		for (const b of bodies) {
+			out.push(...gatherLiterals(b, path, opts, memo));
+		}
+	} else if (t.isSequenceExpression(expr)) {
+		/* 5. SequenceExpression (rare but cheap to support)   */
+		expr.expressions.forEach((e) => {
+			out.push(...gatherLiterals(e as t.Expression, path, opts, memo));
+		});
+	}
+
+	/* ─── finalise ───────────────────────────────────────*/
+	memo.set(expr, out);
+	return out;
 }
 
 /**

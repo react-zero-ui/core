@@ -157,17 +157,21 @@ const VARIANTS = { dark: \`th-\${DARK}\`, light: COLORS.primary } as const;
 const isMobile = false;
 
 function TestComponent() {
+	const [theme, setTheme] = useUI('theme', 'light');
 	const [variant, setVariant] = useUI('variant', 'th-light');
+	const [variant2, setVariant2] = useUI('variant2', 'th-light');
 
 
+			setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
 			setVariant(isMobile ? VARIANTS.light : 'th-light');
-
+		  setVariant2(isMobile ? VARIANTS?.light : 'th-light');
 }
 `,
 		},
 		async () => {
 			const variants = extractVariants('src/app/Component.jsx');
 			console.log('variants: ', variants);
+			assert.strictEqual(variants.length, 3);
 		}
 	);
 });
@@ -198,6 +202,8 @@ test('cache performance', async () => {
 	const [color, setColor] = useUI('color', \`bg-\${COLORS.primary}\`);
 	/* ⑦ object-member */
 	const [variant2, setVariant2] = useUI('variant', VARIANTS.dark);
+
+	
 
 			return <div onClick={() => setTheme('dark')}>Test</div>;
 		}

@@ -1,3 +1,5 @@
+/* eslint-disable import/named */
+
 import { test, expect } from '@playwright/test';
 
 // Define test scenarios with proper expected values

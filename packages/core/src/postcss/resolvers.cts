@@ -56,11 +56,31 @@ export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts
 		return resolveTemplateLiteral(node, path, literalFromNode, opts);
 	}
 
-	if (t.isMemberExpression(node)) {
-		return resolveMemberExpression(node, path, literalFromNode, opts);
+	if (t.isMemberExpression(node) || t.isOptionalMemberExpression(node)) {
+		//   treat optional-member exactly the same
+		return resolveMemberExpression(node as t.MemberExpression, path, literalFromNode, opts);
 	}
 
-	return null; // everything else is illegal
+	return null;
+}
+
+function fastEval(node: t.Expression, path: NodePath<t.Node>) {
+	// ❶ If the node *is* the current visitor path, we can evaluate directly.
+	if (node === path.node && (path as any).evaluate) {
+		return (path as any).evaluate(); // safe, returns {confident, value}
+	}
+
+	// ❷ Otherwise try to locate a child-path that wraps `node`.
+	//    (Babel exposes .get() only for *named* keys, so we must scan.)
+	for (const key of Object.keys(path.node)) {
+		const sub = (path as any).get?.(key);
+		if (sub?.node === node && sub.evaluate) {
+			return sub.evaluate();
+		}
+	}
+
+	// ❸ Give up → undefined (caller falls back to manual resolver)
+	return { confident: false };
 }
 
 /*──────────────────────────────────────────────────────────*\
@@ -225,12 +245,12 @@ export function resolveMemberExpression(
 	let current: t.Expression | t.PrivateName = node;
 
 	// Walk up until we hit the root Identifier
-	while (t.isMemberExpression(current)) {
-		if (current.computed) {
-			/** Any *expression* inside `[]` → run through the same pipeline  */
-			const expr = current.property as t.Expression;
+	while (t.isMemberExpression(current) || t.isOptionalMemberExpression(current)) {
+		const mem = current as t.MemberExpression; // ← common shape
 
-			/* fast paths for perf-critical hot cases */
+		if (mem.computed) {
+			const expr = mem.property as t.Expression;
+			// fast paths …
 			if (t.isStringLiteral(expr)) {
 				props.unshift(expr.value);
 			} else if (t.isNumericLiteral(expr)) {
@@ -245,17 +265,15 @@ export function resolveMemberExpression(
 						'[Zero-UI] Member expression must resolve to a static space-free string.'
 					);
 
-				/* ensure we store number vs string correctly */
 				const num = Number(lit);
 				props.unshift(Number.isFinite(num) ? num : lit);
 			}
 		} else {
-			// obj.prop
-			const pn = current.property as t.Identifier;
-			props.unshift(pn.name);
+			const id = mem.property as t.Identifier;
+			props.unshift(id.name);
 		}
 
-		current = current.object;
+		current = mem.object;
 	}
 
 	/* current should now be the base Identifier */
@@ -337,23 +355,4 @@ function resolveObjectValue(obj: t.ObjectExpression, key: string): t.Expression 
 		}
 	}
 	return null;
-}
-
-function fastEval(node: t.Expression, path: NodePath<t.Node>) {
-	// ❶ If the node *is* the current visitor path, we can evaluate directly.
-	if (node === path.node && (path as any).evaluate) {
-		return (path as any).evaluate(); // safe, returns {confident, value}
-	}
-
-	// ❷ Otherwise try to locate a child-path that wraps `node`.
-	//    (Babel exposes .get() only for *named* keys, so we must scan.)
-	for (const key of Object.keys(path.node)) {
-		const sub = (path as any).get?.(key);
-		if (sub?.node === node && sub.evaluate) {
-			return sub.evaluate();
-		}
-	}
-
-	// ❸ Give up → undefined (caller falls back to manual resolver)
-	return { confident: false };
 }
