@@ -1,6 +1,6 @@
 {
 	"name": "@react-zero-ui/core",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Zero re-render, global UI state management for React",
 	"private": false,
 	"type": "module",
