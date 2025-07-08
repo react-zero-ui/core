@@ -29,7 +29,7 @@ class RenderStore {
 
 		this.data.set(componentName, { count: existing.count + 1, lastRenderTime: renderTime, totalRenderTime: existing.totalRenderTime + renderTime });
 
-		this.listeners.forEach(listener => listener());
+		this.listeners.forEach((listener) => listener());
 	}
 }
 
@@ -41,7 +41,7 @@ const trackerListeners = new Set<() => void>();
 
 const setTrackerEnabled = (enabled: boolean) => {
 	isTrackerEnabled = enabled;
-	trackerListeners.forEach(listener => listener());
+	trackerListeners.forEach((listener) => listener());
 };
 
 // Flash animations store
@@ -71,11 +71,11 @@ const addFlash = (element: HTMLElement, componentName: string, renderTime: numbe
 	};
 
 	flashStore = [...flashStore, flash];
-	flashListeners.forEach(listener => listener());
+	flashListeners.forEach((listener) => listener());
 
 	setTimeout(() => {
-		flashStore = flashStore.filter(f => f.id !== flash.id);
-		flashListeners.forEach(listener => listener());
+		flashStore = flashStore.filter((f) => f.id !== flash.id);
+		flashListeners.forEach((listener) => listener());
 	}, 1500);
 };
 
@@ -84,7 +84,7 @@ export function RenderTracker() {
 	const renderMetrics = useSyncExternalStore(renderStore.subscribe, renderStore.getSnapshot, renderStore.getSnapshot);
 
 	const showTracker = useSyncExternalStore(
-		listener => {
+		(listener) => {
 			trackerListeners.add(listener);
 			return () => trackerListeners.delete(listener);
 		},
@@ -93,7 +93,7 @@ export function RenderTracker() {
 	);
 
 	const flashes = useSyncExternalStore(
-		listener => {
+		(listener) => {
 			flashListeners.add(listener);
 			return () => flashListeners.delete(listener);
 		},
@@ -157,7 +157,7 @@ export function RenderTracker() {
 			<div className="pointer-events-none fixed inset-0 z-50">
 				<AnimatePresence>
 					{showTracker &&
-						flashes.map(flash => (
+						flashes.map((flash) => (
 							<motion.div
 								key={flash.id}
 								className="absolute"

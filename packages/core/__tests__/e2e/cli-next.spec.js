@@ -1,4 +1,6 @@
+// eslint-disable-next-line import/named
 import { test, expect } from '@playwright/test';
+
 import path from 'node:path';
 import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';

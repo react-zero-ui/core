@@ -26,7 +26,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # required for git-diff later
-
       # 2 ▸ Set up pnpm
       - uses: pnpm/action-setup@v3
         with:
@@ -49,7 +48,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles('packages/core/package.json') }}
           restore-keys: |
             ${{ runner.os }}-playwright-
 
@@ -57,26 +56,26 @@ jobs:
         if: steps.pw-cache.outputs.cache-hit != 'true'
         run: pnpm --filter @react-zero-ui/core exec playwright install --with-deps
 
-      - name: Save Playwright cache
-        if: steps.pw-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ steps.pw-cache.outputs.cache-primary-key }}
-
       # 6 ▸ Lint fast, fail fast
       - name: Lint
         run: pnpm lint
 
-      # 7 ▸ Pack → inject tar-ball → run whole test suite
-      - name: Pack core tarball
-        run: pnpm run prepack:core
+      # 7 ▸ Run Build
+      - name: Run Build
+        run: pnpm build
 
-      - name: Inject tarball into fixtures
-        run: node scripts/install-local-tarball.js
+      # 8 ▸ Run Prepack
+      - name: Run Prepack
+        run: pnpm prepack:core
 
+      # 9 ▸ Run Install Tarball
+      - name: Run Install Tarball
+        run: pnpm i-tarball
+
+      # 10 ▸ Run all tests
       - name: Run Vite tests
         run: pnpm test:vite
+
       - name: Run Next.js tests
         run: pnpm test:next
 
@@ -85,3 +84,6 @@ jobs:
 
       - name: Run CLI tests
         run: pnpm test:cli
+
+      - name: Run integration tests
+        run: pnpm test:integration

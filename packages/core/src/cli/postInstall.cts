@@ -1,8 +1,8 @@
-// scripts/postInstall.cjs
-const { processVariants, generateAttributesFile, patchConfigAlias, patchPostcssConfig, patchViteConfig, hasViteConfig } = require('../postcss/helpers.cjs');
-const { patchNextBodyTag } = require('../postcss/ast.cjs');
+// src/cli/postInstall.cts
+import { patchNextBodyTag } from '../postcss/ast-generating.cjs';
+import { processVariants, generateAttributesFile, patchTsConfig, patchPostcssConfig, patchViteConfig, hasViteConfig } from '../postcss/helpers.cjs';
 
-async function runZeroUiInit() {
+export async function runZeroUiInit() {
 	try {
 		console.log('[Zero-UI] Initializing...');
 
@@ -13,7 +13,7 @@ async function runZeroUiInit() {
 
 		if (!hasViteConfig()) {
 			// Patch config for module resolution
-			await patchConfigAlias();
+			await patchTsConfig();
 			// Patch PostCSS config for Next.js projects
 			await patchPostcssConfig();
 		}
@@ -38,5 +38,3 @@ async function runZeroUiInit() {
 		process.exit(1);
 	}
 }
-
-module.exports = { runZeroUiInit };

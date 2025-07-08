@@ -1,4 +1,6 @@
+// eslint-disable-next-line import/named
 import { defineConfig } from '@playwright/test';
+
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -29,6 +31,7 @@ export default defineConfig({
 	projects: [
 		{ name: 'next-cli-e2e', testMatch: /cli-next\.spec\.js/ },
 		{ name: 'next-e2e', dependencies: ['next-cli-e2e'], testMatch: /next\.spec\.js/ },
+		{ name: 'next-scoped-e2e', dependencies: ['next-e2e'], testMatch: /next-scoped\.spec\.js/ },
 	],
 	webServer: {
 		command: 'pnpm run dev',

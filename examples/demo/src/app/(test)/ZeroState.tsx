@@ -16,7 +16,7 @@ export function TestComponentZero() {
 			<Header />
 			<ThemeSwitcher setTheme={setTheme} />
 			<AccentPicker setAccent={setAccent} />
-			<InteractiveCard toggleMenu={() => setMenuOpen(prev => !prev)} />
+			<InteractiveCard toggleMenu={() => setMenuOpen((prev) => !prev)} />
 			<StateDisplay />
 		</div>
 	);

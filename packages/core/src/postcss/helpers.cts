@@ -1,10 +1,28 @@
-// src/postcss/helpers.cjs
-const fs = require('fs');
-const path = require('path');
-const { CONFIG, IGNORE_DIRS } = require('../config.cjs');
-const { extractVariants, parseJsonWithBabel, parseAndUpdatePostcssConfig, parseAndUpdateViteConfig } = require('./ast.cjs');
+// src/postcss/helpers.cts
+import fs from 'fs';
+import fg from 'fast-glob';
+import path from 'path';
+import { CONFIG, IGNORE_DIRS } from '../config.cjs';
+import { parseJsonWithBabel, parseAndUpdatePostcssConfig, parseAndUpdateViteConfig } from './ast-generating.cjs';
+import { extractVariants, VariantData } from './ast-parsing.cjs';
 
-function toKebabCase(str) {
+export interface ProcessVariantsResult {
+	/** Array of deduplicated and sorted variant data */
+	finalVariants: VariantData[];
+	/** Object mapping data attributes to their initial values for body tag */
+	initialValues: Record<string, string>;
+	/** Array of source file paths that were processed */
+	sourceFiles: string[];
+}
+
+export interface GenerateAttributesResult {
+	/** Whether the JavaScript attributes file was changed */
+	jsChanged: boolean;
+	/** Whether the TypeScript definition file was changed */
+	tsChanged: boolean;
+}
+
+export function toKebabCase(str: string): string {
 	if (typeof str !== 'string') {
 		throw new Error(`Expected string but got: ${typeof str}`);
 	}
@@ -17,53 +35,34 @@ function toKebabCase(str) {
 		.toLowerCase();
 }
 
-function findAllSourceFiles(rootDirs = ['src', 'app']) {
-	const exts = ['.ts', '.tsx', '.js', '.jsx'];
-	const files = [];
-	const cwd = process.cwd();
-
-	rootDirs.forEach(dir => {
-		const dirPath = path.join(cwd, dir);
-		if (!fs.existsSync(dirPath)) return;
-
-		const walk = current => {
-			try {
-				for (const entry of fs.readdirSync(current)) {
-					const full = path.join(current, entry);
-					const stat = fs.statSync(full);
-					// TODO upgrade to fast-glob
-					if (stat.isDirectory() && !entry.startsWith('.') && !IGNORE_DIRS.has(entry)) {
-						walk(full);
-					} else if (stat.isFile() && exts.some(ext => full.endsWith(ext))) {
-						files.push(full);
-					}
-				}
-			} catch (error) {
-				console.warn(`[Zero-UI] Error reading directory ${current}:`, error.message);
-			}
-		};
-
-		walk(dirPath);
-	});
-
-	return files;
+/** Return *absolute* paths of every JS/TS file we care about (à la Tailwind). */
+export function findAllSourceFiles(patterns: string[] = CONFIG.CONTENT, cwd: string = process.cwd()): string[] {
+	return fg
+		.sync(patterns, {
+			cwd,
+			ignore: IGNORE_DIRS, // <-- pass the actual ignore list
+			absolute: true, // give back absolute paths
+			onlyFiles: true, // skip directories
+			followSymbolicLinks: false, // Tailwind does the same
+			dot: false, // don't match dot-files (change if you need)
+			unique: true, // guard against duplicates
+		})
+		.map((p) => path.resolve(p)); // normalize on Windows
 }
 
 /**
- * Process all variants from source files and return deduplicated, sorted variants
- * This is the core processing logic used by both PostCSS plugin and init script
- * @param {string[]} files - Array of file paths to process - if not provided, all source files will be found and processed
- * @returns {Object} - Object containing final variants, initial values, and source files
+ * Process all variants from source files and return deduplicated, sorted variants.
+ * This is the core processing logic used by both PostCSS plugin and init script.
  */
-async function processVariants(files = null) {
+export async function processVariants(files: string[] | null = null): Promise<ProcessVariantsResult> {
 	const sourceFiles = files || findAllSourceFiles();
-	const allVariants = sourceFiles.flatMap(file => {
+	const allVariants = sourceFiles.flatMap((file) => {
 		return extractVariants(file);
 	});
 
 	// Deduplicate and merge variants
-	const variantMap = new Map();
-	const initialValueMap = new Map();
+	const variantMap = new Map<string, Set<string>>();
+	const initialValueMap = new Map<string, string>();
 
 	for (const variant of allVariants) {
 		const { key, values, initialValue } = variant;
@@ -76,17 +75,17 @@ async function processVariants(files = null) {
 		}
 
 		if (Array.isArray(values)) {
-			values.forEach(v => variantMap.get(key).add(v));
+			values.forEach((v) => variantMap.get(key)!.add(v));
 		}
 	}
 
 	// Convert to final format
-	const finalVariants = Array.from(variantMap.entries())
-		.map(([key, set]) => ({ key, values: Array.from(set).sort(), initialValue: initialValueMap.get(key) }))
+	const finalVariants: VariantData[] = Array.from(variantMap.entries())
+		.map(([key, set]) => ({ key, values: Array.from(set).sort(), initialValue: initialValueMap.get(key) || null }))
 		.sort((a, b) => a.key.localeCompare(b.key));
 
 	// Generate initial values object
-	const initialValues = {};
+	const initialValues: Record<string, string> = {};
 	for (const { key, values, initialValue } of finalVariants) {
 		const keySlug = toKebabCase(key);
 		initialValues[`data-${keySlug}`] = initialValue || values[0] || '';
@@ -95,19 +94,26 @@ async function processVariants(files = null) {
 	return { finalVariants, initialValues, sourceFiles };
 }
 
-function buildCss(variants) {
-	let css = CONFIG.HEADER + '\n';
-	for (const { key, values } of variants) {
+export function buildCss(variants: VariantData[]): string {
+	const lines = variants.flatMap(({ key, values }) => {
+		if (values.length === 0) return [];
 		const keySlug = toKebabCase(key);
-		for (const val of values) {
-			const valSlug = toKebabCase(val);
-			css += `@variant ${keySlug}-${valSlug} (body[data-${keySlug}="${valSlug}"] &);\n`;
-		}
-	}
-	return css;
+
+		// Double-ensure sorted order, even if extractor didn't sort
+		return [...values].sort().map((v) => {
+			const valSlug = toKebabCase(v);
+
+			return `@custom-variant ${keySlug}-${valSlug} {
+  &:where(body[data-${keySlug}="${valSlug}"] *) { @slot; }
+  [data-${keySlug}="${valSlug}"] &, &[data-${keySlug}="${valSlug}"] { @slot; }
+}`;
+		});
+	});
+
+	return CONFIG.HEADER + '\n' + lines.join('\n') + '\n';
 }
 
-async function generateAttributesFile(finalVariants, initialValues) {
+export async function generateAttributesFile(finalVariants: VariantData[], initialValues: Record<string, string>): Promise<GenerateAttributesResult> {
 	const cwd = process.cwd();
 	const ATTR_DIR = path.join(cwd, CONFIG.ZERO_UI_DIR);
 	const ATTR_FILE = path.join(ATTR_DIR, 'attributes.js');
@@ -117,7 +123,7 @@ async function generateAttributesFile(finalVariants, initialValues) {
 	const attrExport = `${CONFIG.HEADER}\nexport const bodyAttributes = ${JSON.stringify(initialValues, null, 2)};\n`;
 
 	// Generate TypeScript definitions
-	const toLiteral = v => (typeof v === 'string' ? `"${v.replace(/"/g, '\\"')}"` : v);
+	const toLiteral = (v: string) => (typeof v === 'string' ? `"${v.replace(/"/g, '\\"')}"` : v);
 	const variantLines = finalVariants.map(({ key, values }) => {
 		const slug = `data-${toKebabCase(key)}`;
 		const union = values.length ? values.map(toLiteral).join(' | ') : 'string'; // ← fallback
@@ -137,7 +143,7 @@ async function generateAttributesFile(finalVariants, initialValues) {
 	fs.mkdirSync(ATTR_DIR, { recursive: true });
 
 	// Only write if content has changed
-	const writeIfChanged = (file, content) => {
+	const writeIfChanged = (file: string, content: string): boolean => {
 		const existing = fs.existsSync(file) ? fs.readFileSync(file, 'utf-8') : '';
 		if (existing !== content) {
 			fs.writeFileSync(file, content);
@@ -152,7 +158,7 @@ async function generateAttributesFile(finalVariants, initialValues) {
 	return { jsChanged, tsChanged };
 }
 
-function isZeroUiInitialized() {
+export function isZeroUiInitialized(): boolean {
 	const cwd = process.cwd();
 	const ATTR_DIR = path.join(cwd, CONFIG.ZERO_UI_DIR);
 	const ATTR_FILE = path.join(ATTR_DIR, 'attributes.js');
@@ -167,7 +173,7 @@ function isZeroUiInitialized() {
 		const typeContent = fs.readFileSync(ATTR_TYPE_FILE, 'utf-8');
 
 		return attrContent.includes('export const bodyAttributes') && typeContent.includes('export declare const bodyAttributes');
-	} catch (error) {
+	} catch (error: unknown) {
 		console.error('[Zero-UI] Error checking if Zero-UI is initialized:', error);
 		return false;
 	}
@@ -178,50 +184,59 @@ function isZeroUiInitialized() {
  * are inside the TypeScript program. Writes to ts/ jsconfig only if something
  * actually changes.
  */
-async function patchConfigAlias() {
+export async function patchTsConfig(): Promise<void> {
 	const cwd = process.cwd();
 
 	const configFile = fs.existsSync(path.join(cwd, 'tsconfig.json')) ? 'tsconfig.json' : fs.existsSync(path.join(cwd, 'jsconfig.json')) ? 'jsconfig.json' : null;
 
 	// Ignore Vite fixtures — they patch their own config
-	if (fs.existsSync(path.join(cwd, 'vite.config.ts'))) return;
+	const hasViteConfig = ['js', 'mjs', 'ts', 'mts'].some((ext) => fs.existsSync(path.join(cwd, `vite.config.${ext}`)));
+	if (hasViteConfig) {
+		console.log('[Zero-UI] Vite config found, skipping tsconfig patch');
+		return;
+	}
+
 	if (!configFile) {
 		return console.warn(`[Zero-UI] No ts/ jsconfig found in ${cwd}`);
 	}
 
 	const configPath = path.join(cwd, configFile);
-	const raw = fs.readFileSync(configPath, 'utf-8');
-	const config = parseJsonWithBabel(raw, configPath);
-	if (!config) {
-		return console.warn(`[Zero-UI] Could not parse ${configFile}`);
-	}
+	const raw = fs.readFileSync(configPath, 'utf8');
+	const config = parseJsonWithBabel(raw) ?? {};
 
-	/* ---------- ensure alias ---------- */
 	config.compilerOptions ??= {};
 	config.compilerOptions.baseUrl ??= '.';
 	config.compilerOptions.paths ??= {};
 
-	const expectedPaths = ['./.zero-ui/attributes.js'];
-	const currentPaths = config.compilerOptions.paths['@zero-ui/attributes'];
+	/* ---------- migrate misplaced include ---------- */
+	if ('include' in config.compilerOptions && !config.include) {
+		config.include = config.compilerOptions.include;
+		delete config.compilerOptions.include;
+	}
+
 	let changed = false;
 
-	if (!Array.isArray(currentPaths) || JSON.stringify(currentPaths) !== JSON.stringify(expectedPaths)) {
-		config.compilerOptions.paths['@zero-ui/attributes'] = expectedPaths;
+	/* ---------- alias ---------- */
+	const expectedAlias = ['./.zero-ui/attributes.js'];
+	if (
+		!Array.isArray(config.compilerOptions.paths['@zero-ui/attributes']) ||
+		JSON.stringify(config.compilerOptions.paths['@zero-ui/attributes']) !== JSON.stringify(expectedAlias)
+	) {
+		config.compilerOptions.paths['@zero-ui/attributes'] = expectedAlias;
 		changed = true;
 	}
 
-	/* ---------- ensure .d.ts includes ---------- */
+	/* ---------- includes ---------- */
+	const beforeInclude = config.include ?? [];
 	const extraIncludes = ['.zero-ui/**/*.d.ts', '.next/**/*.d.ts'];
-	config.include = Array.from(new Set([...(config.include ?? []), ...extraIncludes]));
+	config.include = Array.from(new Set([...beforeInclude, ...extraIncludes])).sort();
+	if (!changed && JSON.stringify(config.include) !== JSON.stringify(beforeInclude.sort())) changed = true;
 
-	if (config.include.length !== (config.include ?? []).length) {
-		changed = true;
-	}
-
-	/* ---------- write only if modified ---------- */
-	if (changed) {
-		fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n');
-		console.log(`[Zero-UI] Patched ${configFile} (paths &/or includes)`);
+	/* ---------- write ---------- */
+	const output = JSON.stringify(config, null, 2) + '\n';
+	if (changed && output !== raw) {
+		fs.writeFileSync(configPath, output);
+		console.log(`[Zero-UI] Patched ${configFile} (paths + includes)`);
 	}
 }
 
@@ -229,14 +244,14 @@ async function patchConfigAlias() {
  * Patches postcss.config.js to include Zero-UI plugin before Tailwind CSS
  * Only runs for Next.js projects and uses AST parsing for robust config modification
  */
-async function patchPostcssConfig() {
+export async function patchPostcssConfig(): Promise<void> {
 	const cwd = process.cwd();
 	const postcssConfigJsPath = path.join(cwd, 'postcss.config.js');
 	const postcssConfigMjsPath = path.join(cwd, 'postcss.config.mjs');
 	const packageJsonPath = path.join(cwd, 'package.json');
 
 	// Determine which config file exists (prefer .js over .mjs)
-	let postcssConfigPath = null;
+	let postcssConfigPath: string | null = null;
 	let isESModule = false;
 
 	if (fs.existsSync(postcssConfigJsPath)) {
@@ -302,74 +317,30 @@ export default {
  * Patches vite.config.ts/js to include Zero-UI plugin and replace Tailwind CSS v4+ plugin if present
  * Only runs for Vite projects and uses AST parsing for robust config modification
  */
-async function patchViteConfig() {
+
+export async function patchViteConfig(): Promise<void> {
 	const cwd = process.cwd();
-	const viteConfigTsPath = path.join(cwd, 'vite.config.ts');
-	const viteConfigJsPath = path.join(cwd, 'vite.config.js');
-	const viteConfigMjsPath = path.join(cwd, 'vite.config.mjs');
+	const candidates = ['vite.config.ts', 'vite.config.mts', 'vite.config.js', 'vite.config.mjs', 'vite.config.cjs'];
 
-	// Determine which config file exists (prefer .ts over .js)
-	let viteConfigPath = null;
+	const viteConfigPath = candidates.map((f) => path.join(cwd, f)).find((p) => fs.existsSync(p));
 
-	if (fs.existsSync(viteConfigTsPath)) {
-		viteConfigPath = viteConfigTsPath;
-	} else if (fs.existsSync(viteConfigJsPath)) {
-		viteConfigPath = viteConfigJsPath;
-	} else if (fs.existsSync(viteConfigMjsPath)) {
-		viteConfigPath = viteConfigMjsPath;
-	} else {
-		return; // No Vite config found, skip patching
-	}
+	if (!viteConfigPath) return console.warn(`[Zero-UI] No vite.config.ts/js found in ${cwd}`); // not a Vite project
 
-	const zeroUiPlugin = '@react-zero-ui/core/vite';
+	const zeroUiImportPath = CONFIG.VITE_PLUGIN;
+	const original = fs.readFileSync(viteConfigPath, 'utf8');
 
-	try {
-		// Read existing config
-		const existingContent = fs.readFileSync(viteConfigPath, 'utf-8');
+	const patched = parseAndUpdateViteConfig(original, zeroUiImportPath);
 
-		// Parse and update config using AST
-		const updatedConfig = parseAndUpdateViteConfig(existingContent, zeroUiPlugin);
-
-		if (updatedConfig && updatedConfig !== existingContent) {
-			fs.writeFileSync(viteConfigPath, updatedConfig);
-			const configFileName = path.basename(viteConfigPath);
-			console.log(`[Zero-UI] Updated ${configFileName} with Zero-UI plugin`);
-
-			// Check if Tailwind was replaced
-			if (existingContent.includes('@tailwindcss/vite')) {
-				console.log(`[Zero-UI] Replaced @tailwindcss/vite with Zero-UI plugin`);
-			}
-		} else if (updatedConfig === null) {
-			const configFileName = path.basename(viteConfigPath);
-			console.log(`[Zero-UI] Could not automatically update ${configFileName}`);
-			console.log(`[Zero-UI] Please manually add "import zeroUI from '${zeroUiPlugin}'" and "zeroUI()" to your plugins array`);
-		}
-		// If updatedConfig === existingContent, config is already properly configured
-	} catch (error) {
-		console.error('[Zero-UI] Error patching Vite config:', error.message);
+	if (patched && patched !== original) {
+		fs.writeFileSync(viteConfigPath, patched);
+		console.log(`[Zero-UI] Updated ${path.basename(viteConfigPath)} (added Zero-UI, removed Tailwind)`);
 	}
 }
 
 /**
  * Check if the current project has Vite config files
- * @returns {boolean} True if Vite config files are found
  */
-function hasViteConfig() {
+export function hasViteConfig(): boolean {
 	const cwd = process.cwd();
-	const viteConfigFiles = ['vite.config.ts', 'vite.config.js', 'vite.config.mjs'];
-	return viteConfigFiles.some(configFile => fs.existsSync(path.join(cwd, configFile)));
+	return ['vite.config.ts', 'vite.config.mts', 'vite.config.js', 'vite.config.mjs', 'vite.config.cjs'].some((f) => fs.existsSync(path.join(cwd, f)));
 }
-
-module.exports = {
-	toKebabCase,
-	findAllSourceFiles,
-	extractVariants,
-	buildCss,
-	patchConfigAlias,
-	patchPostcssConfig,
-	patchViteConfig,
-	generateAttributesFile,
-	processVariants,
-	isZeroUiInitialized,
-	hasViteConfig,
-};

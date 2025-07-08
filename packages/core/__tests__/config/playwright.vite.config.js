@@ -1,4 +1,6 @@
+// eslint-disable-next-line import/named
 import { defineConfig } from '@playwright/test';
+
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -36,6 +38,11 @@ export default defineConfig({
 			name: 'vite-e2e',
 			dependencies: ['vite-cli-e2e'],
 			testMatch: /vite\.spec\.js/, // Matches both cli-vite.spec.js and vite.spec.js
+		},
+		{
+			name: 'vite-scopes-e2e',
+			dependencies: ['vite-e2e'],
+			testMatch: /vite-scopes\.spec\.js/, // Matches both cli-vite.spec.js and vite.spec.js
 		},
 	],
 	webServer: {

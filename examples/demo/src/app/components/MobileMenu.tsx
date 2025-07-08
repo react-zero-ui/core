@@ -14,7 +14,7 @@ export const MobileMenu: React.FC<{ navItems: { name: string; href: string }[] }
 					style={{ '--index': index } as React.CSSProperties}>
 					<Link
 						href={item.href}
-						onClick={() => setMenuOpen(prev => (prev === 'closed' ? 'open' : 'closed'))}
+						onClick={() => setMenuOpen((prev) => (prev === 'closed' ? 'open' : 'closed'))}
 						className="block pt-4 font-medium">
 						{item.name}
 					</Link>
@@ -23,7 +23,7 @@ export const MobileMenu: React.FC<{ navItems: { name: string; href: string }[] }
 			<li className={clsx('mobile-menu-item transform pt-3 transition-all duration-300 ease-in-out')}>
 				<Link
 					href="/#contact"
-					onClick={() => setMenuOpen(prev => (prev === 'closed' ? 'open' : 'closed'))}
+					onClick={() => setMenuOpen((prev) => (prev === 'closed' ? 'open' : 'closed'))}
 					className="bubble-hover block rounded-full border border-gray-200 bg-white px-3 py-2 text-center font-medium shadow-lg duration-300 hover:border-white">
 					Contact
 				</Link>

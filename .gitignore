@@ -1,7 +1,8 @@
 # package artifacts
 node_modules/
 **/.next/
-dist/
+**/dist/
+# **/build/
 coverage/
 test-results/
 .pnpm-store/
@@ -19,11 +20,8 @@ yarn-error.log*
 # tarballs produced during local tests
 *.tgz
 
-# local scratch files 
-t.py
-todo.md
 
 # keep these files
 !next-env.d.ts
+!packages/core/src/dist/
 
- 

@@ -22,6 +22,7 @@ exec(pm === 'yarn' ? 'add' : 'install', ['@react-zero-ui/core']);
 exec(pm === 'yarn' ? 'add' : 'install', ['postcss', 'tailwindcss', '@tailwindcss/postcss', '--save-dev']);
 
 /* 4️⃣ handoff */
+// eslint-disable-next-line import/no-unresolved
 const { default: zeroUiCli } = await import('@react-zero-ui/core/cli');
 if (typeof zeroUiCli === 'function') {
 	zeroUiCli(process.argv.slice(3));

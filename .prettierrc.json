@@ -6,7 +6,7 @@
 	"useTabs": true,
 	"printWidth": 160,
 	"endOfLine": "lf",
-	"arrowParens": "avoid",
+	"arrowParens": "always",
 	"bracketSpacing": true,
 	"objectWrap": "collapse",
 	"bracketSameLine": true,

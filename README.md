@@ -1,6 +1,6 @@
 # React Zero‑UI (Beta)
 
-**Instant UI state updates. ZERO React re‑renders. <1 KB runtime.**
+**Instant UI state updates. ZERO React re‑renders. Near ZERO runtime. <500 bytes**
 
 Pre‑render your UI once, flip a `data-*` attribute to update — that's it.
 
@@ -156,18 +156,18 @@ Any `data-{key}="{value}"` pair becomes a variant: `{key}-{value}:`.
 - **Zero React re‑renders** for UI‑only state.
 - **Global setters** — call from any component or util.
 - **Tiny**: < 391 Byte gzipped runtime.
-- **TypeScript‑first**.
 - **SSR‑friendly** (Next.js & Vite SSR).
-- **Framework‑agnostic CSS** — generated classes work in plain HTML / Vue / Svelte as well with extra config.
+- **Use from anywhere** — Consume with tailwind variants from anywhere.
 
 ---
 
 ## 🏗 Best Practices
 
-1. **UI state only** → themes, layout toggles, feature flags.
+1. **Global UI state only** → themes, layout toggles, feature flags.
 2. **Business logic stays in React** → fetching, data mutation, etc.
 3. **Kebab‑case keys** → e.g. `sidebar-open`.
 4. **Provide defaults** to avoid Flash‑Of‑Unstyled‑Content.
+5. **Avoid** for per-component logic or data.
 
 ---
 

@@ -10,7 +10,7 @@ export const Dashboard: React.FC = () => {
 			<div className="flex flex-row items-center gap-2">
 				<button
 					type="button"
-					onClick={() => setTheme(prev => (prev === 'light' ? 'dark' : 'light'))}
+					onClick={() => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))}
 					className="rounded-md bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600">
 					Toggle Theme (Current:{' '}
 					{

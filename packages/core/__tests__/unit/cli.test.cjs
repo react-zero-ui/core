@@ -21,7 +21,7 @@ function cleanupTestDir(testDir) {
 			console.warn(`Warning: Could not clean up test directory ${testDir}: ${error.message}`);
 			try {
 				// Try to remove files individually
-				const cleanup = dir => {
+				const cleanup = (dir) => {
 					const entries = fs.readdirSync(dir, { withFileTypes: true });
 					for (const entry of entries) {
 						const fullPath = path.join(dir, entry.name);
@@ -63,11 +63,11 @@ function runCLIScript(targetDir, timeout = 30000) {
 		let stdout = '';
 		let stderr = '';
 
-		child.stdout.on('data', data => {
+		child.stdout.on('data', (data) => {
 			stdout += data.toString();
 		});
 
-		child.stderr.on('data', data => {
+		child.stderr.on('data', (data) => {
 			stderr += data.toString();
 		});
 
@@ -76,12 +76,12 @@ function runCLIScript(targetDir, timeout = 30000) {
 			reject(new Error(`CLI script timed out after ${timeout}ms`));
 		}, timeout);
 
-		child.on('close', code => {
+		child.on('close', (code) => {
 			clearTimeout(timer);
 			resolve({ code, stdout, stderr, success: code === 0 });
 		});
 
-		child.on('error', error => {
+		child.on('error', (error) => {
 			clearTimeout(timer);
 			reject(error);
 		});
@@ -127,7 +127,7 @@ test('CLI script uses existing package.json if it exists', async () => {
 		fs.writeFileSync(packageJsonPath, JSON.stringify(customPackageJson, null, 2));
 
 		// Run CLI (this will timeout on npm install, but that's ok for this test)
-		await runCLIScript(testDir, 5000).catch(err => {
+		await runCLIScript(testDir, 5000).catch((err) => {
 			// We expect this to timeout/fail during npm install
 			console.log('CLI run resulted in:', err.message);
 			return { timedOut: true };
@@ -192,7 +192,7 @@ test('CLI script installs correct dependencies', async () => {
 
 		try {
 			// Run CLI script
-			await runCLIScript(testDir, 10000).catch(err => {
+			await runCLIScript(testDir, 10000).catch((err) => {
 				console.log('CLI run resulted in:', err.message);
 				return { error: err.message };
 			});
@@ -247,12 +247,12 @@ test('CLI script handles different target directories', async () => {
 				resolve({ timedOut: true });
 			}, 5000);
 
-			child.on('close', code => {
+			child.on('close', (code) => {
 				clearTimeout(timer);
 				resolve({ code });
 			});
 
-			child.on('error', error => {
+			child.on('error', (error) => {
 				clearTimeout(timer);
 				reject(error);
 			});
@@ -274,7 +274,7 @@ test('Library CLI initializes project correctly', async () => {
 
 	try {
 		// Create a test React component with useUI hook
-		const componentDir = path.join(testDir, 'src', 'components');
+		const componentDir = path.join(testDir, 'dist', 'components');
 		fs.mkdirSync(componentDir, { recursive: true });
 
 		const testComponent = `
@@ -296,7 +296,7 @@ export function TestComponent() {
 		fs.writeFileSync(path.join(componentDir, 'TestComponent.jsx'), testComponent);
 
 		// Import and run the library CLI directly
-		const { runZeroUiInit } = require('../../src/cli/postInstall.cjs');
+		const { runZeroUiInit } = require('../../dist/cli/postInstall.cjs');
 
 		// Mock console to capture output
 		const originalConsoleLog = console.log;
@@ -348,13 +348,13 @@ test('Library CLI handles errors gracefully', async () => {
 		// Mock process.exit to prevent actual exit
 		const originalExit = process.exit;
 		let exitCalled = false;
-		process.exit = code => {
+		process.exit = (code) => {
 			exitCalled = true;
 			throw new Error(`Process exit called with code ${code}`);
 		};
 
 		try {
-			const { runZeroUiInit } = require('../../src/cli/postInstall.cjs');
+			const { runZeroUiInit } = require('../../dist/cli/postInstall.cjs');
 
 			// This should complete without errors in most cases
 			await runZeroUiInit();
@@ -413,12 +413,12 @@ fi
 					resolve({ timedOut: true });
 				}, 5000);
 
-				child.on('close', code => {
+				child.on('close', (code) => {
 					clearTimeout(timer);
 					resolve({ code });
 				});
 
-				child.on('error', error => {
+				child.on('error', (error) => {
 					clearTimeout(timer);
 					reject(error);
 				});
@@ -445,11 +445,11 @@ test('CLI script handles invalid target directory', async () => {
 		// Try to run CLI with a non-existent directory
 		const binScript = path.resolve(__dirname, '../../../cli/bin.js');
 
-		const result = await new Promise(resolve => {
+		const result = await new Promise((resolve) => {
 			const child = spawn('node', [binScript, 'non-existent-dir'], { cwd: testDir, stdio: ['pipe', 'pipe', 'pipe'] });
 
 			let stderr = '';
-			child.stderr.on('data', data => {
+			child.stderr.on('data', (data) => {
 				stderr += data.toString();
 			});
 
@@ -458,12 +458,12 @@ test('CLI script handles invalid target directory', async () => {
 				resolve({ timedOut: true, stderr });
 			}, 5000);
 
-			child.on('close', code => {
+			child.on('close', (code) => {
 				clearTimeout(timer);
 				resolve({ code, stderr });
 			});
 
-			child.on('error', error => {
+			child.on('error', (error) => {
 				clearTimeout(timer);
 				resolve({ error: error.message });
 			});
@@ -484,7 +484,7 @@ test('Library CLI processes useUI hooks correctly', async () => {
 
 	try {
 		// Create multiple test components with useUI hooks
-		const componentsDir = path.join(testDir, 'src', 'components');
+		const componentsDir = path.join(testDir, 'dist', 'components');
 		fs.mkdirSync(componentsDir, { recursive: true });
 
 		const component1 = `
@@ -523,7 +523,7 @@ export function Toggle() {
 		fs.writeFileSync(path.join(componentsDir, 'Toggle.jsx'), component2);
 
 		// Import and run the library CLI
-		const { runZeroUiInit } = require('../../src/cli/postInstall.cjs');
+		const { runZeroUiInit } = require('../../dist/cli/postInstall.cjs');
 
 		const originalConsoleLog = console.log;
 		const logMessages = [];
