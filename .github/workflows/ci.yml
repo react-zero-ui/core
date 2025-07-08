@@ -70,22 +70,8 @@ jobs:
 
       # 7 ▸ Run Build
       - name: Run Build
-        run: pnpm build
+        run: pnpm bootstrap
 
-      # 8 ▸ Pack → inject tar-ball → run whole test suite
-      - name: Pack core tarball
-        run: pnpm run prepack:core
-
-      - name: Inject tarball into fixtures
-        run: node scripts/install-local-tarball.js
-
+      # 8 ▸ Run all tests
       - name: Run Vite tests
-        run: pnpm test:vite
-      - name: Run Next.js tests
-        run: pnpm test:next
-
-      - name: Run unit tests
-        run: pnpm test:unit
-
-      - name: Run CLI tests
-        run: pnpm test:cli
+        run: pnpm test

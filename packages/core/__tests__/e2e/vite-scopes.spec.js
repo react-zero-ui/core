@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/named
 import { test, expect } from '@playwright/test';
 
 test.describe.configure({ mode: 'serial' });

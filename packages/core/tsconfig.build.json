@@ -1,14 +1,8 @@
 {
 	"extends": "../../tsconfig.base.json",
 	/* — compile exactly one file — */
-	"include": [
-		"src/**/*"
-	],
-	"exclude": [
-		"src/postcss/coming-soon",
-		"src/**/*.test.ts",
-		"./utilities.ts"
-	],
+	"include": ["src/**/*"],
+	"exclude": ["src/postcss/coming-soon", "src/**/*.test.ts", "./utilities.ts"],
 	/* — compiler output — */
 	"compilerOptions": {
 		"target": "ES2020",
