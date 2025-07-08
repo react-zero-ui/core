@@ -12,10 +12,21 @@
 		"declaration": true, // <- emit declaration files
 		"emitDeclarationOnly": false, // <- emit declaration files only
 		"outDir": "dist", // <- output directory
+		"skipLibCheck": true, // <- skip type checking of declaration files in node_modules
 		/* Maps for monorepo imports like "@react-zero-ui/core" */
 		"composite": true,
-		"rootDir": "src",
+		"rootDir": "./",
 		"forceConsistentCasingInFileNames": true
 	},
-	"exclude": ["dist", "node_modules"]
+	"exclude": [
+		"dist",
+		"**/*.tsx",
+		"**/*.jsx",
+		"**/*.test.ts",
+		"pnpm-lock.yaml",
+		"pnpm-workspace.yaml",
+		"examples/**",
+		"**/fixtures/**",
+		"**/coming-soon/**"
+	]
 }

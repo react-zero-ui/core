@@ -6,6 +6,14 @@
 		"packages/*"
 	],
 	"packageManager": "pnpm@10.12.1",
+	"references": [
+		{
+			"path": "packages/core"
+		},
+		{
+			"path": "packages/cli"
+		}
+	],
 	"scripts": {
 		"preinstall": "npx only-allow pnpm",
 		"reset": "git clean -fdx && pnpm install --frozen-lockfile && pnpm prepack:core && pnpm i-tarball",
@@ -22,7 +30,7 @@
 		"format": "prettier --write .",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
-		"typecheck": "tsc --noEmit",
+		"typecheck": "tsc --noEmit --project tsconfig.base.json",
 		"size": "npx esbuild ./packages/core/dist/index.js --bundle --minify --format=esm --external:react --define:process.env.NODE_ENV='\"production\"' | gzip -c | wc -c"
 	},
 	"devDependencies": {
