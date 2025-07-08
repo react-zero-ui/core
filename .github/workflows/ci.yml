@@ -27,17 +27,17 @@ jobs:
         with:
           fetch-depth: 0 # required for git-diff later
 
-      # 2 ▸ Set up pnpm
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 10.12.1
-          run_install: false
-
-      # 3 ▸ Node + pnpm-store cache
+      # 2 ▸ Node + pnpm-store cache
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
+
+      # 3 ▸ Set up pnpm
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10.12.1
+          run_install: false
 
       # 4 ▸ Install deps (deterministic)
       - name: Install dependencies
@@ -49,7 +49,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles('packages/core/package.json') }}
           restore-keys: |
             ${{ runner.os }}-playwright-
 
@@ -57,34 +57,23 @@ jobs:
         if: steps.pw-cache.outputs.cache-hit != 'true'
         run: pnpm --filter @react-zero-ui/core exec playwright install --with-deps
 
-      - name: Save Playwright cache
-        if: steps.pw-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ steps.pw-cache.outputs.cache-primary-key }}
-
       # 6 ▸ Lint fast, fail fast
       - name: Lint
         run: pnpm lint
 
-      # 7 ▸ Install Lockfile
-      - name: Install Lockfile
-        run: pnpm install --frozen-lockfile
-
-      # 8 ▸ Run Build
+      # 7 ▸ Run Build
       - name: Run Build
         run: pnpm build
 
-      # 9 ▸ Run Prepack
+      # 8 ▸ Run Prepack
       - name: Run Prepack
         run: pnpm prepack:core
 
-      # 10 ▸ Run Install Tarball
+      # 9 ▸ Run Install Tarball
       - name: Run Install Tarball
         run: pnpm i-tarball
 
-      # 11 ▸ Run all tests
+      # 10 ▸ Run all tests
       - name: Run Vite tests
         run: pnpm test:vite
 
@@ -97,5 +86,5 @@ jobs:
       - name: Run CLI tests
         run: pnpm test:cli
 
-      - name: Run unit tests 2
-        run: pnpm test:unit-2
+      - name: Run integration tests
+        run: pnpm test:integration
