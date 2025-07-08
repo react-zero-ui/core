@@ -41,7 +41,7 @@
 		"test:vite": "playwright test -c __tests__/config/playwright.vite.config.js",
 		"test:unit": "node --test __tests__/unit/index.test.cjs",
 		"test:cli": "node --test __tests__/unit/cli.test.cjs",
-		"test:all": "pnpm run test:vite && pnpm run test:next && pnpm run test:unit && pnpm run test:cli",
+		"test:all": "pnpm run test:vite && pnpm run test:next && pnpm run test:unit && pnpm run test:cli && pnpm run test:ts",
 		"test": "pnpm run test:all",
 		"test:ts": "tsx --test src/**/*.test.ts"
 	},

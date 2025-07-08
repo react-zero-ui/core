@@ -30,12 +30,12 @@
     }
   },
   "include": [
-    "next-env.d.ts",
-    ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/**/*.d.ts",
-    ".zero-ui/**/*.d.ts"
+    ".next/types/**/*.ts",
+    ".zero-ui/**/*.d.ts",
+    "next-env.d.ts"
   ],
   "exclude": [
     "node_modules"

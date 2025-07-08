@@ -6,7 +6,7 @@ import FAQ from './FAQ';
 export default function Page() {
 	const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
 	const [, setTheme2] = useUI<'light' | 'dark'>('theme-2', 'light');
-	const [, setThemeThree] = useUI<'light' | 'dark'>('themeThree', 'light');
+	const [, setThemeThree] = useUI<'light' | 'dark'>('theme-three', 'light');
 	const [, setToggle] = useUI<'true' | 'false'>('toggle-boolean', 'true');
 	const [, setNumber] = useUI<'1' | '2'>('number', '1');
 	const [, setOpen] = useUI<'open' | 'closed'>('faq', 'closed'); // Same key everywhere!

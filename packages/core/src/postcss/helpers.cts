@@ -191,7 +191,10 @@ export async function patchTsConfig(): Promise<void> {
 
 	// Ignore Vite fixtures — they patch their own config
 	const hasViteConfig = ['js', 'mjs', 'ts', 'mts'].some((ext) => fs.existsSync(path.join(cwd, `vite.config.${ext}`)));
-	if (hasViteConfig) return; // Vite template patches its own tsconfig
+	if (hasViteConfig) {
+		console.log('[Zero-UI] Vite config found, skipping tsconfig patch');
+		return;
+	}
 
 	if (!configFile) {
 		return console.warn(`[Zero-UI] No ts/ jsconfig found in ${cwd}`);
@@ -204,6 +207,12 @@ export async function patchTsConfig(): Promise<void> {
 	config.compilerOptions ??= {};
 	config.compilerOptions.baseUrl ??= '.';
 	config.compilerOptions.paths ??= {};
+
+	/* ---------- migrate misplaced include ---------- */
+	if ('include' in config.compilerOptions && !config.include) {
+		config.include = config.compilerOptions.include;
+		delete config.compilerOptions.include;
+	}
 
 	let changed = false;
 

@@ -17,6 +17,13 @@ function useUI<T extends string = string>(key: string, initialValue: T): [T, UIS
 			throw new Error(`[Zero-UI] useUI(key, initialValue); key and initialValue must not contain spaces, got "${key}" and "${initialValue}"`);
 		}
 
+		// enforce kebab-case for the key: lowercase letters, digits and single dashes
+		if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(key)) {
+			throw new Error(
+				`[Zero-UI] useUI(key, …); key must be kebab-case (e.g. "theme-dark"), got "${key}". ` + `Avoid camelCase or uppercase — they break variant generation.`
+			);
+		}
+
 		// Validate inputs with helpful error messages
 		if (!key || typeof key !== 'string' || key.trim() === '') {
 			throw new Error(`useUI(key, initialValue); key must be a non-empty string, got "${key}"`);
