@@ -1,6 +1,6 @@
 import * as t from '@babel/types';
 import { NodePath } from '@babel/traverse';
-import { throwCodeFrame } from './ast-v2.cjs';
+import { throwCodeFrame } from './ast-parsing.cjs';
 import { generate } from '@babel/generator';
 export interface ResolveOpts {
 	throwOnFail?: boolean; // default false

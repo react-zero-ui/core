@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { glob } from 'glob';
-import { extractVariantsFromFiles } from '../ast-v2.cjs';
+import { extractVariants } from '../ast-parsing.cjs';
 import { batchInjectDataAttributes, SEMANTIC_CONFIG } from './inject-attributes.js';
 import { RefLocationTracker } from './collect-refs.cjs';
 
@@ -17,7 +17,7 @@ export async function buildWithDataAttributes() {
 
 	// 2. Extract variants and populate ref tracker
 	console.log(`📋 Processing ${files.length} files...`);
-	const allVariants = extractVariantsFromFiles(files);
+	const allVariants = extractVariants(files);
 
 	console.log(
 		'✅ Found variants:',
@@ -72,7 +72,7 @@ export function createViteUIPlugin() {
 		async buildEnd() {
 			// Extract variants from all processed files
 			const files = await glob('src/**/*.{ts,tsx,js,jsx}');
-			variants = extractVariantsFromFiles(files);
+			variants = extractVariants(files);
 			refTracker = globalRefTracker;
 
 			console.log('📊 Extracted variants:', variants);

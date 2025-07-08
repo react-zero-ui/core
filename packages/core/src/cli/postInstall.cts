@@ -1,6 +1,6 @@
 // src/cli/postInstall.cts
-import { processVariants, generateAttributesFile, patchConfigAlias, patchPostcssConfig, patchViteConfig, hasViteConfig } from '../postcss/helpers.cjs';
-import { patchNextBodyTag } from '../postcss/ast-v2.cjs';
+import { patchNextBodyTag } from '../postcss/ast-generating.cjs';
+import { processVariants, generateAttributesFile, patchTsConfig, patchPostcssConfig, patchViteConfig, hasViteConfig } from '../postcss/helpers.cjs';
 
 export async function runZeroUiInit() {
 	try {
@@ -13,7 +13,7 @@ export async function runZeroUiInit() {
 
 		if (!hasViteConfig()) {
 			// Patch config for module resolution
-			await patchConfigAlias();
+			await patchTsConfig();
 			// Patch PostCSS config for Next.js projects
 			await patchPostcssConfig();
 		}

@@ -7,7 +7,7 @@ const os = require('os');
 //  This file is the entry point for the react-zero-ui library, that uses postcss to trigger the build process
 const plugin = require('../../dist/postcss/index.cjs');
 
-const { patchConfigAlias, toKebabCase, patchPostcssConfig, patchViteConfig } = require('../../dist/postcss/helpers.cjs');
+const { patchTsConfig, toKebabCase, patchPostcssConfig, patchViteConfig } = require('../../dist/postcss/helpers.cjs');
 
 function getAttrFile() {
 	return path.join(process.cwd(), '.zero-ui', 'attributes.js');
@@ -68,7 +68,6 @@ test('generates body attributes file correctly', async () => {
 			// Read and parse attributes
 			const content = fs.readFileSync(getAttrFile(), 'utf-8');
 			console.log('\n📄 Generated attributes file:');
-			console.log(content);
 
 			// Verify content
 			assert(content.includes('export const bodyAttributes'), 'Should export bodyAttributes');
@@ -104,7 +103,6 @@ test('generates body attributes file correctly when kebab-case is used', async (
 			assert(fs.existsSync(getAttrFile()), 'Attributes file should exist');
 
 			const content = fs.readFileSync(getAttrFile(), 'utf-8');
-			console.log('result.css: ', result.css);
 
 			// Verify content
 			assert(content.includes('export const bodyAttributes'), 'Should export bodyAttributes');
@@ -318,9 +316,9 @@ test('handles multiple files and deduplication', async () => {
 	);
 });
 
-test('handles parsing errors gracefully', async () => {
-	await runTest(
-		{
+test('throws on invalid syntax', async () => {
+	await assert.rejects(async () => {
+		await runTest({
 			'src/valid.jsx': `
       import { useUI } from '@react-zero-ui/core';
       function Valid() {
@@ -335,16 +333,8 @@ test('handles parsing errors gracefully', async () => {
         {{{ invalid syntax
       }
     `,
-		},
-		(result) => {
-			console.log('\n🔍 Parse Error Test:');
-			// Should still process valid files
-			assert(result.css.includes('@custom-variant valid-working'), 'Should process valid files');
-
-			// Should not crash on invalid files
-			assert(result.css.includes('AUTO-GENERATED'), 'Should complete processing');
-		}
-	);
+		});
+	}, /Unexpected token, expected ","/);
 });
 
 test('throws on empty string initial value', () => {
@@ -559,7 +549,7 @@ test('handles concurrent file modifications', async () => {
 	);
 });
 
-test('patchConfigAlias - config file patching', async (t) => {
+test('patchTsConfig - config file patching', async (t) => {
 	await t.test('patches tsconfig.json when it exists', async () => {
 		const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-config-test'));
 		const originalCwd = process.cwd();
@@ -571,8 +561,8 @@ test('patchConfigAlias - config file patching', async (t) => {
 			const tsconfigContent = { compilerOptions: { target: 'ES2015', module: 'ESNext' } };
 			fs.writeFileSync('tsconfig.json', JSON.stringify(tsconfigContent, null, 2));
 
-			// Run patchConfigAlias
-			patchConfigAlias();
+			// Run patchTsConfig
+			patchTsConfig();
 
 			// Read the updated config
 			const updatedConfig = JSON.parse(fs.readFileSync('tsconfig.json', 'utf-8'));
@@ -600,8 +590,8 @@ test('patchConfigAlias - config file patching', async (t) => {
 			const jsconfigContent = { compilerOptions: { target: 'ES2015' } };
 			fs.writeFileSync('jsconfig.json', JSON.stringify(jsconfigContent, null, 2));
 
-			// Run patchConfigAlias
-			patchConfigAlias();
+			// Run patchTsConfig
+			patchTsConfig();
 
 			// Read the updated config
 			const updatedConfig = JSON.parse(fs.readFileSync('jsconfig.json', 'utf-8'));
@@ -626,8 +616,8 @@ test('patchConfigAlias - config file patching', async (t) => {
 		try {
 			process.chdir(testDir);
 
-			// Run patchConfigAlias (should not throw)
-			patchConfigAlias();
+			// Run patchTsConfig (should not throw)
+			patchTsConfig();
 
 			// Verify no files were created
 			assert(!fs.existsSync('tsconfig.json'), 'Should not create tsconfig.json');
@@ -656,8 +646,8 @@ test('patchConfigAlias - config file patching', async (t) => {
 			fs.writeFileSync('tsconfig.json', JSON.stringify(tsconfigContent, null, 2));
 			const originalContent = fs.readFileSync('tsconfig.json', 'utf-8');
 
-			// Run patchConfigAlias
-			patchConfigAlias();
+			// Run patchTsConfig
+			patchTsConfig();
 
 			// Verify the config was not modified
 			const updatedContent = fs.readFileSync('tsconfig.json', 'utf-8');
@@ -679,8 +669,8 @@ test('patchConfigAlias - config file patching', async (t) => {
 			const tsconfigContent = { include: ['src/**/*'] };
 			fs.writeFileSync('tsconfig.json', JSON.stringify(tsconfigContent, null, 2));
 
-			// Run patchConfigAlias
-			patchConfigAlias();
+			// Run patchTsConfig
+			patchTsConfig();
 
 			// Read the updated config
 			const updatedConfig = JSON.parse(fs.readFileSync('tsconfig.json', 'utf-8'));
@@ -717,8 +707,8 @@ test('patchConfigAlias - config file patching', async (t) => {
 }`;
 			fs.writeFileSync('tsconfig.json', tsconfigContent);
 
-			// Run patchConfigAlias
-			patchConfigAlias();
+			// Run patchTsConfig
+			patchTsConfig();
 
 			// Verify file was updated (should parse despite comments)
 			const updatedConfig = JSON.parse(fs.readFileSync('tsconfig.json', 'utf-8'));
@@ -733,7 +723,7 @@ test('patchConfigAlias - config file patching', async (t) => {
 		}
 	});
 
-	await t.test('patchConfigAlias prefers tsconfig.json over jsconfig.json', async () => {
+	await t.test('patchTsConfig prefers tsconfig.json over jsconfig.json', async () => {
 		const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-config-test'));
 		const originalCwd = process.cwd();
 
@@ -744,8 +734,8 @@ test('patchConfigAlias - config file patching', async (t) => {
 			fs.writeFileSync('tsconfig.json', JSON.stringify({ compilerOptions: {} }, null, 2));
 			fs.writeFileSync('jsconfig.json', JSON.stringify({ compilerOptions: {} }, null, 2));
 
-			// Run patchConfigAlias
-			patchConfigAlias();
+			// Run patchTsConfig
+			patchTsConfig();
 
 			// Verify tsconfig.json was modified
 			const tsconfigContent = JSON.parse(fs.readFileSync('tsconfig.json', 'utf-8'));
@@ -1464,7 +1454,6 @@ test('generated variants for initial value without setterFn', async () => {
 		},
 		(result) => {
 			console.log('\n📄 Initial value without setterFn:');
-			console.log(result.css);
 
 			assert(result.css.includes('@custom-variant theme-light'));
 		}
@@ -1491,9 +1480,8 @@ test('handles complex string boolean toggle patterns', async () => {
       `,
 		},
 		(result) => {
-			const content = fs.readFileSync(getAttrFile(), 'utf-8');
+			// const content = fs.readFileSync(getAttrFile(), 'utf-8');
 			console.log('\n📄 String boolean edge cases:');
-			console.log(content);
 
 			// Should only have true/false variants for string booleans
 			assert(result.css.includes('@custom-variant modal-visible-true'));
@@ -1549,7 +1537,6 @@ test.skip('extracts values from deeply nested function calls', async () => {
 		},
 		(result) => {
 			console.log('\n📄 Nested calls extraction:');
-			console.log(result.css);
 
 			// Should extract all literal values
 			assert(result.css.includes('@custom-variant theme-light')); // initial
@@ -1587,7 +1574,7 @@ test('handles ternary and logical expressions', async () => {
           
           // Logical expressions
           const handleError = () => {
-            setStatus(error && 'error' || 'success');
+            setStatus(hasError && 'error' || 'success');
           };
           
           // Complex logical
@@ -1601,11 +1588,11 @@ test('handles ternary and logical expressions', async () => {
 		},
 		(result) => {
 			console.log('\n📄 Expression handling:');
-			console.log(result.css);
 
 			// Ternary values
 			assert(result.css.includes('@custom-variant status-loading'));
 			assert(result.css.includes('@custom-variant status-ready'));
+			assert(result.css.includes('@custom-variant status-idle'));
 			assert(result.css.includes('@custom-variant status-error'));
 			assert(result.css.includes('@custom-variant status-success'));
 
@@ -1655,7 +1642,6 @@ export function Pages() {
 		},
 		(result) => {
 			console.log('\n📄 Constants:');
-			console.log(result.css);
 
 			assert(result.css.includes('@custom-variant theme-dark'));
 			assert(result.css.includes('@custom-variant theme-default'));
@@ -1710,7 +1696,6 @@ test('resolves constants and imported values -- COMPLEX --', async () => {
 		},
 		(result) => {
 			console.log('\n📄 Constants resolution:');
-			console.log(result.css);
 
 			// Should resolve local constants
 			assert(result.css.includes('@custom-variant theme-pending-state'));
@@ -1765,7 +1750,6 @@ test.skip('handles all common setter patterns - full coverage sanity check - COM
 		},
 		(result) => {
 			console.log('\n📄 Full coverage test:');
-			console.log(result.css);
 
 			// ✅ things that MUST be included
 			assert(result.css.includes('@custom-variant theme-dark'));
@@ -1822,7 +1806,6 @@ test('handles arrow functions and function expressions', async () => {
 		},
 		(result) => {
 			console.log('\n📄 Function expressions:');
-			console.log(result.css);
 
 			assert(result.css.includes('@custom-variant component-state-quick'));
 			assert(result.css.includes('@custom-variant component-state-block'));
@@ -1862,7 +1845,6 @@ test('handles multiple setters for same state key', async () => {
 		},
 		(result) => {
 			console.log('\n📄 Multiple setters:');
-			console.log(result.css);
 
 			// Should combine all values from different setters for same key
 			assert(result.css.includes('@custom-variant global-theme-light'));
@@ -1904,7 +1886,6 @@ test('ignores dynamic and non-literal values', async () => {
 		},
 		(result) => {
 			console.log('\n📄 Dynamic values filtering:');
-			console.log(result.css);
 
 			// Should only have literals
 			assert(result.css.includes('@custom-variant theme-default')); // initial
@@ -1958,9 +1939,6 @@ test('handles edge cases with unusual syntax', async () => {
       `,
 		},
 		(result) => {
-			console.log('\n📄 Edge cases:');
-			console.log(result.css);
-
 			// Basic cases that should work
 			assert(result.css.includes('@custom-variant edge-state-first'));
 			assert(result.css.includes('@custom-variant edge-state-second'));

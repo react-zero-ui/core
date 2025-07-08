@@ -7,9 +7,11 @@ export const CONFIG = {
 	HEADER: '/* AUTO-GENERATED - DO NOT EDIT */',
 	ZERO_UI_DIR: '.zero-ui',
 	CONTENT: ['src/**/*.{ts,tsx,js,jsx}', 'app/**/*.{ts,tsx,js,jsx}', 'pages/**/*.{ts,tsx,js,jsx}'],
+	POSTCSS_PLUGIN: '@react-zero-ui/core/postcss',
+	VITE_PLUGIN: '@react-zero-ui/core/vite',
 };
 
-export const IGNORE_DIRS = new Set([
+export const IGNORE_DIRS = [
 	'**/node_modules/**',
 	'**/.next/**',
 	'**/.turbo/**',
@@ -20,4 +22,4 @@ export const IGNORE_DIRS = new Set([
 	'**/public/**',
 	'**/dist/**',
 	'**/build/**',
-]);
+];

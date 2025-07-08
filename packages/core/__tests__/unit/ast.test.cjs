@@ -5,7 +5,7 @@ const path = require('path');
 const os = require('os');
 const { performance } = require('node:perf_hooks');
 const { findAllSourceFiles } = require('../../dist/postcss/helpers.cjs');
-const { collectUseUISetters, extractVariants } = require('../../dist/postcss/ast-v2.cjs');
+const { collectUseUISetters, extractVariants } = require('../../dist/postcss/ast-parsing.cjs');
 
 const ComponentImports = readFile(path.join(__dirname, './fixtures/test-components.jsx'));
 const AllPatternsComponent = readFile(path.join(__dirname, './fixtures/ts-test-components.tsx'));
@@ -70,7 +70,7 @@ test('collectUseUISetters - basic functionality', async () => {
 			const [theme, setTheme] = useUI('theme', 'light');
 			const [size, setSize] = useUI('size', 'medium');
 			return <>
-        <Button theme={theme} setTheme={setTheme("light")} />
+        <Button theme={theme} setTheme={setTheme("light")}  />
         <Button size={size} setSize={setSize("medium")} />
       </>;
 		}
@@ -95,8 +95,8 @@ export function ComponentSimple() {
 	const [, setSize] = useUI('size', 'medium');
 	return (
 		<div>
-			<button onClick={() => setTheme('dark')}>setTheme</button>
-			<button onClick={() => setSize('large')}>setSize</button>
+			<button onClick={() => setTheme('dark')} className="theme-light:bg-red-500 theme-dark:bg-blue-500 theme-blue:bg-green-500 theme-purple:bg-purple-500">setTheme</button>
+			<button onClick={() => setSize('large')} className="size-medium:bg-red-500 size-large:bg-blue-500">setSize</button>
 		</div>
 	);
 }
@@ -105,9 +105,13 @@ export function ComponentSimple() {
 
 		async () => {
 			const variants = extractVariants('src/app/Component.jsx');
+			console.log('variants: ', variants);
 			assert.strictEqual(variants.length, 2);
-			assert.ok(variants.some((v) => v.key === 'theme' && v.values.includes('light')));
-			assert.ok(variants.some((v) => v.key === 'size' && v.values.includes('medium')));
+			assert.strictEqual(variants.length, 2);
+
+			assert.ok(variants.some((v) => v.key === 'theme' && ['light', 'dark', 'blue', 'purple'].every((c) => v.values.includes(c))));
+
+			assert.ok(variants.some((v) => v.key === 'size' && ['medium', 'large'].every((c) => v.values.includes(c))));
 		}
 	);
 });

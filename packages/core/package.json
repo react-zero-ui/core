@@ -35,13 +35,15 @@
 	},
 	"scripts": {
 		"prepack": "pnpm run build",
-		"build": "tsc -p tsconfig.json",
+		"build": "tsc -p tsconfig.build.json",
+		"dev": "tsc -p tsconfig.json --watch",
 		"test:next": "playwright test -c __tests__/config/playwright.next.config.js",
 		"test:vite": "playwright test -c __tests__/config/playwright.vite.config.js",
 		"test:unit": "node --test __tests__/unit/index.test.cjs",
 		"test:cli": "node --test __tests__/unit/cli.test.cjs",
 		"test:all": "pnpm run test:vite && pnpm run test:next && pnpm run test:unit && pnpm run test:cli",
-		"test": "pnpm run test:all"
+		"test": "pnpm run test:all",
+		"test:ts": "tsx --test src/**/*.test.ts"
 	},
 	"keywords": [
 		"react",
@@ -82,7 +84,7 @@
 		"@babel/parser": "^7.27.5",
 		"@babel/traverse": "^7.27.4",
 		"@babel/types": "^7.27.4",
-		"glob": "^11.0.0"
+		"fast-glob": "^3.3.3"
 	},
 	"devDependencies": {
 		"@babel/code-frame": "^7.27.1",
@@ -91,6 +93,7 @@
 		"@types/babel__generator": "^7.27.0",
 		"@types/babel__traverse": "^7.20.7",
 		"@types/react": "^19.1.8",
-		"lru-cache": "^10.4.3"
+		"lru-cache": "^10.4.3",
+		"tsx": "^4.20.3"
 	}
 }
