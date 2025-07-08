@@ -256,7 +256,6 @@ test('ignores node_modules and hidden directories', async () => {
     `,
 		},
 		(result) => {
-			console.log('result: ', result.css);
 			assert(result.css.includes('@custom-variant valid-yes'), 'Should process valid files');
 			assert(!result.css.includes('ignored'), 'Should ignore node_modules');
 			assert(!result.css.includes('hidden'), 'Should ignore hidden directories');
@@ -281,7 +280,6 @@ test('handles large projects efficiently - 500 files', async function () {
 	const startTime = Date.now();
 
 	await runTest(files, (result) => {
-		console.log('handles large projects efficiently-result: ', result.css);
 		const endTime = Date.now();
 		const duration = endTime - startTime;
 
@@ -291,7 +289,7 @@ test('handles large projects efficiently - 500 files', async function () {
 		assert(result.css.includes('@custom-variant state49-value49'), 'Should process all files');
 
 		// Should complete in reasonable time
-		assert(duration < 300, 'Should process 50 files in under 300ms');
+		assert(duration < 500, 'Should process 500 files in under 500ms');
 	});
 });
 

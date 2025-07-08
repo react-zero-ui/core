@@ -68,10 +68,34 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      # 7 ▸ Run Build
-      - name: Run Build
-        run: pnpm bootstrap
+      # 7 ▸ Install Lockfile
+      - name: Install Lockfile
+        run: pnpm install --frozen-lockfile
 
-      # 8 ▸ Run all tests
+      # 8 ▸ Run Build
+      - name: Run Build
+        run: pnpm build
+
+      # 9 ▸ Run Prepack
+      - name: Run Prepack
+        run: pnpm prepack:core
+
+      # 10 ▸ Run Install Tarball
+      - name: Run Install Tarball
+        run: pnpm i-tarball
+
+      # 11 ▸ Run all tests
       - name: Run Vite tests
-        run: pnpm test
+        run: pnpm test:vite
+
+      - name: Run Next.js tests
+        run: pnpm test:next
+
+      - name: Run unit tests
+        run: pnpm test:unit
+
+      - name: Run CLI tests
+        run: pnpm test:cli
+
+      - name: Run unit tests 2
+        run: pnpm test:unit-2

@@ -57,7 +57,6 @@ const FIXTURES = {
 test('parseAndUpdateViteConfig inserts Zero-UI and removes Tailwind', () => {
 	for (const [name, src] of Object.entries(FIXTURES)) {
 		const out = parseAndUpdateViteConfig(src, zeroUiVitePlugin);
-		console.log('out: ', out);
 		assert(out && out.includes(zeroUiVitePlugin), `${name} missing zeroUI`);
 		assert(out.includes('zeroUI()'), `${name} missing zeroUI`);
 		assert(out.includes('react()'), `${name} missing react`);

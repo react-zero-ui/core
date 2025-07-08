@@ -285,7 +285,6 @@ export default { plugins: [react(),tailwindcss()] };`,
 		async () => {
 			await patchViteConfig();
 			const cfg = readFile('vite.config.mjs');
-			console.log('cfg: ', cfg);
 			assert.ok(cfg.includes('@react-zero-ui/core/vite'), 'Zero-UI plugin missing');
 			assert.ok(!cfg.includes('@tailwindcss/vite'), 'Tailwind should be removed');
 		}

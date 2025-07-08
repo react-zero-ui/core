@@ -105,7 +105,6 @@ export function ComponentSimple() {
 
 		async () => {
 			const variants = extractVariants('src/app/Component.jsx');
-			console.log('variants: ', variants);
 			assert.strictEqual(variants.length, 2);
 			assert.strictEqual(variants.length, 2);
 
@@ -174,7 +173,6 @@ function TestComponent() {
 		},
 		async () => {
 			const variants = extractVariants('src/app/Component.jsx');
-			console.log('variants: ', variants);
 			assert.strictEqual(variants.length, 3);
 		}
 	);

@@ -35,6 +35,5 @@ test('scanVariantTokens', () => {
 	`;
 	// should return theme-three-light, theme-three-dark
 	const result = scanVariantTokens(src, new Set(['theme-three']));
-	console.log('result: ', result);
 	assert.deepStrictEqual(result.get('theme-three'), new Set(['light', 'dark']));
 });
