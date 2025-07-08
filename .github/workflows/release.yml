@@ -1,7 +1,7 @@
 name: Release
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:   # manual “Run workflow”
 
 permissions:
   contents: write
@@ -11,63 +11,70 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+
     steps:
+      # 1 ▸ Checkout the branch you chose in the UI (default = main)
       - uses: actions/checkout@v4
 
-      - name: Check CI Status
+      # 2 ▸ Ensure the latest CI on this branch passed
+      - name: Check CI status
         run: |
-          # Get the latest CI workflow run for this branch
-          CI_STATUS=$(gh run list --workflow=ci.yml --branch=${{ github.ref_name }} --limit=1 --json conclusion --jq '.[0].conclusion')
+          CI_STATUS=$(gh run list \
+            --workflow=ci.yml \
+            --branch=${{ github.ref_name }} \
+            --limit=1 \
+            --json conclusion \
+            --jq '.[0].conclusion')
 
           if [[ "$CI_STATUS" != "success" ]]; then
             echo "❌ CI must pass before releasing. Current status: $CI_STATUS"
             exit 1
           fi
-
-          echo "✅ CI passed. Proceeding with release..."
+          echo "✅ CI passed. Proceeding with release…"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # 3 ▸ Calculate tags / CHANGELOG with release-please
       - uses: googleapis/release-please-action@v4
         id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          config-file: .release-please-manifest.json
-          manifest-file: .release-please-manifest.json
+          config-file: .release-please-config.json      # your config
+          manifest-file: .release-please-manifest.json  # version manifest
 
-      # Publish to npm when releases are created
+      # 4 ▸ Only continue if at least one package was released
       - uses: actions/setup-node@v4
-        if: ${{ steps.release.outputs.releases_created }}
+        if: ${{ steps.release.outputs.release_created == 'true' }}
         with:
-          node-version: '18'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: 18
+          registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
-        if: ${{ steps.release.outputs.releases_created }}
+        if: ${{ steps.release.outputs.release_created == 'true' }}
         run: |
           corepack enable
           pnpm install --frozen-lockfile
 
+      # 5 ▸ Publish each released workspace package
       - name: Publish packages
-        if: ${{ steps.release.outputs.releases_created }}
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          # Check which packages were released and publish them
-          echo "Releases created: ${{ steps.release.outputs.releases_created }}"
+          echo "ℹ️  Packages flagged for publish:"
+          echo "• core → ${{ steps.release.outputs['packages/core--release_version'] }}"
+          echo "• cli  → ${{ steps.release.outputs['packages/cli--release_version'] }}"
 
-          # Publish core package if it was released
-          if [[ '${{ steps.release.outputs.packages_core--release_created }}' == 'true' ]]; then
-            echo "📦 Publishing @react-zero-ui/core..."
+          if [[ '${{ steps.release.outputs['packages/core--release_created'] }}' == 'true' ]]; then
+            echo "📦 Publishing @react-zero-ui/core…"
             cd packages/core
             npm publish --access public
             cd ../..
           fi
 
-          # Publish CLI package if it was released
-          if [[ '${{ steps.release.outputs.packages_cli--release_created }}' == 'true' ]]; then
-            echo "📦 Publishing create-zero-ui..."
+          if [[ '${{ steps.release.outputs['packages/cli--release_created'] }}' == 'true' ]]; then
+            echo "📦 Publishing create-zero-ui…"
             cd packages/cli
             npm publish --access public
             cd ../..
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
