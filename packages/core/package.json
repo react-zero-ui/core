@@ -1,6 +1,6 @@
 {
 	"name": "@react-zero-ui/core",
-	"version": "0.2.0",
+	"version": "0.2.3",
 	"description": "Zero re-render, global UI state management for React",
 	"private": false,
 	"type": "module",
@@ -41,7 +41,7 @@
 		"test:vite": "playwright test -c __tests__/config/playwright.vite.config.js",
 		"test:integration": "node --test __tests__/unit/index.test.cjs",
 		"test:cli": "node --test __tests__/unit/cli.test.cjs",
-		"test": "pnpm run test:vite && pnpm run test:next && pnpm run test:unit && pnpm run test:cli && pnpm run test:integration",
+		"test:all": "pnpm run test:vite && pnpm run test:next && pnpm run test:unit && pnpm run test:cli && pnpm run test:integration",
 		"test:unit": "tsx --test src/**/*.test.ts"
 	},
 	"keywords": [
@@ -83,16 +83,16 @@
 		"@babel/parser": "^7.27.5",
 		"@babel/traverse": "^7.27.4",
 		"@babel/types": "^7.27.4",
-		"fast-glob": "^3.3.3"
+		"fast-glob": "^3.3.3",
+		"@babel/code-frame": "^7.27.1",
+		"lru-cache": "^10.4.3"
 	},
 	"devDependencies": {
-		"@babel/code-frame": "^7.27.1",
 		"@playwright/test": "^1.53.0",
 		"@types/babel__code-frame": "^7.0.6",
 		"@types/babel__generator": "^7.27.0",
 		"@types/babel__traverse": "^7.20.7",
 		"@types/react": "^19.1.8",
-		"lru-cache": "^10.4.3",
 		"tsx": "^4.20.3"
 	}
 }

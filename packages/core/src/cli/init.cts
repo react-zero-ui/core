@@ -1,14 +1,16 @@
 #!/usr/bin/env node
 
-// src/cli/init.ts  - single source of truth
+// src/cli/init.cts  - single source of truth
 
-import { runZeroUiInit } from './postInstall.cjs';
+//import the actual implementation from postInstall.cjs
+const { runZeroUiInit } = require('./postInstall.cjs');
 
-async function cli() {
-	return await runZeroUiInit();
+// Take command line arguments (defaulting to process.argv.slice(2) which are the args after node <scriptname>) and pass them to runZeroUiInit
+async function cli(argv = process.argv.slice(2)) {
+	return await runZeroUiInit(argv);
 }
 
-/* -------- CLI  -------- */
+/* -------- CL I  -------- */
 if (require.main === module) {
 	cli().catch((error) => {
 		console.error('CLI failed:', error);
@@ -16,5 +18,5 @@ if (require.main === module) {
 	});
 }
 
-/* -------- ES6 Export  -------- */
-export default cli;
+/* -------- CJS  -------- */
+module.exports = cli; // `require('@…/cli')()`

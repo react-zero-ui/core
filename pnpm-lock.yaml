@@ -88,8 +88,8 @@ importers:
   packages/cli:
     dependencies:
       '@react-zero-ui/core':
-        specifier: ^0.1.0
-        version: 0.1.0(@tailwindcss/postcss@4.1.10)(postcss@8.5.6)(react@19.1.0)(tailwindcss@4.1.10)
+        specifier: ^0.2.2
+        version: 0.2.2(@tailwindcss/postcss@4.1.10)(postcss@8.5.6)(react@19.1.0)(tailwindcss@4.1.10)
       '@tailwindcss/postcss':
         specifier: ^4.1.8
         version: 4.1.10
@@ -102,6 +102,9 @@ importers:
 
   packages/core:
     dependencies:
+      '@babel/code-frame':
+        specifier: ^7.27.1
+        version: 7.27.1
       '@babel/generator':
         specifier: ^7.27.5
         version: 7.27.5
@@ -120,6 +123,9 @@ importers:
       fast-glob:
         specifier: ^3.3.3
         version: 3.3.3
+      lru-cache:
+        specifier: ^10.4.3
+        version: 10.4.3
       postcss:
         specifier: ^8.5.5
         version: 8.5.6
@@ -130,9 +136,6 @@ importers:
         specifier: ^4.1.10
         version: 4.1.10
     devDependencies:
-      '@babel/code-frame':
-        specifier: ^7.27.1
-        version: 7.27.1
       '@playwright/test':
         specifier: ^1.53.0
         version: 1.53.1
@@ -148,9 +151,6 @@ importers:
       '@types/react':
         specifier: ^19.1.8
         version: 19.1.8
-      lru-cache:
-        specifier: ^10.4.3
-        version: 10.4.3
       tsx:
         specifier: ^4.20.3
         version: 4.20.3
@@ -186,6 +186,11 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
+  '@babel/parser@7.28.0':
+    resolution: {integrity: sha512-jVZGvOxOuNSsuQuLRTh13nU0AogFlw32w/MT+LV6D3sP5WdbW61E77RnkbaO2dUvmPAYrBDJXGn5gGS6tH4j8g==}
+    engines: {node: '>=6.0.0'}
+    hasBin: true
+
   '@babel/template@7.27.2':
     resolution: {integrity: sha512-LPDZ85aEJyYSd18/DkjNh4/y1ntkE5KwUHWTiqgRxruuZL2F1yuHligVHLvcHY2vMHXttKFpJn6LwfI7cw7ODw==}
     engines: {node: '>=6.9.0'}
@@ -196,6 +201,10 @@ packages:
 
   '@babel/types@7.27.6':
     resolution: {integrity: sha512-ETyHEk2VHHvl9b9jZP5IHPavHYk57EhanlRRuae9XCpb/j5bDCbPPMOBfCWhnl/7EDJz0jEMCi/RhccCE8r1+Q==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/types@7.28.0':
+    resolution: {integrity: sha512-jYnje+JyZG5YThjHiF28oT4SIZLnYOcSBb6+SDaFIyzDVSkXQmQQYclJ2R+YxcdmK0AX6x1E5OQNtuh3jHDrUg==}
     engines: {node: '>=6.9.0'}
 
   '@conventional-commits/parser@0.4.1':
@@ -695,6 +704,15 @@ packages:
 
   '@react-zero-ui/core@0.1.0':
     resolution: {integrity: sha512-ZaFumt9DKsuubhcJHyC6j/JKhF430Q2DYKhetNfgDDYFisLhc2k9Wd+SHuSaxAJjoRmFJlW+jaGzvk0BLtvY6Q==}
+    engines: {node: '>=18.0.0'}
+    peerDependencies:
+      '@tailwindcss/postcss': ^4.1.10
+      postcss: ^8.5.5
+      react: '>=16.8.0'
+      tailwindcss: ^4.1.10
+
+  '@react-zero-ui/core@0.2.2':
+    resolution: {integrity: sha512-3jCC9ivgpItAZl2WV9OUN8cltX2mt4vuk9sC9Mjf+l7/jUqin8fHTal2cgDOUbYxLC6eK6IOoby5OsKem+hLzg==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
       '@tailwindcss/postcss': ^4.1.10
@@ -2507,11 +2525,15 @@ snapshots:
     dependencies:
       '@babel/types': 7.27.6
 
+  '@babel/parser@7.28.0':
+    dependencies:
+      '@babel/types': 7.28.0
+
   '@babel/template@7.27.2':
     dependencies:
       '@babel/code-frame': 7.27.1
-      '@babel/parser': 7.27.5
-      '@babel/types': 7.27.6
+      '@babel/parser': 7.28.0
+      '@babel/types': 7.28.0
 
   '@babel/traverse@7.27.4':
     dependencies:
@@ -2526,6 +2548,11 @@ snapshots:
       - supports-color
 
   '@babel/types@7.27.6':
+    dependencies:
+      '@babel/helper-string-parser': 7.27.1
+      '@babel/helper-validator-identifier': 7.27.1
+
+  '@babel/types@7.28.0':
     dependencies:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.27.1
@@ -2906,6 +2933,22 @@ snapshots:
       '@babel/traverse': 7.27.4
       '@babel/types': 7.27.6
       '@tailwindcss/postcss': 4.1.10
+      postcss: 8.5.6
+      react: 19.1.0
+      tailwindcss: 4.1.10
+    transitivePeerDependencies:
+      - supports-color
+
+  '@react-zero-ui/core@0.2.2(@tailwindcss/postcss@4.1.10)(postcss@8.5.6)(react@19.1.0)(tailwindcss@4.1.10)':
+    dependencies:
+      '@babel/code-frame': 7.27.1
+      '@babel/generator': 7.27.5
+      '@babel/parser': 7.27.5
+      '@babel/traverse': 7.27.4
+      '@babel/types': 7.27.6
+      '@tailwindcss/postcss': 4.1.10
+      fast-glob: 3.3.3
+      lru-cache: 10.4.3
       postcss: 8.5.6
       react: 19.1.0
       tailwindcss: 4.1.10
