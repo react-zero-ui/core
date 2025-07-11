@@ -1,7 +1,7 @@
 name: Release
 
 on:
-  workflow_dispatch:   # manual “Run workflow”
+  workflow_dispatch:   # manual "Run workflow"
 
 permissions:
   contents: write

@@ -1,11 +1,25 @@
-import { parse, parseExpression } from '@babel/parser';
+import { parse, parseExpression, ParserOptions } from '@babel/parser';
 import * as babelTraverse from '@babel/traverse';
 import { NodePath } from '@babel/traverse';
 import * as t from '@babel/types';
 import { generate } from '@babel/generator';
 const traverse = (babelTraverse as any).default;
 import * as fs from 'fs';
-import path from 'path';
+import fg from 'fast-glob';
+
+const AST_CONFIG_OPTS: Partial<ParserOptions> = {
+	sourceType: 'unambiguous',
+	plugins: [
+		'typescript', // in case it's postcss.config.ts / .cts / .mts
+		'jsx', // harmless, needed for rare edge cases
+		'classProperties', // safe if someone uses class-based config
+		'decorators-legacy', // legacy decorators (safe fallback)
+		'dynamicImport', // some setups use dynamic import()
+		'importMeta', // future-proofing
+		'jsonStrings', // for JSON config files
+		'topLevelAwait', // for async config
+	],
+};
 
 /**
  * Parse PostCSS config JavaScript file and add Zero-UI plugin if not present
@@ -18,14 +32,9 @@ import path from 'path';
  */
 export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string, isESModule: boolean = false): string | null {
 	try {
-		const ast = parse(source, { sourceType: 'module', plugins: ['jsonStrings'] });
+		const ast = parse(source, AST_CONFIG_OPTS);
 
 		let modified = false;
-
-		// Check if Zero-UI plugin already exists
-		if (source.includes(zeroUiPlugin)) {
-			return source; // Already configured
-		}
 
 		traverse(ast, {
 			// Handle CommonJS: module.exports = { ... } and exports = { ... }
@@ -83,7 +92,7 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 		}
 	} catch (err: unknown) {
 		const errorMessage = err instanceof Error ? err.message : String(err);
-		console.warn(`[Zero-UI] Failed to parse PostCSS config: ${errorMessage}`);
+		console.warn(`[Zero-UI] Failed to parse PostCSS config: ${errorMessage} ${source}`);
 		return null;
 	}
 }
@@ -106,48 +115,6 @@ function addZeroUiToPlugins(pluginsNode: t.Expression, zeroUiPlugin: string): bo
 }
 
 /**
- * Helper to create a zeroUI() call AST node
- */
-function createZeroUICallNode(): t.CallExpression {
-	return t.callExpression(t.identifier('zeroUI'), []);
-}
-
-/**
- * Helper to create a zeroUI import AST node
- */
-function createZeroUIImportNode(importPath: string): t.ImportDeclaration {
-	return t.importDeclaration([t.importDefaultSpecifier(t.identifier('zeroUI'))], t.stringLiteral(importPath));
-}
-/**
- * Ensure the plugins array contains `zeroUI()` and **no** Tailwind entry.
- * @returns true if the array was modified
- */
-function processPluginsArray(elements: (t.Expression | null)[]): boolean {
-	let modified = false;
-
-	// 1  remove "@tailwindcss/vite" string or tailwindcss() call
-	for (let i = elements.length - 1; i >= 0; i--) {
-		const el = elements[i];
-		if ((t.isStringLiteral(el) && el.value === '@tailwindcss/vite') || (t.isCallExpression(el) && t.isIdentifier(el.callee, { name: 'tailwindcss' }))) {
-			elements.splice(i, 1);
-			modified = true;
-		}
-	}
-
-	// 2  inject zeroUI() if absent
-	const hasZero = elements.some(
-		(el) => (t.isCallExpression(el) && t.isIdentifier(el.callee, { name: 'zeroUI' })) || (t.isStringLiteral(el) && el.value === 'zeroUI()')
-	);
-
-	if (!hasZero) {
-		elements.push(createZeroUICallNode());
-		modified = true;
-	}
-
-	return modified;
-}
-
-/**
  * Parse Vite config TypeScript/JavaScript file and add Zero-UI plugin
  * Removes tailwindcss plugin if present, and adds zeroUI plugin if missing
  * @param {string} source - The Vite config source code
@@ -155,13 +122,9 @@ function processPluginsArray(elements: (t.Expression | null)[]): boolean {
  * @returns {string | null} The modified config code or null if no changes were made
  */
 export function parseAndUpdateViteConfig(source: string, zeroUiImportPath: string): string | null {
-	if (source.includes(zeroUiImportPath) && source.includes('zeroUI()') && !source.includes('@tailwindcss/')) {
-		return source;
-	}
-
 	let ast: t.File;
 	try {
-		ast = parse(source, { sourceType: 'module', plugins: ['typescript', 'jsx', 'importMeta', 'decorators-legacy'] });
+		ast = parse(source, AST_CONFIG_OPTS);
 	} catch (e) {
 		throw new Error(`[Zero-UI] Failed to parse vite.config: ${e instanceof Error ? e.message : String(e)}`);
 	}
@@ -253,23 +216,12 @@ function processConfigObject(obj: t.ObjectExpression): boolean {
 }
 
 function findLayoutWithBody(root = process.cwd()): string[] {
-	const matches: string[] = [];
-	function walk(dir: string): void {
-		for (const file of fs.readdirSync(dir)) {
-			const fullPath = path.join(dir, file);
-			const stat = fs.statSync(fullPath);
-			if (stat.isDirectory()) {
-				walk(fullPath);
-			} else if (/^layout\.(tsx|jsx|js|ts)$/.test(file)) {
-				const source = fs.readFileSync(fullPath, 'utf8');
-				if (source.includes('<body')) {
-					matches.push(fullPath);
-				}
-			}
-		}
-	}
-	walk(root);
-	return matches;
+	const files = fg.sync('**/layout.{tsx,jsx,js,ts}', { cwd: root, ignore: ['**/node_modules/**'], absolute: true });
+
+	return files.filter((file) => {
+		const source = fs.readFileSync(file, 'utf8');
+		return source.includes('<body');
+	});
 }
 
 export async function patchNextBodyTag(): Promise<void> {
@@ -284,7 +236,7 @@ export async function patchNextBodyTag(): Promise<void> {
 	const code = fs.readFileSync(filePath, 'utf8');
 
 	// Parse the file into an AST
-	const ast = parse(code, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
+	const ast = parse(code, AST_CONFIG_OPTS);
 
 	let hasImport = false;
 	traverse(ast, {
@@ -328,13 +280,7 @@ export async function patchNextBodyTag(): Promise<void> {
 		},
 	});
 
-	const output = generate(
-		ast,
-		{
-			/* retain lines, formatting */
-		},
-		code
-	).code;
+	const output = generate(ast, { retainLines: true, decoratorsBeforeExport: true }, code).code;
 	fs.writeFileSync(filePath, output, 'utf8');
 	console.log(`[Zero-UI] ✅ Patched <body> in ${filePath} with {...bodyAttributes}`);
 }

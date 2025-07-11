@@ -1,146 +1,151 @@
-Below is a **“mental model”** of the Zero-UI variant extractor. distilled so that _another_ human (or LLM) can reason about, extend, or safely refactor the code-base.
+# Internal docs
+
+Below is a **"mental model"** of the Zero‑UI variant extractor—distilled so that *another* human (or LLM) can reason about, extend, or safely refactor the code‑base.
 
 ---
 
-## 1. Top-level goal
+## 1. Top‑level goal
 
-- **Locate every call** to a user-supplied React hook
+1. **Locate every hook call** `(ast-parsing.cts) → collectUseUIHooks`
 
-  ```js
-  const [value, setterFn] = useUI('stateKey', 'initialValue');
-  ```
+   ```ts
+   const [value, setterFn] = useUI('stateKey', 'initialValue');
+   ```
 
-- Statically discover **all possible string values** that flow into
-  `stateKey`, `initialValue`, and `setterFn()` arguments.
-  - `stateKey` can resolve to a local static string.
-  - `initialValue` is the same rule as above.
-  - `setterFn()` argument is many forms allowed (see table 3.1) but **must be resolvable**; otherwise the value is ignored (silent) _unless_ it looked resolvable but failed inside the helpers, in which case a targeted error is thrown.
-  - Imported bindings are never allowed - the dev must re-cast them through a local `const`.
+2. **Resolve** (using §3) the `stateKey` and `initialValue` arguments **at build‑time.**
 
-- Report the result as a list of `VariantData` objects.
+   * `stateKey` must be a *local*, static string.
+   * `initialValue` follows the same rule.
 
-```ts
-type VariantData = {
-	key: string; // 'stateKey'
-	values: string[]; // ['light','dark',…]   (unique, sorted)
-	initialValue: string; // from 2nd arg of useUI()
-};
+3. **Globally scan all project files** for **variant tokens that match any discovered `stateKey`**—regardless of where hooks are declared. `(scanner.cts) → scanVariantTokens`
+
+   *Examples*
+
+   ```html
+   <!-- stateKey‑true:bg-black  →  value = "true" -->
+   <div class="stateKey-true:bg-black" />
+   <!-- theme‑dark:text-white  →  value = "dark" -->
+   ```
+
+```bash
+             ┌────────────┐
+             │  Phase A   │   Parse + collect hooks
+source files ─►           ├─► hooks[], global keySet
+             └────────────┘
+                    ▼
+             ┌────────────┐
+             │  Phase B   │   Regex-scan every file
+source files ─►           ├─► Map<key,Set<value>>
+             └────────────┘
+                    ▼
+             build VariantData[]
 ```
 
+4. **Aggregate results** into an array of `VariantData` objects `(ast-parsing.cts)`
+
+   ```ts
+   type VariantData = {
+     key: string;          // 'stateKey'
+     values: string[];     // ['light', 'dark', …]  (unique & sorted)
+     initialValue: string; // from 2nd arg of useUI()
+   };
+   ```
+
+5. **Emit Tailwind `@custom-variant`s** for every `key‑value` pair `(helpers.cts) → buildCss`
+
+   ```css
+   @custom-variant ${keySlug}-${valSlug} {
+     &:where(body[data-${keySlug}="${valSlug}"] *) { @slot; }
+     [data-${keySlug}="${valSlug}"] &, &[data-${keySlug}="${valSlug}"] { @slot; }
+   }
+   ```
+
+6. **Generate the attributes file** so SSR can inject the `<body>` data‑attributes `(helpers.cts) → generateAttributesFile`.
+
 ---
 
-## 2. Two-pass pipeline
+## 2. Pipeline overview (AST + global token scan)
 
-| Pass                               | File-scope work                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Output                                                               |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| **Pass 1 - `collectUseUISetters`** | 1. Traverse the AST once.<br>2. For each `useUI()` destructuring:<br>• validate shapes & count.<br>• resolve the **state key** and **initial value** with **`literalFromNode`** (see rules below).<br>• grab the **binding** of the setter variable.                                                                                                                                                                                                                                                                                   | `SetterMeta[]` = `{ binding, setterName, stateKey, initialValue }[]` |
-| **Pass 2 - `harvestSetterValues`** | 1. For every `binding.referencePaths` (i.e. every place the setter is used)<br>2. Only keep `CallExpression`s: `setX(…)`<br>3. Examine the first argument:<br>• direct literal / identifier / template → resolve via `literalFromNode`.<br>• conditional `cond ? a : b` → resolve both arms.<br>• logical fallback `a \|\| b`, `a ?? b` → resolve each side.<br>&nbsp;&nbsp; arrow / function bodies → collect every returned expression and resolve.<br>4. Add every successfully-resolved string to a `Set` bucket **per stateKey**. | `Map< stateKey, Set<string> >`                                       |
+| Stage | Scope & algorithm | Output |
+| --- | --- | --- |
+| **A - collectUseUIHooks** | Single AST traversal per file.<br>• Validate `useUI()` shapes.<br>• Resolve **stateKey** & **initialValue** with **`literalFromNode`** (§3).<br>• Builds global set of all state keys. | `HookMeta[]` = `{ stateKey, initialValue }[]`, global `Set<stateKey>` |
+| **B - global scanVariantTokens** | Single global regex scan pass over all files (same glob & delimiters Tailwind uses).<br>Matches tokens for **every stateKey discovered in Stage A**. | `Map<stateKey, Set<value>>` |
 
-`normalizeVariants` just converts that map back into the
-`VariantData[]` shape (keeping initial values, sorting, etc.).
+The pipeline now ensures tokens are captured globally—regardless of hook declarations in each file.
 
 ---
 
-## 3. The **literal-resolution micro-framework**
+## 3. The literal‑resolution micro‑framework
 
-Everything funnels through **`literalFromNode`**.
-Think of it as a deterministic _static evaluator_ restricted to a
-_very_ small grammar.
+Everything funnels through **`literalFromNode`**. Think of it as a deterministic *static evaluator* restricted to a very small grammar.
 
-### 3.1 Supported input forms (setterFn())
+### 3.1 Supported input forms (stateKey & initialValue)
 
+```bash
+┌──────────────────────────────┬──────────────────────────┐
+│ Expression                   │ Accepted? → Returns      │
+├──────────────────────────────┼──────────────────────────┤
+│ "dark"                       │ ✅ string literal        │
+│ `dark`                       │ ✅ template literal      │
+│ `th-${COLOR}`                │ ✅ if COLOR is const     │
+│ "a" + "b"                    │ ✅ → "ab"                │
+│ a || b, a ?? b               │ ✅ tries left, then right│
+│ const DARK = "dark"          │ ✅ top-level const only  │
+│ THEMES.dark                  │ ✅ const object access   │
+│ THEMES["dark"]               │ ✅ computed property     │
+│ THEMES[KEY]                  │ ✅ if KEY is const       │
+│ THEMES.brand.primary         │ ✅ nested objects        │
+│ COLORS[1]                    │ ✅ array access          │
+│ THEMES?.dark                 │ ✅ optional chaining     │
+│ { dark: "theme" } as const   │ ✅ TS const assertion    │
+├──────────────────────────────┼──────────────────────────┤
+│ import { X } from './file'   │ ❌ throws:use local const│
+│ let/var THEME                │ ❌ only const allowed    │
+│ function() { const X }       │ ❌ must be top-level     │
+│ someFunction()               │ ❌ no dynamic values     │
+│ THEMES.nonexistent           │ ❌ throws: not found     │
+│ Math.random()                │ ❌ no runtime values     │
+└──────────────────────────────┴──────────────────────────┘
 ```
-┌────────────────────────────────┬─────────────────────────┐
-│ Expression                     │ Accepted? → Returns     │
-├────────────────────────────────┼─────────────────────────┤
-│ dark                           │ ✔ string literal        │
-│ `th-${COLOR}`                  │ ✔ if every `${}`resolves│
-│ const DARK                     │ ✔ if IDENT → const str  │
-│ THEMES.dark/[idx]/?.           │ ✔ if the whole chain is │
-│                                │   top-level `const`     │
-│ "a" + "b"                      │ ✔ "ab"                  │
-│ a ?? b or a || b               │ ✔ Attempts to resolve   │
-│                                │   both sides            │
-│prev =>(prev=== 'a' ? 'b' : 'a')│  "a" ,"b"               │
-│ Anything imported              │ ❌ Hard error           │
-│ Anything dynamic at runtime    │ ❌ Returns null / error │
-└────────────────────────────────┴─────────────────────────┘
-```
 
-### 3.2 Helpers
+**Note:** All values must be resolvable at build time to static strings.
 
-| Helper                            | Job                                                                                                                                                                           |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`resolveTemplateLiteral`**      | Ensures every `${expr}` itself resolves to a string via `literalFromNode`.                                                                                                    |
-| **`resolveLocalConstIdentifier`** | Maps an `Identifier` → its `const` initializer _if_ that initializer is an accepted string/ template. Rejects imported bindings with a _single_ descriptive error.            |
-| **`resolveMemberExpression`**     | Static walk of `obj.prop`, `obj['prop']`, `obj?.prop`, etc. Works through `as const`, optional-chaining, arrays, numbers, nested chains. Throws if any hop can't be resolved. |
-| **`literalFromNode`**             | Router that calls the above; memoised (`WeakMap`) so each AST node is evaluated once.                                                                                         |
+### 3.2 Resolvers
 
-All helpers accept `opts:{ throwOnFail, source, hook }` so _contextual_
-error messages can be emitted with **`throwCodeFrame`**
-(using `@babel/code-frame` to show a coloured snippet).
+| Helper | Purpose |
+| -- | -- |
+| **`resolveTemplateLiteral`** | Ensures every `${expr}` resolves via `literalFromNode`. |
+| **`resolveLocalConstIdentifier`** | Maps an `Identifier` → its `const` initializer *iff* initializer is a local static string/template. Imported bindings rejected explicitly. |
+| **`resolveMemberExpression`** | Static walk of `obj.prop`, `obj['prop']`, `obj?.prop`, arrays, numeric indexes, optional‑chaining… Throws if unresolved. |
+| **`literalFromNode`**             | Router calling above; memoised (`WeakMap`) per AST node.                                                                                   |
+
+Resolvers throw contextual errors via **`throwCodeFrame`** (`@babel/code-frame`).
 
 ---
 
-## 4. Validation rules (why errors occur)
+## 4. Validation rules
 
-| Position in `useUI`      | Allowed value                                                                                                                                                                                                 | Example error                                 |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| **stateKey (arg 0)**     | _Local_ static string                                                                                                                                                                                         | `State key cannot be resolved at build-time.` |
-| **initialValue (arg 1)** | Same rule as above.                                                                                                                                                                                           | `Initial value cannot be resolved …`          |
-| **setter argument**      | Many forms allowed (see table 3.1) but **must be resolvable**; otherwise the value is ignored (silent) _unless_ it looked resolvable but failed inside the helpers, in which case a targeted error is thrown. |                                               |
+| Position in `useUI` | Allowed value | Example error |
+| --- | --- | --- |
+| **stateKey (arg 0)** | Local static string | `State key cannot be resolved at build‑time.` |
+| **initialValue (arg 1)** | Same rule as above. | `Initial value cannot be resolved …` |
 
-Imported bindings are never allowed - the dev must re-cast them
-through a local `const`.
+Imported bindings must be re‑cast locally.
 
 ---
 
-## 5. Optional-chain & optional-member details
+## 5. Performance notes
 
-- The updated `resolveMemberExpression` loop iterates while
-  `isMemberExpression || isOptionalMemberExpression`.
-- Inside array/obj traversal it throws a clear error if a link is
-  missing instead of silently returning `null`.
-- `props` collects mixed `string | number` keys in **reverse** (deep → shallow) order, so they can be replayed from the root identifier outward.
+* **Global LRU file‑cache** avoids re‑parsing unchanged files (`mtime:size`).
+* **Parallel parsing** (`os.cpus().length-1` concurrent tasks).
+* **Regex-based global token scanning** (fast Tailwind‑style parsing).
 
 ---
 
-## 6. Performance enhancements
+## 6. Unsupported cases
 
-- **Memoisation** (`WeakMap<node,string\|null>`) across _both_ passes.
-- **Quick literals** - string & number keys handled without extra calls.
-- `throwCodeFrame` (and thus `generate(node).code`) runs **only** on
-  failing branches.
-- A small **LRU file-cache** (<5k entries) avoids re-parsing unchanged
-  files (mtime + size signature, with hash fallback).
-
----
-
-## 7. What is **not** supported
-
-- Runtime-only constructs (`import.meta`, env checks, dynamic imports …).
-- Cross-file constant propagation - the extractor is intentionally
-  single-file to keep the build independent of user bundler config.
-- Non-string variants (numbers, booleans) - strings only.
-- Private class fields in member chains.
-- Setter arguments that are **imported functions**.
-
----
-
-## 8. How to extend
-
-- **Add more expression kinds**: extend `literalFromNode` with new
-  cases _and_ unit-test them.
-- **Cross-file constants**: in `resolveLocalConstIdentifier`, detect
-  `ImportSpecifier`, read & parse the target file, then recurse - but
-  beware performance.
-- **Boolean / number variants**: relax `literalToString` and adjust
-  variant schema.
-
----
-
-> **In one sentence**:
-> The extractor turns _purely static, in-file JavaScript_ around `useUI`
-> into a deterministic list of variant strings, throwing early and with
-> helpful frames whenever something would otherwise need runtime
-> evaluation.
+* Runtime constructs (`import.meta`, dynamic imports).
+* Cross‑file constants.
+* Non‑string values (numbers, booleans).
+* Private class fields.
+* No analysis of setter functions (runtime-only).

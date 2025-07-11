@@ -5,7 +5,7 @@ const path = require('path');
 const os = require('os');
 const { performance } = require('node:perf_hooks');
 const { findAllSourceFiles } = require('../../dist/postcss/helpers.cjs');
-const { collectUseUISetters, extractVariants } = require('../../dist/postcss/ast-parsing.cjs');
+const { collectUseUIHooks, extractVariants } = require('../../dist/postcss/ast-parsing.cjs');
 
 const ComponentImports = readFile(path.join(__dirname, './fixtures/test-components.jsx'));
 const AllPatternsComponent = readFile(path.join(__dirname, './fixtures/ts-test-components.tsx'));
@@ -62,7 +62,7 @@ test('findAllSourceFiles', async () => {
 	);
 });
 
-test('collectUseUISetters - basic functionality', async () => {
+test('collectUseUIHooks - basic functionality', async () => {
 	const sourceCode = `
 		import { useUI } from '@react-zero-ui/core';
 
@@ -77,7 +77,7 @@ test('collectUseUISetters - basic functionality', async () => {
 	`;
 
 	const ast = parse(sourceCode, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
-	const setters = collectUseUISetters(ast);
+	const setters = collectUseUIHooks(ast);
 
 	assert.strictEqual(setters[0].stateKey, 'theme');
 	assert.strictEqual(setters[0].initialValue, 'light');
@@ -118,7 +118,7 @@ export function ComponentSimple() {
 test('Extract Variant with imports and throw error', async () => {
 	await runTest({ 'src/app/Component.jsx': ComponentImports }, async () => {
 		assert.throws(() => {
-			collectUseUISetters(parse(ComponentImports, { sourceType: 'module', plugins: ['jsx', 'typescript'] }), ComponentImports);
+			collectUseUIHooks(parse(ComponentImports, { sourceType: 'module', plugins: ['jsx', 'typescript'] }), ComponentImports);
 			// tests that the error message contains the correct text
 		}, /const VARSLocal = VARS/);
 	});
@@ -126,7 +126,7 @@ test('Extract Variant with imports and throw error', async () => {
 
 test('testKeyInitialValue', async () => {
 	await runTest({ 'src/app/Component.jsx': AllPatternsComponent }, async () => {
-		const setters = collectUseUISetters(parse(AllPatternsComponent, { sourceType: 'module', plugins: ['jsx', 'typescript'] }), AllPatternsComponent);
+		const setters = collectUseUIHooks(parse(AllPatternsComponent, { sourceType: 'module', plugins: ['jsx', 'typescript'] }), AllPatternsComponent);
 		assert.strictEqual(setters[0].stateKey, 'theme');
 		assert.strictEqual(setters[0].initialValue, 'light');
 		assert.strictEqual(setters[1].stateKey, 'altTheme');

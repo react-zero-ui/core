@@ -1,6 +1,7 @@
 // src/cli/postInstall.cts
 import { patchNextBodyTag } from '../postcss/ast-generating.cjs';
-import { processVariants, generateAttributesFile, patchTsConfig, patchPostcssConfig, patchViteConfig, hasViteConfig } from '../postcss/helpers.cjs';
+import { generateAttributesFile, patchTsConfig, patchPostcssConfig, patchViteConfig, hasViteConfig } from '../postcss/helpers.cjs';
+import { processVariants } from '../postcss/ast-parsing.cjs';
 
 export async function runZeroUiInit() {
 	try {

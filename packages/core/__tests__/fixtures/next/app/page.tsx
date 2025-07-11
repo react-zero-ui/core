@@ -2,6 +2,7 @@
 import { useUI } from '@react-zero-ui/core';
 import UseEffectComponent from './UseEffectComponent';
 import FAQ from './FAQ';
+import { ChildComponent } from './ChildComponent';
 
 export default function Page() {
 	const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
@@ -12,6 +13,7 @@ export default function Page() {
 	const [, setOpen] = useUI<'open' | 'closed'>('faq', 'closed'); // Same key everywhere!
 	const [, setScope] = useUI<'off' | 'on'>('scope', 'off');
 	const [, setMobile] = useUI<'true' | 'false'>('mobile', 'false');
+	const [, setChildOpen] = useUI<'open' | 'closed'>('child', 'closed');
 
 	const [, setToggleFunction] = useUI<'white' | 'black'>('toggle-function', 'white');
 
@@ -128,9 +130,13 @@ export default function Page() {
 						Function: <span className="toggle-function-white:block hidden">White</span> <span className="toggle-function-black:block hidden">Black</span>
 					</div>
 				</div>
+				<hr />
+				<ChildComponent setIsOpen={setChildOpen} />
 			</div>
 			<hr />
+
 			<h1 className="text-2xl font-bold py-5">Scoped Style Tests</h1>
+
 			<hr />
 
 			<div className="border-2 border-blue-500">
@@ -151,6 +157,7 @@ export default function Page() {
 						<span className="scope-on:block scope-off:hidden">True</span>
 					</div>
 				</div>
+
 				<hr />
 
 				<div
@@ -182,6 +189,8 @@ export default function Page() {
 					</div>
 				</div>
 			</div>
+
+			<hr />
 
 			<div ref={setOpen.ref}>
 				<button

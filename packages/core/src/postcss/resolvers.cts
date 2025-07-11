@@ -5,7 +5,7 @@ import { generate } from '@babel/generator';
 export interface ResolveOpts {
 	throwOnFail?: boolean; // default false
 	source?: string; // optional; fall back to path.hub.file.code
-	hook?: 'stateKey' | 'initialValue' | 'setterName'; // default 'stateKey'
+	hook?: 'stateKey' | 'initialValue' | 'setterFnName'; // default 'stateKey'
 }
 
 /**
@@ -13,9 +13,13 @@ export interface ResolveOpts {
  *
  * 1. String literal
  * 2. Template literal with no expressions
- * 3. Identifier bound to local const
- * 4. Template literal with expressions
- * 5. Everything else is illegal
+ * 3. Binary expression (a + b)
+ * 4. Logical expression (a || b, a ?? b)
+ * 5. Identifier bound to local const
+ * 6. Template literal with expressions
+ * 7. Member expression
+ * 8. Optional member expression
+ * 9. Everything else is illegal
  * @param node - The node to convert
  * @param path - The path to the node
  * @returns The string literal or null if the node is not a string literal or template literal with no expressions or identifier bound to local const
@@ -63,7 +67,14 @@ export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts
 	return null;
 }
 
-function fastEval(node: t.Expression, path: NodePath<t.Node>) {
+/*──────────────────────────────────────────────────────────*\
+  fastEval - a fast path to evaluate a node if it is the current visitor path
+  ---------------------------
+  If the node *is* the current visitor path, we can evaluate directly.
+
+  Returns {confident, value} or {confident: false}
+\*──────────────────────────────────────────────────────────*/
+export function fastEval(node: t.Expression, path: NodePath<t.Node>) {
 	// ❶ If the node *is* the current visitor path, we can evaluate directly.
 	if (node === path.node && (path as any).evaluate) {
 		return (path as any).evaluate(); // safe, returns {confident, value}
@@ -95,7 +106,7 @@ function fastEval(node: t.Expression, path: NodePath<t.Node>) {
   Anything else (inner-scope `const`, dynamic value, imported binding, spaces)
   ➜ return `null` — the caller will decide whether to throw or keep searching.
 
-  If the binding is *imported*, we delegate to `importedVariableErr()` so the
+  If the binding is *imported*, we delegate to `throwCodeFrame()` so the
   developer gets a consistent, actionable error message.
 \*──────────────────────────────────────────────────────────*/
 export function resolveLocalConstIdentifier(
@@ -123,7 +134,7 @@ export function resolveLocalConstIdentifier(
 						? `useUI(${node.name}Local, initialValue);`
 						: opts.hook === 'initialValue'
 							? `useUI(stateKey, ${node.name}Local);`
-							: opts.hook === 'setterName'
+							: opts.hook === 'setterFnName'
 								? `setterFunction(${node.name}Local)`
 								: ''
 				}\n`
@@ -156,7 +167,7 @@ export function resolveLocalConstIdentifier(
 }
 
 /*──────────────────────────────────────────────────────────*\
-  resolveTemplateLiteral
+  resolveTemplateLiteral - a template literal is a string literal with ${expr} placeholders
   ----------------------
   Accepts a **TemplateLiteral** node that *may* contain `${}` placeholders
   *and* a NodePath for scope look-ups.
@@ -165,9 +176,9 @@ export function resolveLocalConstIdentifier(
   --------------
   1. The *final* resolved string **must have zero whitespace** (`/^\S+$/`).
   2. Each `${expr}` must resolve (via `literalFromNode`) to a **local**
-     string literal **without spaces**.
+	string literal **without spaces**.
   3. If an expression's binding is *imported*, we delegate to
-      `importedVariableErr`.
+	`throwCodeFrame`.
   4. Any failure → return `null` so the caller can emit its own error.
 
   Returned value
@@ -204,6 +215,7 @@ export function resolveTemplateLiteral(
 			if (lit === null && opts.throwOnFail) {
 				throwCodeFrame(path, path.opts?.filename, opts.source ?? path.opts?.source?.code, '[Zero-UI] Template literal must resolve to a space-free string.');
 			}
+			if (lit === null) return null;
 			result += lit;
 		}
 	}
@@ -212,7 +224,7 @@ export function resolveTemplateLiteral(
 }
 
 /*────────────────────────────────────*\
-  resolveMemberExpression
+  resolveMemberExpression - a member expression is an object access like `THEMES.dark` or `THEMES['dark']` or `THEMES.brand.primary`
   -----------------------
   Resolve a **MemberExpression** like `THEMES.dark` or `THEMES['dark']`
   (optionally nested: `THEMES.brand.primary`) to a **space-free string**
@@ -227,7 +239,7 @@ export function resolveTemplateLiteral(
   • No imported bindings are involved.
 
   Returns `string` on success, otherwise `null`.  Throws via
-  `importedVariableErr` when the base identifier is imported.
+  `throwCodeFrame` when the base identifier is imported.
 
   Re-uses:
     • `resolveTemplateLiteral`  - so a template like THEMES[`da${'rk'}`] would
@@ -339,7 +351,7 @@ export function resolveMemberExpression(
 }
 
 /*──────────────────────────────────────────────────────────*\
-  resolveObjectValue
+  resolveObjectValue - an object expression is an object like `{ dark: 'theme' }` or nested `{ dark: 'theme', brand: { primary: 'blue' } }`
   -------------
   Helper: given an ObjectExpression, return the value associated with `key`
   when that value is a **StringLiteral** | ObjectExpression | ArrayExpression.

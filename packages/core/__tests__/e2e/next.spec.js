@@ -74,6 +74,16 @@ const scenarios = [
 		initialText: 'White',
 		toggledText: 'Black',
 	},
+	{
+		name: 'Child Component Toggle',
+		toggle: 'child-toggle',
+		container: 'child-container',
+		attr: 'data-child',
+		initialValue: 'closed',
+		toggledValue: 'open',
+		initialText: 'Closed',
+		toggledText: 'Open',
+	},
 ];
 
 test.describe.configure({ mode: 'serial' });

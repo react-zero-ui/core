@@ -4,7 +4,7 @@ import fg from 'fast-glob';
 import path from 'path';
 import { CONFIG, IGNORE_DIRS } from '../config.cjs';
 import { parseJsonWithBabel, parseAndUpdatePostcssConfig, parseAndUpdateViteConfig } from './ast-generating.cjs';
-import { extractVariants, VariantData } from './ast-parsing.cjs';
+import { VariantData } from './ast-parsing.cjs';
 
 export interface ProcessVariantsResult {
 	/** Array of deduplicated and sorted variant data */
@@ -50,50 +50,6 @@ export function findAllSourceFiles(patterns: string[] = CONFIG.CONTENT, cwd: str
 		.map((p) => path.resolve(p)); // normalize on Windows
 }
 
-/**
- * Process all variants from source files and return deduplicated, sorted variants.
- * This is the core processing logic used by both PostCSS plugin and init script.
- */
-export async function processVariants(files: string[] | null = null): Promise<ProcessVariantsResult> {
-	const sourceFiles = files || findAllSourceFiles();
-	const allVariants = sourceFiles.flatMap((file) => {
-		return extractVariants(file);
-	});
-
-	// Deduplicate and merge variants
-	const variantMap = new Map<string, Set<string>>();
-	const initialValueMap = new Map<string, string>();
-
-	for (const variant of allVariants) {
-		const { key, values, initialValue } = variant;
-
-		if (!variantMap.has(key)) {
-			variantMap.set(key, new Set());
-			if (initialValue !== null && initialValue !== undefined) {
-				initialValueMap.set(key, initialValue);
-			}
-		}
-
-		if (Array.isArray(values)) {
-			values.forEach((v) => variantMap.get(key)!.add(v));
-		}
-	}
-
-	// Convert to final format
-	const finalVariants: VariantData[] = Array.from(variantMap.entries())
-		.map(([key, set]) => ({ key, values: Array.from(set).sort(), initialValue: initialValueMap.get(key) || null }))
-		.sort((a, b) => a.key.localeCompare(b.key));
-
-	// Generate initial values object
-	const initialValues: Record<string, string> = {};
-	for (const { key, values, initialValue } of finalVariants) {
-		const keySlug = toKebabCase(key);
-		initialValues[`data-${keySlug}`] = initialValue || values[0] || '';
-	}
-
-	return { finalVariants, initialValues, sourceFiles };
-}
-
 export function buildCss(variants: VariantData[]): string {
 	const lines = variants.flatMap(({ key, values }) => {
 		if (values.length === 0) return [];
@@ -103,10 +59,7 @@ export function buildCss(variants: VariantData[]): string {
 		return [...values].sort().map((v) => {
 			const valSlug = toKebabCase(v);
 
-			return `@custom-variant ${keySlug}-${valSlug} {
-  &:where(body[data-${keySlug}="${valSlug}"] *) { @slot; }
-  [data-${keySlug}="${valSlug}"] &, &[data-${keySlug}="${valSlug}"] { @slot; }
-}`;
+			return `@custom-variant ${keySlug}-${valSlug} {&:where(body[data-${keySlug}="${valSlug}"] *) { @slot; } [data-${keySlug}="${valSlug}"] &, &[data-${keySlug}="${valSlug}"] { @slot; }}`;
 		});
 	});
 
@@ -343,4 +296,36 @@ export async function patchViteConfig(): Promise<void> {
 export function hasViteConfig(): boolean {
 	const cwd = process.cwd();
 	return ['vite.config.ts', 'vite.config.mts', 'vite.config.js', 'vite.config.mjs', 'vite.config.cjs'].some((f) => fs.existsSync(path.join(cwd, f)));
+}
+
+/**
+ * Concurrency helper (no external dep)
+ * @param items - The items to process.
+ * @param limit - The maximum number of concurrent executions.
+ * @param fn - The function to execute for each item.
+ * @returns A promise that resolves to an array of results.
+ */
+export async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+	const out: R[] = [];
+	let i = 0;
+	let active = 0;
+	return new Promise((resolve, reject) => {
+		const launch = () => {
+			if (i === items.length && active === 0) return resolve(out);
+			while (active < limit && i < items.length) {
+				const idx = i++;
+				active++;
+				fn(items[idx])
+					.then((r) => {
+						out[idx] = r;
+					})
+					.then(() => {
+						active--;
+						launch();
+					})
+					.catch(reject);
+			}
+		};
+		launch();
+	});
 }

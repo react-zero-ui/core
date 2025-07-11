@@ -28,7 +28,28 @@ async function runTest(files, callback) {
 				fs.mkdirSync(dir, { recursive: true });
 			}
 			fs.writeFileSync(filePath, content);
+			
+			// Verify file was created
+			if (!fs.existsSync(filePath)) {
+				throw new Error(`Failed to create test file: ${filePath}`);
+			}
 		}
+
+		// Small delay to ensure files are fully written
+		await new Promise(resolve => setTimeout(resolve, 10));
+
+		// Debug: Log current directory and files
+		console.log(`[DEBUG] Test directory: ${process.cwd()}`);
+		console.log(`[DEBUG] Files created:`, Object.keys(files));
+		
+		// Check if files exist in the expected locations
+		const fg = require('fast-glob');
+		const foundFiles = fg.sync(['src/**/*.{ts,tsx,js,jsx}', 'app/**/*.{ts,tsx,js,jsx}', 'pages/**/*.{ts,tsx,js,jsx}'], {
+			cwd: process.cwd(),
+			absolute: true,
+			onlyFiles: true
+		});
+		console.log(`[DEBUG] Files found by glob:`, foundFiles);
 
 		// Run PostCSS
 		const result = await postcss([plugin()]).process('', { from: undefined });

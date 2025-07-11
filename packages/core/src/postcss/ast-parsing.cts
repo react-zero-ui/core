@@ -1,23 +1,29 @@
 // src/core/postcss/ast-parsing.cts
-
-import { parse } from '@babel/parser';
+import os from 'os';
+import { parse, ParserOptions } from '@babel/parser';
 import * as babelTraverse from '@babel/traverse';
 import { Binding, NodePath, Node } from '@babel/traverse';
 import * as t from '@babel/types';
 import { CONFIG } from '../config.cjs';
-import { createHash } from 'crypto';
 import * as fs from 'fs';
 import { literalFromNode, ResolveOpts } from './resolvers.cjs';
 import { codeFrameColumns } from '@babel/code-frame';
 const traverse = (babelTraverse as any).default;
 import { LRUCache as LRU } from 'lru-cache';
 import { scanVariantTokens } from './scanner.cjs';
+import { findAllSourceFiles, mapLimit, toKebabCase } from './helpers.cjs';
 
-export interface SetterMeta {
+const PARSE_OPTS = (f: string): Partial<ParserOptions> => ({
+	sourceType: 'module',
+	plugins: ['jsx', 'typescript', 'decorators-legacy', 'topLevelAwait'],
+	sourceFilename: f,
+});
+
+export interface HookMeta {
 	/** Babel binding object — use `binding.referencePaths` in Pass 2 */
 	binding: Binding;
 	/** Variable name (`setTheme`) */
-	setterName: string;
+	setterFnName: string;
 	/** State key passed to `useUI` (`'theme'`) */
 	stateKey: string;
 	/** Literal initial value as string, or `null` if non-literal */
@@ -33,11 +39,11 @@ export interface SetterMeta {
  * Throws if the key is dynamic or if the initial value cannot be
  * reduced to a space-free string.
  */
-export function collectUseUISetters(ast: t.File, sourceCode: string): SetterMeta[] {
-	const setters: SetterMeta[] = [];
+export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
+	const hooks: HookMeta[] = [];
 	/* ---------- cache resolved literals per AST node ---------- */
 	const memo = new WeakMap<t.Node, string | null>();
-	const optsBase = { throwOnFail: false, source: sourceCode } as ResolveOpts;
+	const optsBase = { throwOnFail: true, source: sourceCode } as ResolveOpts;
 
 	function lit(node: t.Expression, p: NodePath<t.Node>, hook: ResolveOpts['hook']): string | null {
 		if (memo.has(node)) return memo.get(node)!;
@@ -45,8 +51,7 @@ export function collectUseUISetters(ast: t.File, sourceCode: string): SetterMeta
 		// clone instead of mutate
 		const localOpts: ResolveOpts = { ...optsBase, hook };
 
-		const ev = (p as NodePath).evaluate?.();
-		const value = ev?.confident && typeof ev.value === 'string' ? ev.value : literalFromNode(node, p, localOpts);
+		const value = literalFromNode(node, p, localOpts);
 
 		memo.set(node, value);
 		return value;
@@ -80,11 +85,11 @@ export function collectUseUISetters(ast: t.File, sourceCode: string): SetterMeta
 					path.opts?.filename,
 					sourceCode,
 					// TODO add link to docs
-					`[Zero-UI] State key cannot be resolved at build-time.\n` + `Only local, fully-static strings are supported. - collectUseUISetters-stateKey`
+					`[Zero-UI] State key cannot be resolved at build-time.\n` + `Only local, fully-static strings are supported. - collectUseUIHooks-stateKey`
 				);
 			}
 
-			// resolve initial value with new helpers
+			// resolve initial value with helpers
 			const initialValue = lit(initialArg as t.Expression, path as NodePath<t.Node>, 'initialValue');
 
 			if (initialValue === null) {
@@ -94,7 +99,7 @@ export function collectUseUISetters(ast: t.File, sourceCode: string): SetterMeta
 					sourceCode,
 					// TODO add link to docs
 					`[Zero-UI] initial value cannot be resolved at build-time.\n` +
-						`Only local, fully-static objects/arrays are supported. - collectUseUISetters-initialValue`
+						`Only local, fully-static objects/arrays are supported. - collectUseUIHooks-initialValue`
 				);
 			}
 
@@ -103,11 +108,11 @@ export function collectUseUISetters(ast: t.File, sourceCode: string): SetterMeta
 				throwCodeFrame(path, path.opts?.filename, sourceCode, `[Zero-UI] Could not resolve binding for setter "${setterEl.name}".`);
 			}
 
-			setters.push({ binding, setterName: setterEl.name, stateKey, initialValue });
+			hooks.push({ binding, setterFnName: setterEl.name, stateKey, initialValue });
 		},
 	});
 
-	return setters;
+	return hooks;
 }
 
 export interface VariantData {
@@ -118,109 +123,112 @@ export interface VariantData {
 	/** Literal initial value as string, or `null` if non-literal */
 	initialValue: string | null;
 }
+
+/* ── LRU cache keyed by absolute file path ──────────────────────────── */
+interface CacheEntry {
+	hash: string; // mtime:size
+	hooks: HookMeta[]; // Phase-A result
+	tokens: Map<string, Set<string>>; // Phase-B result
+}
+const fileCache = new LRU<string, CacheEntry>({ max: 1_000 });
+
+/* ── Main compiler ──────────────────────────────────────────────────── */
+export interface ProcessVariantsResult {
+	finalVariants: VariantData[];
+	initialValues: Record<string, string>;
+	sourceFiles: string[];
+}
+
 /**
- * Convert the harvested variants map to the final output format
+ * Scans all source files for `useUI` hooks and variant tokens.
+ * Pass `null` (or omit arg) for a cold build (re-process all files).
+ * @param changedFiles - The files that have changed (optional).
+ * @returns A promise that resolves to the ProcessVariantsResult.
  */
-export function normalizeVariants(scanned: Map<string, Set<string>>, setters: SetterMeta[], sort = true): VariantData[] {
-	// key → initialValue  (may be null)
-	const initialMap = new Map(setters.map((s) => [s.stateKey, s.initialValue ?? null]));
 
-	const out: VariantData[] = [];
+export async function processVariants(changedFiles: string[] | null = null): Promise<ProcessVariantsResult> {
+	const srcFiles = changedFiles ?? findAllSourceFiles();
 
-	// 1️⃣  merge scan-results with initial values
-	for (const [key, init] of initialMap) {
-		// ensure we have a bucket
-		if (!scanned.has(key)) scanned.set(key, new Set());
+	/* Phase A — refresh hooks in cache (no token scan yet) */
 
-		if (init) scanned.get(key)!.add(init);
-	}
+	// Count the number of CPUs and use 1 less than that for concurrency
+	const cpu = Math.max(os.cpus().length - 1, 1);
 
-	// 2️⃣  convert to the public shape
-	for (const [key, set] of scanned) {
-		const values = Array.from(set);
-		if (sort) values.sort();
-
-		out.push({ key, values, initialValue: initialMap.get(key) ?? null });
-	}
-
-	if (sort) out.sort((a, b) => a.key.localeCompare(b.key));
-	return out;
-}
-
-// File cache to avoid re-parsing unchanged files
-export interface CacheEntry {
-	hash: string;
-	variants: VariantData[];
-}
-
-const fileCache = new LRU<string, CacheEntry>({ max: 5000 });
-
-function keysFrom(setters: SetterMeta[]): Set<string> {
-	return new Set(setters.map((s) => s.stateKey)); // already kebab-cased by collectUseUISetters
-}
-
-export function extractVariants(filePath: string): VariantData[] {
-	// console.log(`[CACHE] Checking: ${filePath}`);
-
-	try {
-		const { mtimeMs, size } = fs.statSync(filePath);
+	// Process files concurrently
+	await mapLimit(srcFiles, cpu, async (fp) => {
+		const { mtimeMs, size } = fs.statSync(fp);
 		const sig = `${mtimeMs}:${size}`;
 
-		const cached = fileCache.get(filePath);
-		if (cached && cached.hash === sig) {
-			// console.log(`[CACHE] HIT (sig): ${filePath}`);
-			return cached.variants; // Fast path: file unchanged
-		}
+		// Fast-path: unchanged file
+		if (fileCache.get(fp)?.hash === sig) return;
 
-		const source = fs.readFileSync(filePath, 'utf8');
-		const hash = createHash('md5').update(source).digest('hex');
+		// Read the file
+		const code = fs.readFileSync(fp, 'utf8');
 
-		// Fallback: content unchanged despite mtime/size change
-		if (cached && cached.hash === hash) {
-			// console.log(`[CACHE] HIT (hash): ${filePath}`);
-			// Update cache with new sig for next time
-			const entry = { hash: sig, variants: cached.variants };
-			fileCache.set(filePath, entry);
-			return cached.variants;
-		}
+		// AST Parse the file
+		const ast = parse(code, PARSE_OPTS(fp));
 
-		// console.log(`[CACHE] MISS: ${filePath} (parsing...)`);
-		// Parse the file
-		const ast = parse(source, { sourceType: 'module', plugins: ['jsx', 'typescript', 'decorators-legacy', 'topLevelAwait'], sourceFilename: filePath });
+		// Collect the useUI hooks
+		const hooks = collectUseUIHooks(ast, code);
 
-		// Collect useUI setters
-		const setters = collectUseUISetters(ast, source);
-		if (!setters.length) return [];
+		// Temporarily store empty token map; we'll fill it after we know all keys
+		fileCache.set(fp, { hash: sig, hooks, tokens: new Map() });
+	});
 
-		// Normalize variants
-		const variants = normalizeVariants(scanVariantTokens(source, keysFrom(setters)), setters);
+	/* Phase B — build global key set */
+	const keySet = new Set<string>();
+	for (const { hooks } of fileCache.values()) hooks.forEach((h) => keySet.add(h.stateKey));
 
-		// Store with signature for fast future lookups
-		fileCache.set(filePath, { hash: sig, variants });
-		return variants;
-	} catch (error) {
-		// Fallback for virtual/non-existent files - use content hash only
-		const source = fs.readFileSync(filePath, 'utf8');
-		const hash = createHash('md5').update(source).digest('hex');
+	/* Phase C — ensure every cache entry has up-to-date tokens */
+	for (const [fp, entry] of fileCache) {
+		// Re-scan if tokens missing OR if keySet now contains keys we didn't scan for
+		const needsRescan = entry.tokens.size === 0 || [...keySet].some((k) => !entry.tokens.has(k));
 
-		const cached = fileCache.get(filePath);
-		if (cached && cached.hash === hash) {
-			return cached.variants;
-		}
+		if (!needsRescan) continue;
 
-		// Parse and cache...
-		const ast = parse(source, { sourceType: 'module', plugins: ['jsx', 'typescript', 'decorators-legacy', 'topLevelAwait'], sourceFilename: filePath });
-		const setters = collectUseUISetters(ast, source);
-		if (!setters.length) return [];
-
-		// final normalization of variants
-		const variants = normalizeVariants(scanVariantTokens(source, keysFrom(setters)), setters);
-		console.log('variants extractVariants: ', variants);
-
-		fileCache.set(filePath, { hash, variants });
-		return variants;
+		const code = fs.readFileSync(fp, 'utf8'); // cheap: regex only
+		entry.tokens = scanVariantTokens(code, keySet);
 	}
+
+	/* Phase D — aggregate variant & initial-value maps */
+	const variantMap = new Map<string, Set<string>>();
+	const initMap = new Map<string, string>();
+
+	for (const { hooks, tokens } of fileCache.values()) {
+		// initial values
+		hooks.forEach((h) => {
+			if (!h.initialValue) return;
+			const prev = initMap.get(h.stateKey);
+			if (prev && prev !== h.initialValue) {
+				throw new Error(`[Zero-UI] Conflicting initial values for '${h.stateKey}': '${prev}' vs '${h.initialValue}'`);
+			}
+			initMap.set(h.stateKey, h.initialValue);
+		});
+
+		// tokens → variantMap
+		tokens.forEach((vals, k) => {
+			if (!variantMap.has(k)) variantMap.set(k, new Set());
+			vals.forEach((v) => variantMap.get(k)!.add(v));
+		});
+	}
+
+	/* Phase E — final assembly */
+	const finalVariants: VariantData[] = [...variantMap]
+		.map(([key, set]) => ({ key, values: [...set].sort(), initialValue: initMap.get(key) ?? null }))
+		.sort((a, b) => a.key.localeCompare(b.key));
+
+	const initialValues = Object.fromEntries(finalVariants.map((v) => [`data-${toKebabCase(v.key)}`, v.initialValue ?? v.values[0] ?? '']));
+
+	return { finalVariants, initialValues, sourceFiles: srcFiles };
 }
+
+/**
+ * @param nodeOrPath - The node or node path to throw the code frame for.
+ * @param filename - The filename to include in the code frame.
+ * @param source - The source code to include in the code frame.
+ * @param msg - The message to include in the code frame.
+ * @returns A never value.
+ */
 
 export function throwCodeFrame(nodeOrPath: Node | NodePath, filename: string, source: string, msg: string): never {
 	// Accept either a raw node or a NodePath

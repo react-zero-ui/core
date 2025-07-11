@@ -1,12 +1,15 @@
+'use client';
 import { useCallback, useRef, type RefObject } from 'react';
+
+type UIAction<T extends string> = T | ((prev: T) => T);
+
+interface UISetterFn<T extends string = string> {
+	(action: UIAction<T>): void; //  ← SINGLE source of truth
+	ref?: RefObject<any> | ((node: HTMLElement | null) => void);
+}
 
 interface GlobalThis {
 	__useUIRegistry?: Map<string, string>;
-}
-
-export interface UISetterFn<T extends string = string> {
-	(valueOrUpdater: T | ((currentValue: T) => T)): void;
-	ref?: RefObject<any> | ((node: HTMLElement | null) => void);
 }
 
 function useUI<T extends string = string>(key: string, initialValue: T): [T, UISetterFn<T>] {
@@ -68,7 +71,7 @@ function useUI<T extends string = string>(key: string, initialValue: T): [T, UIS
 	// Memoized setter function that updates data-* attributes on the target element
 	// useCallback prevents recreation on every render, essential for useEffect dependencies
 	const setValue: UISetterFn<T> = useCallback(
-		(valueOrUpdater: T | ((currentValue: T) => T)) => {
+		(valueOrUpdater: UIAction<T>) => {
 			// SSR safety: bail out if running on server where window is undefined
 			if (typeof window === 'undefined') return;
 
@@ -132,3 +135,4 @@ function useUI<T extends string = string>(key: string, initialValue: T): [T, UIS
 }
 
 export { useUI };
+export type { UIAction, UISetterFn };

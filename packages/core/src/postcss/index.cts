@@ -2,68 +2,75 @@
 /**
  * @type {import('postcss').PluginCreator}
  */
-import { processVariants, buildCss, generateAttributesFile, isZeroUiInitialized } from './helpers.cjs';
+import { buildCss, generateAttributesFile, isZeroUiInitialized } from './helpers.cjs';
 import { runZeroUiInit } from '../cli/postInstall.cjs';
-import type { Result, Root } from 'postcss';
+import type { PluginCreator, Root } from 'postcss';
+import { processVariants } from './ast-parsing.cjs';
 
-const DEV = process.env.NODE_ENV !== 'production';
+const plugin: PluginCreator<void> = () => {
+	const DEV = process.env.NODE_ENV !== 'production';
 
-const plugin = (): { postcssPlugin: string; Once: (root: Root, { result }: { result: Result }) => Promise<void> } => {
 	return {
 		postcssPlugin: 'postcss-react-zero-ui',
 
-		// Once runs BEFORE Root, so Tailwind will see our variants
-		async Once(root: Root, { result }: { result: Result }) {
+		async Once(root: Root, { result }) {
 			try {
-				// Process all variants using the shared helper
+				/* ── generate + inject variants ─────────────────────────── */
 				const { finalVariants, initialValues, sourceFiles } = await processVariants();
 
-				// Generate CSS
 				const cssBlock = buildCss(finalVariants);
-				// Inject new CSS - prepend so it's before any @tailwind directives
-				if (cssBlock.trim()) {
-					root.prepend(cssBlock + '\n');
-				}
+				if (cssBlock.trim()) root.prepend(cssBlock + '\n');
 
-				// Register dependencies - CRITICAL for file watching
-				sourceFiles.forEach((file: string) => {
-					result.messages.push({ type: 'dependency', plugin: 'postcss-react-zero-ui', file: file, parent: result.opts.from });
-				});
+				/* ── register file-dependencies for HMR ─────────────────── */
+				sourceFiles.forEach((file) => result.messages.push({ type: 'dependency', plugin: 'postcss-react-zero-ui', file, parent: result.opts.from }));
 
-				// Run initialization only once (fallback if user hasn't run npx zero-ui init)
+				/* ── first-run bootstrap ────────────────────────────────── */
 				if (!isZeroUiInitialized()) {
-					console.log('[Zero-UI] Auto-initializing (first time setup)...');
+					console.log('[Zero-UI] Auto-initializing (first-time setup)…');
 					await runZeroUiInit();
 				}
 
-				// Generate body attributes file and TypeScript definitions
 				await generateAttributesFile(finalVariants, initialValues);
 			} catch (err: unknown) {
-				const msg = err instanceof Error ? err.message : String(err);
+				/* ───────────────── error handling ─────────────────────── */
+				const error = err instanceof Error ? err : new Error(String(err));
+				const eWithLoc = error as Error & { loc?: { file?: string; line?: number; column?: number } };
 
-				// ⏩ 1. Always surface the real stack in the dev console
-				if (DEV) console.error(err);
+				/* ❶ Special-case throwCodeFrame errors (they always contain "^") */
+				const isCodeFrame = /[\n\r]\s*\^/.test(error.message);
 
-				// ⏩ 2. Warn (dev) or throw (prod)
+				/* ❷ Broader categories for non-frame errors (kept from your code) */
+				const isSyntaxError =
+					!isCodeFrame &&
+					(error.message.includes('State key cannot be resolved') ||
+						error.message.includes('initial value cannot be resolved') ||
+						error.message.includes('SyntaxError'));
+				const isFileError = !isCodeFrame && (error.message.includes('ENOENT') || error.message.includes('Cannot find module'));
+
+				let friendly = error.message;
+				if (isCodeFrame)
+					friendly = error.message; // already perfect
+				else if (isSyntaxError) friendly = `Syntax error in Zero-UI usage: ${error.message}`;
+				else if (isFileError) friendly = `File system error: ${error.message}`;
+
+				/* ❸ Dev = warn + keep server alive  |  Prod = fail build */
 				if (DEV) {
-					result.warn(`[Zero-UI] ${msg}`, { plugin: 'postcss-react-zero-ui' });
-				} else {
-					throw new Error(`[Zero-UI] PostCSS plugin error: ${msg}`);
-				}
-				const e = err as { loc?: { file?: string } } & Error;
-				// ⏩ 3. Keep the file hot-watched so a save un-bricks the build
-				if (e?.loc?.file) {
-					result.messages.push({ type: 'dependency', plugin: 'postcss-react-zero-ui', file: e.loc.file, parent: result.opts.from });
+					if (eWithLoc.loc?.file) {
+						result.messages.push({ type: 'dependency', plugin: 'postcss-react-zero-ui', file: eWithLoc.loc.file, parent: result.opts.from });
+					}
+
+					result.warn(friendly, { plugin: 'postcss-react-zero-ui', ...(eWithLoc.loc && { line: eWithLoc.loc.line, column: eWithLoc.loc.column }) });
+
+					console.error('[Zero-UI] Full error (dev-only):\n', error);
+					return; // ← do **not** abort dev-server
 				}
 
-				return; // bail out without killing dev-server
+				// production / CI
+				throw new Error(`[Zero-UI] PostCSS plugin error: ${friendly}`);
 			}
 		},
 	};
 };
 
-// PostCSS plugin marker
 plugin.postcss = true;
-
-// For CommonJS compatibility when loaded as a string in PostCSS config
 export = plugin;
