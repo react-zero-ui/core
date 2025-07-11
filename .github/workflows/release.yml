@@ -39,9 +39,7 @@ jobs:
         id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          config-file: .release-please-config.json # your config
-          manifest-file: .release-please-manifest.json # version manifest
-
+          config-file: .release-please-config.json
       # 4 ▸ Only continue if at least one package was released
       - uses: actions/setup-node@v4
         if: ${{ steps.release.outputs.release_created == 'true' }}
