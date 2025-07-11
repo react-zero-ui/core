@@ -1,6 +1,6 @@
 # Internal docs
 
-Below is a **"mental model"** of the Zero‑UI variant extractor—distilled so that *another* human (or LLM) can reason about, extend, or safely refactor the code‑base.
+Below is a **"mental model"** of the Zero‑UI variant extractor—distilled so that _another_ human (or LLM) can reason about, extend, or safely refactor the code‑base.
 
 ---
 
@@ -13,13 +13,12 @@ Below is a **"mental model"** of the Zero‑UI variant extractor—distilled so 
    ```
 
 2. **Resolve** (using §3) the `stateKey` and `initialValue` arguments **at build‑time.**
-
-   * `stateKey` must be a *local*, static string.
-   * `initialValue` follows the same rule.
+   - `stateKey` must be a _local_, static string.
+   - `initialValue` follows the same rule.
 
 3. **Globally scan all project files** for **variant tokens that match any discovered `stateKey`**—regardless of where hooks are declared. `(scanner.cts) → scanVariantTokens`
 
-   *Examples*
+   _Examples_
 
    ```html
    <!-- stateKey‑true:bg-black  →  value = "true" -->
@@ -45,9 +44,9 @@ source files ─►           ├─► Map<key,Set<value>>
 
    ```ts
    type VariantData = {
-     key: string;          // 'stateKey'
-     values: string[];     // ['light', 'dark', …]  (unique & sorted)
-     initialValue: string; // from 2nd arg of useUI()
+   	key: string; // 'stateKey'
+   	values: string[]; // ['light', 'dark', …]  (unique & sorted)
+   	initialValue: string; // from 2nd arg of useUI()
    };
    ```
 
@@ -66,10 +65,10 @@ source files ─►           ├─► Map<key,Set<value>>
 
 ## 2. Pipeline overview (AST + global token scan)
 
-| Stage | Scope & algorithm | Output |
-| --- | --- | --- |
-| **A - collectUseUIHooks** | Single AST traversal per file.<br>• Validate `useUI()` shapes.<br>• Resolve **stateKey** & **initialValue** with **`literalFromNode`** (§3).<br>• Builds global set of all state keys. | `HookMeta[]` = `{ stateKey, initialValue }[]`, global `Set<stateKey>` |
-| **B - global scanVariantTokens** | Single global regex scan pass over all files (same glob & delimiters Tailwind uses).<br>Matches tokens for **every stateKey discovered in Stage A**. | `Map<stateKey, Set<value>>` |
+| Stage                            | Scope & algorithm                                                                                                                                                                      | Output                                                                |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| **A - collectUseUIHooks**        | Single AST traversal per file.<br>• Validate `useUI()` shapes.<br>• Resolve **stateKey** & **initialValue** with **`literalFromNode`** (§3).<br>• Builds global set of all state keys. | `HookMeta[]` = `{ stateKey, initialValue }[]`, global `Set<stateKey>` |
+| **B - global scanVariantTokens** | Single global regex scan pass over all files (same glob & delimiters Tailwind uses).<br>Matches tokens for **every stateKey discovered in Stage A**.                                   | `Map<stateKey, Set<value>>`                                           |
 
 The pipeline now ensures tokens are captured globally—regardless of hook declarations in each file.
 
@@ -77,7 +76,7 @@ The pipeline now ensures tokens are captured globally—regardless of hook decla
 
 ## 3. The literal‑resolution micro‑framework
 
-Everything funnels through **`literalFromNode`**. Think of it as a deterministic *static evaluator* restricted to a very small grammar.
+Everything funnels through **`literalFromNode`**. Think of it as a deterministic _static evaluator_ restricted to a very small grammar.
 
 ### 3.1 Supported input forms (stateKey & initialValue)
 
@@ -112,11 +111,11 @@ Everything funnels through **`literalFromNode`**. Think of it as a deterministic
 
 ### 3.2 Resolvers
 
-| Helper | Purpose |
-| -- | -- |
-| **`resolveTemplateLiteral`** | Ensures every `${expr}` resolves via `literalFromNode`. |
-| **`resolveLocalConstIdentifier`** | Maps an `Identifier` → its `const` initializer *iff* initializer is a local static string/template. Imported bindings rejected explicitly. |
-| **`resolveMemberExpression`** | Static walk of `obj.prop`, `obj['prop']`, `obj?.prop`, arrays, numeric indexes, optional‑chaining… Throws if unresolved. |
+| Helper                            | Purpose                                                                                                                                    |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`resolveTemplateLiteral`**      | Ensures every `${expr}` resolves via `literalFromNode`.                                                                                    |
+| **`resolveLocalConstIdentifier`** | Maps an `Identifier` → its `const` initializer _iff_ initializer is a local static string/template. Imported bindings rejected explicitly. |
+| **`resolveMemberExpression`**     | Static walk of `obj.prop`, `obj['prop']`, `obj?.prop`, arrays, numeric indexes, optional‑chaining… Throws if unresolved.                   |
 | **`literalFromNode`**             | Router calling above; memoised (`WeakMap`) per AST node.                                                                                   |
 
 Resolvers throw contextual errors via **`throwCodeFrame`** (`@babel/code-frame`).
@@ -125,10 +124,10 @@ Resolvers throw contextual errors via **`throwCodeFrame`** (`@babel/code-frame`)
 
 ## 4. Validation rules
 
-| Position in `useUI` | Allowed value | Example error |
-| --- | --- | --- |
-| **stateKey (arg 0)** | Local static string | `State key cannot be resolved at build‑time.` |
-| **initialValue (arg 1)** | Same rule as above. | `Initial value cannot be resolved …` |
+| Position in `useUI`      | Allowed value       | Example error                                 |
+| ------------------------ | ------------------- | --------------------------------------------- |
+| **stateKey (arg 0)**     | Local static string | `State key cannot be resolved at build‑time.` |
+| **initialValue (arg 1)** | Same rule as above. | `Initial value cannot be resolved …`          |
 
 Imported bindings must be re‑cast locally.
 
@@ -136,16 +135,16 @@ Imported bindings must be re‑cast locally.
 
 ## 5. Performance notes
 
-* **Global LRU file‑cache** avoids re‑parsing unchanged files (`mtime:size`).
-* **Parallel parsing** (`os.cpus().length-1` concurrent tasks).
-* **Regex-based global token scanning** (fast Tailwind‑style parsing).
+- **Global LRU file‑cache** avoids re‑parsing unchanged files (`mtime:size`).
+- **Parallel parsing** (`os.cpus().length-1` concurrent tasks).
+- **Regex-based global token scanning** (fast Tailwind‑style parsing).
 
 ---
 
 ## 6. Unsupported cases
 
-* Runtime constructs (`import.meta`, dynamic imports).
-* Cross‑file constants.
-* Non‑string values (numbers, booleans).
-* Private class fields.
-* No analysis of setter functions (runtime-only).
+- Runtime constructs (`import.meta`, dynamic imports).
+- Cross‑file constants.
+- Non‑string values (numbers, booleans).
+- Private class fields.
+- No analysis of setter functions (runtime-only).

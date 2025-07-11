@@ -6,6 +6,7 @@ import { generate } from '@babel/generator';
 const traverse = (babelTraverse as any).default;
 import * as fs from 'fs';
 import fg from 'fast-glob';
+import { IGNORE_DIRS } from '../config.cjs';
 
 const AST_CONFIG_OPTS: Partial<ParserOptions> = {
 	sourceType: 'unambiguous',
@@ -216,7 +217,7 @@ function processConfigObject(obj: t.ObjectExpression): boolean {
 }
 
 function findLayoutWithBody(root = process.cwd()): string[] {
-	const files = fg.sync('**/layout.{tsx,jsx,js,ts}', { cwd: root, ignore: ['**/node_modules/**'], absolute: true });
+	const files = fg.sync('**/layout.{tsx,jsx,js,ts}', { cwd: root, ignore: IGNORE_DIRS, absolute: true });
 
 	return files.filter((file) => {
 		const source = fs.readFileSync(file, 'utf8');

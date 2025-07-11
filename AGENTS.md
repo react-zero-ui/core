@@ -7,7 +7,7 @@ Use these tips when working with the codebase or generating examples.
 
 ## How React Zero-UI works
 
-1. `useUI()` writes to `document.body.dataset` using keys you specify. 
+1. `useUI()` writes to `document.body.dataset` using keys you specify.
 
 ```tsx
 const [staleValue, setValue] = useUI<'open' | 'closed'>('sidebar', 'closed');
@@ -61,11 +61,13 @@ const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
 ```tsx
 const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
 // Simply pass a ref to the element
-<div ref={setTheme.ref} className="theme-light:bg-white theme-dark:bg-black" />
-
+<div
+	ref={setTheme.ref}
+	className="theme-light:bg-white theme-dark:bg-black"
+/>;
 ```
 
-Now the data-* will flip on that element, and the styles will be scoped to that element, or its children.
+Now the data-\* will flip on that element, and the styles will be scoped to that element, or its children.
 
 ---
 

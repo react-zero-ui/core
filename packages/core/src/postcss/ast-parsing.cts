@@ -132,6 +132,13 @@ interface CacheEntry {
 }
 const fileCache = new LRU<string, CacheEntry>({ max: 1_000 });
 
+/**
+ * Clear the global file cache - useful for testing
+ */
+export function clearCache(): void {
+	fileCache.clear();
+}
+
 /* ── Main compiler ──────────────────────────────────────────────────── */
 export interface ProcessVariantsResult {
 	finalVariants: VariantData[];
