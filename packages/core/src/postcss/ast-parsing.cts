@@ -186,7 +186,7 @@ export function extractVariants(filePath: string): VariantData[] {
 
 		// console.log(`[CACHE] MISS: ${filePath} (parsing...)`);
 		// Parse the file
-		const ast = parse(source, { sourceType: 'module', plugins: ['jsx', 'typescript', 'decorators-legacy'], sourceFilename: filePath });
+		const ast = parse(source, { sourceType: 'module', plugins: ['jsx', 'typescript', 'decorators-legacy', 'topLevelAwait'], sourceFilename: filePath });
 
 		// Collect useUI setters
 		const setters = collectUseUISetters(ast, source);
@@ -209,7 +209,7 @@ export function extractVariants(filePath: string): VariantData[] {
 		}
 
 		// Parse and cache...
-		const ast = parse(source, { sourceType: 'module', plugins: ['jsx', 'typescript', 'decorators-legacy'], sourceFilename: filePath });
+		const ast = parse(source, { sourceType: 'module', plugins: ['jsx', 'typescript', 'decorators-legacy', 'topLevelAwait'], sourceFilename: filePath });
 		const setters = collectUseUISetters(ast, source);
 		if (!setters.length) return [];
 

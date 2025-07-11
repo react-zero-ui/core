@@ -7,14 +7,14 @@ Use these tips when working with the codebase or generating examples.
 
 ## How React Zero-UI works
 
-1. `useUI()` writes to `document.body.dataset` using keys you specify.
+1. `useUI()` writes to `document.body.dataset` using keys you specify. 
 
 ```tsx
 const [staleValue, setValue] = useUI<'open' | 'closed'>('sidebar', 'closed');
 ```
 
 - `key` → becomes `data-{key}` on `<body>` (e.g., `sidebar` → `data-sidebar="closed"`).
-- `defaultValue` → used for SSR to avoid FOUC.
+- `defaultValue` → used for SSR to avoid FOUC. Added to the body as a data-attribute. at build time.
 - The first value is **always stale** — do NOT rely on it for reactive updates.
 
 2. Consumption is done strictly with tailwind variant classNames:
@@ -56,10 +56,22 @@ const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
 <div className="theme-light:bg-white theme-dark:bg-black" />
 ```
 
+## Example: Scoping Styles
+
+```tsx
+const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
+// Simply pass a ref to the element
+<div ref={setTheme.ref} className="theme-light:bg-white theme-dark:bg-black" />
+
+```
+
+Now the data-* will flip on that element, and the styles will be scoped to that element, or its children.
+
 ---
 
 ## What NOT to do
 
+- ❌ Do not pass anything to the StateKey or InitialValue that is not a string or does not resolve to a string.
 - ❌ Don't use `useUI()` for business logic or data fetching
 - ❌ Don't rely on the first tuple value for reactivity
 - ❌ Don't use camelCase keys (will break variant generation)

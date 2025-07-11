@@ -6,6 +6,8 @@ import { processVariants, buildCss, generateAttributesFile, isZeroUiInitialized 
 import { runZeroUiInit } from '../cli/postInstall.cjs';
 import type { Result, Root } from 'postcss';
 
+const DEV = process.env.NODE_ENV !== 'production';
+
 const plugin = (): { postcssPlugin: string; Once: (root: Root, { result }: { result: Result }) => Promise<void> } => {
 	return {
 		postcssPlugin: 'postcss-react-zero-ui',
@@ -36,9 +38,25 @@ const plugin = (): { postcssPlugin: string; Once: (root: Root, { result }: { res
 
 				// Generate body attributes file and TypeScript definitions
 				await generateAttributesFile(finalVariants, initialValues);
-			} catch (error: unknown) {
-				const errorMessage = error instanceof Error ? error.message : String(error);
-				throw new Error(`[Zero-UI] PostCSS plugin error: ${errorMessage}`);
+			} catch (err: unknown) {
+				const msg = err instanceof Error ? err.message : String(err);
+
+				// ⏩ 1. Always surface the real stack in the dev console
+				if (DEV) console.error(err);
+
+				// ⏩ 2. Warn (dev) or throw (prod)
+				if (DEV) {
+					result.warn(`[Zero-UI] ${msg}`, { plugin: 'postcss-react-zero-ui' });
+				} else {
+					throw new Error(`[Zero-UI] PostCSS plugin error: ${msg}`);
+				}
+				const e = err as { loc?: { file?: string } } & Error;
+				// ⏩ 3. Keep the file hot-watched so a save un-bricks the build
+				if (e?.loc?.file) {
+					result.messages.push({ type: 'dependency', plugin: 'postcss-react-zero-ui', file: e.loc.file, parent: result.opts.from });
+				}
+
+				return; // bail out without killing dev-server
 			}
 		},
 	};
