@@ -79,16 +79,16 @@
 		"tailwindcss": "^4.1.10"
 	},
 	"dependencies": {
-		"@babel/generator": "^7.27.5",
-		"@babel/parser": "^7.27.5",
-		"@babel/traverse": "^7.27.4",
-		"@babel/types": "^7.27.4",
+		"@babel/generator": "^7.28.0",
+		"@babel/parser": "^7.28.0",
+		"@babel/traverse": "^7.28.0",
+		"@babel/types": "^7.28.0",
 		"fast-glob": "^3.3.3",
 		"@babel/code-frame": "^7.27.1",
-		"lru-cache": "^10.4.3"
+		"lru-cache": "^11.1.0"
 	},
 	"devDependencies": {
-		"@playwright/test": "^1.53.0",
+		"@playwright/test": "^1.54.0",
 		"@types/babel__code-frame": "^7.0.6",
 		"@types/babel__generator": "^7.27.0",
 		"@types/babel__traverse": "^7.20.7",
