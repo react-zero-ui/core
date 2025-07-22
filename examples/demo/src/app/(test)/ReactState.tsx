@@ -2,17 +2,13 @@
 
 import { useState } from 'react';
 
-import { useRenderTracker } from './ReactTracker';
-
 export function TestComponentWithState() {
-	const ref = useRenderTracker('TestComponentWithState');
 	const [accent, setAccent] = useState<'violet' | 'emerald' | 'amber'>('violet');
 	const [theme, setTheme] = useState<'light' | 'dark'>('light');
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 
 	return (
 		<div
-			ref={ref}
 			className={`flex h-full w-full flex-col justify-between space-y-4 py-8 **:transition-all **:duration-300 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
 			<Header theme={theme} />
 			<ThemeSwitcher
@@ -41,12 +37,8 @@ export function TestComponentWithState() {
 
 // Header Component
 function Header({ theme }: { theme: 'light' | 'dark' }) {
-	const ref = useRenderTracker('Header');
-
 	return (
-		<div
-			ref={ref}
-			className="space-y-2 text-center">
+		<div className="space-y-2 text-center">
 			<h1 className={`text-3xl font-bold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
 				React State <span className="max-[450px]:hidden">Management</span>
 			</h1>
@@ -61,12 +53,8 @@ function Header({ theme }: { theme: 'light' | 'dark' }) {
 
 // Theme Switcher Component
 function ThemeSwitcher({ theme, setTheme }: { theme: 'light' | 'dark'; setTheme: (t: 'light' | 'dark') => void }) {
-	const ref = useRenderTracker('ThemeSwitcher');
-
 	return (
-		<div
-			ref={ref}
-			className="flex justify-center gap-2">
+		<div className="flex justify-center gap-2">
 			<button
 				aria-label="button"
 				onClick={() => setTheme('light')}
@@ -93,12 +81,8 @@ function AccentPicker({
 	setAccent: (a: 'violet' | 'emerald' | 'amber') => void;
 	theme: 'light' | 'dark';
 }) {
-	const ref = useRenderTracker('AccentPicker');
-
 	return (
-		<div
-			ref={ref}
-			className="space-y-4 pb-2">
+		<div className="space-y-4 pb-2">
 			<h2 className={`text-center text-lg font-semibold ${theme === 'light' ? 'text-gray-800' : 'text-gray-200'}`}>Choose Accent</h2>
 			<div className="flex justify-center gap-3">
 				<button
@@ -133,11 +117,8 @@ function InteractiveCard({
 	setMenuOpen: (open: boolean) => void;
 	accent: 'violet' | 'emerald' | 'amber';
 }) {
-	const ref = useRenderTracker('InteractiveCard');
-
 	return (
 		<div
-			ref={ref}
 			className={`relative mx-auto max-w-md overflow-hidden rounded-2xl border border-gray-200 shadow-lg transition-all duration-0! ${theme === 'light' ? 'bg-gray-50 shadow-gray-200' : 'bg-gray-700 shadow-black/50'}`}>
 			<div className="space-y-4 p-6">
 				<h3 className={`text-xl font-semibold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>Open Menu Demo</h3>
@@ -162,12 +143,8 @@ function InteractiveCard({
 
 // State Display Component
 function StateDisplay({ theme, accent, menuOpen }: { theme: 'light' | 'dark'; accent: 'violet' | 'emerald' | 'amber'; menuOpen: boolean }) {
-	const ref = useRenderTracker('StateDisplay');
-
 	return (
-		<div
-			ref={ref}
-			className="max-[450px]:hidden">
+		<div className="max-[450px]:hidden">
 			<div
 				className={`mt-5 **:text-nowrap flex justify-center gap-4 space-y-1 text-center font-mono text-sm capitalize ${accent === 'violet' ? 'text-violet-500' : accent === 'emerald' ? 'text-emerald-500' : 'text-amber-500'}`}>
 				<div className="flex gap-1">theme: {theme} </div>

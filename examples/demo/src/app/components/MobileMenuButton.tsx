@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import { useMotionValueEvent } from 'motion/react';
 import { useScroll } from 'motion/react';
 
-import useUI from '@react-zero-ui/core';
+import { useUI } from '@react-zero-ui/core';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { DotMenuIcon } from './DotMenuIcon';
 

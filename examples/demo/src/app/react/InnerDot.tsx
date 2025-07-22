@@ -1,4 +1,8 @@
-export const InnerDot = ({ itemClasses2 }: { itemClasses2: string }) => {
+import React from 'react';
+
+export const InnerDot = React.memo(({ theme }: { theme: 'light' | 'dark' }) => {
+	const itemClasses2 = theme === 'dark' ? 'bg-red-400' : 'bg-blue-400';
+
 	return (
 		<Layer1>
 			<Layer2>
@@ -8,7 +12,7 @@ export const InnerDot = ({ itemClasses2 }: { itemClasses2: string }) => {
 			</Layer2>
 		</Layer1>
 	);
-};
+});
 
 const Layer1 = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
 const Layer2 = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;

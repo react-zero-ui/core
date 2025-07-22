@@ -47,7 +47,7 @@ button:not(:disabled),
 }
 body[data-mobile-menu='closed'] {
 	.bounce > span {
-		animation: customBounce 2s cubic-bezier(0.8, 0.5, 0.2, 1.4) infinite;
+		/* animation: customBounce 2s cubic-bezier(0.8, 0.5, 0.2, 1.4) infinite; */
 		animation-delay: var(--delay, 0s);
 		height: 0.375rem;
 		width: 0.375rem;

@@ -1,22 +1,18 @@
 'use client';
 
-import useUI from '@react-zero-ui/core';
-import { useRenderTracker } from './ReactTracker';
+import { useUI } from '@react-zero-ui/core';
 
 export function TestComponentZero() {
-	const ref = useRenderTracker('TestComponent');
 	const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
 	const [, setAccent] = useUI<'violet' | 'emerald' | 'amber'>('accent', 'violet');
-	const [, setMenuOpen] = useUI<boolean>('menuOpen', false);
+	const [, setMenuOpen] = useUI<'true' | 'false'>('menu-open', 'false');
 
 	return (
-		<div
-			ref={ref}
-			className="theme-light:bg-gray-100 theme-dark:bg-gray-900 flex h-full w-full flex-col justify-between space-y-4 py-8 **:transition-all **:duration-300">
+		<div className="theme-light:bg-gray-100 theme-dark:bg-gray-900 flex h-full w-full flex-col justify-between space-y-4 py-8 **:transition-all **:duration-300">
 			<Header />
 			<ThemeSwitcher setTheme={setTheme} />
 			<AccentPicker setAccent={setAccent} />
-			<InteractiveCard toggleMenu={() => setMenuOpen((prev) => !prev)} />
+			<InteractiveCard toggleMenu={() => setMenuOpen((prev) => (prev === 'true' ? 'false' : 'true'))} />
 			<StateDisplay />
 		</div>
 	);
@@ -24,12 +20,8 @@ export function TestComponentZero() {
 
 // Header Component - Never re-renders!
 function Header() {
-	const ref = useRenderTracker('Header');
-
 	return (
-		<div
-			ref={ref}
-			className="space-y-2 text-center">
+		<div className="space-y-2 text-center">
 			<h1 className="theme-light:text-gray-900 theme-dark:text-white text-3xl font-bold">Zero UI</h1>
 
 			<p className="theme-light:text-gray-600 theme-dark:text-gray-400">
@@ -46,12 +38,8 @@ function Header() {
 
 // Theme Switcher - Never re-renders!
 function ThemeSwitcher({ setTheme }: { setTheme: (t: 'light' | 'dark') => void }) {
-	const ref = useRenderTracker('ThemeSwitcher');
-
 	return (
-		<div
-			ref={ref}
-			className="flex justify-center gap-2">
+		<div className="flex justify-center gap-2">
 			<button
 				aria-label="button"
 				onClick={() => setTheme('light')}
@@ -70,12 +58,8 @@ function ThemeSwitcher({ setTheme }: { setTheme: (t: 'light' | 'dark') => void }
 
 // Accent Picker - Never re-renders!
 function AccentPicker({ setAccent }: { setAccent: (a: 'violet' | 'emerald' | 'amber') => void }) {
-	const ref = useRenderTracker('AccentPicker');
-
 	return (
-		<div
-			ref={ref}
-			className="space-y-4 pb-2">
+		<div className="space-y-4 pb-2">
 			<h2 className="theme-light:text-gray-800 theme-dark:text-gray-200 text-center text-lg font-semibold">Choose Accent</h2>
 			<div className="flex justify-center gap-3">
 				<button
@@ -100,12 +84,8 @@ function AccentPicker({ setAccent }: { setAccent: (a: 'violet' | 'emerald' | 'am
 
 // Interactive Card - Never re-renders!
 function InteractiveCard({ toggleMenu }: { toggleMenu: () => void }) {
-	const ref = useRenderTracker('InteractiveCard');
-
 	return (
-		<div
-			ref={ref}
-			className="theme-light:bg-gray-50 theme-light:shadow-gray-200 theme-dark:bg-gray-700 theme-dark:shadow-black/50 relative mx-auto max-w-md overflow-hidden rounded-2xl border border-gray-200 shadow-lg transition-all duration-0!">
+		<div className="theme-light:bg-gray-50 theme-light:shadow-gray-200 theme-dark:bg-gray-700 theme-dark:shadow-black/50 relative mx-auto max-w-md overflow-hidden rounded-2xl border border-gray-200 shadow-lg transition-all duration-0!">
 			<div className="space-y-4 p-6">
 				<h3 className="theme-light:text-gray-900 theme-dark:text-white text-xl font-semibold">Open Menu Demo</h3>
 				<button
@@ -129,12 +109,8 @@ function InteractiveCard({ toggleMenu }: { toggleMenu: () => void }) {
 
 // State Display - Never re-renders!
 function StateDisplay() {
-	const ref = useRenderTracker('StateDisplay');
-
 	return (
-		<div
-			ref={ref}
-			className="max-[450px]:hidden">
+		<div className="max-[450px]:hidden">
 			<div className="theme-light:text-gray-500 theme-dark:text-gray-400 **:accent-violet:text-violet-500 **:accent-emerald:text-emerald-500 **:accent-amber:text-amber-500 mt-5 flex justify-center gap-4 space-y-1 text-center font-mono text-sm capitalize">
 				<div className="flex gap-1 text-nowrap **:text-nowrap">
 					theme: <span className="theme-dark:hidden">Light</span>

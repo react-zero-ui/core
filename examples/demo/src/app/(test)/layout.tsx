@@ -1,11 +1,10 @@
 import { domAnimation, LazyMotion } from 'motion/react';
-import { RenderTracker } from './ReactTracker';
 
 const layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	return (
 		<div className="relative py-10">
 			<LazyMotion features={domAnimation}>{children}</LazyMotion>
-			<RenderTracker />
+
 			<div className="fixed right-0 bottom-0 z-10 h-fit w-full rounded-lg bg-white/80 px-4 py-2 ring-1 ring-black/5 backdrop-blur-sm md:bg-white/20">
 				<div className="pb-2 text-sm text-blue-500">(Layout.tsx) Global UI State Variables</div>
 				<div className="active-zero:hidden text-sm text-gray-600">None</div>

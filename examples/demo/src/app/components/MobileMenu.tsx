@@ -1,5 +1,5 @@
 'use client';
-import useUI from '@react-zero-ui/core';
+import { useUI } from '@react-zero-ui/core';
 import clsx from 'clsx';
 import Link from 'next/link';
 
