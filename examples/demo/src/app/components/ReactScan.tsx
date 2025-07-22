@@ -5,7 +5,9 @@ import { useEffect } from 'react';
 
 export function ReactScan() {
 	useEffect(() => {
-		scan({ enabled: true });
+		setTimeout(() => {
+			scan({ enabled: true });
+		}, 1000);
 	}, []);
 
 	return null;
