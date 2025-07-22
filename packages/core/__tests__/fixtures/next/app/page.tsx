@@ -3,6 +3,7 @@ import { useUI } from '@react-zero-ui/core';
 import UseEffectComponent from './UseEffectComponent';
 import FAQ from './FAQ';
 import { ChildComponent } from './ChildComponent';
+import { ChildWithoutSetter } from './ChildWithoutSetter';
 
 export default function Page() {
 	const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
@@ -152,6 +153,7 @@ export default function Page() {
 						data-testid="scope-toggle">
 						Toggle Scope
 					</button>
+					<ChildWithoutSetter />
 					<div className="scope-on:bg-blue-900 scope-off:bg-blue-100 ">
 						Scope: <span className="scope-off:block scope-on:hidden">False</span>
 						<span className="scope-on:block scope-off:hidden">True</span>
