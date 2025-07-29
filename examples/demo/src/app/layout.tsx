@@ -3,7 +3,6 @@ import { bodyAttributes } from '@zero-ui/attributes';
 import './globals.css';
 import { TopBarV2 } from './components/TopBar';
 import { Analytics } from '@vercel/analytics/next';
-import Script from 'next/script';
 
 export const metadata = { title: 'React Zero UI Demo', description: 'React Zero UI Demo', alternates: { canonical: process.env.NEXT_PUBLIC_URL } };
 
@@ -13,10 +12,8 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 			<body
 				className="flex h-full w-full items-center justify-center bg-gray-100 antialiased"
 				{...bodyAttributes}>
-				<Script
-					strategy="lazyOnload"
-					src="https://unpkg.com/react-scan/dist/auto.global.js"
-				/>
+				<script src="https://unpkg.com/react-scan/dist/auto.global.js" />
+
 				<ReactScan />
 				<TopBarV2 />
 				{children}
