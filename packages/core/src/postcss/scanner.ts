@@ -1,4 +1,4 @@
-// scanner.cts
+// scanner.ts
 export function scanVariantTokens(src: string, keys: Set<string>): Map<string, Set<string>> {
 	/* 1.  bootstrap the output */
 	const out = new Map<string, Set<string>>();

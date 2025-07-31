@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { collectUseUIHooks, processVariants } from './ast-parsing.cts';
+import { collectUseUIHooks, processVariants } from './ast-parsing.js';
 import { parse } from '@babel/parser';
-import { readFile, runTest } from '../utilities.ts';
+import { readFile, runTest } from '../utilities.js';
 
 test('collectUseUIHooks should collect setters from a component', async () => {
 	await runTest(
@@ -48,6 +48,33 @@ return (
 			assert(finalVariants[1].key === 'modal-visible');
 			assert(finalVariants[1].values.includes('true'));
 			assert(finalVariants[1].initialValue === 'false', 'initialValue should be false');
+		}
+	);
+});
+
+test('collectUseUIHooks should resolve const-based args for useScopedUI', async () => {
+	await runTest(
+		{
+			'app/tabs.tsx': `
+        import { useScopedUI } from '@react-zero-ui/core';
+
+        const KEY = 'tabs';
+        const DEFAULT = 'first';
+
+        export function Tabs() {
+          const [, setTab] = useScopedUI(KEY, DEFAULT);
+          return <div ref={setTab.ref} />;
+        }
+      `,
+		},
+		async () => {
+			const src = readFile('app/tabs.tsx');
+			const ast = parse(src, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
+			const [meta] = collectUseUIHooks(ast, src);
+
+			assert.equal(meta.stateKey, 'tabs');
+			assert.equal(meta.initialValue, 'first');
+			assert.equal(meta.scope, 'scoped');
 		}
 	);
 });

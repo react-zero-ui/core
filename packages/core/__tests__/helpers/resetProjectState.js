@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { rmSync } from 'node:fs';
-import { overwriteFile } from './overwriteFile';
+import { overwriteFile } from './overwriteFile.js';
 
 /**
  * Reset everything the Zero-UI CLI generates inside a fixture.

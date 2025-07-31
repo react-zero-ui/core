@@ -4,7 +4,7 @@ import path from 'node:path';
 
 export async function loadCliFromFixture(fixtureDir) {
 	const r = createRequire(path.join(fixtureDir, 'package.json'));
-	const modulePath = r.resolve('../../../dist/cli/init.cjs'); // get the path
+	const modulePath = r.resolve('../../../dist/cli/init.js'); // get the path
 	const mod = r(modulePath); // actually require the module
 	console.log('[Global Setup] Loaded CLI from fixture:', modulePath);
 	// Return a wrapper function that changes directory before running CLI

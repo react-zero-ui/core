@@ -1,6 +1,6 @@
 {
 	"name": "@react-zero-ui/core",
-	"version": "0.2.6",
+	"version": "0.2.7",
 	"description": "Zero re-render, global UI state management for React",
 	"private": false,
 	"type": "module",
@@ -11,8 +11,7 @@
 	"files": [
 		"dist/**/*",
 		"README.md",
-		"LICENSE",
-		"!dist/postcss/coming-soon/**/*"
+		"LICENSE"
 	],
 	"exports": {
 		".": {
@@ -20,7 +19,7 @@
 			"import": "./dist/index.js"
 		},
 		"./postcss": {
-			"types": "./dist/postcss/index.d.ts",
+			"types": "./dist/postcss/index.d.cts",
 			"require": "./dist/postcss/index.cjs"
 		},
 		"./vite": {
@@ -29,8 +28,8 @@
 		},
 		"./cli": {
 			"types": "./dist/cli/init.d.ts",
-			"require": "./dist/cli/init.cjs",
-			"import": "./dist/cli/init.cjs"
+			"require": "./dist/cli/init.js",
+			"import": "./dist/cli/init.js"
 		}
 	},
 	"scripts": {
@@ -79,15 +78,15 @@
 		"tailwindcss": "^4.1.10"
 	},
 	"dependencies": {
+		"@babel/code-frame": "^7.27.1",
 		"@babel/generator": "^7.28.0",
 		"@babel/parser": "^7.28.0",
-		"@babel/traverse": "^7.28.0",
 		"@babel/types": "^7.28.0",
 		"fast-glob": "^3.3.3",
-		"@babel/code-frame": "^7.27.1",
 		"lru-cache": "^11.1.0"
 	},
 	"devDependencies": {
+		"@babel/traverse": "^7.28.0",
 		"@playwright/test": "^1.54.0",
 		"@types/babel__code-frame": "^7.0.6",
 		"@types/babel__generator": "^7.27.0",

@@ -1,15 +1,9 @@
 {
-  "release-type": "node",
-  "monorepo-tags": true,
-  "include-component-in-tag": true,
-  "packages": {
-    "packages/core": {
-      "package-name": "@react-zero-ui/core",
-      "release-type": "node"
-    },
-    "packages/cli": {
-      "package-name": "create-zero-ui",
-      "release-type": "node"
-    }
-  }
+	"release-type": "node",
+	"monorepo-tags": true,
+	"include-component-in-tag": true,
+	"packages": {
+		"packages/core": { "package-name": "@react-zero-ui/core", "release-type": "node" },
+		"packages/cli": { "package-name": "create-zero-ui", "release-type": "node" }
+	}
 }

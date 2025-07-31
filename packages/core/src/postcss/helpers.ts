@@ -1,10 +1,10 @@
-// src/postcss/helpers.cts
+// src/postcss/helpers.ts
 import fs from 'fs';
 import fg from 'fast-glob';
 import path from 'path';
-import { CONFIG, IGNORE_DIRS } from '../config.cjs';
-import { parseJsonWithBabel, parseAndUpdatePostcssConfig, parseAndUpdateViteConfig } from './ast-generating.cjs';
-import { VariantData } from './ast-parsing.cjs';
+import { CONFIG, IGNORE_DIRS } from '../config.js';
+import { parseJsonWithBabel, parseAndUpdatePostcssConfig, parseAndUpdateViteConfig } from './ast-generating.js';
+import { VariantData } from './ast-parsing.js';
 
 export interface ProcessVariantsResult {
 	/** Array of deduplicated and sorted variant data */

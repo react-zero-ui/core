@@ -56,7 +56,7 @@ function cleanupTestDir(testDir) {
 function runCLIScript(targetDir, timeout = 30000) {
 	return new Promise((resolve, reject) => {
 		// Updated path to the correct CLI script location
-		const binScript = path.resolve(__dirname, '../../../cli/bin.js');
+		const binScript = path.resolve(__dirname, '../../../cli/bin');
 
 		const child = spawn('node', [binScript, '.'], { cwd: targetDir, stdio: ['pipe', 'pipe', 'pipe'] });
 
@@ -296,7 +296,7 @@ export function TestComponent() {
 		fs.writeFileSync(path.join(componentDir, 'TestComponent.jsx'), testComponent);
 
 		// Import and run the library CLI directly
-		const { runZeroUiInit } = require('../../dist/cli/postInstall.cjs');
+		const { runZeroUiInit } = require('../../dist/cli/postInstall');
 
 		// Mock console to capture output
 		const originalConsoleLog = console.log;
@@ -354,7 +354,7 @@ test('Library CLI handles errors gracefully', async () => {
 		};
 
 		try {
-			const { runZeroUiInit } = require('../../dist/cli/postInstall.cjs');
+			const { runZeroUiInit } = require('../../dist/cli/postInstall');
 
 			// This should complete without errors in most cases
 			await runZeroUiInit();
@@ -523,7 +523,7 @@ export function Toggle() {
 		fs.writeFileSync(path.join(componentsDir, 'Toggle.jsx'), component2);
 
 		// Import and run the library CLI
-		const { runZeroUiInit } = require('../../dist/cli/postInstall.cjs');
+		const { runZeroUiInit } = require('../../dist/cli/postInstall');
 
 		const originalConsoleLog = console.log;
 		const logMessages = [];

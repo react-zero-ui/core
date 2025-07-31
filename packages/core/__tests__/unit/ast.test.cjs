@@ -4,8 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { performance } = require('node:perf_hooks');
-const { findAllSourceFiles } = require('../../dist/postcss/helpers.cjs');
-const { collectUseUIHooks, extractVariants } = require('../../dist/postcss/ast-parsing.cjs');
+const { findAllSourceFiles } = require('../../dist/postcss/helpers');
+const { collectUseUIHooks, extractVariants } = require('../../dist/postcss/ast-parsing');
 
 const ComponentImports = readFile(path.join(__dirname, './fixtures/test-components.jsx'));
 const AllPatternsComponent = readFile(path.join(__dirname, './fixtures/ts-test-components.tsx'));

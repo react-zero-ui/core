@@ -9,11 +9,11 @@ import {
 	patchTsConfig,
 	patchViteConfig,
 	toKebabCase,
-} from './helpers.cts';
-import { readFile, runTest } from '../utilities.ts';
-import { CONFIG } from '../config.cts';
+} from './helpers.js';
+import { readFile, runTest } from '../utilities.js';
+import { CONFIG } from '../config.js';
 import path from 'node:path';
-import { processVariants } from './ast-parsing.cts';
+import { processVariants } from './ast-parsing.js';
 
 test('toKebabCase should convert a string to kebab case', () => {
 	assert.equal(toKebabCase('helloWorld'), 'hello-world');
