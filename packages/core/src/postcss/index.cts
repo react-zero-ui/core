@@ -16,6 +16,11 @@ const plugin: PluginCreator<void> = () => {
 		async Once(root: Root, { result }) {
 			try {
 				/* ── generate + inject variants ─────────────────────────── */
+				/*
+					finalVariants: VariantData[] // = { key: string; values: string[]; initialValue: string | null;}
+					initialValues: Record<string, string>; // key: initialValue
+					sourceFiles: string[]; // file paths (absolute)
+	      */
 				const { finalVariants, initialValues, sourceFiles } = await processVariants();
 
 				const cssBlock = buildCss(finalVariants);

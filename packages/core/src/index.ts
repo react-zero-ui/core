@@ -85,7 +85,7 @@ function useUI<T extends string = string>(key: string, initialValue: T): [T, UIS
 				const value = target.dataset[camelKey] as T;
 
 				// Call the updater function with the parsed current value
-				newValue = valueOrUpdater(value);
+				newValue = valueOrUpdater(value ?? initialValue);
 			} else {
 				// Direct value assignment (no updater function)
 				newValue = valueOrUpdater;
@@ -114,7 +114,7 @@ function useUI<T extends string = string>(key: string, initialValue: T): [T, UIS
 							`[useUI] Multiple ref attachments detected for key "${key}". ` +
 								`Each useUI hook supports only one ref attachment per component. ` +
 								`Solution: Create separate component. and reuse.\n` +
-								`Example: <FAQ/>  <FAQ/> instead of multiple refs in one component.`
+								`Example: <FAQ/> <FAQ/> instead of multiple refs in one component.`
 						);
 					}
 				} else {
