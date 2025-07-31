@@ -13,14 +13,14 @@ export async function loadCliFromFixture(fixtureDir) {
 		try {
 			process.chdir(fixtureDir); // Change to fixture directory
 
-			// The init.cjs exports a cli function, so call it
+			// The init.js exports a cli function, so call it
 
 			if (typeof mod === 'function') {
 				return await Promise.resolve(mod(args)); // run the CLI
 			} else if (typeof mod.default === 'function') {
 				return await Promise.resolve(mod.default(args)); // run the CLI (ESM default export)
 			} else {
-				throw new Error('Could not find CLI function in init.cjs');
+				throw new Error('Could not find CLI function in init.js');
 			}
 		} finally {
 			process.chdir(originalCwd); // Always restore original directory
