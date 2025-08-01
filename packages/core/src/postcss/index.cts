@@ -9,9 +9,10 @@ import { processVariants } from './ast-parsing';
 
 const plugin: PluginCreator<void> = () => {
 	const DEV = process.env.NODE_ENV !== 'production';
+	const zeroUIPlugin = 'postcss-react-zero-ui';
 
 	return {
-		postcssPlugin: 'postcss-react-zero-ui',
+		postcssPlugin: zeroUIPlugin,
 
 		async Once(root: Root, { result }) {
 			try {
@@ -21,21 +22,20 @@ const plugin: PluginCreator<void> = () => {
 					initialValues: Record<string, string>; // key: initialValue
 					sourceFiles: string[]; // file paths (absolute)
 	      */
-				const { finalVariants, initialValues, sourceFiles } = await processVariants();
+				const { finalVariants, initialGlobalValues, sourceFiles } = await processVariants();
 
 				const cssBlock = buildCss(finalVariants);
 				if (cssBlock.trim()) root.prepend(cssBlock + '\n');
 
 				/* ── register file-dependencies for HMR ─────────────────── */
-				sourceFiles.forEach((file) => result.messages.push({ type: 'dependency', plugin: 'postcss-react-zero-ui', file, parent: result.opts.from }));
+				sourceFiles.forEach((file) => result.messages.push({ type: 'dependency', plugin: zeroUIPlugin, file, parent: result.opts.from }));
 
 				/* ── first-run bootstrap ────────────────────────────────── */
 				if (!isZeroUiInitialized()) {
 					console.log('[Zero-UI] Auto-initializing (first-time setup)…');
 					await runZeroUiInit();
 				}
-
-				await generateAttributesFile(finalVariants, initialValues);
+				await generateAttributesFile(finalVariants, initialGlobalValues);
 			} catch (err: unknown) {
 				/* ───────────────── error handling ─────────────────────── */
 				const error = err instanceof Error ? err : new Error(String(err));
@@ -61,10 +61,10 @@ const plugin: PluginCreator<void> = () => {
 				/* ❸ Dev = warn + keep server alive  |  Prod = fail build */
 				if (DEV) {
 					if (eWithLoc.loc?.file) {
-						result.messages.push({ type: 'dependency', plugin: 'postcss-react-zero-ui', file: eWithLoc.loc.file, parent: result.opts.from });
+						result.messages.push({ type: 'dependency', plugin: zeroUIPlugin, file: eWithLoc.loc.file, parent: result.opts.from });
 					}
 
-					result.warn(friendly, { plugin: 'postcss-react-zero-ui', ...(eWithLoc.loc && { line: eWithLoc.loc.line, column: eWithLoc.loc.column }) });
+					result.warn(friendly, { plugin: zeroUIPlugin, ...(eWithLoc.loc && { line: eWithLoc.loc.line, column: eWithLoc.loc.column }) });
 
 					console.error('[Zero-UI] Full error (dev-only):\n', error);
 					return; // ← do **not** abort dev-server

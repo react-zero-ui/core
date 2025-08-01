@@ -1,19 +1,20 @@
 'use client';
-import { useUI } from '@react-zero-ui/core';
+import { useScopedUI, useUI } from '@react-zero-ui/core';
 import UseEffectComponent from './UseEffectComponent';
 import FAQ from './FAQ';
 import { ChildComponent } from './ChildComponent';
 import { ChildWithoutSetter } from './ChildWithoutSetter';
 
 export default function Page() {
+	const [scope, setScope] = useScopedUI<'off' | 'on'>('scope', 'off');
+
 	const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
 	const [, setTheme2] = useUI<'light' | 'dark'>('theme-2', 'light');
 	const [, setThemeThree] = useUI<'light' | 'dark'>('theme-three', 'light');
 	const [, setToggle] = useUI<'true' | 'false'>('toggle-boolean', 'true');
 	const [, setNumber] = useUI<'1' | '2'>('number', '1');
-	const [, setOpen] = useUI<'open' | 'closed'>('faq', 'closed'); // Same key everywhere!
-	const [, setScope] = useUI<'off' | 'on'>('scope', 'off');
-	const [, setMobile] = useUI<'true' | 'false'>('mobile', 'false');
+	const [open, setOpen] = useScopedUI<'open' | 'closed'>('faq', 'closed');
+	const [mobile, setMobile] = useScopedUI<'true' | 'false'>('mobile', 'false');
 	const [, setChildOpen] = useUI<'open' | 'closed'>('child', 'closed');
 
 	const [, setToggleFunction] = useUI<'white' | 'black'>('toggle-function', 'white');
@@ -145,6 +146,7 @@ export default function Page() {
 					className="scope-off:bg-blue-100 scope-on:bg-blue-900 scope-on:text-white"
 					data-testid="scope-container"
 					//this ref tells the hook to flip the data key here
+					data-scope={scope}
 					ref={setScope.ref}>
 					<button
 						type="button"
@@ -166,7 +168,8 @@ export default function Page() {
 					className="mobile-false:bg-blue-100 mobile-true:bg-blue-900 mobile-true:text-white"
 					data-testid="mobile-container"
 					//this ref tells the hook to flip the data key here
-					ref={setMobile.ref}>
+					ref={setMobile.ref}
+					data-mobile={mobile}>
 					<button
 						type="button"
 						onClick={() => {
@@ -194,7 +197,9 @@ export default function Page() {
 
 			<hr />
 
-			<div ref={setOpen.ref}>
+			<div
+				ref={setOpen.ref}
+				data-faq={open}>
 				<button
 					className="bg-blue-500 text-white p-2 rounded-md m-5"
 					onClick={() => setOpen((prev) => (prev === 'open' ? 'closed' : 'open'))}>

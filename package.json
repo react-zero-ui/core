@@ -37,7 +37,8 @@
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"typecheck": "tsc --noEmit --project tsconfig.base.json",
-		"size": "npx esbuild ./packages/core/dist/index.js --bundle --minify --format=esm --external:react --define:process.env.NODE_ENV='\"production\"' | gzip -c | wc -c"
+		"size": "npx esbuild ./packages/core/dist/index.js --bundle --minify --format=esm --external:react --define:process.env.NODE_ENV='\"production\"' | gzip -c | wc -c",
+		"build-output": "npx esbuild ./packages/core/dist/index.js --bundle --minify --format=esm --external:react --define:process.env.NODE_ENV='\"production\"'"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.32.0",

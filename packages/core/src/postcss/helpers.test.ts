@@ -10,10 +10,10 @@ import {
 	patchViteConfig,
 	toKebabCase,
 } from './helpers.js';
-import { readFile, runTest } from '../utilities.js';
+import { readFile, runTest } from './utilities.js';
 import { CONFIG } from '../config.js';
 import path from 'node:path';
-import { processVariants } from './ast-parsing.js';
+import { processVariants, VariantData } from './ast-parsing.js';
 
 test('toKebabCase should convert a string to kebab case', () => {
 	assert.equal(toKebabCase('helloWorld'), 'hello-world');
@@ -40,9 +40,9 @@ return (
 	</div>
 ); }`;
 
-const expectedVariants = [
-	{ key: 'feature-enabled', values: ['false'], initialValue: 'true' },
-	{ key: 'modal-visible', values: ['true'], initialValue: 'false' },
+const expectedVariants: VariantData[] = [
+	{ key: 'feature-enabled', values: ['false'], initialValue: 'true', scope: 'global' },
+	{ key: 'modal-visible', values: ['true'], initialValue: 'false', scope: 'global' },
 ];
 const initialValues = { 'data-feature-enabled': 'true', 'data-modal-visible': 'false' };
 
@@ -53,9 +53,9 @@ test('findAllSourceFiles Return *absolute* paths of every JS/TS file we care abo
 
 test('processVariants should process variants', async () => {
 	await runTest({ 'src/app/component.tsx': src }, async () => {
-		const { finalVariants, initialValues, sourceFiles } = await processVariants();
+		const { finalVariants, initialGlobalValues, sourceFiles } = await processVariants();
 		assert.deepStrictEqual(finalVariants, expectedVariants);
-		assert.deepStrictEqual(initialValues, initialValues);
+		assert.deepStrictEqual(initialGlobalValues, initialValues);
 		assert.equal(sourceFiles.length, 1);
 	});
 });
@@ -65,9 +65,7 @@ const norm = (s: string) => s.replace(/\r\n/g, '\n');
 
 test('buildCss emits @custom-variant blocks in stable order', () => {
 	const css = buildCss(expectedVariants);
-	const expected = `${CONFIG.HEADER}
-@custom-variant feature-enabled-false {&:where(body[data-feature-enabled="false"] *) { @slot; } [data-feature-enabled="false"] &, &[data-feature-enabled="false"] { @slot; }}
-@custom-variant modal-visible-true {&:where(body[data-modal-visible="true"] *) { @slot; } [data-modal-visible="true"] &, &[data-modal-visible="true"] { @slot; }}\n`;
+	const expected = `/* AUTO-GENERATED - DO NOT EDIT */\n@custom-variant feature-enabled-false { &:where(body[data-feature-enabled='false'] &) { @slot; } }\n@custom-variant modal-visible-true { &:where(body[data-modal-visible='true'] &) { @slot; } }\n`;
 	assert.strictEqual(norm(css), norm(expected), 'CSS snapshot mismatch');
 });
 

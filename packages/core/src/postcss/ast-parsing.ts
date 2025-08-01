@@ -9,7 +9,7 @@ import { codeFrameColumns } from '@babel/code-frame';
 import { LRUCache as LRU } from 'lru-cache';
 import { scanVariantTokens } from './scanner.js';
 import { findAllSourceFiles, mapLimit, toKebabCase } from './helpers.js';
-import { Binding, NodePath, Node } from '@babel/traverse';
+import { NodePath, Node } from '@babel/traverse';
 import traverse from './traverse.cjs';
 
 const PARSE_OPTS = (f: string): Partial<ParserOptions> => ({
@@ -19,8 +19,8 @@ const PARSE_OPTS = (f: string): Partial<ParserOptions> => ({
 });
 
 export interface HookMeta {
-	/** Babel binding object — use `binding.referencePaths` in Pass 2 */
-	binding: Binding;
+	/** Babel binding object — use `binding.referencePaths` */
+	// binding: Binding;
 	/** Variable name (`setTheme`) */
 	setterFnName: string;
 	/** State key passed to `useUI` (`'theme'`) */
@@ -40,6 +40,7 @@ export interface HookMeta {
  * Throws if the key is dynamic or if the initial value cannot be
  * reduced to a space-free string.
  */
+const ALL_HOOK_NAMES = new Set([CONFIG.HOOK_NAME, CONFIG.LOCAL_HOOK_NAME]);
 
 export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 	const hooks: HookMeta[] = [];
@@ -58,8 +59,6 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 		memo.set(node, value);
 		return value;
 	}
-
-	const ALL_HOOK_NAMES = new Set([CONFIG.HOOK_NAME, CONFIG.LOCAL_HOOK_NAME]);
 
 	traverse(ast, {
 		VariableDeclarator(path: NodePath<t.VariableDeclarator>) {
@@ -110,14 +109,14 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 				);
 			}
 
-			const binding = path.scope.getBinding(setterEl.name);
-			if (!binding) {
-				throwCodeFrame(path, path.opts?.filename, sourceCode, `[Zero-UI] Could not resolve binding for setter "${setterEl.name}".`);
-			}
+			// const binding = path.scope.getBinding(setterEl.name);
+			// if (!binding) {
+			// 	throwCodeFrame(path, path.opts?.filename, sourceCode, `[Zero-UI] Could not resolve binding for setter "${setterEl.name}".`);
+			// }
 
 			const scope: 'global' | 'scoped' = init.callee.name === CONFIG.HOOK_NAME ? 'global' : 'scoped';
 
-			hooks.push({ binding, setterFnName: setterEl.name, stateKey, initialValue, scope });
+			hooks.push({ setterFnName: setterEl.name, stateKey, initialValue, scope });
 		},
 	});
 
@@ -131,6 +130,8 @@ export interface VariantData {
 	values: string[];
 	/** Literal initial value as string, or `null` if non-literal */
 	initialValue: string | null;
+	/** Whether the variant is global or scoped */
+	scope: 'global' | 'scoped';
 }
 
 /* ── LRU cache keyed by absolute file path ──────────────────────────── */
@@ -151,7 +152,7 @@ export function clearCache(): void {
 /* ── Main compiler ──────────────────────────────────────────────────── */
 export interface ProcessVariantsResult {
 	finalVariants: VariantData[];
-	initialValues: Record<string, string>;
+	initialGlobalValues: Record<string, string>;
 	sourceFiles: string[];
 }
 
@@ -209,16 +210,25 @@ export async function processVariants(changedFiles: string[] | null = null): Pro
 	/* Phase D — aggregate variant & initial-value maps */
 	const variantMap = new Map<string, Set<string>>();
 	const initMap = new Map<string, string>();
+	const scopeMap = new Map<string, 'global' | 'scoped'>();
 
 	for (const { hooks, tokens } of fileCache.values()) {
-		// initial values
 		hooks.forEach((h) => {
-			if (!h.initialValue) return;
-			const prev = initMap.get(h.stateKey);
-			if (prev && prev !== h.initialValue) {
-				throw new Error(`[Zero-UI] Conflicting initial values for '${h.stateKey}': '${prev}' vs '${h.initialValue}'`);
+			/* initial-value aggregation */
+			if (h.initialValue) {
+				const prev = initMap.get(h.stateKey);
+				if (prev && prev !== h.initialValue) {
+					throw new Error(`[Zero-UI] Conflicting initial values for '${h.stateKey}': '${prev}' vs '${h.initialValue}'`);
+				}
+				initMap.set(h.stateKey, h.initialValue);
 			}
-			initMap.set(h.stateKey, h.initialValue);
+
+			/* scope aggregation — always run */
+			const prevScope = scopeMap.get(h.stateKey);
+			if (prevScope && prevScope !== h.scope) {
+				throw new Error(`[Zero-UI] Key "${h.stateKey}" used with both global and scoped hooks.`);
+			}
+			scopeMap.set(h.stateKey, h.scope);
 		});
 
 		// tokens → variantMap
@@ -230,12 +240,15 @@ export async function processVariants(changedFiles: string[] | null = null): Pro
 
 	/* Phase E — final assembly */
 	const finalVariants: VariantData[] = [...variantMap]
-		.map(([key, set]) => ({ key, values: [...set].sort(), initialValue: initMap.get(key) ?? null }))
+		.map(([key, set]) => ({ key, values: [...set].sort(), initialValue: initMap.get(key) ?? null, scope: scopeMap.get(key)! }))
 		.sort((a, b) => a.key.localeCompare(b.key));
 
-	const initialValues = Object.fromEntries(finalVariants.map((v) => [`data-${toKebabCase(v.key)}`, v.initialValue ?? v.values[0] ?? '']));
+	const initialGlobalValues = Object.fromEntries(
+		// only include global variants in the initialGlobalValues object because scoped variants are handled by the component data-attributes
+		finalVariants.filter((v) => v.scope === 'global').map((v) => [`data-${toKebabCase(v.key)}`, v.initialValue ?? v.values[0] ?? ''])
+	);
 
-	return { finalVariants, initialValues, sourceFiles: srcFiles };
+	return { finalVariants, initialGlobalValues, sourceFiles: srcFiles };
 }
 
 /**
