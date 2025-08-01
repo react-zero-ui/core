@@ -1,6 +1,6 @@
 {
 	"name": "@react-zero-ui/core",
-	"version": "0.3.0",
+	"version": "0.3.1",
 	"description": "Zero re-render, global UI state management for React",
 	"private": false,
 	"type": "module",
@@ -34,6 +34,7 @@
 	},
 	"scripts": {
 		"prepack": "pnpm run build",
+		"smoke": "node scripts/smoke-test.js",
 		"build": "tsc -p tsconfig.build.json",
 		"dev": "tsc -p tsconfig.json --watch",
 		"test:next": "playwright test -c __tests__/config/playwright.next.config.js",
@@ -80,13 +81,13 @@
 	"dependencies": {
 		"@babel/code-frame": "^7.27.1",
 		"@babel/generator": "^7.28.0",
+		"@babel/traverse": "^7.28.0",
 		"@babel/parser": "^7.28.0",
 		"@babel/types": "^7.28.0",
 		"fast-glob": "^3.3.3",
 		"lru-cache": "^11.1.0"
 	},
 	"devDependencies": {
-		"@babel/traverse": "^7.28.0",
 		"@playwright/test": "^1.54.0",
 		"@types/babel__code-frame": "^7.0.6",
 		"@types/babel__generator": "^7.27.0",

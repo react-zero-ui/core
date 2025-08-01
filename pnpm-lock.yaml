@@ -117,6 +117,9 @@ importers:
       '@babel/parser':
         specifier: ^7.28.0
         version: 7.28.0
+      '@babel/traverse':
+        specifier: ^7.28.0
+        version: 7.28.0
       '@babel/types':
         specifier: ^7.28.0
         version: 7.28.0
@@ -139,9 +142,6 @@ importers:
         specifier: ^4.1.10
         version: 4.1.10
     devDependencies:
-      '@babel/traverse':
-        specifier: ^7.28.0
-        version: 7.28.0
       '@playwright/test':
         specifier: ^1.54.0
         version: 1.54.0
