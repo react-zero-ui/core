@@ -12,7 +12,8 @@
 	],
 	"scripts": {
 		"build": "tsc -p tsconfig.json",
-		"prepack": "pnpm build"
+		"prepack": "pnpm build",
+		"prepare": "pnpm run build"
 	},
 	"peerDependencies": {
 		"eslint": "^9 || ^8",

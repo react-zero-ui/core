@@ -2,6 +2,9 @@ import { ESLintUtils, TSESTree as T } from '@typescript-eslint/utils';
 
 const createRule = ESLintUtils.RuleCreator((name) => `https://github.com/serbyte/eslint-plugin-react-zero-ui/blob/main/docs/${name}.md`);
 
+// At top of create()
+const hookLoc = new Map<string /*setter*/, T.SourceLocation>();
+
 export default createRule({
 	name: 'require-data-attr',
 	meta: {
@@ -46,6 +49,7 @@ export default createRule({
 				if (!keyArg || keyArg.type !== 'Literal' || typeof keyArg.value !== 'string') return;
 
 				scopedSetters.set(setter.name, keyArg.value);
+				hookLoc.set(setter.name, node.loc!);
 			},
 
 			//----------------------------------------------------------------
@@ -81,11 +85,7 @@ export default createRule({
 			'Program:exit'() {
 				for (const [setter, key] of scopedSetters) {
 					if (!seenRef.has(setter)) {
-						ctx.report({
-							messageId: 'missingRef',
-							loc: ctx.getScope().block.loc!, // entire file
-							data: { setter, key },
-						});
+						ctx.report({ messageId: 'missingRef', loc: hookLoc.get(setter)!, data: { setter, key } });
 					}
 				}
 			},
