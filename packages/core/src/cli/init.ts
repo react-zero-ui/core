@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-// src/cli/init.cts  - single source of truth
+// src/cli/init.ts  - single source of truth
 
-//import the actual implementation from postInstall.cjs
-const { runZeroUiInit } = require('./postInstall.cjs');
+//import the actual implementation from postInstall.ts
+import { runZeroUiInit } from './postInstall.js';
 
 // Take command line arguments (defaulting to process.argv.slice(2) which are the args after node <scriptname>) and pass them to runZeroUiInit
-async function cli(argv = process.argv.slice(2)) {
-	return await runZeroUiInit(argv);
+async function cli() {
+	return await runZeroUiInit();
 }
 
 /* -------- CL I  -------- */

@@ -1,17 +1,16 @@
 // src/core/postcss/ast-parsing.cts
 import os from 'os';
 import { parse, ParserOptions } from '@babel/parser';
-import * as babelTraverse from '@babel/traverse';
-import { Binding, NodePath, Node } from '@babel/traverse';
 import * as t from '@babel/types';
-import { CONFIG } from '../config.cjs';
+import { CONFIG } from '../config.js';
 import * as fs from 'fs';
-import { literalFromNode, ResolveOpts } from './resolvers.cjs';
+import { literalFromNode, ResolveOpts } from './resolvers.js';
 import { codeFrameColumns } from '@babel/code-frame';
-const traverse = (babelTraverse as any).default;
 import { LRUCache as LRU } from 'lru-cache';
-import { scanVariantTokens } from './scanner.cjs';
-import { findAllSourceFiles, mapLimit, toKebabCase } from './helpers.cjs';
+import { scanVariantTokens } from './scanner.js';
+import { findAllSourceFiles, mapLimit, toKebabCase } from './helpers.js';
+import { Binding, NodePath, Node } from '@babel/traverse';
+import traverse from './traverse.cjs';
 
 const PARSE_OPTS = (f: string): Partial<ParserOptions> => ({
 	sourceType: 'module',
@@ -28,6 +27,8 @@ export interface HookMeta {
 	stateKey: string;
 	/** Literal initial value as string, or `null` if non-literal */
 	initialValue: string | null;
+	/** Whether the hook is scoped to a specific element or global */
+	scope: 'global' | 'scoped';
 }
 
 /**
@@ -39,6 +40,7 @@ export interface HookMeta {
  * Throws if the key is dynamic or if the initial value cannot be
  * reduced to a space-free string.
  */
+
 export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 	const hooks: HookMeta[] = [];
 	/* ---------- cache resolved literals per AST node ---------- */
@@ -57,12 +59,17 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 		return value;
 	}
 
+	const ALL_HOOK_NAMES = new Set([CONFIG.HOOK_NAME, CONFIG.LOCAL_HOOK_NAME]);
+
 	traverse(ast, {
 		VariableDeclarator(path: NodePath<t.VariableDeclarator>) {
 			const { id, init } = path.node;
 
-			// match: const [ , setX ] = useUI(...)
-			if (!t.isArrayPattern(id) || !t.isCallExpression(init) || !t.isIdentifier(init.callee, { name: CONFIG.HOOK_NAME })) return;
+			// a) must be   const [ , setX ] = <hook>(…)
+			if (!t.isArrayPattern(id) || !t.isCallExpression(init)) return;
+
+			// b) callee must be one of our hook names
+			if (!(t.isIdentifier(init.callee) && ALL_HOOK_NAMES.has(init.callee.name))) return;
 
 			if (id.elements.length !== 2) {
 				throwCodeFrame(path, path.opts?.filename, sourceCode, `[Zero-UI] useUI() must destructure two values: [value, setterFn].`);
@@ -108,7 +115,9 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 				throwCodeFrame(path, path.opts?.filename, sourceCode, `[Zero-UI] Could not resolve binding for setter "${setterEl.name}".`);
 			}
 
-			hooks.push({ binding, setterFnName: setterEl.name, stateKey, initialValue });
+			const scope: 'global' | 'scoped' = init.callee.name === CONFIG.HOOK_NAME ? 'global' : 'scoped';
+
+			hooks.push({ binding, setterFnName: setterEl.name, stateKey, initialValue, scope });
 		},
 	});
 

@@ -1,20 +1,17 @@
+// tsconfig.base.json
 {
 	// Shared defaults
 	"compilerOptions": {
 		"target": "ES2022",
 		"module": "NodeNext",
 		"moduleResolution": "NodeNext",
-		// "verbatimModuleSyntax": true,
-		/* Gradual-migration flags */
 		"allowJs": true, // <- JS still builds
-		"checkJs": false, // <- flip to true later for type-checking JS
+		"checkJs": true,
 		"strict": true, // <- tighten as we go
 		"declaration": true, // <- emit declaration files
-		"emitDeclarationOnly": false, // <- emit declaration files only
 		"outDir": "dist", // <- output directory
 		"skipLibCheck": true, // <- skip type checking of declaration files in node_modules
 		/* Maps for monorepo imports like "@react-zero-ui/core" */
-		"composite": true,
 		"rootDir": "./",
 		"forceConsistentCasingInFileNames": true
 	},

@@ -2,10 +2,10 @@
 /**
  * @type {import('postcss').PluginCreator}
  */
-import { buildCss, generateAttributesFile, isZeroUiInitialized } from './helpers.cjs';
-import { runZeroUiInit } from '../cli/postInstall.cjs';
+import { buildCss, generateAttributesFile, isZeroUiInitialized } from './helpers';
+import { runZeroUiInit } from '../cli/postInstall.js';
 import type { PluginCreator, Root } from 'postcss';
-import { processVariants } from './ast-parsing.cjs';
+import { processVariants } from './ast-parsing';
 
 const plugin: PluginCreator<void> = () => {
 	const DEV = process.env.NODE_ENV !== 'production';

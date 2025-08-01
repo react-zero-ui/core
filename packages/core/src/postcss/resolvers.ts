@@ -1,6 +1,7 @@
+// src/postcss/resolvers.ts
 import * as t from '@babel/types';
 import { NodePath } from '@babel/traverse';
-import { throwCodeFrame } from './ast-parsing.cjs';
+import { throwCodeFrame } from './ast-parsing.js';
 import { generate } from '@babel/generator';
 export interface ResolveOpts {
 	throwOnFail?: boolean; // default false

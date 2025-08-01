@@ -7,7 +7,7 @@ const os = require('os');
 //  This file is the entry point for the react-zero-ui library, that uses postcss to trigger the build process
 const plugin = require('../../dist/postcss/index.cjs');
 
-const { patchTsConfig, toKebabCase, patchPostcssConfig, patchViteConfig } = require('../../dist/postcss/helpers.cjs');
+const { patchTsConfig, toKebabCase, patchPostcssConfig, patchViteConfig } = require('../../dist/postcss/helpers.js');
 
 function getAttrFile() {
 	return path.join(process.cwd(), '.zero-ui', 'attributes.js');
@@ -23,7 +23,7 @@ async function runTest(files, callback) {
 
 		// Clear the global file cache to prevent stale entries from previous tests
 		try {
-			const astParsing = require('../../dist/postcss/ast-parsing.cjs');
+			const astParsing = require('../../dist/postcss/ast-parsing.js');
 			if (astParsing.clearCache) {
 				astParsing.clearCache();
 			}

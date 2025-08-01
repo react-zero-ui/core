@@ -1,12 +1,11 @@
 import { parse, parseExpression, ParserOptions } from '@babel/parser';
-import * as babelTraverse from '@babel/traverse';
-import { NodePath } from '@babel/traverse';
 import * as t from '@babel/types';
 import { generate } from '@babel/generator';
-const traverse = (babelTraverse as any).default;
 import * as fs from 'fs';
 import fg from 'fast-glob';
-import { IGNORE_DIRS } from '../config.cjs';
+import { IGNORE_DIRS } from '../config.js';
+import { type NodePath } from '@babel/traverse';
+import traverse from './traverse.cjs';
 
 const AST_CONFIG_OPTS: Partial<ParserOptions> = {
 	sourceType: 'unambiguous',

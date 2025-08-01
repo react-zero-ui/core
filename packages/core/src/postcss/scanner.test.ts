@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { scanVariantTokens } from './scanner.cts';
+import { scanVariantTokens } from './scanner.js';
 
 test('scanVariantTokens', () => {
 	const src = `

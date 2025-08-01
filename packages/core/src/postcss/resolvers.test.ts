@@ -3,11 +3,9 @@ import assert from 'node:assert';
 import { parse } from '@babel/parser';
 import * as t from '@babel/types';
 import { NodePath } from '@babel/traverse';
-import { literalFromNode, resolveLocalConstIdentifier, resolveTemplateLiteral, resolveMemberExpression, ResolveOpts } from './resolvers.cts';
-import { runTest } from '../utilities.ts';
-import _traverse from '@babel/traverse';
-
-const traverse = (_traverse as any).default || _traverse;
+import { literalFromNode, resolveLocalConstIdentifier, resolveTemplateLiteral, resolveMemberExpression, ResolveOpts } from './resolvers.js';
+import { runTest } from '../utilities.js';
+import traverse from './traverse.cjs';
 
 /*
 Test Coverage:
