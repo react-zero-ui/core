@@ -5,7 +5,8 @@
 		"dev": "rm -rf .next && next dev",
 		"build": "next build",
 		"start": "next start",
-		"clean": "rm -rf .next node_modules package-lock.json"
+		"clean": "rm -rf .next node_modules package-lock.json",
+		"lint": "eslint . --ext .js,.jsx,.ts,.tsx"
 	},
 	"dependencies": {
 		"next": "^15.0.0",
