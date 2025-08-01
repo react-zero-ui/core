@@ -1,11 +1,12 @@
 {
-	"name": "test-nextjs-app",
+	"name": "eslint-test-nextjs-app",
 	"version": "1.0.0",
 	"scripts": {
 		"dev": "rm -rf .next && next dev",
 		"build": "next build",
 		"start": "next start",
-		"clean": "rm -rf .next node_modules package-lock.json"
+		"clean": "rm -rf .next node_modules package-lock.json",
+		"lint": "eslint . --ext .js,.jsx,.ts,.tsx"
 	},
 	"dependencies": {
 		"next": "^15.0.0",
@@ -13,10 +14,13 @@
 		"react-dom": "^18.2.0"
 	},
 	"devDependencies": {
+		"@eslint/eslintrc": "^3.3.1",
 		"@tailwindcss/postcss": "^4.1.10",
 		"@types/node": "24.0.0",
 		"@types/react": "19.1.7",
-		"eslint-plugin-react-zero-ui": "0.0.1-beta.1",
+		"eslint": "^9.32.0",
+		"eslint-config-next": "^15.4.5",
+		"eslint-plugin-react-zero-ui": "workspace:*",
 		"postcss": "^8.5.5",
 		"tailwindcss": "^4.1.10",
 		"typescript": "5.8.3"

@@ -67,21 +67,4 @@ export default [
 	},
 
 	/* 5 - JSX files */
-	{
-		files: ['**/*.jsx'],
-		plugins: { node: nodePlugin, import: importPlugin },
-		languageOptions: {
-			ecmaVersion: 'latest',
-			sourceType: 'module',
-			globals: { ...nodeGlobals, ...browserGlobals },
-			parserOptions: { ecmaFeatures: { jsx: true } },
-		},
-		rules: {
-			'node/no-unsupported-features/es-syntax': 'off',
-			'import/no-unresolved': 'error',
-			'import/named': 'error',
-			'import/default': 'error',
-			'import/no-absolute-path': 'error',
-		},
-	},
 ];
