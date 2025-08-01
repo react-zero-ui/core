@@ -16,6 +16,7 @@
 		"@tailwindcss/postcss": "^4.1.10",
 		"@types/node": "24.0.0",
 		"@types/react": "19.1.7",
+		"eslint-plugin-react-zero-ui": "0.0.1-beta.1",
 		"postcss": "^8.5.5",
 		"tailwindcss": "^4.1.10",
 		"typescript": "5.8.3"
