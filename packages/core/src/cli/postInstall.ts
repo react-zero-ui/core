@@ -20,10 +20,10 @@ export async function runZeroUiInit() {
 		}
 
 		// Process all variants using the shared helper
-		const { finalVariants, initialValues, sourceFiles } = await processVariants();
+		const { finalVariants, initialGlobalValues, sourceFiles } = await processVariants();
 
 		// Generate attribute files using the shared helper
-		await generateAttributesFile(finalVariants, initialValues);
+		await generateAttributesFile(finalVariants, initialGlobalValues);
 
 		console.log(`[Zero-UI] ✅ Initialized with ${finalVariants.length} variants from ${sourceFiles.length} files`);
 

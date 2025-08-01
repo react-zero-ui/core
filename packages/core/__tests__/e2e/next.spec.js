@@ -178,7 +178,8 @@ test.describe('Zero-UI Next.js Integration Tests', () => {
 
 		// Click scope toggle
 		await page.getByTestId('scope-toggle').click();
-		await expect(body).toHaveAttribute('data-scope', 'off');
+		const scope = page.getByTestId('scope-container');
+		await expect(scope).toHaveAttribute('data-scope', 'on');
 
 		// Verify other states are preserved
 		await expect(body).toHaveAttribute('data-theme', 'dark');

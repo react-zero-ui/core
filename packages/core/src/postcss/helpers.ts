@@ -50,16 +50,30 @@ export function findAllSourceFiles(patterns: string[] = CONFIG.CONTENT, cwd: str
 		.map((p) => path.resolve(p)); // normalize on Windows
 }
 
+function buildLocalSelector(keySlug: string, valSlug: string): string {
+	return `[data-${keySlug}="${valSlug}"] &, &[data-${keySlug}="${valSlug}"] { @slot; }`;
+}
+
+function buildGlobalSelector(keySlug: string, valSlug: string): string {
+	return `&:where(body[data-${keySlug}='${valSlug}'] &) { @slot; }`;
+}
+
 export function buildCss(variants: VariantData[]): string {
-	const lines = variants.flatMap(({ key, values }) => {
+	const lines = variants.flatMap(({ key, values, scope }) => {
 		if (values.length === 0) return [];
 		const keySlug = toKebabCase(key);
 
 		// Double-ensure sorted order, even if extractor didn't sort
 		return [...values].sort().map((v) => {
 			const valSlug = toKebabCase(v);
+			let selector;
+			if (scope === 'scoped') {
+				selector = buildLocalSelector(keySlug, valSlug);
+			} else {
+				selector = buildGlobalSelector(keySlug, valSlug);
+			}
 
-			return `@custom-variant ${keySlug}-${valSlug} {&:where(body[data-${keySlug}="${valSlug}"] *) { @slot; } [data-${keySlug}="${valSlug}"] &, &[data-${keySlug}="${valSlug}"] { @slot; }}`;
+			return `@custom-variant ${keySlug}-${valSlug} { ${selector} }`;
 		});
 	});
 

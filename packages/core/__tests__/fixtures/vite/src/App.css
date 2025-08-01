@@ -4,7 +4,3 @@
 	--color-primary: #000000;
 	--color-secondary: #ffffff;
 }
-
-body {
-	@apply bg-primary text-secondary;
-}

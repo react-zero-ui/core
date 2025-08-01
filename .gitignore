@@ -19,7 +19,7 @@ yarn-error.log*
 
 # tarballs produced during local tests
 *.tgz
-
+t.*
 
 # keep these files
 !next-env.d.ts

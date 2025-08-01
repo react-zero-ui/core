@@ -1,5 +1,6 @@
 /* AUTO-GENERATED - DO NOT EDIT */
 export declare const bodyAttributes: {
+  "data-child": "closed" | "open";
   "data-faq": "closed" | "open";
   "data-mobile": "false" | "true";
   "data-number": "1" | "2";

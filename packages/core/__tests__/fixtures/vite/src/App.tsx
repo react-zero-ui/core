@@ -1,18 +1,22 @@
 'use client';
-import { useUI } from '@react-zero-ui/core';
+import { useUI, useScopedUI } from '@react-zero-ui/core';
 import UseEffectComponent from './UseEffectComponent';
 import FAQ from './FAQ';
 import './App.css';
+import { ChildComponent } from './ChildComponent';
+import { ChildWithoutSetter } from './ChildWithoutSetter';
 
 export default function App() {
+	const [scope, setScope] = useScopedUI<'off' | 'on'>('scope', 'off');
+
 	const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
 	const [, setTheme2] = useUI<'light' | 'dark'>('theme-2', 'light');
 	const [, setThemeThree] = useUI<'light' | 'dark'>('theme-three', 'light');
 	const [, setToggle] = useUI<'true' | 'false'>('toggle-boolean', 'true');
 	const [, setNumber] = useUI<'1' | '2'>('number', '1');
-	const [, setOpen] = useUI<'open' | 'closed'>('faq', 'closed'); // Same key everywhere!
-	const [, setScope] = useUI<'off' | 'on'>('scope', 'off');
-	const [, setMobile] = useUI<'true' | 'false'>('mobile', 'false');
+	const [open, setOpen] = useScopedUI<'open' | 'closed'>('faq', 'closed'); // Same key everywhere!
+	const [mobile, setMobile] = useScopedUI<'true' | 'false'>('mobile', 'false');
+	const [, setChildOpen] = useUI<'open' | 'closed'>('child', 'closed');
 
 	const [, setToggleFunction] = useUI<'white' | 'black'>('toggle-function', 'white');
 
@@ -22,7 +26,7 @@ export default function App() {
 
 	return (
 		<div
-			className="p-8 theme-light:bg-white theme-dark:bg-white bg-black text-black"
+			className="p-8 theme-light:bg-white theme-dark:bg-white bg-black"
 			data-testid="page-container">
 			<h1 className="text-2xl font-bold py-5">Global State</h1>
 			<hr />
@@ -129,9 +133,13 @@ export default function App() {
 						Function: <span className="toggle-function-white:block hidden">White</span> <span className="toggle-function-black:block hidden">Black</span>
 					</div>
 				</div>
+				<hr />
+				<ChildComponent setIsOpen={setChildOpen} />
 			</div>
 			<hr />
+
 			<h1 className="text-2xl font-bold py-5">Scoped Style Tests</h1>
+
 			<hr />
 
 			<div className="border-2 border-blue-500">
@@ -139,6 +147,7 @@ export default function App() {
 					className="scope-off:bg-blue-100 scope-on:bg-blue-900 scope-on:text-white"
 					data-testid="scope-container"
 					//this ref tells the hook to flip the data key here
+					data-scope={scope}
 					ref={setScope.ref}>
 					<button
 						type="button"
@@ -147,18 +156,21 @@ export default function App() {
 						data-testid="scope-toggle">
 						Toggle Scope
 					</button>
+					<ChildWithoutSetter />
 					<div className="scope-on:bg-blue-900 scope-off:bg-blue-100 ">
 						Scope: <span className="scope-off:block scope-on:hidden">False</span>
 						<span className="scope-on:block scope-off:hidden">True</span>
 					</div>
 				</div>
+
 				<hr />
 
 				<div
 					className="mobile-false:bg-blue-100 mobile-true:bg-blue-900 mobile-true:text-white"
 					data-testid="mobile-container"
 					//this ref tells the hook to flip the data key here
-					ref={setMobile.ref}>
+					ref={setMobile.ref}
+					data-mobile={mobile}>
 					<button
 						type="button"
 						onClick={() => {
@@ -184,7 +196,11 @@ export default function App() {
 				</div>
 			</div>
 
-			<div ref={setOpen.ref}>
+			<hr />
+
+			<div
+				ref={setOpen.ref}
+				data-faq={open}>
 				<button
 					className="bg-blue-500 text-white p-2 rounded-md m-5"
 					onClick={() => setOpen((prev) => (prev === 'open' ? 'closed' : 'open'))}>
