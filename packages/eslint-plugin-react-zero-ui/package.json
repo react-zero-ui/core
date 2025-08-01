@@ -1,0 +1,24 @@
+{
+	"name": "eslint-plugin-react-zero-ui",
+	"version": "0.1.0",
+	"description": "ESLint rules for React Zero-UI",
+	"type": "module",
+	"main": "dist/index.js",
+	"exports": {
+		".": "./dist/index.js"
+	},
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "tsc -p tsconfig.json"
+	},
+	"peerDependencies": {
+		"eslint": "^9 || ^8",
+		"@typescript-eslint/parser": "^8 || ^7"
+	},
+	"devDependencies": {
+		"@typescript-eslint/utils": "^8.0.0",
+		"typescript": "^5.8.3"
+	}
+}

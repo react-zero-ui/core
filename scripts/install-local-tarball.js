@@ -7,7 +7,11 @@ const pkg = readdirSync(dist)
 	.filter((f) => f.endsWith('.tgz'))
 	.sort((a, b) => statSync(join(dist, b)).mtimeMs - statSync(join(dist, a)).mtimeMs)[0];
 
-const fixtures = ['packages/core/__tests__/fixtures/next', 'packages/core/__tests__/fixtures/vite'];
+const fixtures = [
+	'packages/core/__tests__/fixtures/next',
+	'packages/core/__tests__/fixtures/vite',
+	'packages/eslint-plugin-react-zero-ui/__tests__/fixtures/next',
+];
 
 for (const dir of fixtures) {
 	const pkgJson = join(dir, 'package.json');
