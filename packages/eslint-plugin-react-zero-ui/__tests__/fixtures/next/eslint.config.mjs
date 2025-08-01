@@ -26,7 +26,6 @@ export default [
 		},
 		rules: {
 			'react-zero-ui/require-data-attr': 'error',
-			// any local overrides…
 			'@typescript-eslint/no-unused-vars': ['warn'],
 			'no-console': ['warn', { allow: ['warn', 'error'] }],
 		},
