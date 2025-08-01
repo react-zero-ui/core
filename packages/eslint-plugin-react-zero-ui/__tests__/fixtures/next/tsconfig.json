@@ -1,7 +1,12 @@
 {
 	"compilerOptions": {
-		"lib": ["dom", "dom.iterable", "esnext"],
+		"lib": [
+			"dom",
+			"dom.iterable",
+			"esnext"
+		],
 		"allowJs": true,
+		"forceConsistentCasingInFileNames": true,
 		"skipLibCheck": true,
 		"strict": true,
 		"noEmit": true,
@@ -12,11 +17,23 @@
 		"resolveJsonModule": true,
 		"isolatedModules": true,
 		"jsx": "preserve",
-		"plugins": [{ "name": "next" }],
 		"target": "ES2017",
 		"baseUrl": ".",
-		"paths": { "@zero-ui/attributes": ["./.zero-ui/attributes.js"] }
+		"paths": {
+			"@zero-ui/attributes": [
+				"./.zero-ui/attributes.js"
+			]
+		}
 	},
-	"include": ["**/*.ts", "**/*.tsx", ".next/**/*.d.ts", ".next/types/**/*.ts", ".zero-ui/**/*.d.ts", "next-env.d.ts"],
-	"exclude": ["node_modules"]
+	"include": [
+		"**/*.ts",
+		"**/*.tsx",
+		".next/**/*.d.ts",
+		".next/types/**/*.ts",
+		".zero-ui/**/*.d.ts",
+		"next-env.d.ts"
+	],
+	"exclude": [
+		"node_modules"
+	]
 }
