@@ -15,15 +15,5 @@
 		"rootDir": "./",
 		"forceConsistentCasingInFileNames": true
 	},
-	"exclude": [
-		"dist",
-		"**/*.tsx",
-		"**/*.jsx",
-		"**/*.test.ts",
-		"pnpm-lock.yaml",
-		"pnpm-workspace.yaml",
-		"examples/**",
-		"**/fixtures/**",
-		"**/coming-soon/**"
-	]
+	"exclude": ["dist", "**/*.tsx", "**/*.jsx", "**/*.test.ts", "pnpm-lock.yaml", "pnpm-workspace.yaml", "examples/**", "**/fixtures/**", "**/coming-soon/**"]
 }

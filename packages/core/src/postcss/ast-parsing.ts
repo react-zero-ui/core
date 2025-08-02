@@ -121,7 +121,7 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 			// 	throwCodeFrame(path, path.opts?.filename, sourceCode, `[Zero-UI] Could not resolve binding for setter "${setterEl.name}".`);
 			// }
 
-			const scope: 'global' | 'scoped' = init.callee.name === CONFIG.HOOK_NAME ? 'global' : 'scoped';
+			const scope = init.callee.name === CONFIG.HOOK_NAME ? 'global' : 'scoped';
 
 			hooks.push({ setterFnName: setterEl.name, stateKey, initialValue, scope });
 		},

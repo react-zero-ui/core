@@ -42,24 +42,28 @@ export default function Page() {
 				<hr className="my-8" />
 
 				<div
+					data-theme-ssr="light"
 					data-testid="theme-ssr-container"
 					className="theme-ssr-dark:bg-gray-900 theme-ssr-light:bg-gray-100 theme-ssr-dark:text-white theme-ssr-light:text-black">
 					<button
 						data-testid="theme-ssr-toggle"
-						className="border-2 border-red-500"
+						className="border-2 border-red-500 theme-ssr-light:text-blue-500 theme-ssr-dark:text-red-500"
 						{...zeroSSR.onClick('theme-ssr', ['light', 'dark'])}>
 						Toggle SSR SAFE THEME
 					</button>
-					<span
-						data-testid="theme-ssr-dark"
-						className="theme-ssr-dark:block hidden">
-						Dark
-					</span>
-					<span
-						data-testid="theme-ssr-light"
-						className="theme-ssr-light:block hidden">
-						Light
-					</span>
+					<div className="flex gap-2">
+						Theme:
+						<span
+							data-testid="theme-ssr-dark"
+							className="theme-ssr-dark:block hidden">
+							Dark
+						</span>
+						<span
+							data-testid="theme-ssr-light"
+							className="theme-ssr-light:block hidden">
+							Light
+						</span>
+					</div>
 				</div>
 				<hr className="my-8" />
 
