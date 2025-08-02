@@ -184,6 +184,16 @@ test.describe('Zero-UI Next.js Integration Tests', () => {
 		// Verify other states are preserved
 		await expect(body).toHaveAttribute('data-theme', 'dark');
 		await expect(body).toHaveAttribute('data-toggle-boolean', 'false');
+
+		// Click global blur toggle
+		await page.getByTestId('global-toggle').click();
+		const globalBlur = page.getByTestId('global-blur');
+		await expect(globalBlur).toHaveCSS('backdrop-filter', 'blur(4px)');
+
+		// Click scope blur toggle
+		await page.getByTestId('toggle-0').click();
+		const demoBlur = page.getByTestId('demo-0');
+		await expect(demoBlur).toHaveCSS('filter', 'blur(4px)');
 	});
 
 	test('Tailwind is generated correctly', async ({ page }) => {

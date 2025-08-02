@@ -1,9 +1,10 @@
 'use client';
-import { useScopedUI, useUI } from '@react-zero-ui/core';
+import { cssVar, useScopedUI, useUI } from '@react-zero-ui/core';
 import UseEffectComponent from './UseEffectComponent';
 import FAQ from './FAQ';
 import { ChildComponent } from './ChildComponent';
 import { ChildWithoutSetter } from './ChildWithoutSetter';
+import CssVarDemo from './CssVarDemo';
 
 export default function Page() {
 	const [scope, setScope] = useScopedUI<'off' | 'on'>('scope', 'off');
@@ -19,13 +20,15 @@ export default function Page() {
 
 	const [, setToggleFunction] = useUI<'white' | 'black'>('toggle-function', 'white');
 
+	const [global, setGlobal] = useUI<'0px' | '4px'>('blur-global', '0px', cssVar);
+
 	const toggleFunction = () => {
 		setToggleFunction((prev) => (prev === 'white' ? 'black' : 'white'));
 	};
 
 	return (
 		<div
-			className="p-8 theme-light:bg-white theme-dark:bg-white bg-black"
+			className="p-8 theme-light:bg-white theme-dark:bg-white bg-black relative"
 			data-testid="page-container">
 			<h1 className="text-2xl font-bold py-5">Global State</h1>
 			<hr />
@@ -223,6 +226,28 @@ export default function Page() {
 				question="Question 3"
 				answer="Answer 3"
 			/>
+
+			{Array.from({ length: 2 }).map((_, index) => (
+				<CssVarDemo
+					key={index}
+					index={index}
+				/>
+			))}
+			<div
+				data-testid={`global-blur-container`}
+				className="m-4 p-6 rounded bg-slate-200 space-y-3">
+				<button
+					data-testid={`global-toggle`}
+					className="bg-blue-500 text-white p-2 rounded-md"
+					onClick={() => setGlobal((prev) => (prev === '0px' ? '4px' : '0px'))}>
+					Global blur toggle
+				</button>
+				<div
+					data-testid={`global-blur`}
+					className="absolute inset-0 z-10 pointer-events-none"
+					style={{ backdropFilter: 'blur(var(--blur-global, 0px))' }} // read the var
+				/>
+			</div>
 		</div>
 	);
 }

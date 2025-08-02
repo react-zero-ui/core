@@ -1,26 +1,27 @@
 'use client';
 import { useRef, type RefObject } from 'react';
-import { makeSetter } from './internal.js';
+import { cssVar, makeSetter } from './internal.js';
 
 type UIAction<T extends string> = T | ((prev: T) => T);
 
 interface ScopedSetterFn<T extends string = string> {
 	(action: UIAction<T>): void; //  ← SINGLE source of truth
 	ref?: RefObject<any> | ((node: HTMLElement | null) => void);
+	cssVar?: typeof cssVar;
 }
 
 type GlobalSetterFn<T extends string> = (action: UIAction<T>) => void;
 
-function useUI<T extends string>(key: string, initial: T): [T, GlobalSetterFn<T>] {
-	return [initial, useRef(makeSetter(key, initial, () => document.body)).current as GlobalSetterFn<T>];
+function useUI<T extends string>(key: string, initial: T, flag?: typeof cssVar): [T, GlobalSetterFn<T>] {
+	return [initial, useRef(makeSetter(key, initial, () => document.body, flag)).current as GlobalSetterFn<T>];
 }
 
-function useScopedUI<T extends string = string>(key: string, initialValue: T): [T, ScopedSetterFn<T>] {
+function useScopedUI<T extends string = string>(key: string, initialValue: T, flag?: typeof cssVar): [T, ScopedSetterFn<T>] {
 	// Create a ref to hold the DOM element that will receive the data-* attributes
 	// This allows scoping UI state to specific elements instead of always using document.body
 	const scopeRef = useRef<HTMLElement | null>(null);
 
-	const setterFn = useRef(makeSetter(key, initialValue, () => scopeRef.current!)).current as ScopedSetterFn<T>;
+	const setterFn = useRef(makeSetter(key, initialValue, () => scopeRef.current!, flag)).current as ScopedSetterFn<T>;
 
 	if (process.env.NODE_ENV !== 'production') {
 		//  -- DEV-ONLY MULTIPLE REF GUARD (removed in production by modern bundlers)  --
@@ -53,5 +54,5 @@ function useScopedUI<T extends string = string>(key: string, initialValue: T): [
 	return [initialValue, setterFn];
 }
 
-export { useUI, useScopedUI };
+export { useUI, useScopedUI, cssVar };
 export type { UIAction, ScopedSetterFn, GlobalSetterFn };

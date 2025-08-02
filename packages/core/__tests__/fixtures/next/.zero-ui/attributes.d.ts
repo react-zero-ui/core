@@ -1,6 +1,9 @@
 /* AUTO-GENERATED - DO NOT EDIT */
 export declare const bodyAttributes: {
+  "data-blur": string;
+  "data-blur-global": string;
   "data-child": "closed" | "open";
+  "data-dialog": "closed" | "open";
   "data-faq": "closed" | "open";
   "data-mobile": "false" | "true";
   "data-number": "1" | "2";
