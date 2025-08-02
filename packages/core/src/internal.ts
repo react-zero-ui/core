@@ -1,8 +1,11 @@
-// internal.ts
+// src/internal.ts
+import { UIAction } from './index.js';
 
-export function makeSetter<T extends string>(key: string, initialValue: T, getTarget: () => HTMLElement) {
+export const cssVar: unique symbol = Symbol('cssVar');
+
+export function makeSetter<T extends string>(key: string, initialValue: T, getTarget: () => HTMLElement, flag?: typeof cssVar) {
 	const camelKey = key.replace(/-([a-z])/g, (_, l) => l.toUpperCase());
-
+	const isCss = flag === cssVar;
 	if (process.env.NODE_ENV !== 'production') {
 		if (key.includes(' ') || initialValue.includes(' ')) {
 			throw new Error(`[Zero-UI] useUI(key, initialValue); key and initialValue must not contain spaces, got "${key}" and "${initialValue}"`);
@@ -43,29 +46,19 @@ export function makeSetter<T extends string>(key: string, initialValue: T, getTa
 			registry.set(key, initialValue);
 		}
 	}
-	return (valueOrFn: T | ((prev: T) => T)) => {
+	return (valueOrFn: UIAction<T>) => {
 		// SSR safety: bail out if running on server where window is undefined
 		if (typeof window === 'undefined') return;
 
 		const target = getTarget();
-		if (process.env.NODE_ENV !== 'production') {
-			if (target === null) {
-				throw new Error(
-					`[Zero-UI] useScopedUI(key, initialValue); targetRef is null. \n` +
-						`This is likely due to a missing ref attachment. \n` +
-						`Solution: Attach a ref to the component.\n` +
-						`Example: <div ref={setValue.ref} />`
-				);
-			}
-		}
 
-		// Write the new value to the data-* attribute
-		target.dataset[camelKey] =
-			// Check if caller passed an updater function (like React's setState(prev => prev === 'true' ? 'false' : 'true') pattern)
+		const prev = isCss ? ((target.style.getPropertyValue(`--${key}`) || initialValue) as T) : ((target.dataset[camelKey] || initialValue) as T);
+
+		const next =
 			typeof valueOrFn === 'function'
-				? // Call the updater function with the parsed current value - fallback to initial value if not set
-					valueOrFn((target.dataset[camelKey] as T) ?? initialValue)
-				: // Direct value assignment (no updater function)
-					valueOrFn;
+				? (valueOrFn as (p: T) => T)(prev) //  ← CALL the updater
+				: valueOrFn;
+
+		isCss ? target.style.setProperty(`--${key}`, next) : (target.dataset[camelKey] = next);
 	};
 }

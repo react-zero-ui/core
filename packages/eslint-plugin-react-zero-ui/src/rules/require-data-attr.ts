@@ -12,7 +12,7 @@ export default createRule({
 		docs: { description: 'Enforce data-* attribute on element using setter.ref' },
 		schema: [],
 		messages: {
-			missingAttr: 'Element using "{{setter}}.ref" must include {{attr}} to avoid FOUC.',
+			missingAttr: 'Element using "{{setter}}.ref" should include {{attr}}=initialState to avoid FOUC.',
 			missingRef: 'Setter "{{setter}}" from useScopedUI("{{key}}") was never attached via .ref.',
 		},
 	},

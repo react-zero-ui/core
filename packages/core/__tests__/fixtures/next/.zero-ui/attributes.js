@@ -1,5 +1,6 @@
 /* AUTO-GENERATED - DO NOT EDIT */
 export const bodyAttributes = {
+  "data-blur-global": "0px",
   "data-child": "closed",
   "data-number": "1",
   "data-theme": "light",

@@ -25,7 +25,7 @@
 		"reset": "git clean -fdx && pnpm install --frozen-lockfile && pnpm prepack:core && pnpm i-tarball",
 		"bootstrap": "pnpm install --frozen-lockfile && pnpm build && pnpm prepack:core && pnpm i-tarball",
 		"build": "cd packages/core && pnpm build",
-		"test": "cd packages/core && pnpm test:all",
+		"test": "cd packages/core && pnpm test:all && pnpm smoke",
 		"prepack:core": "pnpm -F @react-zero-ui/core pack --pack-destination ./dist",
 		"i-tarball": "node scripts/install-local-tarball.js",
 		"test:vite": "cd packages/core && pnpm test:vite",
