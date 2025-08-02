@@ -100,9 +100,9 @@
 	},
 	"peerDependencies": {
 		"@tailwindcss/postcss": "^4.1.10",
-		"postcss": "^8.5.5",
 		"react": ">=16.8.0",
-		"tailwindcss": "^4.1.10"
+		"tailwindcss": "^4.1.10",
+		"postcss": "^8.5.5"
 	},
 	"dependencies": {
 		"@babel/code-frame": "^7.27.1",

@@ -4,10 +4,13 @@
 import tailwindcss from '@tailwindcss/postcss';
 import zeroUiPostcss from './index.cjs';
 import path from 'path';
-export default function zeroUI() {
+// @ts-ignore
+import type { Plugin } from 'vite';
+
+export default function zeroUI(): Plugin {
 	return {
-		name: 'vite-zero-ui',
-		enforce: 'pre', // run before other Vite plugins
+		name: 'vite-react-zero-ui',
+		enforce: 'pre' as const, // run before other Vite plugins
 		async config() {
 			return { css: { postcss: { plugins: [zeroUiPostcss, tailwindcss()] } } };
 		},

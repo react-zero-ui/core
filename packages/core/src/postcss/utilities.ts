@@ -24,6 +24,8 @@ export function formatError(err: unknown) {
 	return { friendly, loc: eWithLoc.loc };
 }
 
-export function registerDeps(result: Result, plugin: string, files: string[], parent: string | undefined) {
-	result.messages.push({ type: 'dependency', plugin, file: files, parent });
+export function registerDeps(result: Result, plugin: string, files: string[], parent: string) {
+	files.forEach((file) => {
+		result.messages.push({ type: 'dependency', plugin, file, parent });
+	});
 }
