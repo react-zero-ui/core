@@ -24,10 +24,6 @@ export default [
 		plugins: {
 			'react-zero-ui': zeroUiPlugin, // load from workspace
 		},
-		rules: {
-			'react-zero-ui/require-data-attr': 'error',
-			'@typescript-eslint/no-unused-vars': ['warn'],
-			'no-console': ['warn', { allow: ['warn', 'error'] }],
-		},
+		rules: { 'react-zero-ui/require-data-attr': 'error', '@typescript-eslint/no-unused-vars': ['warn'], 'no-console': ['warn', { allow: ['warn', 'error'] }] },
 	},
 ];

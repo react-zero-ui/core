@@ -12,3 +12,7 @@ export declare const bodyAttributes: {
   "data-toggle-function": "black" | "blue" | "green" | "red" | "white";
   "data-use-effect-theme": "dark" | "light";
 };
+
+export declare const variantKeyMap: {
+  [key: string]: true;
+};

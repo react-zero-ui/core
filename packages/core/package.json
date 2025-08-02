@@ -7,7 +7,9 @@
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
-	"sideEffects": false,
+	"sideEffects": [
+		"./dist/experimental/runtime.js"
+	],
 	"files": [
 		"dist/**/*",
 		"README.md",
@@ -30,6 +32,30 @@
 			"types": "./dist/cli/init.d.ts",
 			"require": "./dist/cli/init.js",
 			"import": "./dist/cli/init.js"
+		},
+		"./experimental": {
+			"types": "./dist/experimental/index.d.ts",
+			"import": "./dist/experimental/index.js"
+		},
+		"./experimental/runtime": {
+			"import": "./dist/experimental/runtime.js"
+		},
+		"./experimental/init": {
+			"types": "./dist/experimental/InitZeroUI.d.ts",
+			"import": "./dist/experimental/InitZeroUI.js"
+		}
+	},
+	"typesVersions": {
+		"*": {
+			"experimental/init": [
+				"dist/experimental/InitZeroUI.d.ts"
+			],
+			"experimental/runtime": [
+				"dist/experimental/runtime.d.ts"
+			],
+			"experimental": [
+				"dist/experimental/index.d.ts"
+			]
 		}
 	},
 	"scripts": {
@@ -74,9 +100,9 @@
 	},
 	"peerDependencies": {
 		"@tailwindcss/postcss": "^4.1.10",
-		"postcss": "^8.5.5",
 		"react": ">=16.8.0",
-		"tailwindcss": "^4.1.10"
+		"tailwindcss": "^4.1.10",
+		"postcss": "^8.5.5"
 	},
 	"dependencies": {
 		"@babel/code-frame": "^7.27.1",

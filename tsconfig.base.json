@@ -6,7 +6,7 @@
 		"module": "NodeNext",
 		"moduleResolution": "NodeNext",
 		"allowJs": true, // <- JS still builds
-		"checkJs": true,
+		"checkJs": false,
 		"strict": true, // <- tighten as we go
 		"declaration": true, // <- emit declaration files
 		"outDir": "dist", // <- output directory

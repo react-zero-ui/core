@@ -2,7 +2,10 @@ export const CONFIG = {
 	SUPPORTED_EXTENSIONS: { TYPESCRIPT: ['.ts', '.tsx'], JAVASCRIPT: ['.js', '.jsx'] },
 	HOOK_NAME: 'useUI',
 	LOCAL_HOOK_NAME: 'useScopedUI',
+	SSR_HOOK_NAME: 'zeroSSR',
+	SSR_HOOK_NAME_SCOPED: 'scopedZeroSSR',
 	IMPORT_NAME: '@react-zero-ui/core',
+	PLUGIN_NAME: 'postcss-react-zero-ui',
 	MIN_HOOK_ARGUMENTS: 2,
 	MAX_HOOK_ARGUMENTS: 2,
 	HEADER: '/* AUTO-GENERATED - DO NOT EDIT */',
@@ -10,7 +13,7 @@ export const CONFIG = {
 	CONTENT: ['src/**/*.{ts,tsx,js,jsx}', 'app/**/*.{ts,tsx,js,jsx}', 'pages/**/*.{ts,tsx,js,jsx}'],
 	POSTCSS_PLUGIN: '@react-zero-ui/core/postcss',
 	VITE_PLUGIN: '@react-zero-ui/core/vite',
-};
+} as const;
 
 export const IGNORE_DIRS = [
 	'**/node_modules/**',

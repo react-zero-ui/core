@@ -5,6 +5,10 @@ import FAQ from './FAQ';
 import { ChildComponent } from './ChildComponent';
 import { ChildWithoutSetter } from './ChildWithoutSetter';
 import CssVarDemo from './CssVarDemo';
+ 
+import { zeroSSR } from '@react-zero-ui/core/experimental';
+import ZeroUiRuntime from './zero-runtime';
+ 
 
 export default function Page() {
 	const [scope, setScope] = useScopedUI<'off' | 'on'>('scope', 'off');
@@ -19,8 +23,8 @@ export default function Page() {
 	const [, setChildOpen] = useUI<'open' | 'closed'>('child', 'closed');
 
 	const [, setToggleFunction] = useUI<'white' | 'black'>('toggle-function', 'white');
+	const [, setGlobal] = useUI<'0px' | '4px'>('blur-global', '0px', cssVar);
 
-	const [global, setGlobal] = useUI<'0px' | '4px'>('blur-global', '0px', cssVar);
 
 	const toggleFunction = () => {
 		setToggleFunction((prev) => (prev === 'white' ? 'black' : 'white'));
@@ -30,12 +34,39 @@ export default function Page() {
 		<div
 			className="p-8 theme-light:bg-white theme-dark:bg-white bg-black relative"
 			data-testid="page-container">
+			<ZeroUiRuntime />
 			<h1 className="text-2xl font-bold py-5">Global State</h1>
 			<hr />
 			<div className=" space-y-4 border-2">
 				{/* Auto Theme Component  */}
 				<UseEffectComponent />
 
+				<hr className="my-8" />
+
+				<div
+					data-theme-ssr="light"
+					data-testid="theme-ssr-container"
+					className="theme-ssr-dark:bg-gray-900 theme-ssr-light:bg-gray-100 theme-ssr-dark:text-white theme-ssr-light:text-black">
+					<button
+						data-testid="theme-ssr-toggle"
+						className="border-2 border-red-500 theme-ssr-light:text-blue-500 theme-ssr-dark:text-red-500"
+						{...zeroSSR.onClick('theme-ssr', ['light', 'dark'])}>
+						Toggle SSR SAFE THEME
+					</button>
+					<div className="flex gap-2">
+						Theme:
+						<span
+							data-testid="theme-ssr-dark"
+							className="theme-ssr-dark:block hidden">
+							Dark
+						</span>
+						<span
+							data-testid="theme-ssr-light"
+							className="theme-ssr-light:block hidden">
+							Light
+						</span>
+					</div>
+				</div>
 				<hr className="my-8" />
 
 				<div

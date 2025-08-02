@@ -31,7 +31,6 @@ export function makeSetter<T extends string>(key: string, initialValue: T, getTa
 			throw new Error(`useUI(key, initialValue); initialValue cannot be empty string, null, or undefined, got "${initialValue}"`);
 		}
 		// One shared registry per window / Node context
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const registry = typeof globalThis !== 'undefined' ? ((globalThis as any).__useUIRegistry ||= new Map()) : new Map();
 
 		const prev = registry.get(key);

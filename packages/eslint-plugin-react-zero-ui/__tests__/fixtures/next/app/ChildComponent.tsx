@@ -1,6 +1,6 @@
-import { type UISetterFn } from '@react-zero-ui/core';
+import { type ScopedSetterFn } from '@react-zero-ui/core';
 
-export function ChildComponent({ setIsOpen }: { setIsOpen: UISetterFn }) {
+export function ChildComponent({ setIsOpen }: { setIsOpen: ScopedSetterFn }) {
 	return (
 		<div
 			className="child-closed:bg-gray-100 child-open:bg-gray-900 child-open:text-white"

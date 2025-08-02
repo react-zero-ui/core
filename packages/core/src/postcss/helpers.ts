@@ -6,22 +6,6 @@ import { CONFIG, IGNORE_DIRS } from '../config.js';
 import { parseJsonWithBabel, parseAndUpdatePostcssConfig, parseAndUpdateViteConfig } from './ast-generating.js';
 import { VariantData } from './ast-parsing.js';
 
-export interface ProcessVariantsResult {
-	/** Array of deduplicated and sorted variant data */
-	finalVariants: VariantData[];
-	/** Object mapping data attributes to their initial values for body tag */
-	initialValues: Record<string, string>;
-	/** Array of source file paths that were processed */
-	sourceFiles: string[];
-}
-
-export interface GenerateAttributesResult {
-	/** Whether the JavaScript attributes file was changed */
-	jsChanged: boolean;
-	/** Whether the TypeScript definition file was changed */
-	tsChanged: boolean;
-}
-
 export function toKebabCase(str: string): string {
 	if (typeof str !== 'string') {
 		throw new Error(`Expected string but got: ${typeof str}`);
@@ -36,7 +20,7 @@ export function toKebabCase(str: string): string {
 }
 
 /** Return *absolute* paths of every JS/TS file we care about (à la Tailwind). */
-export function findAllSourceFiles(patterns: string[] = CONFIG.CONTENT, cwd: string = process.cwd()): string[] {
+export function findAllSourceFiles(patterns: string[] = [...CONFIG.CONTENT], cwd: string = process.cwd()): string[] {
 	return fg
 		.sync(patterns, {
 			cwd,
@@ -80,49 +64,50 @@ export function buildCss(variants: VariantData[]): string {
 	return CONFIG.HEADER + '\n' + lines.join('\n') + '\n';
 }
 
-export async function generateAttributesFile(finalVariants: VariantData[], initialValues: Record<string, string>): Promise<GenerateAttributesResult> {
-	const cwd = process.cwd();
-	const ATTR_DIR = path.join(cwd, CONFIG.ZERO_UI_DIR);
-	const ATTR_FILE = path.join(ATTR_DIR, 'attributes.js');
-	const ATTR_TYPE_FILE = path.join(ATTR_DIR, 'attributes.d.ts');
+export async function generateAttributesFile(finalVariants: VariantData[], initialGlobals: Record<string, string>) {
+	const dir = path.join(process.cwd(), CONFIG.ZERO_UI_DIR);
+	const js = path.join(dir, 'attributes.js');
+	const dts = path.join(dir, 'attributes.d.ts');
 
-	// Generate JavaScript export
-	const attrExport = `${CONFIG.HEADER}\nexport const bodyAttributes = ${JSON.stringify(initialValues, null, 2)};\n`;
+	/* Data objects */
+	const variantKeyMap = Object.fromEntries(finalVariants.map((v) => [`data-${toKebabCase(v.key)}`, true as const]));
 
-	// Generate TypeScript definitions
-	const toLiteral = (v: string) => (typeof v === 'string' ? `"${v.replace(/"/g, '\\"')}"` : v);
-	const variantLines = finalVariants.map(({ key, values }) => {
-		const slug = `data-${toKebabCase(key)}`;
-		const union = values.length ? values.map(toLiteral).join(' | ') : 'string'; // ← fallback
+	/* JS file */
+	const jsContent = `${CONFIG.HEADER}
+export const bodyAttributes = ${JSON.stringify(initialGlobals, null, 2)};
+export const variantKeyMap  = ${JSON.stringify(variantKeyMap, null, 2)};
+`;
+
+	/* DTS file (types) */
+	const toLiteral = (s: string) => `"${s.replace(/"/g, '\\"')}"`;
+	const variantDecl = finalVariants.map((v) => {
+		const slug = `data-${toKebabCase(v.key)}`;
+		const union = v.values.length ? v.values.map(toLiteral).join(' | ') : 'string';
 		return `  "${slug}": ${union};`;
 	});
 
-	// Always include an index signature so TS doesn't optimize
-	// the declaration away when no variants exist.
-	if (variantLines.length === 0) {
-		variantLines.push('  [key: string]: string;');
-	}
+	const dtsContent = `${CONFIG.HEADER}
+export declare const bodyAttributes: {
+${variantDecl.join('\n')}
+};
 
-	const typeLines = [CONFIG.HEADER, 'export declare const bodyAttributes: {', ...variantLines, '};', ''];
-	const attrTypeExport = typeLines.join('\n');
+export declare const variantKeyMap: {
+  [key: string]: true;
+};
+`;
 
-	// Create directory if it doesn't exist
-	fs.mkdirSync(ATTR_DIR, { recursive: true });
-
-	// Only write if content has changed
-	const writeIfChanged = (file: string, content: string): boolean => {
-		const existing = fs.existsSync(file) ? fs.readFileSync(file, 'utf-8') : '';
-		if (existing !== content) {
-			fs.writeFileSync(file, content);
-			return true;
-		}
-		return false;
+	/* Write helper */
+	const writeIfChanged = (file: string, content: string) => {
+		if (fs.existsSync(file) && fs.readFileSync(file, 'utf-8') === content) return false;
+		fs.mkdirSync(dir, { recursive: true });
+		fs.writeFileSync(file, content);
+		return true;
 	};
 
-	const jsChanged = writeIfChanged(ATTR_FILE, attrExport);
-	const tsChanged = writeIfChanged(ATTR_TYPE_FILE, attrTypeExport);
+	const jsChanged = writeIfChanged(js, jsContent);
+	const dtsChanged = writeIfChanged(dts, dtsContent);
 
-	return { jsChanged, tsChanged };
+	return { jsChanged, tsChanged: dtsChanged };
 }
 
 export function isZeroUiInitialized(): boolean {

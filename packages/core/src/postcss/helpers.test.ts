@@ -1,18 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import {
-	buildCss,
-	findAllSourceFiles,
-	generateAttributesFile,
-	isZeroUiInitialized,
-	patchPostcssConfig,
-	patchTsConfig,
-	patchViteConfig,
-	toKebabCase,
-} from './helpers.js';
-import { readFile, runTest } from './utilities.js';
+import { buildCss, findAllSourceFiles, isZeroUiInitialized, patchPostcssConfig, patchTsConfig, patchViteConfig, toKebabCase } from './helpers.js';
+import { readFile, runTest } from './test-utilities.js';
 import { CONFIG } from '../config.js';
-import path from 'node:path';
 import { processVariants, VariantData } from './ast-parsing.js';
 
 test('toKebabCase should convert a string to kebab case', () => {
@@ -60,7 +50,7 @@ test('processVariants should process variants', async () => {
 	});
 });
 
-// tiny helper - avoids CRLF ↔ LF failures on Windows runners
+// tiny helper - avoids CRLF - LF failures on Windows runners
 const norm = (s: string) => s.replace(/\r\n/g, '\n');
 
 test('buildCss emits @custom-variant blocks in stable order', () => {

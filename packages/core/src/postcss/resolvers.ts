@@ -11,7 +11,6 @@ export interface ResolveOpts {
 
 /**
  * This function will decide which function to call based on the node type
- *
  * 1. String literal
  * 2. Template literal with no expressions
  * 3. Binary expression (a + b)

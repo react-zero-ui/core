@@ -5,6 +5,7 @@
 	"exclude": ["node_modules"],
 	/* — compiler output — */
 	"compilerOptions": {
+		"moduleResolution": "nodenext",
 		"esModuleInterop": true,
 		"rootDir": "./src", // keeps relative paths clean
 		"outDir": "./dist" // compiled JS → dist/
