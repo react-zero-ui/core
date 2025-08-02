@@ -1,6 +1,6 @@
 {
 	"name": "@react-zero-ui/core",
-	"version": "0.3.1",
+	"version": "0.3.1-beta.1",
 	"description": "Zero re-render, global UI state management for React",
 	"private": false,
 	"type": "module",
@@ -13,7 +13,9 @@
 	"files": [
 		"dist/**/*",
 		"README.md",
-		"LICENSE"
+		"LICENSE",
+		"!*.test.js",
+		"!*.test.cjs"
 	],
 	"exports": {
 		".": {
