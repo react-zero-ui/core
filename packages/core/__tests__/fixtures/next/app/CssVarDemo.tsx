@@ -13,9 +13,7 @@ export default function CssVarDemo({ index = 0 }) {
 	// 👇 pass `cssVar` flag to switch makeSetter into CSS-var mode
 	const [blur, setBlur] = useScopedUI<'0px' | '4px'>('blur', '0px', cssVar);
 	// global test
-	//@ts-ignore
-
-	return (
+ 	return (
 		<div
 			ref={setBlur.ref} // element that owns --blur
 			data-testid={`demo-${index}`}
@@ -24,7 +22,7 @@ export default function CssVarDemo({ index = 0 }) {
 			<button
 				data-testid={`toggle-${index}`}
 				onClick={() => setBlur((prev) => (prev === '0px' ? '4px' : '0px'))}
-				className="px-3 py-1 rounded bg-black text-white ">
+				className="px-3 py-1 rounded bg-black text-white">
 				toggle blur
 			</button>
 
