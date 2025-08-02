@@ -42,10 +42,13 @@ export interface HookMeta {
  */
 const ALL_HOOK_NAMES = new Set([CONFIG.HOOK_NAME, CONFIG.LOCAL_HOOK_NAME]);
 
+const OBJ_NAMES = new Set([CONFIG.SSR_HOOK_NAME, CONFIG.SSR_HOOK_NAME_SCOPED]);
+
 export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 	const hooks: HookMeta[] = [];
 	/* ---------- cache resolved literals per AST node ---------- */
 	const memo = new WeakMap<t.Node, string | null>();
+
 	const optsBase = { throwOnFail: true, source: sourceCode } as ResolveOpts;
 
 	function lit(node: t.Expression, p: NodePath<t.Node>, hook: ResolveOpts['hook']): string | null {
@@ -54,6 +57,10 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 		// clone instead of mutate
 		const localOpts: ResolveOpts = { ...optsBase, hook };
 
+		/**
+		 * @param node - The node to convert
+		 * @param path - The path to the node
+		 * @returns The string literal or null if the node is not a string literal or template literal with no expressions or identifier bound to local const  */
 		const value = literalFromNode(node, p, localOpts);
 
 		memo.set(node, value);
@@ -68,7 +75,7 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 			if (!t.isArrayPattern(id) || !t.isCallExpression(init)) return;
 
 			// b) callee must be one of our hook names
-			if (!(t.isIdentifier(init.callee) && ALL_HOOK_NAMES.has(init.callee.name))) return;
+			if (!(t.isIdentifier(init.callee) && ALL_HOOK_NAMES.has(init.callee.name as any))) return;
 
 			if (id.elements.length !== 2) {
 				throwCodeFrame(path, path.opts?.filename, sourceCode, `[Zero-UI] useUI() must destructure two values: [value, setterFn].`);
@@ -118,8 +125,60 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 
 			hooks.push({ setterFnName: setterEl.name, stateKey, initialValue, scope });
 		},
-	});
+		/* ────────────────────────────────────────────────────────────────
+    2. NEW: zeroSSR.onClick('key', ['v1','v2'])
+    ───────────────────────────────────────────────────────────────── */
 
+		CallExpression(path) {
+			const callee = path.node.callee;
+			if (
+				!t.isMemberExpression(callee) ||
+				!t.isIdentifier(callee.object) ||
+				!OBJ_NAMES.has(callee.object.name as any) ||
+				!t.isIdentifier(callee.property, { name: 'onClick' })
+			)
+				return;
+
+			const isScoped = callee.object.name === CONFIG.SSR_HOOK_NAME_SCOPED;
+
+			const [keyArg, arrArg] = path.node.arguments;
+
+			/* --- resolve key ------------------------------------------------ */
+			const stateKey = lit(keyArg as t.Expression, path, 'stateKey');
+			if (stateKey === null) {
+				throwCodeFrame(keyArg, path.opts?.filename, sourceCode, `[Zero-UI] zeroSSR.onClick("key"): key must be a fully-static string.`);
+			}
+
+			/* --- resolve array of values ----------------------------------- */
+			if (!t.isArrayExpression(arrArg)) {
+				throwCodeFrame(
+					arrArg,
+					path.opts?.filename,
+					sourceCode,
+					`[Zero-UI] zeroSSR.onClick("${stateKey}",[string]): second argument must be a literal string array.`
+				);
+			}
+			const values: string[] = [];
+			for (const el of arrArg.elements) {
+				const v = lit(el as t.Expression, path, 'initialValue');
+				if (v === null) {
+					throwCodeFrame(el!, path.opts?.filename, sourceCode, `[Zero-UI] zeroSSR.onClick("${stateKey}",[string]): array values must be static strings.`);
+				}
+				values.push(v);
+			}
+			if (values.length === 0) {
+				throwCodeFrame(arrArg, path.opts?.filename, sourceCode, `[Zero-UI] zeroSSR.onClick("${stateKey}",[" "]): array cannot be empty.`);
+			}
+
+			/* --- push synthetic HookMeta ----------------------------------- */
+			hooks.push({
+				setterFnName: '_', // placeholder
+				stateKey,
+				initialValue: values[0], // first element becomes default
+				scope: isScoped ? 'scoped' : 'global',
+			});
+		},
+	});
 	return hooks;
 }
 
@@ -151,8 +210,11 @@ export function clearCache(): void {
 
 /* ── Main compiler ──────────────────────────────────────────────────── */
 export interface ProcessVariantsResult {
+	/** Array of deduplicated and sorted variant data */
 	finalVariants: VariantData[];
+	/** Object mapping data attributes to their initial values for body tag */
 	initialGlobalValues: Record<string, string>;
+	/** Array of source file paths that were processed */
 	sourceFiles: string[];
 }
 

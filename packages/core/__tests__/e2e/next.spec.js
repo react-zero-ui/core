@@ -84,6 +84,16 @@ const scenarios = [
 		initialText: 'Closed',
 		toggledText: 'Open',
 	},
+	{
+		name: 'SSR Theme Toggle',
+		toggle: 'theme-ssr-toggle',
+		container: 'theme-ssr-container',
+		attr: 'data-theme-ssr',
+		initialValue: 'light',
+		toggledValue: 'dark',
+		initialText: 'Light',
+		toggledText: 'Dark',
+	},
 ];
 
 test.describe.configure({ mode: 'serial' });

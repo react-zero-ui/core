@@ -10,7 +10,7 @@ import {
 	patchViteConfig,
 	toKebabCase,
 } from './helpers.js';
-import { readFile, runTest } from './utilities.js';
+import { readFile, runTest } from './test-utilities.js';
 import { CONFIG } from '../config.js';
 import path from 'node:path';
 import { processVariants, VariantData } from './ast-parsing.js';

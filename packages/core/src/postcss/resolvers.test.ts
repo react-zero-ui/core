@@ -4,7 +4,7 @@ import { parse } from '@babel/parser';
 import * as t from '@babel/types';
 import { NodePath } from '@babel/traverse';
 import { literalFromNode, resolveLocalConstIdentifier, resolveTemplateLiteral, resolveMemberExpression, ResolveOpts } from './resolvers.js';
-import { runTest } from './utilities.js';
+import { runTest } from './test-utilities.js';
 import traverse from './traverse.cjs';
 
 /*

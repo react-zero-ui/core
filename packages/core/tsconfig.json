@@ -1,10 +1,15 @@
 {
 	"extends": "../../tsconfig.base.json",
 	/* — compile exactly one file — */
-	"include": ["src/**/*"],
-	"exclude": ["node_modules"],
+	"include": [
+		"src/**/*"
+	],
+	"exclude": [
+		"node_modules"
+	],
 	/* — compiler output — */
 	"compilerOptions": {
+		"moduleResolution": "nodenext",
 		"esModuleInterop": true,
 		"rootDir": "./src", // keeps relative paths clean
 		"outDir": "./dist" // compiled JS → dist/

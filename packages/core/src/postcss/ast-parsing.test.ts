@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert';
 import { collectUseUIHooks, processVariants } from './ast-parsing.js';
 import { parse } from '@babel/parser';
-import { readFile, runTest } from './utilities.js';
+import { readFile, runTest } from './test-utilities.js';
 
 test('collectUseUIHooks should collect setters from a component', async () => {
 	await runTest(

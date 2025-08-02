@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { readFile, runTest } from './utilities.js';
+import { readFile, runTest } from './test-utilities.js';
 import { parseAndUpdatePostcssConfig, parseAndUpdateViteConfig, parseJsonWithBabel, patchNextBodyTag } from './ast-generating.js';
 
 const zeroUiPlugin = '@react-zero-ui/core/postcss';

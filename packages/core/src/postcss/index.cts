@@ -1,81 +1,49 @@
 // src/postcss/index.cts
-/**
- * @type {import('postcss').PluginCreator}
- */
-import { buildCss, generateAttributesFile, isZeroUiInitialized } from './helpers';
+import { buildCss, generateAttributesFile, isZeroUiInitialized } from './helpers.js';
 import { runZeroUiInit } from '../cli/postInstall.js';
-import type { PluginCreator, Root } from 'postcss';
-import { processVariants } from './ast-parsing';
+import { processVariants } from './ast-parsing.js';
+import { CONFIG } from '../config.js';
+import { formatError, registerDeps } from './utilities.js';
+import type { Root, Result } from 'postcss';
 
-const plugin: PluginCreator<void> = () => {
-	const DEV = process.env.NODE_ENV !== 'production';
-	const zeroUIPlugin = 'postcss-react-zero-ui';
+const PLUGIN = CONFIG.PLUGIN_NAME;
+const DEV = process.env.NODE_ENV !== 'production';
 
-	return {
-		postcssPlugin: zeroUIPlugin,
+const plugin = () => ({
+	postcssPlugin: PLUGIN,
 
-		async Once(root: Root, { result }) {
-			try {
-				/* ── generate + inject variants ─────────────────────────── */
-				/*
-					finalVariants: VariantData[] // = { key: string; values: string[]; initialValue: string | null;}
-					initialValues: Record<string, string>; // key: initialValue
-					sourceFiles: string[]; // file paths (absolute)
-	      */
-				const { finalVariants, initialGlobalValues, sourceFiles } = await processVariants();
-
-				const cssBlock = buildCss(finalVariants);
-				if (cssBlock.trim()) root.prepend(cssBlock + '\n');
-
-				/* ── register file-dependencies for HMR ─────────────────── */
-				sourceFiles.forEach((file) => result.messages.push({ type: 'dependency', plugin: zeroUIPlugin, file, parent: result.opts.from }));
-
-				/* ── first-run bootstrap ────────────────────────────────── */
-				if (!isZeroUiInitialized()) {
-					console.log('[Zero-UI] Auto-initializing (first-time setup)…');
-					await runZeroUiInit();
-				}
-				await generateAttributesFile(finalVariants, initialGlobalValues);
-			} catch (err: unknown) {
-				/* ───────────────── error handling ─────────────────────── */
-				const error = err instanceof Error ? err : new Error(String(err));
-				const eWithLoc = error as Error & { loc?: { file?: string; line?: number; column?: number } };
-
-				/* ❶ Special-case throwCodeFrame errors (they always contain "^") */
-				const isCodeFrame = /[\n\r]\s*\^/.test(error.message);
-
-				/* ❷ Broader categories for non-frame errors (kept from your code) */
-				const isSyntaxError =
-					!isCodeFrame &&
-					(error.message.includes('State key cannot be resolved') ||
-						error.message.includes('initial value cannot be resolved') ||
-						error.message.includes('SyntaxError'));
-				const isFileError = !isCodeFrame && (error.message.includes('ENOENT') || error.message.includes('Cannot find module'));
-
-				let friendly = error.message;
-				if (isCodeFrame)
-					friendly = error.message; // already perfect
-				else if (isSyntaxError) friendly = `Syntax error in Zero-UI usage: ${error.message}`;
-				else if (isFileError) friendly = `File system error: ${error.message}`;
-
-				/* ❸ Dev = warn + keep server alive  |  Prod = fail build */
-				if (DEV) {
-					if (eWithLoc.loc?.file) {
-						result.messages.push({ type: 'dependency', plugin: zeroUIPlugin, file: eWithLoc.loc.file, parent: result.opts.from });
-					}
-
-					result.warn(friendly, { plugin: zeroUIPlugin, ...(eWithLoc.loc && { line: eWithLoc.loc.line, column: eWithLoc.loc.column }) });
-
-					console.error('[Zero-UI] Full error (dev-only):\n', error);
-					return; // ← do **not** abort dev-server
-				}
-
-				// production / CI
-				throw new Error(`[Zero-UI] PostCSS plugin error: ${friendly}`);
+	async Once(root: Root, { result }: { result: Result }) {
+		try {
+			/* ① cold-start bootstrap --------------------------------------- */
+			if (!isZeroUiInitialized()) {
+				console.log('[Zero-UI] Auto-initializing (first-time setup)…');
+				await runZeroUiInit();
 			}
-		},
-	};
-};
+
+			/* ② variants → CSS + attributes ------------------------------- */
+			const { finalVariants, initialGlobalValues, sourceFiles } = await processVariants();
+
+			const cssBlock = buildCss(finalVariants);
+			if (cssBlock.trim()) root.prepend(cssBlock + '\n');
+
+			/* ③ HMR dependencies ------------------------------------------ */
+			registerDeps(result, PLUGIN, sourceFiles, result.opts.from);
+
+			/* ④ write .zero-ui files -------------------------------------- */
+			await generateAttributesFile(finalVariants, initialGlobalValues);
+		} catch (err) {
+			const { friendly, loc } = formatError(err);
+
+			if (DEV) {
+				if (loc?.file) registerDeps(result, PLUGIN, [loc.file], result.opts.from);
+				result.warn(friendly, { plugin: PLUGIN, ...loc });
+				console.error('[Zero-UI] Full error (dev-only)\n', err);
+				return;
+			}
+			throw new Error(`[Zero-UI] PostCSS plugin error: ${friendly}`);
+		}
+	},
+});
 
 plugin.postcss = true;
 export = plugin;
