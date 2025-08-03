@@ -1,6 +1,6 @@
 {
 	"name": "@react-zero-ui/core",
-	"version": "0.3.1-beta.1",
+	"version": "0.3.1-beta.2",
 	"description": "Zero re-render, global UI state management for React",
 	"private": false,
 	"type": "module",
@@ -40,30 +40,14 @@
 			"import": "./dist/experimental/index.js"
 		},
 		"./experimental/runtime": {
+			"types": "./dist/experimental/runtime.d.ts",
 			"import": "./dist/experimental/runtime.js"
-		},
-		"./experimental/init": {
-			"types": "./dist/experimental/InitZeroUI.d.ts",
-			"import": "./dist/experimental/InitZeroUI.js"
-		}
-	},
-	"typesVersions": {
-		"*": {
-			"experimental/init": [
-				"dist/experimental/InitZeroUI.d.ts"
-			],
-			"experimental/runtime": [
-				"dist/experimental/runtime.d.ts"
-			],
-			"experimental": [
-				"dist/experimental/index.d.ts"
-			]
 		}
 	},
 	"scripts": {
 		"prepack": "pnpm run build",
 		"smoke": "node scripts/smoke-test.js",
-		"build": "tsc -p tsconfig.build.json",
+		"build": "rm -rf dist && tsc -p tsconfig.build.json",
 		"dev": "tsc -p tsconfig.json --watch",
 		"test:next": "playwright test -c __tests__/config/playwright.next.config.js",
 		"test:vite": "playwright test -c __tests__/config/playwright.vite.config.js",
