@@ -20,10 +20,10 @@ Pre‑render your UI once, flip a `data-*` attribute to update — that's it.
 
 ## 🚀 Live Demo
 
-| Example                                 | Link                                                                                                                                           | What it shows                                                 | Link to Code                                                                                                                                 |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Interactive menu with render tracker    | <a href="https://zero-ui.dev/" target="_blank" rel="noopener noreferrer"><strong>Main Demo↗</strong></a>                                      | Compare Zero‑UI vs. React side‑by‑side while toggling a menu. | <a href="https://github.com/react-zero-ui/core/tree/main/examples/demo" target="_blank" rel="noopener noreferrer">Github</a>                 |
-| React benchmark (10 000 nested nodes)   | <a href="https://zero-ui.dev/react" target="_blank" rel="noopener noreferrer"><strong>React 10k↗</strong></a>                                 | How long the traditional React render path takes.             | <a href="https://github.com/react-zero-ui/core/tree/main/examples/demo/src/app/react" target="_blank" rel="noopener noreferrer">Github</a>   |
+| Example | Link | What it shows | Link to Code |
+| --- | --- | --- | --- |
+| Interactive menu with render tracker | <a href="https://zero-ui.dev/" target="_blank" rel="noopener noreferrer"><strong>Main Demo↗</strong></a> | Compare Zero‑UI vs. React side‑by‑side while toggling a menu. | <a href="https://github.com/react-zero-ui/core/tree/main/examples/demo" target="_blank" rel="noopener noreferrer">Github</a> |
+| React benchmark (10 000 nested nodes)   | <a href="https://zero-ui.dev/react" target="_blank" rel="noopener noreferrer"><strong>React 10k↗</strong></a> | How long the traditional React render path takes.             | <a href="https://github.com/react-zero-ui/core/tree/main/examples/demo/src/app/react" target="_blank" rel="noopener noreferrer">Github</a>   |
 | Zero‑UI benchmark (10 000 nested nodes) | <a href="https://zero-ui.dev/zero-ui" target="_blank" rel="noopener noreferrer"><strong style="text-align: nowrap;">Zero‑UI 10k↗</strong></a> | Identical DOM, but powered by Zero‑UI's `data-*` switch.      | <a href="https://github.com/react-zero-ui/core/tree/main/examples/demo/src/app/zero-ui" target="_blank" rel="noopener noreferrer">Github</a> |
 
 ---
