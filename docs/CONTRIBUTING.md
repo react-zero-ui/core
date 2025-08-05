@@ -66,18 +66,19 @@ Use the templates.
 ## 🧪 Test Commands
 
 ```bash
-pnpm test:unit      # Core logic tests
-pnpm test:cli       # CLI creation flow
-pnpm test:vite      # E2E tests on Vite fixture
-pnpm test:next      # E2E tests on Next.js fixture
-pnpm test           # Runs all of the above
+pnpm test:unit        # Core logic tests
+pnpm test:integration # Core logic tests
+pnpm test:cli         # CLI creation flow
+pnpm test:vite        # E2E tests on Vite fixture
+pnpm test:next        # E2E tests on Next.js fixture
+pnpm test             # Runs all of the above
 ```
 
 ---
 
 ## 🤝 Code of Conduct
 
-Keep it respectful. Push ideas hard, not people.
+Keep it respectful, accessible. Push ideas hard, not people.
 
 ---
 

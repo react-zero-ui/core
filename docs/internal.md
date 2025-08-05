@@ -47,6 +47,7 @@ source files ─►           ├─► Map<key,Set<value>>
    	key: string; // 'stateKey'
    	values: string[]; // ['light', 'dark', …]  (unique & sorted)
    	initialValue: string; // from 2nd arg of useUI()
+      scope: 'global' | 'scoped';
    };
    ```
 
@@ -65,10 +66,10 @@ source files ─►           ├─► Map<key,Set<value>>
 
 ## 2. Pipeline overview (AST + global token scan)
 
-| Stage                            | Scope & algorithm                                                                                                                                                                      | Output                                                                |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| **A - collectUseUIHooks**        | Single AST traversal per file.<br>• Validate `useUI()` shapes.<br>• Resolve **stateKey** & **initialValue** with **`literalFromNode`** (§3).<br>• Builds global set of all state keys. | `HookMeta[]` = `{ stateKey, initialValue }[]`, global `Set<stateKey>` |
-| **B - global scanVariantTokens** | Single global regex scan pass over all files (same glob & delimiters Tailwind uses).<br>Matches tokens for **every stateKey discovered in Stage A**.                                   | `Map<stateKey, Set<value>>`                                           |
+| Stage | Scope & algorithm | Output |
+| --- | --- | --- |
+| **A - collectUseUIHooks** | Single AST traversal per file.<br>• Validate `useUI()` shapes.<br>• Resolve **stateKey** & **initialValue** with **`literalFromNode`** (§3).<br>• Builds global set of all state keys. | `HookMeta[]` = `{ stateKey, initialValue }[]`, global `Set<stateKey>` |
+| **B - global scanVariantTokens** | Single global regex scan pass over all files (same glob & delimiters Tailwind uses).<br>Matches tokens for **every stateKey discovered in Stage A**. | `Map<stateKey, Set<value>>` |
 
 The pipeline now ensures tokens are captured globally—regardless of hook declarations in each file.
 
@@ -111,12 +112,12 @@ Everything funnels through **`literalFromNode`**. Think of it as a deterministic
 
 ### 3.2 Resolvers
 
-| Helper                            | Purpose                                                                                                                                    |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`resolveTemplateLiteral`**      | Ensures every `${expr}` resolves via `literalFromNode`.                                                                                    |
+| Helper | Purpose |
+| --- | --- |
+| **`resolveTemplateLiteral`** | Ensures every `${expr}` resolves via `literalFromNode`. |
 | **`resolveLocalConstIdentifier`** | Maps an `Identifier` → its `const` initializer _iff_ initializer is a local static string/template. Imported bindings rejected explicitly. |
-| **`resolveMemberExpression`**     | Static walk of `obj.prop`, `obj['prop']`, `obj?.prop`, arrays, numeric indexes, optional‑chaining… Throws if unresolved.                   |
-| **`literalFromNode`**             | Router calling above; memoised (`WeakMap`) per AST node.                                                                                   |
+| **`resolveMemberExpression`** | Static walk of `obj.prop`, `obj['prop']`, `obj?.prop`, arrays, numeric indexes, optional‑chaining… Throws if unresolved. |
+| **`literalFromNode`** | Router calling above; memoised (`WeakMap`) per AST node. |
 
 Resolvers throw contextual errors via **`throwCodeFrame`** (`@babel/code-frame`).
 

@@ -18,8 +18,7 @@ if (!existsSync(resolve(target, 'package.json'))) exec('init', ['-y']);
 exec(pm === 'yarn' ? 'add' : 'install', ['@react-zero-ui/core']);
 
 /* 3️⃣ dev deps */
-// TODO figure out if we can do it without tailwindcss and only the postcss plugin
-exec(pm === 'yarn' ? 'add' : 'install', ['postcss', 'tailwindcss', '@tailwindcss/postcss', '--save-dev']);
+exec(pm === 'yarn' ? 'add' : 'install', ['@tailwindcss/postcss', '--save-dev']);
 
 /* 4️⃣ handoff */
 // eslint-disable-next-line import/no-unresolved
