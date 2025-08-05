@@ -24,6 +24,7 @@
 		"preinstall": "npx only-allow pnpm",
 		"reset": "git clean -fdx && pnpm install --frozen-lockfile && pnpm prepack:core && pnpm i-tarball",
 		"bootstrap": "pnpm install --frozen-lockfile && pnpm build && pnpm prepack:core && pnpm i-tarball",
+		"dev": "pnpm install && pnpm build && pnpm prepack:core && pnpm i-tarball",
 		"build": "cd packages/core && pnpm build",
 		"test": "cd packages/core && pnpm test:all && pnpm smoke",
 		"prepack:core": "pnpm -F @react-zero-ui/core pack --pack-destination ./dist",
@@ -43,8 +44,6 @@
 	"devDependencies": {
 		"@eslint/js": "^9.32.0",
 		"@types/node": "^24.1.0",
-		"@typescript-eslint/eslint-plugin": "^8.38.0",
-		"@typescript-eslint/parser": "^8.38.0",
 		"esbuild": "^0.25.8",
 		"eslint": "^9.32.0",
 		"eslint-plugin-import": "^2.32.0",

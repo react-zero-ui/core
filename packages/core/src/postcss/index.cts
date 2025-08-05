@@ -4,14 +4,15 @@
  */
 import { buildCss, generateAttributesFile, isZeroUiInitialized } from './helpers';
 import { runZeroUiInit } from '../cli/postInstall.js';
-import type { PluginCreator, Root, Result } from 'postcss';
 import { processVariants } from './ast-parsing';
 import { CONFIG } from '../config';
-import { formatError, registerDeps } from './utilities.js';
+import { formatError, registerDeps, Result } from './utilities.js';
+
+type Root = { prepend: (css: string) => void };
 
 const zeroUIPlugin = CONFIG.PLUGIN_NAME;
 
-const plugin: PluginCreator<void> = () => {
+const plugin = () => {
 	return {
 		postcssPlugin: zeroUIPlugin,
 		async Once(root: Root, { result }: { result: Result }) {

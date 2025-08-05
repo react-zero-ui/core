@@ -4,6 +4,13 @@ import { generateAttributesFile, patchTsConfig, patchPostcssConfig, patchViteCon
 import { processVariants } from '../postcss/ast-parsing.js';
 
 export async function runZeroUiInit() {
+	// 0️⃣ Check peer dependency
+	try {
+		require.resolve('@tailwindcss/postcss');
+	} catch {
+		console.error('\n[Zero-UI] ❌ Missing peer dependency "@tailwindcss/postcss".\n' + 'Run: npm install @tailwindcss/postcss\n');
+		process.exit(1);
+	}
 	try {
 		console.log('[Zero-UI] Initializing...');
 

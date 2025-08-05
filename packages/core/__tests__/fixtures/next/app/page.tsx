@@ -5,10 +5,10 @@ import FAQ from './FAQ';
 import { ChildComponent } from './ChildComponent';
 import { ChildWithoutSetter } from './ChildWithoutSetter';
 import CssVarDemo from './CssVarDemo';
- 
+
 import { zeroSSR } from '@react-zero-ui/core/experimental';
+
 import ZeroUiRuntime from './zero-runtime';
- 
 
 export default function Page() {
 	const [scope, setScope] = useScopedUI<'off' | 'on'>('scope', 'off');
@@ -24,7 +24,6 @@ export default function Page() {
 
 	const [, setToggleFunction] = useUI<'white' | 'black'>('toggle-function', 'white');
 	const [, setGlobal] = useUI<'0px' | '4px'>('blur-global', '0px', cssVar);
-
 
 	const toggleFunction = () => {
 		setToggleFunction((prev) => (prev === 'white' ? 'black' : 'white'));

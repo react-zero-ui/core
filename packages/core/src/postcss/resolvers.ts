@@ -10,35 +10,91 @@ export interface ResolveOpts {
 }
 
 /**
- * This function will decide which function to call based on the node type
- * 1. String literal
- * 2. Template literal with no expressions
- * 3. Binary expression (a + b)
- * 4. Logical expression (a || b, a ?? b)
- * 5. Identifier bound to local const
- * 6. Template literal with expressions
- * 7. Member expression
- * 8. Optional member expression
- * 9. Everything else is illegal
+ * Higher up the call tree we verify with typescript that the node resolves to a string literal. and has no whitespace.
+ * We just have to resolve it at build time.
+ *
+ * This function will decide which function to call based on the node type (ALL RESOLVE TO STRINGS)
+ * StringLiteral
+ * TemplateLiteral (both static and dynamic expressions resolved recursively)
+ * Identifier (local const)
+ * BinaryExpression (+ operator)
+ * UnaryExpression (covers numeric/string coercions and logical negation explicitly)
+ * LogicalExpression (||, ??)
+ * ConditionalExpression (condition ? expr1 : expr2)
+ * ArrayExpression (["a", "b"][index])
+ * NumericLiteral (coerced)
+ * MemberExpression (static, computed, nested objects/arrays)
+ * OptionalMemberExpression (a?.b)
+ * ObjectExpression (via MemberExpression chains)
+ * BooleanLiteral (handled explicitly by isBooleanLiteral)
+ SequenceExpression (already handled explicitly by taking last expression)
+
  * @param node - The node to convert
  * @param path - The path to the node
- * @returns The string literal or null if the node is not a string literal or template literal with no expressions or identifier bound to local const
+ * @returns - The string literal resolved or null
  */
 export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts: ResolveOpts): string | null {
+	// StringLiteral
+	if (t.isStringLiteral(node)) return node.value;
+	// NumericLiteral - convert numbers to strings
+	if (t.isNumericLiteral(node)) return String(node.value);
+	// BooleanLiteral returned as string
+	if (t.isBooleanLiteral(node)) return String(node.value); // → 'true' or 'false'
+	// TemplateLiteral without ${}
+	if (t.isTemplateLiteral(node) && node.expressions.length === 0) return node.quasis[0].value.cooked ?? node.quasis[0].value.raw;
+
 	/* ── Fast path via Babel constant-folder ───────────── */
 	const ev = fastEval(node, path);
-	if (ev.confident && typeof ev.value === 'string') return ev.value;
 
-	// String / template (no ${})
-	if (t.isStringLiteral(node)) return node.value;
-	if (t.isTemplateLiteral(node) && node.expressions.length === 0) {
-		const text = node.quasis[0].value.cooked ?? node.quasis[0].value.raw;
-		return text;
+	if (ev.confident && typeof ev.value === 'string') {
+		containsIllegalIdentifiers(node, path, opts); // 👈 throws if invalid
+		return ev.value;
 	}
+
+	// ConditionalExpression
+	if (t.isConditionalExpression(node)) {
+		const testResult = fastEval(node.test, path);
+		if (testResult.confident) {
+			const branch = testResult.value ? node.consequent : node.alternate;
+			return literalFromNode(branch as t.Expression, path, opts);
+		}
+		// If test isn't statically evaluable, return null
+		return null;
+	}
+
+	// BinaryExpression with + operator
 	if (t.isBinaryExpression(node) && node.operator === '+') {
+		// Resolve left
 		const left = literalFromNode(node.left as t.Expression, path, opts);
+		// Resolve right
 		const right = literalFromNode(node.right as t.Expression, path, opts);
 		return left !== null && right !== null ? left + right : null;
+	}
+
+	// SequenceExpression (already handled explicitly by taking last expression)
+	if (t.isSequenceExpression(node)) {
+		const last = node.expressions.at(-1);
+		if (last) return literalFromNode(last, path, opts);
+	}
+
+	if (t.isUnaryExpression(node)) {
+		const arg = literalFromNode(node.argument as t.Expression, path, opts);
+		if (arg === null) return null;
+
+		switch (node.operator) {
+			case 'typeof':
+				return typeof arg;
+			case '+':
+				return typeof arg === 'number' || !isNaN(Number(arg)) ? String(+arg) : null;
+			case '-':
+				return typeof arg === 'number' || !isNaN(Number(arg)) ? String(-arg) : null;
+			case '!':
+				return String(!arg);
+			case 'void':
+				return 'undefined';
+			default:
+				return null;
+		}
 	}
 
 	/* ── Logical fallback  (a || b ,  a ?? b) ───────────── */
@@ -49,10 +105,10 @@ export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts
 		return literalFromNode(node.right as t.Expression, path, opts);
 	}
 
-	// Identifier bound to local const (also handles object/array literals
-	// via the recursive call inside resolveLocalConstIdentifier)
+	// 	"Is this node an Identifier?"
+	// "If yes, can I resolve it to a literal value like a string, number, or boolean?"
 	const idLit = resolveLocalConstIdentifier(node, path, opts);
-	if (idLit !== null) return idLit;
+	if (idLit !== null) return String(idLit);
 
 	// Template literal with ${expr} or ${CONSTANT}
 	if (t.isTemplateLiteral(node)) {
@@ -74,17 +130,17 @@ export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts
 
   Returns {confident, value} or {confident: false}
 \*──────────────────────────────────────────────────────────*/
-export function fastEval(node: t.Expression, path: NodePath<t.Node>) {
+export function fastEval(node: t.Expression, path: NodePath<t.Node>): { confident: boolean; value?: string } {
 	// ❶ If the node *is* the current visitor path, we can evaluate directly.
-	if (node === path.node && (path as any).evaluate) {
-		return (path as any).evaluate(); // safe, returns {confident, value}
+	if (node === path.node && (path as NodePath<t.Node>).evaluate) {
+		return path.evaluate(); // safe, returns {confident, value}
 	}
 
 	// ❷ Otherwise try to locate a child-path that wraps `node`.
 	//    (Babel exposes .get() only for *named* keys, so we must scan.)
 	for (const key of Object.keys(path.node)) {
-		const sub = (path as any).get?.(key);
-		if (sub?.node === node && sub.evaluate) {
+		const sub = (path as NodePath<t.Node>).get?.(key) as NodePath<t.Node> | undefined;
+		if (sub?.node === node && sub?.evaluate) {
 			return sub.evaluate();
 		}
 	}
@@ -100,7 +156,7 @@ export function fastEval(node: t.Expression, path: NodePath<t.Node>) {
 
   1. It is bound in the **same file** (Program scope),
   2. Declared with **`const`** (not `let` / `var`),
-  3. Initialised to a **string literal** or a **static template literal**,
+  3. Initialized to a **string literal** or a **static template literal**,
   4. The final string has **no whitespace** (`/^\S+$/`).
 
   Anything else (inner-scope `const`, dynamic value, imported binding, spaces)
@@ -109,11 +165,7 @@ export function fastEval(node: t.Expression, path: NodePath<t.Node>) {
   If the binding is *imported*, we delegate to `throwCodeFrame()` so the
   developer gets a consistent, actionable error message.
 \*──────────────────────────────────────────────────────────*/
-export function resolveLocalConstIdentifier(
-	node: t.Expression, // <- widened
-	path: NodePath<t.Node>,
-	opts: ResolveOpts
-): string | null {
+export function resolveLocalConstIdentifier(node: t.Expression, path: NodePath<t.Node>, opts: ResolveOpts): string | number | boolean | null {
 	/* Fast-exit when node isn't an Identifier */
 	if (!t.isIdentifier(node)) return null;
 
@@ -143,6 +195,14 @@ export function resolveLocalConstIdentifier(
 
 	/* 2. Allow only top-level `const` */
 	if (!binding.path.isVariableDeclarator() || binding.scope.block.type !== 'Program' || (binding.path.parent as t.VariableDeclaration).kind !== 'const') {
+		if ((binding.path.parent as t.VariableDeclaration).kind !== 'const') {
+			throwCodeFrame(
+				path,
+				path.opts?.filename,
+				opts.source ?? path.opts?.source?.code,
+				`[Zero-UI] Only top-level \`const\` variables are allowed. '${node.name}' is not valid.`
+			);
+		}
 		return null;
 	}
 
@@ -155,12 +215,17 @@ export function resolveLocalConstIdentifier(
 		init = (init as any).expression; // step into the real value
 	}
 
-	let text: string | null = null;
+	let text: string | number | boolean | null = null;
 
 	if (t.isStringLiteral(init)) {
-		text = init.value;
+		text = init?.value;
 	} else if (t.isTemplateLiteral(init)) {
 		text = resolveTemplateLiteral(init, binding.path, literalFromNode, opts);
+	} else if (t.isNumericLiteral(init)) {
+		const raw = String(init.value);
+		if (/^\S+$/.test(raw)) text = raw;
+	} else if (t.isBooleanLiteral(init)) {
+		text = init.value; // → 'true' or 'false'
 	}
 
 	return text;
@@ -267,15 +332,15 @@ export function resolveMemberExpression(
 			} else if (t.isNumericLiteral(expr)) {
 				props.unshift(expr.value);
 			} else {
-				const lit = literalFromNode(expr, path, opts);
-				if (lit === null)
+				const lit = literalFromNode(expr, path, { ...opts, throwOnFail: true });
+				if (lit === null) {
 					throwCodeFrame(
 						path,
 						path.opts?.filename,
 						opts.source ?? path.opts?.source?.code,
-						'[Zero-UI] Member expression must resolve to a static space-free string.'
+						'[Zero-UI] Member expression must resolve to a static space-free string.\n' + 'only use const identifiers as keys.'
 					);
-
+				}
 				const num = Number(lit);
 				props.unshift(Number.isFinite(num) ? num : lit);
 			}
@@ -358,12 +423,60 @@ export function resolveMemberExpression(
 \*──────────────────────────────────────────────────────────*/
 function resolveObjectValue(obj: t.ObjectExpression, key: string): t.Expression | null | undefined {
 	for (const p of obj.properties) {
+		// Matches: { dark: 'theme' } — key = 'dark'
 		if (t.isObjectProperty(p) && !p.computed && t.isIdentifier(p.key) && p.key.name === key) {
 			return p.value as t.Expression;
 		}
+
+		// Matches: { ['dark']: 'theme' } — key = 'dark'
 		if (t.isObjectProperty(p) && p.computed && t.isStringLiteral(p.key) && p.key.value === key) {
 			return p.value as t.Expression;
 		}
+
+		// Matches: { "dark": "theme" } or { "1": "theme" } — key = 'dark' or '1'
+		// if (t.isObjectProperty(p) && t.isStringLiteral(p.key) && p.key.value === key) {
+		// 	return p.value as t.Expression;
+		// }
+
+		// // ✅ New: Matches { 1: "theme" } — key = '1'
+		// if (t.isObjectProperty(p) && t.isNumericLiteral(p.key) && String(p.key.value) === key) {
+		// 	return p.value as t.Expression;
+		// }
 	}
+
 	return null;
+}
+
+function containsIllegalIdentifiers(node: t.Node, path: NodePath, opts: ResolveOpts): void {
+	t.traverseFast(node, (subNode) => {
+		if (!t.isIdentifier(subNode)) return;
+
+		const binding = path.scope.getBinding(subNode.name);
+		if (!binding) {
+			throwCodeFrame(
+				path,
+				path.opts?.filename,
+				opts.source ?? path.opts?.source?.code,
+				`[Zero-UI] Identifier '${subNode.name}' is not declared. Only local top-level consts are allowed.`
+			);
+		}
+
+		if (binding.path.isImportSpecifier() || binding.path.isImportDefaultSpecifier() || binding.path.isImportNamespaceSpecifier()) {
+			throwCodeFrame(
+				path,
+				path.opts?.filename,
+				opts.source ?? path.opts?.source?.code,
+				`[Zero-UI] Imports Not Allowed:\n Inline it or alias to a local const first.`
+			);
+		}
+
+		if (binding.scope.block.type !== 'Program' || (binding.path.parent as t.VariableDeclaration).kind !== 'const') {
+			throwCodeFrame(
+				path,
+				path.opts?.filename,
+				opts.source ?? path.opts?.source?.code,
+				`[Zero-UI] Only top-level \`const\` variables are allowed. '${subNode.name}' is not valid.`
+			);
+		}
+	});
 }

@@ -16,9 +16,6 @@
 		"LICENSE"
 	],
 	"dependencies": {
-		"@react-zero-ui/core": "^0.2.2",
-		"postcss": "^8.4.27",
-		"tailwindcss": "^4.0.0",
-		"@tailwindcss/postcss": "^4.1.8"
+		"@react-zero-ui/core": "^0.3.1"
 	}
 }

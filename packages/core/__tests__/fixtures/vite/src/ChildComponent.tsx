@@ -1,6 +1,6 @@
-import { type UISetterFn } from '@react-zero-ui/core';
+import { type GlobalSetterFn } from '@react-zero-ui/core';
 
-export function ChildComponent({ setIsOpen }: { setIsOpen: UISetterFn<'open' | 'closed'> }) {
+export function ChildComponent({ setIsOpen }: { setIsOpen: GlobalSetterFn<'open' | 'closed'> }) {
 	return (
 		<div
 			className="child-closed:bg-gray-100 child-open:bg-gray-900 child-open:text-white"

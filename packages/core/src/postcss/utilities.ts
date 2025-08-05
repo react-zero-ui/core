@@ -1,5 +1,3 @@
-import { Result } from 'postcss';
-
 export function formatError(err: unknown) {
 	const error = err instanceof Error ? err : new Error(String(err));
 	const eWithLoc = error as Error & { loc?: { file?: string; line?: number; column?: number } };
@@ -23,6 +21,13 @@ export function formatError(err: unknown) {
 
 	return { friendly, loc: eWithLoc.loc };
 }
+
+export type Result = {
+	messages: { type: string; plugin: string; file: string; parent: string }[];
+	opts: { from: string };
+	prepend: (css: string) => void;
+	warn: (message: string, options?: { endIndex?: number; index?: number; node?: Node; plugin?: string; word?: string }) => void;
+};
 
 export function registerDeps(result: Result, plugin: string, files: string[], parent: string) {
 	files.forEach((file) => {

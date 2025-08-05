@@ -101,3 +101,26 @@ test('collectUseUIHooks handles + both hooks', async () => {
 		]
 	);
 });
+
+test('collectUseUIHooks NumericLiterals bound to const identifiers', async () => {
+	const code = `
+    import { useUI, useScopedUI } from '@react-zero-ui/core';
+		const T = "true"; const M = { "true": "dark", "false": "light" }; const x = M[T]
+    export function Comp() {
+      const [, setTheme] = useUI<'theme', 'dark'>('theme', x);
+      const [, setAcc] = useScopedUI<'accordion', 'closed'>('accordion','closed');
+      return <section ref={setAcc.ref} />;
+    }
+  `;
+	const ast = parse(code, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
+	const hooks = collectUseUIHooks(ast, code);
+
+	assert.equal(hooks.length, 2);
+	assert.deepEqual(
+		hooks.map((h) => [h.stateKey, h.scope]),
+		[
+			['theme', 'global'],
+			['accordion', 'scoped'],
+		]
+	);
+});

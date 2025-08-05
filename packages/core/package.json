@@ -56,20 +56,6 @@
 		"test:all": "pnpm run test:vite && pnpm run test:next && pnpm run test:unit && pnpm run test:cli && pnpm run test:integration",
 		"test:unit": "tsx --test src/**/*.test.ts"
 	},
-	"keywords": [
-		"react",
-		"ui",
-		"state",
-		"css",
-		"postcss",
-		"postcss-plugin",
-		"zero-config",
-		"react-zero-ui",
-		"postcss-react-zero-ui",
-		"pre-rendering",
-		"no-rerender",
-		"zero-ui"
-	],
 	"author": "Austinserb <serbaustin@gmail.com>",
 	"license": "MIT",
 	"repository": {
@@ -86,9 +72,7 @@
 	},
 	"peerDependencies": {
 		"@tailwindcss/postcss": "^4.1.10",
-		"react": ">=16.8.0",
-		"tailwindcss": "^4.1.10",
-		"postcss": "^8.5.5"
+		"react": ">=16.8.0"
 	},
 	"dependencies": {
 		"@babel/code-frame": "^7.27.1",
