@@ -51,14 +51,19 @@ source files ─►           ├─► Map<key,Set<value>>
    };
    ```
 
-5. **Emit Tailwind `@custom-variant`s** for every `key‑value` pair `(helpers.cts) → buildCss`
+5. **Emit Tailwind** `@custom-variant` for every `key‑value` pair `(helpers.cts) → buildCss`
 
-   ```css
-   @custom-variant ${keySlug}-${valSlug} {
-     &:where(body[data-${keySlug}="${valSlug}"] *) { @slot; }
-     [data-${keySlug}="${valSlug}"] &, &[data-${keySlug}="${valSlug}"] { @slot; }
-   }
-   ```
+```ts
+function buildLocalSelector(keySlug: string, valSlug: string): string {
+	return 
+   `[data-${keySlug}="${valSlug}"] &, &[data-${keySlug}="${valSlug}"] { @slot; }`;
+}
+
+function buildGlobalSelector(keySlug: string, valSlug: string): string {
+	return 
+   `&:where(body[data-${keySlug}='${valSlug}'] &) { @slot; }`;
+}
+```
 
 6. **Generate the attributes file** so SSR can inject the `<body>` data‑attributes `(helpers.cts) → generateAttributesFile`.
 

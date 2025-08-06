@@ -99,22 +99,26 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 					keyArg,
 					path.opts?.filename,
 					sourceCode,
-					// TODO add link to docs
-					`[Zero-UI] State key cannot be resolved at build-time.\n` + `Only local, fully-static strings are supported. - collectUseUIHooks-stateKey`
+
+					`[Zero-UI] State key cannot be resolved at build-time.\n` +
+						`Only local, fully-static strings are supported. - collectUseUIHooks-stateKey` +
+						`\nSee: https://github.com/react-zero-ui/core/blob/main/docs/assets/internal.md`
 				);
 			}
 
 			// resolve initial value with helpers
 			const initialValue = resolveLiteralMemoized(initialArg as t.Expression, path as NodePath<t.Node>, 'initialValue');
+			console.log('initialValue: ', initialValue);
 
 			if (initialValue === null) {
 				throwCodeFrame(
 					initialArg,
 					path.opts?.filename,
 					sourceCode,
-					// TODO add link to docs
+
 					`[Zero-UI] initial value cannot be resolved at build-time.\n` +
-						`Only local, fully-static objects/arrays are supported. - collectUseUIHooks-initialValue`
+						`Only local, fully-static objects/arrays are supported. - collectUseUIHooks-initialValue` +
+						`\nSee: https://github.com/react-zero-ui/core/blob/main/docs/assets/internal.md`
 				);
 			}
 

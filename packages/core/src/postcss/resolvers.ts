@@ -3,6 +3,8 @@ import * as t from '@babel/types';
 import { NodePath } from '@babel/traverse';
 import { throwCodeFrame } from './ast-parsing.js';
 import { generate } from '@babel/generator';
+
+const VERBOSE = true;
 export interface ResolveOpts {
 	throwOnFail?: boolean; // default false
 	source?: string; // optional; fall back to path.hub.file.code
@@ -43,6 +45,8 @@ export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts
 	// TemplateLiteral without ${}
 	if (t.isTemplateLiteral(node) && node.expressions.length === 0) return node.quasis[0].value.cooked ?? node.quasis[0].value.raw;
 
+	VERBOSE && console.log('48 -> literalFromNode');
+
 	/* ── Fast path via Babel constant-folder ───────────── */
 	const ev = fastEval(node, path);
 
@@ -50,6 +54,8 @@ export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts
 		containsIllegalIdentifiers(node, path, opts); // 👈 throws if invalid
 		return ev.value;
 	}
+
+	VERBOSE && console.log('58 -> literalFromNode -> ev: ');
 
 	// ConditionalExpression
 	if (t.isConditionalExpression(node)) {
@@ -62,6 +68,8 @@ export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts
 		return null;
 	}
 
+	VERBOSE && console.log('70 -> literalFromNode');
+
 	// BinaryExpression with + operator
 	if (t.isBinaryExpression(node) && node.operator === '+') {
 		// Resolve left
@@ -71,11 +79,15 @@ export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts
 		return left !== null && right !== null ? left + right : null;
 	}
 
+	VERBOSE && console.log('82 -> literalFromNode');
+
 	// SequenceExpression (already handled explicitly by taking last expression)
 	if (t.isSequenceExpression(node)) {
 		const last = node.expressions.at(-1);
 		if (last) return literalFromNode(last, path, opts);
 	}
+
+	VERBOSE && console.log('89 -> literalFromNode');
 
 	if (t.isUnaryExpression(node)) {
 		const arg = literalFromNode(node.argument as t.Expression, path, opts);
@@ -97,6 +109,8 @@ export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts
 		}
 	}
 
+	VERBOSE && console.log('112 -> literalFromNode');
+
 	/* ── Logical fallback  (a || b ,  a ?? b) ───────────── */
 	if (t.isLogicalExpression(node) && (node.operator === '||' || node.operator === '??')) {
 		// try left; if it resolves, use it, otherwise fall back to right
@@ -105,20 +119,30 @@ export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts
 		return literalFromNode(node.right as t.Expression, path, opts);
 	}
 
+	VERBOSE && console.log('122 -> literalFromNode');
+
 	// 	"Is this node an Identifier?"
 	// "If yes, can I resolve it to a literal value like a string, number, or boolean?"
 	const idLit = resolveLocalConstIdentifier(node, path, opts);
+	VERBOSE && console.log('127 -> literalFromNode -> idLit: ', idLit);
 	if (idLit !== null) return String(idLit);
+
+	VERBOSE && console.log('130 -> literalFromNode');
 
 	// Template literal with ${expr} or ${CONSTANT}
 	if (t.isTemplateLiteral(node)) {
+		VERBOSE && console.log('135 -> literalFromNode -> template literal');
 		return resolveTemplateLiteral(node, path, literalFromNode, opts);
 	}
+
+	VERBOSE && console.log('138 -> literalFromNode');
 
 	if (t.isMemberExpression(node) || t.isOptionalMemberExpression(node)) {
 		//   treat optional-member exactly the same
 		return resolveMemberExpression(node as t.MemberExpression, path, literalFromNode, opts);
 	}
+
+	VERBOSE && console.log('END -> literalFromNode', node);
 
 	return null;
 }
@@ -150,14 +174,11 @@ export function fastEval(node: t.Expression, path: NodePath<t.Node>): { confiden
 }
 
 /*──────────────────────────────────────────────────────────*\
-  resolveLocalConstIdentifier
-  ---------------------------
-  Resolve an **Identifier** node to a *space-free string literal* **only when**
+  Resolve an **Identifier** node
 
   1. It is bound in the **same file** (Program scope),
   2. Declared with **`const`** (not `let` / `var`),
   3. Initialized to a **string literal** or a **static template literal**,
-  4. The final string has **no whitespace** (`/^\S+$/`).
 
   Anything else (inner-scope `const`, dynamic value, imported binding, spaces)
   ➜ return `null` — the caller will decide whether to throw or keep searching.
@@ -166,6 +187,7 @@ export function fastEval(node: t.Expression, path: NodePath<t.Node>): { confiden
   developer gets a consistent, actionable error message.
 \*──────────────────────────────────────────────────────────*/
 export function resolveLocalConstIdentifier(node: t.Expression, path: NodePath<t.Node>, opts: ResolveOpts): string | number | boolean | null {
+	VERBOSE && console.log('resolveLocalConstIdentifier -> 190');
 	/* Fast-exit when node isn't an Identifier */
 	if (!t.isIdentifier(node)) return null;
 
@@ -218,7 +240,7 @@ export function resolveLocalConstIdentifier(node: t.Expression, path: NodePath<t
 	let text: string | number | boolean | null = null;
 
 	if (t.isStringLiteral(init)) {
-		text = init?.value;
+		text = init.value;
 	} else if (t.isTemplateLiteral(init)) {
 		text = resolveTemplateLiteral(init, binding.path, literalFromNode, opts);
 	} else if (t.isNumericLiteral(init)) {
@@ -289,12 +311,9 @@ export function resolveTemplateLiteral(
 }
 
 /*────────────────────────────────────*\
-  resolveMemberExpression - a member expression is an object access like `THEMES.dark` or `THEMES['dark']` or `THEMES.brand.primary`
-  -----------------------
   Resolve a **MemberExpression** like `THEMES.dark` or `THEMES['dark']`
   (optionally nested: `THEMES.brand.primary`) to a **space-free string**
-  **iff**:
-
+  **if**:
   • The **base identifier** is a top-level `const` **ObjectExpression**  
   • Every hop in the chain exists and is either  
         - another ObjectExpression (→ continue) or  
@@ -316,6 +335,7 @@ export function resolveMemberExpression(
 	literalFromNode: (expr: t.Expression, p: NodePath, opts: ResolveOpts) => string | null,
 	opts: ResolveOpts
 ): string | null {
+	VERBOSE && console.log('resolveMemberExpression -> 352');
 	/** Collect the property chain (deep → shallow) */
 	const props: (string | number)[] = [];
 	let current: t.Expression | t.PrivateName = node;
@@ -390,7 +410,7 @@ export function resolveMemberExpression(
 		}
 	}
 
-	/* ── NEW: bail-out with an explicit error if nothing was found ───────── */
+	/* ── bail-out with an explicit error if nothing was found ───────── */
 	if (value == null) {
 		throwCodeFrame(
 			path,
@@ -401,17 +421,29 @@ export function resolveMemberExpression(
 	}
 	/* ─────────────────────────────────────────────────────── */
 
-	/* existing tail logic (unwrap, recurse, return string)… */
+	/* ── existing unwrap ─ */
 	if (t.isTSAsExpression(value)) value = value.expression;
 
+	/* ── recursively resolve nested member expressions ─ */
 	if (t.isMemberExpression(value)) {
 		return resolveMemberExpression(value, path, literalFromNode, opts);
 	}
 
+	/* ── support literals ─ */
 	if (t.isStringLiteral(value)) return value.value;
 	if (t.isTemplateLiteral(value)) {
 		return resolveTemplateLiteral(value, path, literalFromNode, opts);
 	}
+
+	/* ── NEW: resolve Identifier bindings recursively ─ */
+	if (t.isIdentifier(value)) {
+		const idBinding = path.scope.getBinding(value.name);
+		if (!idBinding || !idBinding.path.isVariableDeclarator()) return null;
+		const resolvedInit = idBinding.path.node.init;
+		if (!resolvedInit) return null;
+		return literalFromNode(resolvedInit as t.Expression, idBinding.path, opts);
+	}
+	VERBOSE && console.log('resolveMemberExpression -> 460');
 	return null;
 }
 
