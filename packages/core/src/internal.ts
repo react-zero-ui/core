@@ -14,7 +14,7 @@ export function makeSetter<T extends string>(key: string, initialValue: T, getTa
 		// enforce kebab-case for the key: lowercase letters, digits and single dashes
 		if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(key)) {
 			throw new Error(
-				`[Zero-UI] useUI(key, …); key must be kebab-case (e.g. "theme-dark"), got "${key}". ` + `Avoid camelCase or uppercase — they break variant generation.`
+				`[Zero-UI] useUI(key, …); key must be kebab-case (e.g. "theme-dark"), got "${key}". ` + `Avoid camelCase or uppercase - they break variant generation.`
 			);
 		}
 

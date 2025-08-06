@@ -179,7 +179,7 @@ export function fastEval(node: t.Expression, path: NodePath<t.Node>): { confiden
 		}
 	}
 
-	// ❸ Give up → undefined (caller falls back to manual resolver)
+	// ❸ Give up ➡️ undefined (caller falls back to manual resolver)
 	return { confident: false };
 }
 
@@ -191,7 +191,7 @@ export function fastEval(node: t.Expression, path: NodePath<t.Node>): { confiden
   3. Initialized to a **string literal** or a **static template literal**,
 
   Anything else (inner-scope `const`, dynamic value, imported binding, spaces)
-  ➜ return `null` — the caller will decide whether to throw or keep searching.
+  ➜ return `null` - the caller will decide whether to throw or keep searching.
 
   If the binding is *imported*, we delegate to `throwCodeFrame()` so the
   developer gets a consistent, actionable error message.
@@ -257,7 +257,7 @@ export function resolveLocalConstIdentifier(node: t.Expression, path: NodePath<t
 		const raw = String(init.value);
 		if (/^\S+$/.test(raw)) text = raw;
 	} else if (t.isBooleanLiteral(init)) {
-		text = init.value; // → 'true' or 'false'
+		text = init.value; // ➡️ 'true' or 'false'
 	}
 
 	return text;
@@ -276,12 +276,12 @@ export function resolveLocalConstIdentifier(node: t.Expression, path: NodePath<t
 	string literal **without spaces**.
   3. If an expression's binding is *imported*, we delegate to
 	`throwCodeFrame`.
-  4. Any failure → return `null` so the caller can emit its own error.
+  4. Any failure ➡️ return `null` so the caller can emit its own error.
 
   Returned value
   --------------
-  • `string`  → safe, space-free literal.  
-  • `null`    → invalid (dynamic / contains spaces / unresolved).
+  • `string`  ➡️ safe, space-free literal.  
+  • `null`    ➡️ invalid (dynamic / contains spaces / unresolved).
 \*──────────────────────────────────────────────────────────*/
 export function resolveTemplateLiteral(
 	node: t.TemplateLiteral,
@@ -326,7 +326,7 @@ export function resolveTemplateLiteral(
   **if**:
   • The **base identifier** is a top-level `const` **ObjectExpression**  
   • Every hop in the chain exists and is either  
-        - another ObjectExpression (→ continue) or  
+        - another ObjectExpression (➡️ continue) or  
         - a **StringLiteral** terminal value  
   • All keys are static (`Identifier`, `StringLiteral`, or numeric index on
     an ArrayExpression)  
@@ -346,7 +346,7 @@ export function resolveMemberExpression(
 	opts: ResolveOpts
 ): string | null {
 	VERBOSE && console.log('resolveMemberExpression -> 352');
-	/** Collect the property chain (deep → shallow) */
+	/** Collect the property chain (deep ➡️ shallow) */
 	const props: (string | number)[] = [];
 	let current: t.Expression | t.PrivateName = node;
 
@@ -465,22 +465,22 @@ export function resolveMemberExpression(
 \*──────────────────────────────────────────────────────────*/
 function resolveObjectValue(obj: t.ObjectExpression, key: string): t.Expression | null | undefined {
 	for (const p of obj.properties) {
-		// Matches: { dark: 'theme' } — key = 'dark'
+		// Matches: { dark: 'theme' } - key = 'dark'
 		if (t.isObjectProperty(p) && !p.computed && t.isIdentifier(p.key) && p.key.name === key) {
 			return p.value as t.Expression;
 		}
 
-		// Matches: { ['dark']: 'theme' } — key = 'dark'
+		// Matches: { ['dark']: 'theme' } - key = 'dark'
 		if (t.isObjectProperty(p) && p.computed && t.isStringLiteral(p.key) && p.key.value === key) {
 			return p.value as t.Expression;
 		}
 
-		// Matches: { "dark": "theme" } or { "1": "theme" } — key = 'dark' or '1'
+		// Matches: { "dark": "theme" } or { "1": "theme" } - key = 'dark' or '1'
 		// if (t.isObjectProperty(p) && t.isStringLiteral(p.key) && p.key.value === key) {
 		// 	return p.value as t.Expression;
 		// }
 
-		// // ✅ New: Matches { 1: "theme" } — key = '1'
+		// // ✅ New: Matches { 1: "theme" } - key = '1'
 		// if (t.isObjectProperty(p) && t.isNumericLiteral(p.key) && String(p.key.value) === key) {
 		// 	return p.value as t.Expression;
 		// }

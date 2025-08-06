@@ -19,7 +19,7 @@ const PARSE_OPTS = (f: string): Partial<ParserOptions> => ({
 });
 
 export interface HookMeta {
-	/** Babel binding object — use `binding.referencePaths` */
+	/** Babel binding object - use `binding.referencePaths` */
 	// binding: Binding;
 	/** Variable name (`setTheme`) */
 	setterFnName: string;
@@ -233,7 +233,7 @@ export interface ProcessVariantsResult {
 export async function processVariants(changedFiles: string[] | null = null): Promise<ProcessVariantsResult> {
 	const srcFiles = changedFiles ?? findAllSourceFiles();
 
-	/* Phase A — refresh hooks in cache (no token scan yet) */
+	/* Phase A - refresh hooks in cache (no token scan yet) */
 
 	// Count the number of CPUs and use 1 less than that for concurrency
 	const cpu = Math.max(os.cpus().length - 1, 1);
@@ -259,11 +259,11 @@ export async function processVariants(changedFiles: string[] | null = null): Pro
 		fileCache.set(fp, { hash: sig, hooks, tokens: new Map() });
 	});
 
-	/* Phase B — build global key set */
+	/* Phase B - build global key set */
 	const keySet = new Set<string>();
 	for (const { hooks } of fileCache.values()) hooks.forEach((h) => keySet.add(h.stateKey));
 
-	/* Phase C — ensure every cache entry has up-to-date tokens */
+	/* Phase C - ensure every cache entry has up-to-date tokens */
 	for (const [fp, entry] of fileCache) {
 		// Re-scan if tokens missing OR if keySet now contains keys we didn't scan for
 		const needsRescan = entry.tokens.size === 0 || [...keySet].some((k) => !entry.tokens.has(k));
@@ -274,7 +274,7 @@ export async function processVariants(changedFiles: string[] | null = null): Pro
 		entry.tokens = scanVariantTokens(code, keySet);
 	}
 
-	/* Phase D — aggregate variant & initial-value maps */
+	/* Phase D - aggregate variant & initial-value maps */
 	const variantMap = new Map<string, Set<string>>();
 	const initMap = new Map<string, string>();
 	const scopeMap = new Map<string, 'global' | 'scoped'>();
@@ -290,7 +290,7 @@ export async function processVariants(changedFiles: string[] | null = null): Pro
 				initMap.set(h.stateKey, h.initialValue);
 			}
 
-			/* scope aggregation — always run */
+			/* scope aggregation - always run */
 			const prevScope = scopeMap.get(h.stateKey);
 			if (prevScope && prevScope !== h.scope) {
 				throw new Error(`[Zero-UI] Key "${h.stateKey}" used with both global and scoped hooks.`);
@@ -298,14 +298,14 @@ export async function processVariants(changedFiles: string[] | null = null): Pro
 			scopeMap.set(h.stateKey, h.scope);
 		});
 
-		// tokens → variantMap
+		// tokens ➡️ variantMap
 		tokens.forEach((vals, k) => {
 			if (!variantMap.has(k)) variantMap.set(k, new Set());
 			vals.forEach((v) => variantMap.get(k)!.add(v));
 		});
 	}
 
-	/* Phase E — final assembly */
+	/* Phase E - final assembly */
 	const finalVariants: VariantData[] = [...variantMap]
 		.map(([key, set]) => ({ key, values: [...set].sort(), initialValue: initMap.get(key) ?? null, scope: scopeMap.get(key)! }))
 		.sort((a, b) => a.key.localeCompare(b.key));

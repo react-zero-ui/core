@@ -141,7 +141,7 @@ export async function patchTsConfig(): Promise<void> {
 
 	const configFile = fs.existsSync(path.join(cwd, 'tsconfig.json')) ? 'tsconfig.json' : fs.existsSync(path.join(cwd, 'jsconfig.json')) ? 'jsconfig.json' : null;
 
-	// Ignore Vite fixtures — they patch their own config
+	// Ignore Vite fixtures - they patch their own config
 	const hasViteConfig = ['js', 'mjs', 'ts', 'mts'].some((ext) => fs.existsSync(path.join(cwd, `vite.config.${ext}`)));
 	if (hasViteConfig) {
 		console.log('[Zero-UI] Vite config found, skipping tsconfig patch');

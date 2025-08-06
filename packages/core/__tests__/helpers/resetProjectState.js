@@ -8,8 +8,8 @@ import { overwriteFile } from './overwriteFile.js';
  * Reset everything the Zero-UI CLI generates inside a fixture.
  *
  * @param projectDir absolute path to the fixture root
- * @param isNext     true  → Next.js fixture (tsconfig + postcss)
- *                   false → Vite fixture   (vite.config.ts)
+ * @param isNext     true  ➡️ Next.js fixture (tsconfig + postcss)
+ *                   false ➡️ Vite fixture   (vite.config.ts)
  */
 export async function resetZeroUiState(projectDir, isNext = false) {
 	console.log(`[Reset] Starting Zero-UI state reset for ${isNext ? 'Next.js' : 'Vite'} project`);

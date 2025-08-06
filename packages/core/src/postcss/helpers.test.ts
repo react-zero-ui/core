@@ -62,7 +62,7 @@ test('buildCss emits @custom-variant blocks in stable order', () => {
 // test('generateAttributesFile writes files once and stays stable', async () => {
 // 	await runTest({}, async () => {
 // 		/* ------------------------------------------------------------------ *
-// 		 * 1. first call — files should be created
+// 		 * 1. first call - files should be created
 // 		 * ------------------------------------------------------------------ */
 // 		const first = await generateAttributesFile(expectedVariants, initialValues);
 // 		console.log('first: ', first);
@@ -91,7 +91,7 @@ test('buildCss emits @custom-variant blocks in stable order', () => {
 // `;
 // 		assert.strictEqual(norm(tsText), norm(expectedTs), 'attributes.d.ts snapshot mismatch');
 // 		/* ------------------------------------------------------------------ *
-// 		 * 2. second call — nothing should change
+// 		 * 2. second call - nothing should change
 // 		 * ------------------------------------------------------------------ */
 // 		const second = await generateAttributesFile(expectedVariants, initialValues);
 // 		console.log('second: ', second);

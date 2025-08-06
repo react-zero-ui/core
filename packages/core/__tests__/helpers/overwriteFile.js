@@ -8,7 +8,7 @@ import fs from 'fs';
  */
 export async function overwriteFile(filePath, content) {
 	if (!fs.existsSync(filePath)) {
-		console.warn(`[Reset] ⚠️ File not found: ${filePath} — skipping overwrite.`);
+		console.warn(`[Reset] ⚠️ File not found: ${filePath} - skipping overwrite.`);
 		return;
 	}
 

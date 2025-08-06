@@ -1,170 +1,105 @@
-# @react-zero-ui/core
 
-![Tagline](https://img.shields.io/badge/The_ZERO_re--render_UI_state_library-%235500AD?style=flat&label=)
-![Zero UI logo](https://raw.githubusercontent.com/react-zero-ui/core/upgrade/resolver/docs/assets/zero-ui-logo.png)
+# create-zero-ui
 
-**The fastest possible UI updates in React. Period.**  
-Zero runtime, zero React re-renders, and the simplest developer experience ever.  
-_Say goodbye to context and prop-drilling._
+> ⚡ Instantly scaffold React Zero-UI into your Next.js or Vite project
 
-[![Bundle size](https://badgen.net/bundlephobia/minzip/@react-zero-ui/core@0.2.6)](https://bundlephobia.com/package/@react-zero-ui/core@0.2.6)
-[![npm version](https://img.shields.io/npm/v/@react-zero-ui/core)](https://www.npmjs.com/package/@react-zero-ui/core)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![CI](https://github.com/react-zero-ui/core/actions/workflows/ci.yml/badge.svg?branch=main)
+```bash
 
-[📖 See the proof](https://github.com/react-zero-ui/core/blob/main/docs/assets/demo.md) • [🚀 Quick Start](#-quick-start) • [📚 API Reference](#-api-reference) • [🤝 Contributing](#-contributing)
+npx create-zero-ui
 
----
-
-## 🔥 Core Concept: *"Pre-Rendering"*
-
-Why re-render UI if all states are known at build time?  
-React Zero-UI **pre-renders** UI states once — at no runtime cost — and flips `data-*` attributes to update. That’s it.
-
-```tsx
-const [, setTheme] = useUI("theme", "dark");
-
-// Flip theme to "light"
-setTheme("light"); // data-theme="light" on body
-```
-
-Tailwind usage:
-
-```html
-<div class="theme-dark:bg-black theme-light:bg-white">Fast & Reactive</div>
 ```
 
 ---
 
-## 🚀 How it Works (Build-Time Magic)
+## 🚀 What It Sets Up
 
-React Zero-UI uses a hyper-optimized AST resolver in development that scans your codebase for:
 
-- `useUI` and `useScopedUI` hook usage
-- Any variables resolving to strings (e.g., `'theme'`, `'modal-open'`)
-- Tailwind variant classes (e.g., `theme-dark:bg-black`)
+### ✅ Shared (Next.js & Vite)
 
-This generates:
+* Adds `@react-zero-ui/core` to your project
+* Generates `.zero-ui/attributes.js` + `attributes.d.ts`
+* Patches your `tsconfig.json`:
 
-- Optimal CSS with global or scoped variant selectors
-- Initial `data-*` attributes injected onto `<body>` (zero FOUC)
-- UI state with ease, no prop-drilling
-- **Zero runtime overhead in production**
+  ```json
+  "paths": {
+    "@zero-ui/attributes": ["./.zero-ui/attributes.js"]
+  }
+  ```
 
 ---
 
-## 🚀 Quick Start
+### 🔷 Next.js Specific
 
-**Requires:** Vite or Next.js (App Router)
+* Injects initial `data-*` attributes into `app/layout.tsx`
+* Adds `postcss.config` with:
+
+  ```js
+  plugins: [
+	// ❗zero-ui must come before tailwind
+    "@react-zero-ui/core/postcss",
+    "@tailwindcss/postcss"
+  ]
+  ```
+
+---
+
+### 🔶 Vite Specific
+
+* Patches `vite.config.ts` with:
+
+  ```ts
+  export default defineConfig({
+    plugins: [zeroUI(), react()]
+  });
+  ```
+* Vite **does not require** a PostCSS config
+
+---
+
+## 🧪 Works With
+
+* `Next.js` (App Router)
+* `Vite` (React projects)
+* `pnpm`, `yarn`, or `npm`
+
+---
+
+## 🛠 Usage
 
 ```bash
 npx create-zero-ui
 ```
 
-Manual config:  
-- [Next.js Setup](/docs/installation-next.md)  
-- [Vite Setup](/docs/installation-vite.md)
+Follow the CLI prompts to scaffold your config in seconds.
 
 ---
 
-## 📚 API Reference
+## 📚 Related
 
-### Basic Hook Signature
-
-```tsx
-const [staleValue, setValue] = useUI("key", "value");
-```
-
-- `key` → becomes `data-key` on `<body>`
-- `value` → default SSR value
-- `staleValue` → SSR fallback (doesn't update after mount)
-
----
-
-### 🔨 `useUI` – Global UI State
-
-```tsx
-import { useUI } from '@react-zero-ui/core';
-
-const [theme, setTheme] = useUI("theme", "dark");
-```
-
-- Updates `data-theme` on `<body>`
-- No React re-renders
-- Globally accessible with Tailwind
-
----
-
-### 🎯 `useScopedUI` – Scoped UI State
-
-```tsx
-import { useScopedUI } from '@react-zero-ui/core';
-
-const [theme, setTheme] = useScopedUI("theme", "dark");
-
-<div ref={setTheme.ref} data-theme={theme}>
-  Scoped UI Here
-</div>
-```
-
-- Sets `data-*` on a specific DOM node
-- Scoped Tailwind variants only apply inside that element
-- Prevents FOUC, no re-renders
-
----
-
-### 🌈 CSS Variable Support
-
-Pass the `CssVar` flag for variable-based state:
-
-```tsx
-import { CssVar } from '@react-zero-ui/core';
-
-const [blur, setBlur] = useUI("blur", "0px", CssVar);
-setBlur("5px"); // body { --blur: 5px }
-```
-
-Scoped example:
-
-```tsx
-const [blur, setBlur] = useScopedUI("blur", "0px", CssVar);
-
-<div ref={setBlur.ref} style={{ "--blur": blur }}>
-  Scoped blur effect
-</div>
-```
-
----
-
-## 🧪 Experimental Feature: `zeroOnClick`
-
-Enables interactivity **inside Server Components** without useEffect.  
-Only ~300 bytes of runtime.
-
-Read more: [experimental.md](/docs/experimental.md)
-
----
-
-## 📦 Summary of Benefits
-
-- 🚀 **Zero React re-renders**
-- ⚡️ **Pre-rendered UI**: state embedded at build time
-- 📦 **<350B runtime footprint**
-- 💫 **Simple DX**: hooks + Tailwind variants
-- ⚙️ **AST-powered**: cached fast builds
-
-Zero re-renders. Zero runtime. Infinite scalability.
+* [@react-zero-ui/core](https://github.com/react-zero-ui/core)
+* [Documentation](https://github.com/react-zero-ui/core/tree/main/docs)
 
 ---
 
 ## 🤝 Contributing
 
-We welcome all contributions!
-
-- 🐛 [Open an issue](https://github.com/react-zero-ui/core/issues)
-- 💡 [Start a discussion](https://github.com/react-zero-ui/core/discussions)
-- 🔧 [Read the contributing guide](/docs/CONTRIBUTING.md)
+Found a bug or want to help?
+PRs welcome at [react-zero-ui/core](https://github.com/react-zero-ui/core).
 
 ---
 
-Made with ❤️ for the React community by [@austin1serb](https://github.com/austin1serb)
+## License
+
+MIT
+
+
+---
+
+### ✅ This README:
+- Is **npm-ready** and GitHub-friendly.
+- Makes **no assumptions** (Vite vs Next.js clearly separated).
+- Avoids unnecessary branding/markup.
+- Gives devs **trust** by showing exactly what gets modified.
+
+Let me know if you want to auto-generate or publish it with a `postinstall` script that shows a success message with the same info.
+```

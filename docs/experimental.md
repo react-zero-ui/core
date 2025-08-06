@@ -1,8 +1,7 @@
-
 <div align="center">
 <h1> 🧪 Experimental Runtime (Zero-UI) </h1>
 
-**SSR-safe runtime logic** for handling interactivity in React server components without using 
+**SSR-safe runtime logic** for handling interactivity in React server components without using
 
 ```diff
 - use client
@@ -20,14 +19,15 @@ React Zero-UI's pre-rendered data-attribute model.
 
 ### ❓ Why This Approach?
 
-**The Problem:** A single `onClick` event forces your entire component tree to become client-rendered. In Next.js, this means shipping extra JavaScript, losing SSR benefits, and adding hydration overhead—all for basic interactivity.
+**The Problem:** A single `onClick` event forces your entire component tree to become client-rendered. In Next.js, this means shipping extra JavaScript, losing SSR benefits, and adding hydration overhead-all for basic interactivity.
 
 **The Solution:** This design creates the perfect bridge between **static HTML** and **interactive UX**, while maintaining:
+
 - Server-rendered performance
-- Zero JavaScript bundle overhead  
+- Zero JavaScript bundle overhead
 - Instant visual feedback
 
-*Why sacrifice server-side rendering for a simple click handler when 300 bytes of runtime can handle all the clicks in your app?*
+_Why sacrifice server-side rendering for a simple click handler when 300 bytes of runtime can handle all the clicks in your app?_
 
 ---
 
@@ -42,10 +42,12 @@ The core runtime entrypoint that enables client-side interactivity in server com
 1. **🎯 Single Global Listener** - Registers one click event listener on `document`
 2. **👂 Smart Detection** - Listens for clicks on elements with `data-ui` attributes
 3. **🔍 Directive Parsing** - Interprets `data-ui` directives in this format.
+
 ```diff
-+ 	data-ui="global:key(val1,val2,...)"   → flips data-key on document.body
-+ 	data-ui="scoped:key(val1,val2,...)"   → flips data-key on closest ancestor/self
++ 	data-ui="global:key(val1,val2,...)"   ➡️ flips data-key on document.body
++ 	data-ui="scoped:key(val1,val2,...)"   ➡️ flips data-key on closest ancestor/self
 ```
+
 4. **🔄 Round-Robin Cycling** - Cycles through values in sequence
 5. **⚡️ Instant DOM Updates** - Updates DOM immediately for Tailwind responsiveness
 
@@ -60,18 +62,21 @@ The core runtime entrypoint that enables client-side interactivity in server com
 Utility functions that generate valid `data-ui` attributes for JSX/TSX:
 
 **Global Example:**
+
 ```tsx
-zeroSSR.onClick("theme", ["dark", "light"])
+zeroSSR.onClick('theme', ['dark', 'light']);
 // Returns: { 'data-ui': 'global:theme(dark,light)' }
 ```
 
 **Scoped Example:**
+
 ```tsx
-scopedZeroSSR.onClick("modal", ["open", "closed"])  
+scopedZeroSSR.onClick('modal', ['open', 'closed']);
 // Returns: { 'data-ui': 'scoped:modal(open,closed)' }
 ```
 
 **Development Validation:**
+
 - ✅ Ensures keys are kebab-case
 - ✅ Validates at least one value is provided
 
@@ -98,10 +103,10 @@ This creates `.zero-ui/attributes.ts` containing the variant map needed for runt
 ### Step 3: Create `<InitZeroUI>` Component
 
 ```tsx
-"use client";
+'use client';
 
-import { variantKeyMap } from "path/to/.zero-ui/attributes";
-import { activateZeroUiRuntime } from "@react-zero-ui/core/experimental/runtime";
+import { variantKeyMap } from 'path/to/.zero-ui/attributes';
+import { activateZeroUiRuntime } from '@react-zero-ui/core/experimental/runtime';
 
 activateZeroUiRuntime(variantKeyMap);
 
@@ -111,17 +116,17 @@ export const InitZeroUI = () => null;
 ### Step 4: Add to Root Layout
 
 ```tsx
-import { InitZeroUI } from "path/to/InitZeroUI";
+import { InitZeroUI } from 'path/to/InitZeroUI';
 
 export default function RootLayout({ children }) {
-  return (
-    <html lang="en">
-      <body>
-        <InitZeroUI />
-        {children}
-      </body>
-    </html>
-  );
+	return (
+		<html lang="en">
+			<body>
+				<InitZeroUI />
+				{children}
+			</body>
+		</html>
+	);
 }
 ```
 
@@ -132,32 +137,26 @@ export default function RootLayout({ children }) {
 ### Global Theme Toggle
 
 ```tsx
-import { zeroSSR } from "@react-zero-ui/core/experimental";
+import { zeroSSR } from '@react-zero-ui/core/experimental';
 
-<div {...zeroSSR.onClick("theme", ["dark", "light", "spanish"])}>
-  Click me to cycle themes!
-</div>
+<div {...zeroSSR.onClick('theme', ['dark', 'light', 'spanish'])}>Click me to cycle themes!</div>;
 ```
 
 **Pair with Tailwind variants:**
 
 ```html
-<div class="theme-dark:bg-black theme-light:bg-white theme-spanish:bg-red-500">
-  Interactive Server Component!
-</div>
+<div class="theme-dark:bg-black theme-light:bg-white theme-spanish:bg-red-500">Interactive Server Component!</div>
 ```
 
 ### Scoped Modal Toggle
 
 ```tsx
-import { scopedZeroSSR } from "@react-zero-ui/experimental";
+import { scopedZeroSSR } from '@react-zero-ui/experimental';
 
 // ❗️ Scopes based on matching data-* attribute (e.g. data-modal)
 <div data-modal="open">
-  <button {...scopedZeroSSR.onClick("modal", ["open", "closed"])}>
-    Toggle Modal
-  </button>
-</div>
+	<button {...scopedZeroSSR.onClick('modal', ['open', 'closed'])}>Toggle Modal</button>
+</div>;
 ```
 
 ---
@@ -167,22 +166,21 @@ import { scopedZeroSSR } from "@react-zero-ui/experimental";
 ### Core Principles
 
 - **🚫 No React State** - Zero re-renders involved
-- **🎯 Pure DOM Mutations** - Works entirely via `data-*` attribute changes  
+- **🎯 Pure DOM Mutations** - Works entirely via `data-*` attribute changes
 - **🔧 Server Component Compatible** - Full compatibility with all server components
 - **⚡️ Tailwind-First** - Designed for conditional CSS classes
-
 
 ---
 
 ## 📋 Summary
 
-| Feature | Description |
-|---------|-------------|
-| **`activateZeroUiRuntime()`** | Enables click handling on static components via `data-ui` |
-| **`zeroSSR` / `scopedZeroSSR`** | Generate valid click handlers as JSX props |
-| **Runtime Overhead** | ~300 bytes total |
-| **React Re-renders** | Zero |
-| **Server Component Support** | ✅ Full compatibility |
+| Feature                         | Description                                               |
+| ------------------------------- | --------------------------------------------------------- |
+| **`activateZeroUiRuntime()`**   | Enables click handling on static components via `data-ui` |
+| **`zeroSSR` / `scopedZeroSSR`** | Generate valid click handlers as JSX props                |
+| **Runtime Overhead**            | ~300 bytes total                                          |
+| **React Re-renders**            | Zero                                                      |
+| **Server Component Support**    | ✅ Full compatibility                                     |
 
 > **Source Code:** See [experimental](/packages/core/src/experimental) for implementation details.
 
@@ -192,9 +190,8 @@ import { scopedZeroSSR } from "@react-zero-ui/experimental";
 
 **The bridge between static HTML and interactive UX**
 
-*No state. No runtime overhead. Works in server components. ZERO re-renders.*
+_No state. No runtime overhead. Works in server components. ZERO re-renders._
 
 [**🚀 Get Started in less than 5 minutes**](/#-quick-start)
 
 </div>
-

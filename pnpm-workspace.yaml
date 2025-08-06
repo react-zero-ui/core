@@ -3,11 +3,11 @@ packages:
   - examples/*
 
 onlyBuiltDependencies:
-  - "@tailwindcss/oxide"
+  - '@tailwindcss/oxide'
   - sharp
 
 strictPeerDependencies: true
 
 publicHoistPattern:
-  - "*eslint*"
-  - "*typescript*"
+  - '*eslint*'
+  - '*typescript*'
