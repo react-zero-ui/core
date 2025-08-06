@@ -2,12 +2,11 @@
 	
 ![Tagline](https://img.shields.io/badge/The_ZERO_re--render_UI_state_library-%235500AD?style=flat&label=)
 
-</p>
+</a>
 
-<p align="center" style="display:flex; align-items:center;background-color: #000;">
- <img width="1000" height="144" alt="Frame 342" src="https://github.com/user-attachments/assets/4cf299a0-6d7f-4dd5-9b0c-2727a92e3b29" />
-
-</p>
+<a href="https://zero-ui.dev" target="_blank" rel="noopener noreferrer" alt="Zero-UI Logo" align="center" style="display:flex; align-items:center;padding-bottom: 20px;">
+ <img width="1000" height="144" alt="Frame 342" src="https://raw.githubusercontent.com/react-zero-ui/core/upgrade/resolver/docs/assets/zero-ui-logo.png" />
+</a>
 
  
 <div align="center">

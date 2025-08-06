@@ -5,8 +5,7 @@
 </p>
 
 <p align="center" style="display:flex; align-items:center;">
- <img width="1000" height="144" alt="Frame 342" src="https://github.com/user-attachments/assets/4cf299a0-6d7f-4dd5-9b0c-2727a92e3b29" />
-
+ <img width="1000" height="144" alt="Frame 342" src="https://raw.githubusercontent.com/react-zero-ui/core/upgrade/resolver/docs/assets/zero-ui-logo.png" />
 </p>
 
  

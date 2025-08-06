@@ -1,45 +1,57 @@
 {
 	"name": "react-zero-ui-monorepo",
-	"private": true,
-	"type": "module",
-	"engines": {
-		"node": ">=22"
+	"private": false,
+	"description": "Ultra-fast React UI state library with zero runtime, zero re-renders, Tailwind variant support, and automatic data-attribute/css-vars based styling. Replace context, prop drilling, and global stores with build-time magic.",
+	"keywords": [
+		"react",
+		"react state",
+		"ui state",
+		"global state",
+		"scoped state",
+		"state management",
+		"tailwind",
+		"tailwind variants",
+		"postcss plugin",
+		"fastest ui updates",
+		"zero rerenders",
+		"zero render",
+		"no context",
+		"no prop drilling",
+		"css driven state",
+		"data attributes",
+		"ssr safe",
+		"instant ui updates",
+		"react optimization",
+		"high performance react"
+	],
+	"funding": {
+		"type": "github",
+		"url": "https://github.com/sponsors/austin1serb"
 	},
+	"type": "module",
 	"workspaces": [
 		"packages/*"
 	],
-	"packageManager": "pnpm@10.13.1",
-	"references": [
-		{
-			"path": "packages/core"
-		},
-		{
-			"path": "packages/cli"
-		},
-		{
-			"path": "packages/eslint-plugin-react-zero-ui"
-		}
-	],
 	"scripts": {
-		"preinstall": "npx only-allow pnpm",
-		"reset": "git clean -fdx && pnpm install --frozen-lockfile && pnpm prepack:core && pnpm i-tarball",
 		"bootstrap": "pnpm install --frozen-lockfile && pnpm build && pnpm prepack:core && pnpm i-tarball",
-		"dev": "pnpm install && pnpm build && pnpm prepack:core && pnpm i-tarball",
 		"build": "cd packages/core && pnpm build",
-		"test": "cd packages/core && pnpm test:all && pnpm smoke",
-		"prepack:core": "pnpm -F @react-zero-ui/core pack --pack-destination ./dist",
-		"i-tarball": "node scripts/install-local-tarball.js",
-		"test:vite": "cd packages/core && pnpm test:vite",
-		"test:next": "cd packages/core && pnpm test:next",
-		"test:integration": "cd packages/core && pnpm test:integration",
-		"test:unit": "cd packages/core && pnpm test:unit",
-		"test:cli": "cd packages/core && pnpm test:cli",
+		"build-output": "npx esbuild ./packages/core/dist/index.js --bundle --minify --format=esm --external:react --define:process.env.NODE_ENV='\"production\"'",
+		"dev": "pnpm install && pnpm build && pnpm prepack:core && pnpm i-tarball",
 		"format": "prettier --write .",
+		"i-tarball": "node scripts/install-local-tarball.js",
+		"preinstall": "npx only-allow pnpm",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
-		"typecheck": "tsc --noEmit --project tsconfig.base.json",
+		"prepack:core": "pnpm -F @react-zero-ui/core pack --pack-destination ./dist",
+		"reset": "git clean -fdx && pnpm install --frozen-lockfile && pnpm prepack:core && pnpm i-tarball",
 		"size": "npx esbuild ./packages/core/dist/index.js --bundle --minify --format=esm --external:react --define:process.env.NODE_ENV='\"production\"' | gzip -c | wc -c",
-		"build-output": "npx esbuild ./packages/core/dist/index.js --bundle --minify --format=esm --external:react --define:process.env.NODE_ENV='\"production\"'"
+		"test": "cd packages/core && pnpm test:all && pnpm smoke",
+		"test:cli": "cd packages/core && pnpm test:cli",
+		"test:integration": "cd packages/core && pnpm test:integration",
+		"test:next": "cd packages/core && pnpm test:next",
+		"test:unit": "cd packages/core && pnpm test:unit",
+		"test:vite": "cd packages/core && pnpm test:vite",
+		"typecheck": "tsc --noEmit --project tsconfig.base.json"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.32.0",
@@ -52,5 +64,20 @@
 		"release-please": "^17.1.1",
 		"tsx": "^4.20.3",
 		"typescript": "^5.9.2"
-	}
+	},
+	"packageManager": "pnpm@10.13.1",
+	"engines": {
+		"node": ">=22"
+	},
+	"references": [
+		{
+			"path": "packages/core"
+		},
+		{
+			"path": "packages/cli"
+		},
+		{
+			"path": "packages/eslint-plugin-react-zero-ui"
+		}
+	]
 }
