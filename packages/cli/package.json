@@ -1,6 +1,6 @@
 {
 	"name": "create-zero-ui",
-	"version": "1.1.1",
+	"version": "1.1.2",
 	"description": "Zero-UI project scaffolder for React. Instantly sets up zero-runtime UI state, Tailwind variants, PostCSS, and SSR-safe config in Vite or Next.js apps.",
 	"keywords": [
 		"react",

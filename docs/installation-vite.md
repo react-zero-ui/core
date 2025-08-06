@@ -31,6 +31,13 @@ export default defineConfig({
 });
 ```
 
+3. **Import Tailwind CSS**
+
+```css
+// global.css
+@import "tailwindcss";
+```
+
 **Thats it.**
 
 The plugin will add the data-\* attributes to the body tag (no FOUC) and the CSS will be injected and transformed by tailwind.

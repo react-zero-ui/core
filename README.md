@@ -2,7 +2,7 @@
 	
 ![Tagline](https://img.shields.io/badge/The_ZERO_re--render_UI_state_library-%235500AD?style=flat&label=)
 
-</p>
+</a>
 
 <p align="center" style="display:flex; align-items:center;">
  <img width="1000" height="144" alt="Frame 342" src="https://raw.githubusercontent.com/react-zero-ui/core/upgrade/resolver/docs/assets/zero-ui-logo.png" />
@@ -63,7 +63,9 @@ React Zero-UI uses a hyper-optimized AST resolver in development that scans your
 
 <small>Zero-UI CLI</small>
 
-**Pre-requisites:** <small>Vite or Next.js (App Router)</small>
+**Pre-requisites:** 
+* <small>Vite or Next.js (App Router)</small>
+* <small>Tailwind V4 Configured. See [Tailwind V4 Installation](https://tailwindcss.com/docs/installation/using-vite)</small>
 
 ```bash
 npx create-zero-ui

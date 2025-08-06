@@ -31,9 +31,16 @@ module.exports = {
 };
 ```
 
+3. **Import Tailwind CSS**
+
+```css
+// global.css
+@import "tailwindcss";
+```
+
 ---
 
-3. **Start the App**
+4. **Start the App**
 
 ```bash
 npm run dev
@@ -43,7 +50,7 @@ npm run dev
 
 ---
 
-4. **Preventing FOUC (Flash Of Unstyled Content)**
+5. **Preventing FOUC (Flash Of Unstyled Content)**
 
 Spread `bodyAttributes` on `<body>` in your root layout.
 

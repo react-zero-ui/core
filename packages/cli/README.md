@@ -91,15 +91,3 @@ PRs welcome at [react-zero-ui/core](https://github.com/react-zero-ui/core).
 ## License
 
 MIT
-
-
----
-
-### ✅ This README:
-- Is **npm-ready** and GitHub-friendly.
-- Makes **no assumptions** (Vite vs Next.js clearly separated).
-- Avoids unnecessary branding/markup.
-- Gives devs **trust** by showing exactly what gets modified.
-
-Let me know if you want to auto-generate or publish it with a `postinstall` script that shows a success message with the same info.
-```
