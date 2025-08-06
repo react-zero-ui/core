@@ -108,7 +108,6 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 
 			// resolve initial value with helpers
 			const initialValue = resolveLiteralMemoized(initialArg as t.Expression, path as NodePath<t.Node>, 'initialValue');
-			console.log('initialValue: ', initialValue);
 
 			if (initialValue === null) {
 				throwCodeFrame(

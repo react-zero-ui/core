@@ -4,7 +4,7 @@ import { NodePath } from '@babel/traverse';
 import { throwCodeFrame } from './ast-parsing.js';
 import { generate } from '@babel/generator';
 
-const VERBOSE = true;
+const VERBOSE = false;
 export interface ResolveOpts {
 	throwOnFail?: boolean; // default false
 	source?: string; // optional; fall back to path.hub.file.code
@@ -41,7 +41,7 @@ export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts
 	// NumericLiteral - convert numbers to strings
 	if (t.isNumericLiteral(node)) return String(node.value);
 	// BooleanLiteral returned as string
-	if (t.isBooleanLiteral(node)) return String(node.value); // → 'true' or 'false'
+	if (t.isBooleanLiteral(node)) return String(node.value);
 	// TemplateLiteral without ${}
 	if (t.isTemplateLiteral(node) && node.expressions.length === 0) return node.quasis[0].value.cooked ?? node.quasis[0].value.raw;
 
@@ -115,8 +115,18 @@ export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts
 	if (t.isLogicalExpression(node) && (node.operator === '||' || node.operator === '??')) {
 		// try left; if it resolves, use it, otherwise fall back to right
 		const left = literalFromNode(node.left as t.Expression, path, opts);
-		if (left !== null) return left;
-		return literalFromNode(node.right as t.Expression, path, opts);
+		if (left === 'true') return left;
+		if (left === 'false' || left === 'undefined' || left === 'null') {
+			return literalFromNode(node.right as t.Expression, path, opts);
+		}
+	}
+	if (t.isLogicalExpression(node) && node.operator === '&&') {
+		const left = literalFromNode(node.left as t.Expression, path, opts);
+		if (left === 'false' || left === 'undefined' || left === 'null') return null;
+		if (left === 'true') return literalFromNode(node.right as t.Expression, path, opts);
+		if (opts.throwOnFail) {
+			throwCodeFrame(path, path.opts?.filename, opts.source ?? path.opts?.source?.code, `[Zero-UI] Logical && expression could not be resolved at build time.`);
+		}
 	}
 
 	VERBOSE && console.log('122 -> literalFromNode');

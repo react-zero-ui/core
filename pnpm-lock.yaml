@@ -139,6 +139,9 @@ importers:
       '@types/react':
         specifier: ^19.1.8
         version: 19.1.9
+      postcss:
+        specifier: ^8.5.6
+        version: 8.5.6
       tsx:
         specifier: ^4.20.3
         version: 4.20.3
