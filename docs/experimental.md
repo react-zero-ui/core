@@ -151,7 +151,7 @@ import { zeroSSR } from '@react-zero-ui/core/experimental';
 ### Scoped Modal Toggle
 
 ```tsx
-import { scopedZeroSSR } from '@react-zero-ui/experimental';
+import { scopedZeroSSR } from '@react-zero-ui/core/experimental';
 
 // ❗️ Scopes based on matching data-* attribute (e.g. data-modal)
 <div data-modal="open">

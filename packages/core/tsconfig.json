@@ -2,7 +2,8 @@
 	"extends": "../../tsconfig.base.json",
 	/* - compile exactly one file - */
 	"include": [
-		"src/**/*"
+		"src/**/*",
+		"__tests__/fixtures/vite/src/ErrorBoundary.tsx"
 	],
 	"exclude": [
 		"node_modules"

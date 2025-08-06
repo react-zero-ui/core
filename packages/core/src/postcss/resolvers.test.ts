@@ -584,7 +584,7 @@ test('resolveMemberExpression should handle valid and invalid member expressions
 			code: `const THEMES = { dark: "dark-theme" }; const x = THEMES.nonexistent;`,
 			shouldThrow: /cannot be resolved at build-time/,
 		},
-		{ description: 'imported object should throw', code: `import { THEMES } from './constants'; const x = THEMES.dark;`, shouldThrow: /Imports Not Allowed/ },
+		{ description: 'imported object should throw', code: `import { THEMES } from './constants'; const x = THEMES.dark;`, shouldThrow: /Zero-UI/ },
 	];
 
 	await runTest({}, async () => {

@@ -395,7 +395,9 @@ export function resolveMemberExpression(
 			path,
 			path.opts?.filename,
 			opts.source ?? path.opts?.source?.code,
-			`[Zero-UI] Imports Not Allowed:\n Inline it or alias to a local const first.`
+			`[Zero-UI] Imported variable: '${current.name}'\n\n` +
+				`Imported values cannot be statically resolved at build-time.\n` +
+				`➡️ Inline the literal or reassign it manually:\n\n`
 		);
 	}
 
@@ -499,7 +501,9 @@ function containsIllegalIdentifiers(node: t.Node, path: NodePath, opts: ResolveO
 				path,
 				path.opts?.filename,
 				opts.source ?? path.opts?.source?.code,
-				`[Zero-UI] Identifier '${subNode.name}' is not declared. Only local top-level consts are allowed.`
+				`[Zero-UI] Undeclared identifier: '${subNode.name}'\n\n` +
+					`This variable isn't declared in the current file.\n` +
+					`➡️ Only top-level \`const\`s defined in the same file are allowed.`
 			);
 		}
 
@@ -508,7 +512,9 @@ function containsIllegalIdentifiers(node: t.Node, path: NodePath, opts: ResolveO
 				path,
 				path.opts?.filename,
 				opts.source ?? path.opts?.source?.code,
-				`[Zero-UI] Imports Not Allowed:\n Inline it or alias to a local const first.`
+				`[Zero-UI] Imported variable: '${subNode.name}'\n\n` +
+					`Imported values cannot be statically resolved at build-time.\n` +
+					`➡️ Inline the literal or reassign it manually:\n\n`
 			);
 		}
 
@@ -517,7 +523,8 @@ function containsIllegalIdentifiers(node: t.Node, path: NodePath, opts: ResolveO
 				path,
 				path.opts?.filename,
 				opts.source ?? path.opts?.source?.code,
-				`[Zero-UI] Only top-level \`const\` variables are allowed. '${subNode.name}' is not valid.`
+				`[Zero-UI] Invalid scope: '${subNode.name}' is not defined at the top level.\n\n` +
+					`➡️ Move this variable to the top of the file, outside any functions or blocks.`
 			);
 		}
 	});

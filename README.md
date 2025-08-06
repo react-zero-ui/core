@@ -15,7 +15,7 @@ Zero runtime, zero React re-renders, and the simplest developer experience ever.
 
 <a href="https://bundlephobia.com/package/@react-zero-ui/core@0.2.6" target="_blank" rel="noopener noreferrer"><img src="https://badgen.net/bundlephobia/minzip/@react-zero-ui/core@0.2.6" alt="bundle size" /></a> <a href="https://www.npmjs.com/package/@austinserb/react-zero-ui" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/npm/v/@react-zero-ui/core" alt="npm version" /></a> <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a> ![CI](https://github.com/react-zero-ui/core/actions/workflows/ci.yml/badge.svg?branch=main)
 
-[📖 See the proof](/docs/demo.md) [🚀 Quick Start](#-quick-start) [📚 API Reference](#-api-reference) [🤝 Contributing](#-contributing)
+[📖 See the proof](/docs/demo.md) [🚀 Quick Start](#-quick-start) [📚 API Reference](/docs/api-reference.md) [📋 Usage Examples](/docs/usage-examples.md) [🔄 Migration Guide](/docs/migration-guide.md) [❓ FAQ](/docs/faq.md) [🤝 Contributing](#-contributing)
 
 </div>
 
@@ -178,7 +178,7 @@ const [blur, setBlur] = useScopedUI('blur', '0px', CssVar);
 Enable client-side interactivity **without leaving server components**.
 Just 300 bytes of runtime overhead.
 
-See [experimental](./docs/assets/experimental.md) for more details.
+See [experimental](./docs/experimental.md) for more details.
 
 ---
 
@@ -193,6 +193,34 @@ See [experimental](./docs/assets/experimental.md) for more details.
 React Zero-UI delivers the fastest, simplest, most performant way to handle global and scoped UI state in modern React applications. Say goodbye to re-renders and prop-drilling.
 
 ---
+
+---
+
+## 📖 Documentation
+
+### 📚 Complete Guide Collection
+
+| Guide | Description |
+|-------|-------------|
+| [📚 API Reference](/docs/api-reference.md) | Complete API documentation for all hooks and utilities |
+| [📋 Usage Examples](/docs/usage-examples.md) | Practical patterns and real-world use cases |
+| [🔄 Migration Guide](/docs/migration-guide.md) | Step-by-step migration from useState, Context, Redux |
+| [🔧 Troubleshooting](/docs/troubleshooting.md) | Common issues and debugging techniques |
+| [❓ FAQ](/docs/faq.md) | Frequently asked questions and answers |
+| [🧪 Experimental Features](/docs/experimental.md) | SSR-safe server component interactivity |
+
+### 🛠️ Setup Guides
+
+| Framework | Guide |
+|-----------|-------|
+| [Next.js App Router](/docs/installation-next.md) | Complete Next.js setup with SSR support |
+| [Vite + React](/docs/installation-vite.md) | Vite configuration and optimization |
+
+### 🎯 Learn by Example
+
+- [🎮 **Live Demo**](https://zero-ui.dev/) - Interactive playground
+- [📊 **Performance Demo**](https://zero-ui.dev/react) - 10k component benchmark  
+- [📁 **Demo Source Code**](/examples/demo/) - Complete example project
 
 ---
 
