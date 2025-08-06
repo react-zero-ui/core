@@ -69,8 +69,7 @@ React Zero-UI uses a hyper-optimized AST resolver in development that scans your
 npx create-zero-ui
 ```
 
-> For manual configuration, see [Next JS Installation](/docs/installation-next.md)
-> [Vite Installation](/docs/installation-vite.md)
+> For manual configuration, see [Next JS Installation](/docs/installation-next.md) | [Vite Installation](/docs/installation-vite.md)
 
 **That's it.** Start your app and see the magic.
 
@@ -137,11 +136,13 @@ const [theme, setTheme] = useScopedUI("theme", "dark");
 
 Sometimes CSS variables are more efficient. React Zero-UI makes it trivial by passing the `CssVar` option:
 
-```tsx
-useUI(<cssVariable>, <defaultValue>, CssVar); // ❗️Pass CssVar to either hook to use CSS variables
-```
+```diff
++ Pass `CssVar` to either hook to use CSS variables
 
-<small>automatically adds `--` to the cssVariable</small>
+useUI(<cssVariable>, <defaultValue>, CssVar); 
+
+```
+<small>automatically adds `--` to the Css Variable</small>
 
 **Global CSS Variable:**
 

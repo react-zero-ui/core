@@ -1,6 +1,6 @@
 {
 	"name": "@react-zero-ui/core",
-	"version": "0.3.1-beta.2",
+	"version": "0.3.2",
 	"private": false,
 	"description": "Ultra-fast React UI state library with zero runtime, zero re-renders, Tailwind variant support, and automatic data-attribute/css-vars based styling. Replace context, prop drilling, and global stores with build-time magic.",
 	"keywords": [
