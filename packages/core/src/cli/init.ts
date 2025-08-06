@@ -10,13 +10,14 @@ async function cli() {
 	return await runZeroUiInit();
 }
 
-/* -------- CL I  -------- */
-if (require.main === module) {
+/* -------- CLI  -------- */
+// ES module equivalent of require.main === module
+if (import.meta.url === `file://${process.argv[1]}`) {
 	cli().catch((error) => {
 		console.error('CLI failed:', error);
 		process.exit(1);
 	});
 }
 
-/* -------- CJS  -------- */
-module.exports = cli; // `require('@…/cli')()`
+/* -------- ES Module Export  -------- */
+export default cli;
