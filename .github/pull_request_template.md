@@ -23,7 +23,7 @@
 - [ ] Linting and formatting pass (`pnpm lint && pnpm format`)
 - [ ] PR title follows semantic commit format (`feat:`, `fix:`, etc.)
 - [ ] Changes are documented (README, JSDoc, or comments if needed)
-- [ ] Ready for review — not a draft
+- [ ] Ready for review - not a draft
 
 ---
 

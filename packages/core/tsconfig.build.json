@@ -1,7 +1,7 @@
 // tsconfig.build.json
 {
 	"extends": "../../tsconfig.base.json",
-	/* — compile exactly one file — */
+	/* - compile exactly one file - */
 	"include": [
 		"src/**/*"
 	],
@@ -9,11 +9,11 @@
 		"src/**/*.test.ts",
 		"./src/postcss/test-utilities.ts"
 	],
-	/* — compiler output — */
+	/* - compiler output - */
 	"compilerOptions": {
 		"esModuleInterop": true,
 		"rootDir": "./src", // keeps relative paths clean
-		"outDir": "./dist", // compiled JS → dist/
+		"outDir": "./dist", // compiled JS ➡️ dist/
 		"noEmit": false,
 		"removeComments": false
 	}

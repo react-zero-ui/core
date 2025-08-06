@@ -1,4 +1,4 @@
-/* ------------------------------------------------------------------ *
+/* --- *
  *  Zero-UI click-handler runtime                                     *
  *                                                                    *
  *  Listens for clicks on any element that carries a `data-ui`        *
@@ -11,12 +11,12 @@
  *  A single `activateZeroUiRuntime()` call wires everything up.      *
  *  We guard against duplicate activation in case the component       *
  *  appears twice.                                                    *
- * ------------------------------------------------------------------ */
+ * --- */
 
-/** Map emitted by the compiler: every legal data-* key → true */
+/** Map emitted by the compiler: every legal data-* key ➡️ true */
 export type VariantKeyMap = Record<string, true | string[] | '*'>;
 
-/* kebab → camel ("data-theme-dark" → "themeDark") */
+/* kebab ➡️ camel ("data-theme-dark" ➡️ "themeDark") */
 const kebabToCamel = (attr: string) => attr.slice(5).replace(/-([a-z])/g, (_, c) => c.toUpperCase());
 
 /* One shared RegExp - avoids per-click re-parsing */

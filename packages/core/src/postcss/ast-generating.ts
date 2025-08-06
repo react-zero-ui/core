@@ -181,9 +181,9 @@ export function parseAndUpdateViteConfig(source: string, zeroUiImportPath: strin
 	return modified ? generate(ast).code : null;
 }
 
-/* ------------------------------------------------------------------ *
+/* ------------ *
  *  processConfigObject - mutate a { plugins: [...] }
- * ------------------------------------------------------------------ */
+ * ------------ */
 function processConfigObject(obj: t.ObjectExpression): boolean {
 	let touched = false;
 

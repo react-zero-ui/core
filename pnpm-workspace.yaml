@@ -5,3 +5,9 @@ packages:
 onlyBuiltDependencies:
   - '@tailwindcss/oxide'
   - sharp
+
+strictPeerDependencies: true
+
+publicHoistPattern:
+  - '*eslint*'
+  - '*typescript*'

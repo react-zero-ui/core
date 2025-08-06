@@ -60,8 +60,8 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           echo "ℹ️  Packages flagged for publish:"
-          echo "• core → ${{ steps.release.outputs['packages/core--release_version'] }}"
-          echo "• cli  → ${{ steps.release.outputs['packages/cli--release_version'] }}"
+          echo "• core ➡️ ${{ steps.release.outputs['packages/core--release_version'] }}"
+          echo "• cli  ➡️ ${{ steps.release.outputs['packages/cli--release_version'] }}"
 
           if [[ '${{ steps.release.outputs['packages/core--release_created'] }}' == 'true' ]]; then
             echo "📦 Publishing @react-zero-ui/core…"

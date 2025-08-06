@@ -9,10 +9,10 @@ import { useScopedUI } from '@react-zero-ui/core';
  * The Zero-UI ESLint rule should flag both.
  */
 export default function LintFailures() {
-	// #1  Setter attached but no data-scope attr  →  missingAttr error
+	// #1  Setter attached but no data-scope attr  ➡️  missingAttr error
 	const [scope, setScope] = useScopedUI<'off' | 'on'>('scope', 'off');
 
-	// #2  No ref at all  →  missingRef error
+	// #2  No ref at all  ➡️  missingRef error
 	const [, setDialog] = useScopedUI<'open' | 'closed'>('dialog', 'closed');
 
 	return (

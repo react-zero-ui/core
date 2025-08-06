@@ -19,7 +19,7 @@ const PARSE_OPTS = (f: string): Partial<ParserOptions> => ({
 });
 
 export interface HookMeta {
-	/** Babel binding object — use `binding.referencePaths` */
+	/** Babel binding object - use `binding.referencePaths` */
 	// binding: Binding;
 	/** Variable name (`setTheme`) */
 	setterFnName: string;
@@ -41,8 +41,10 @@ export interface HookMeta {
  * reduced to a space-free string.
  */
 const ALL_HOOK_NAMES = new Set([CONFIG.HOOK_NAME, CONFIG.LOCAL_HOOK_NAME]);
+type HookName = typeof CONFIG.HOOK_NAME | typeof CONFIG.LOCAL_HOOK_NAME;
 
 const OBJ_NAMES = new Set([CONFIG.SSR_HOOK_NAME, CONFIG.SSR_HOOK_NAME_SCOPED]);
+type LocalHookName = typeof CONFIG.SSR_HOOK_NAME | typeof CONFIG.SSR_HOOK_NAME_SCOPED;
 
 export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 	const hooks: HookMeta[] = [];
@@ -51,7 +53,7 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 
 	const optsBase = { throwOnFail: true, source: sourceCode } as ResolveOpts;
 
-	function lit(node: t.Expression, p: NodePath<t.Node>, hook: ResolveOpts['hook']): string | null {
+	function resolveLiteralMemoized(node: t.Expression, p: NodePath<t.Node>, hook: ResolveOpts['hook']): string | null {
 		if (memo.has(node)) return memo.get(node)!;
 
 		// clone instead of mutate
@@ -75,7 +77,7 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 			if (!t.isArrayPattern(id) || !t.isCallExpression(init)) return;
 
 			// b) callee must be one of our hook names
-			if (!(t.isIdentifier(init.callee) && ALL_HOOK_NAMES.has(init.callee.name as any))) return;
+			if (!(t.isIdentifier(init.callee) && ALL_HOOK_NAMES.has(init.callee.name as HookName))) return;
 
 			if (id.elements.length !== 2) {
 				throwCodeFrame(path, path.opts?.filename, sourceCode, `[Zero-UI] useUI() must destructure two values: [value, setterFn].`);
@@ -90,29 +92,32 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 			const [keyArg, initialArg] = init.arguments;
 
 			// resolve state key with new helpers
-			const stateKey = lit(keyArg as t.Expression, path as NodePath<t.Node>, 'stateKey');
+			const stateKey = resolveLiteralMemoized(keyArg as t.Expression, path as NodePath<t.Node>, 'stateKey');
 
 			if (stateKey === null) {
 				throwCodeFrame(
 					keyArg,
 					path.opts?.filename,
 					sourceCode,
-					// TODO add link to docs
-					`[Zero-UI] State key cannot be resolved at build-time.\n` + `Only local, fully-static strings are supported. - collectUseUIHooks-stateKey`
+
+					`[Zero-UI] State key cannot be resolved at build-time.\n` +
+						`Only local, fully-static strings are supported. - collectUseUIHooks-stateKey` +
+						`\nSee: https://github.com/react-zero-ui/core/blob/main/docs/assets/internal.md`
 				);
 			}
 
 			// resolve initial value with helpers
-			const initialValue = lit(initialArg as t.Expression, path as NodePath<t.Node>, 'initialValue');
+			const initialValue = resolveLiteralMemoized(initialArg as t.Expression, path as NodePath<t.Node>, 'initialValue');
 
 			if (initialValue === null) {
 				throwCodeFrame(
 					initialArg,
 					path.opts?.filename,
 					sourceCode,
-					// TODO add link to docs
+
 					`[Zero-UI] initial value cannot be resolved at build-time.\n` +
-						`Only local, fully-static objects/arrays are supported. - collectUseUIHooks-initialValue`
+						`Only local, fully-static objects/arrays are supported. - collectUseUIHooks-initialValue` +
+						`\nSee: https://github.com/react-zero-ui/core/blob/main/docs/assets/internal.md`
 				);
 			}
 
@@ -134,7 +139,7 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 			if (
 				!t.isMemberExpression(callee) ||
 				!t.isIdentifier(callee.object) ||
-				!OBJ_NAMES.has(callee.object.name as any) ||
+				!OBJ_NAMES.has(callee.object.name as LocalHookName) ||
 				!t.isIdentifier(callee.property, { name: 'onClick' })
 			)
 				return;
@@ -144,7 +149,7 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 			const [keyArg, arrArg] = path.node.arguments;
 
 			/* --- resolve key ------------------------------------------------ */
-			const stateKey = lit(keyArg as t.Expression, path, 'stateKey');
+			const stateKey = resolveLiteralMemoized(keyArg as t.Expression, path, 'stateKey');
 			if (stateKey === null) {
 				throwCodeFrame(keyArg, path.opts?.filename, sourceCode, `[Zero-UI] zeroSSR.onClick("key"): key must be a fully-static string.`);
 			}
@@ -160,7 +165,7 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 			}
 			const values: string[] = [];
 			for (const el of arrArg.elements) {
-				const v = lit(el as t.Expression, path, 'initialValue');
+				const v = resolveLiteralMemoized(el as t.Expression, path, 'initialValue');
 				if (v === null) {
 					throwCodeFrame(el!, path.opts?.filename, sourceCode, `[Zero-UI] zeroSSR.onClick("${stateKey}",[string]): array values must be static strings.`);
 				}
@@ -228,7 +233,7 @@ export interface ProcessVariantsResult {
 export async function processVariants(changedFiles: string[] | null = null): Promise<ProcessVariantsResult> {
 	const srcFiles = changedFiles ?? findAllSourceFiles();
 
-	/* Phase A — refresh hooks in cache (no token scan yet) */
+	/* Phase A - refresh hooks in cache (no token scan yet) */
 
 	// Count the number of CPUs and use 1 less than that for concurrency
 	const cpu = Math.max(os.cpus().length - 1, 1);
@@ -254,11 +259,11 @@ export async function processVariants(changedFiles: string[] | null = null): Pro
 		fileCache.set(fp, { hash: sig, hooks, tokens: new Map() });
 	});
 
-	/* Phase B — build global key set */
+	/* Phase B - build global key set */
 	const keySet = new Set<string>();
 	for (const { hooks } of fileCache.values()) hooks.forEach((h) => keySet.add(h.stateKey));
 
-	/* Phase C — ensure every cache entry has up-to-date tokens */
+	/* Phase C - ensure every cache entry has up-to-date tokens */
 	for (const [fp, entry] of fileCache) {
 		// Re-scan if tokens missing OR if keySet now contains keys we didn't scan for
 		const needsRescan = entry.tokens.size === 0 || [...keySet].some((k) => !entry.tokens.has(k));
@@ -269,7 +274,7 @@ export async function processVariants(changedFiles: string[] | null = null): Pro
 		entry.tokens = scanVariantTokens(code, keySet);
 	}
 
-	/* Phase D — aggregate variant & initial-value maps */
+	/* Phase D - aggregate variant & initial-value maps */
 	const variantMap = new Map<string, Set<string>>();
 	const initMap = new Map<string, string>();
 	const scopeMap = new Map<string, 'global' | 'scoped'>();
@@ -285,7 +290,7 @@ export async function processVariants(changedFiles: string[] | null = null): Pro
 				initMap.set(h.stateKey, h.initialValue);
 			}
 
-			/* scope aggregation — always run */
+			/* scope aggregation - always run */
 			const prevScope = scopeMap.get(h.stateKey);
 			if (prevScope && prevScope !== h.scope) {
 				throw new Error(`[Zero-UI] Key "${h.stateKey}" used with both global and scoped hooks.`);
@@ -293,14 +298,14 @@ export async function processVariants(changedFiles: string[] | null = null): Pro
 			scopeMap.set(h.stateKey, h.scope);
 		});
 
-		// tokens → variantMap
+		// tokens ➡️ variantMap
 		tokens.forEach((vals, k) => {
 			if (!variantMap.has(k)) variantMap.set(k, new Set());
 			vals.forEach((v) => variantMap.get(k)!.add(v));
 		});
 	}
 
-	/* Phase E — final assembly */
+	/* Phase E - final assembly */
 	const finalVariants: VariantData[] = [...variantMap]
 		.map(([key, set]) => ({ key, values: [...set].sort(), initialValue: initMap.get(key) ?? null, scope: scopeMap.get(key)! }))
 		.sort((a, b) => a.key.localeCompare(b.key));

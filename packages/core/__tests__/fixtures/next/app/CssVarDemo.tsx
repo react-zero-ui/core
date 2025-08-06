@@ -13,7 +13,7 @@ export default function CssVarDemo({ index = 0 }) {
 	// 👇 pass `cssVar` flag to switch makeSetter into CSS-var mode
 	const [blur, setBlur] = useScopedUI<'0px' | '4px'>('blur', '0px', cssVar);
 	// global test
- 	return (
+	return (
 		<div
 			ref={setBlur.ref} // element that owns --blur
 			data-testid={`demo-${index}`}

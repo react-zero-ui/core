@@ -1,180 +1,175 @@
-# React Zero‑UI (Beta)
+# @react-zero-ui/core
 
-**Instant UI state updates. ZERO React re‑renders. <1 KB runtime.**
+![Tagline](https://img.shields.io/badge/The_ZERO_re--render_UI_state_library-%235500AD?style=flat&label=)
+![Zero UI logo](https://raw.githubusercontent.com/react-zero-ui/core/upgrade/resolver/docs/assets/zero-ui-logo.png)
 
-Pre‑render your UI once, flip a `data-*` attribute to update — that's it.
+**The fastest possible UI updates in React. Period.**  
+Zero runtime, zero React re-renders, and the simplest developer experience ever.  
+_Say goodbye to context and prop-drilling._
 
-<a href="https://bundlephobia.com/package/@austinserb/react-zero-ui@1.0.19" target="_blank" rel="noopener noreferrer"><img src="https://badgen.net/bundlephobia/minzip/@austinserb/react-zero-ui@1.0.19" alt="npm version" /> </a><a href="https://www.npmjs.com/package/@react-zero-ui/core" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/npm/v/@react-zero-ui/core" alt="npm version" /></a> <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a> ![CI](https://github.com/react-zero-ui/core/actions/workflows/ci.yml/badge.svg?branch=main)
+[![Bundle size](https://badgen.net/bundlephobia/minzip/@react-zero-ui/core@0.2.6)](https://bundlephobia.com/package/@react-zero-ui/core@0.2.6)
+[![npm version](https://img.shields.io/npm/v/@react-zero-ui/core)](https://www.npmjs.com/package/@react-zero-ui/core)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+![CI](https://github.com/react-zero-ui/core/actions/workflows/ci.yml/badge.svg?branch=main)
 
----
-
-## 📚 Quick Links
-
-- [⚡️ Quick Start](#️-quick-start)
-- [🏄 Usage](#-usage)
-- [🧬 How it works](#-how-it-works)
-- [✅ Features](#-features)
-- [🏗 Best Practices](#-best-practices)
+[📖 See the proof](https://github.com/react-zero-ui/core/blob/main/docs/assets/demo.md) • [🚀 Quick Start](#-quick-start) • [📚 API Reference](#-api-reference) • [🤝 Contributing](#-contributing)
 
 ---
 
-## 🚀 Live Demo
+## 🔥 Core Concept: _"Pre-Rendering"_
 
-| Example                                 | Link                                                                                                                                           | What it shows                                                 | Link to Code                                                                                                                                 |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Interactive menu with render tracker    | <a href="https://zero-ui.dev/" target="_blank" rel="noopener noreferrer"><strong>Main Demo↗</strong></a>                                      | Compare Zero‑UI vs. React side‑by‑side while toggling a menu. | <a href="https://github.com/react-zero-ui/core/tree/main/examples/demo" target="_blank" rel="noopener noreferrer">Github</a>                 |
-| React benchmark (10 000 nested nodes)   | <a href="https://zero-ui.dev/react" target="_blank" rel="noopener noreferrer"><strong>React 10k↗</strong></a>                                 | How long the traditional React render path takes.             | <a href="https://github.com/react-zero-ui/core/tree/main/examples/demo/src/app/react" target="_blank" rel="noopener noreferrer">Github</a>   |
-| Zero‑UI benchmark (10 000 nested nodes) | <a href="https://zero-ui.dev/zero-ui" target="_blank" rel="noopener noreferrer"><strong style="text-align: nowrap;">Zero‑UI 10k↗</strong></a> | Identical DOM, but powered by Zero‑UI's `data-*` switch.      | <a href="https://github.com/react-zero-ui/core/tree/main/examples/demo/src/app/zero-ui" target="_blank" rel="noopener noreferrer">Github</a> |
+Why re-render UI if all states are known at build time?  
+React Zero-UI **pre-renders** UI states once - at no runtime cost - and flips `data-*` attributes to update. That's it.
 
----
+```tsx
+const [, setTheme] = useUI('theme', 'dark');
 
-## 🧐 Why Zero‑UI?
+// Flip theme to "light"
+setTheme('light'); // data-theme="light" on body
+```
 
-Every `setState` in React triggers the full VDOM → Diff → Reconciliation → Paint pipeline. For _pure UI state_ (themes, menus, toggles) that work is wasted.
+Tailwind usage:
 
-**Zero‑UI introduces "_PRE‑rendering_":**
-
-1. Tailwind variants for every state are **generated at build‑time**.
-2. The app **pre‑renders once**.
-3. Runtime state changes only **flip a `data-*` attribute on `<body>`**.
-
-Result → **5-10× faster visual updates** with **ZERO additional bundle cost**.
-
-### 📊 Micro‑benchmarks (Apple M1)
-
-| Nodes updated | React state | Zero‑UI | Speed‑up |
-| ------------- | ----------- | ------- | -------- |
-| 10,000        | \~50 ms     | \~5 ms  | **10×**  |
-| 25,000        | \~180 ms    | \~15 ms | **12×**  |
-| 50,000        | \~300 ms    | \~20 ms | **15×**  |
-
-Re‑run these numbers yourself via the links above.
+```html
+<div class="theme-dark:bg-black theme-light:bg-white">Fast & Reactive</div>
+```
 
 ---
 
-## ⚡️ Quick Start
+## 🚀 How it Works (Build-Time Magic)
 
-> **Prerequisite:** Tailwind CSS v4 must already be initialized in your project.
+React Zero-UI uses a hyper-optimized AST resolver in development that scans your codebase for:
+
+- `useUI` and `useScopedUI` hook usage
+- Any variables resolving to strings (e.g., `'theme'`, `'modal-open'`)
+- Tailwind variant classes (e.g., `theme-dark:bg-black`)
+
+This generates:
+
+- Optimal CSS with global or scoped variant selectors
+- Initial `data-*` attributes injected onto `<body>` (zero FOUC)
+- UI state with ease, no prop-drilling
+- **Zero runtime overhead in production**
+
+---
+
+## 🚀 Quick Start
+
+**Requires:** Vite or Next.js (App Router)
 
 ```bash
-# Inside an existing *Next.js (App Router)* or *Vite* repo
 npx create-zero-ui
 ```
 
-That's it — the CLI patch‑installs the required Babel & PostCSS plugins and updates `configs` for you.
+Manual config:
 
-### Manual Install
+- [Next.js Setup](/docs/installation-next.md)
+- [Vite Setup](/docs/installation-vite.md)
 
-```bash
-npm install @react-zero-ui/core
+---
+
+## 📚 API Reference
+
+### Basic Hook Signature
+
+```tsx
+const [staleValue, setValue] = useUI('key', 'value');
 ```
 
-Then follow **Setup →** for your bundler.
+- `key` ➡️ becomes `data-key` on `<body>`
+- `value` ➡️ default SSR value
+- `staleValue` ➡️ SSR fallback (doesn't update after mount)
 
 ---
 
-## 🔧 Setup
+### 🔨 `useUI` – Global UI State
 
-### Vite
+```tsx
+import { useUI } from '@react-zero-ui/core';
 
-```js
-// vite.config.*
-import { zeroUIPlugin } from '@react-zero-ui/core/vite';
-
-export default {
-	// ❗️Remove the default `tailwindcss()` plugin — Zero‑UI extends it internally
-	plugins: [zeroUIPlugin()],
-};
+const [theme, setTheme] = useUI('theme', 'dark');
 ```
 
-### Next.js (App Router)
-
-1. **Spread `bodyAttributes` on `<body>`** in your root layout.
-
-   ```tsx
-   // app/layout.tsx
-   import { bodyAttributes } from '@react-zero-ui/core/attributes';
-   // or:  import { bodyAttributes } from '../.zero-ui/attributes';
-
-   export default function RootLayout({ children }) {
-   	return (
-   		<html lang="en">
-   			<body {...bodyAttributes}>{children}</body>
-   		</html>
-   	);
-   }
-   ```
-
-2. **Add the PostCSS plugin (must come _before_ Tailwind).**
-
-   ```js
-   // postcss.config.js
-   module.exports = { plugins: { '@react-zero-ui/core/postcss': {}, tailwindcss: {} } };
-   ```
+- Updates `data-theme` on `<body>`
+- No React re-renders
+- Globally accessible with Tailwind
 
 ---
 
-## 🏄 Usage
+### 🎯 `useScopedUI` – Scoped UI State
 
-![react zero ui usage explained](https://raw.githubusercontent.com/react-zero-ui/core/main/docs/assets/useui-explained.webp)
+```tsx
+import { useScopedUI } from '@react-zero-ui/core';
 
----
+const [theme, setTheme] = useScopedUI('theme', 'dark');
 
-## 🛠 API
-
-### `useUI(key, defaultValue)`
-
-```ts
-const [staleValue, setValue] = useUI<'open' | 'closed'>('sidebar', 'closed');
+<div
+	ref={setTheme.ref}
+	data-theme={theme}>
+	Scoped UI Here
+</div>;
 ```
 
-- `key` → becomes `data-{key}` on `<body>`.
-- `defaultValue` → optional, prevents FOUC.
-- **Note:** the returned `staleValue` does **not** update (`useUI` is write‑only).
+- Sets `data-*` on a specific DOM node
+- Scoped Tailwind variants only apply inside that element
+- Prevents FOUC, no re-renders
 
-### Tailwind variants
+---
 
-```jsx
-<div className="sidebar-open:translate-x-0 sidebar-closed:-translate-x-full" />
+### 🌈 CSS Variable Support
+
+Pass the `CssVar` flag for variable-based state:
+
+```tsx
+import { CssVar } from '@react-zero-ui/core';
+
+const [blur, setBlur] = useUI('blur', '0px', CssVar);
+setBlur('5px'); // body { --blur: 5px }
 ```
 
-Any `data-{key}="{value}"` pair becomes a variant: `{key}-{value}:`.
+Scoped example:
+
+```tsx
+const [blur, setBlur] = useScopedUI('blur', '0px', CssVar);
+
+<div
+	ref={setBlur.ref}
+	style={{ '--blur': blur }}>
+	Scoped blur effect
+</div>;
+```
 
 ---
 
-## 🧬 How it works
+## 🧪 Experimental Feature: `zeroOnClick`
 
-1. **`useUI`** → writes to `data-*` attributes on `<body>`.
-2. **Babel plugin** → scans code, finds every `key/value`, injects them into **PostCSS**.
-3. **PostCSS plugin** → generates static Tailwind classes **at build‑time**.
-4. **Runtime** → changing state only touches the attribute — no VDOM, no reconciliation, no re‑paint.
+Enables interactivity **inside Server Components** without useEffect.  
+Only ~300 bytes of runtime.
 
----
-
-## ✅ Features
-
-- **Zero React re‑renders** for UI‑only state.
-- **Global setters** — call from any component or util.
-- **Tiny**: < 1 KB gzipped runtime.
-- **TypeScript‑first**.
-- **SSR‑friendly** (Next.js & Vite SSR).
-- **Framework‑agnostic CSS** — generated classes work in plain HTML / Vue / Svelte as well.
+Read more: [experimental.md](/docs/experimental.md)
 
 ---
 
-## 🏗 Best Practices
+## 📦 Summary of Benefits
 
-1. **UI state only** → themes, layout toggles, feature flags.
-2. **Business logic stays in React** → fetching, data mutation, etc.
-3. **Kebab‑case keys** → e.g. `sidebar-open`.
-4. **Provide defaults** to avoid Flash‑Of‑Unstyled‑Content.
+- 🚀 **Zero React re-renders**
+- ⚡️ **Pre-rendered UI**: state embedded at build time
+- 📦 **<350B runtime footprint**
+- 💫 **Simple DX**: hooks + Tailwind variants
+- ⚙️ **AST-powered**: cached fast builds
 
----
-
-## 📜 License
-
-[MIT](LICENSE) © Austin Serb
+Zero re-renders. Zero runtime. Infinite scalability.
 
 ---
 
-Built with ❤️ for the React community. If Zero‑UI makes your app feel ZERO fast, please ⭐️ the repo!
+## 🤝 Contributing
+
+We welcome all contributions!
+
+- 🐛 [Open an issue](https://github.com/react-zero-ui/core/issues)
+- 💡 [Start a discussion](https://github.com/react-zero-ui/core/discussions)
+- 🔧 [Read the contributing guide](/docs/CONTRIBUTING.md)
+
+---
+
+Made with ❤️ for the React community by [@austin1serb](https://github.com/austin1serb)

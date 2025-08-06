@@ -1,6 +1,6 @@
 import { ESLintUtils, TSESTree as T } from '@typescript-eslint/utils';
 
-const createRule = ESLintUtils.RuleCreator((name) => `https://github.com/serbyte/eslint-plugin-react-zero-ui/blob/main/docs/${name}.md`);
+const createRule = ESLintUtils.RuleCreator((name) => `https://github.com/serbyte/eslint-zero-ui/blob/main/docs/${name}.md`);
 
 // At top of create()
 const hookLoc = new Map<string /*setter*/, T.SourceLocation>();

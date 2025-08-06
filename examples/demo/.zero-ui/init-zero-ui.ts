@@ -15,9 +15,9 @@ if (typeof window !== 'undefined') {
 
 		const [, key, rawVals = ''] = el.dataset.ui!.match(/^cycle:([\w-]+)(?:\((.*?)\))?$/) || [];
 
-		if (!(`data-${key}` in bodyAttributes)) return; // unknown variant → bail
+		if (!(`data-${key}` in bodyAttributes)) return; // unknown variant ➡️ bail
 
-		const vals = rawVals.split(','); // '' → ['']  OK for toggle
+		const vals = rawVals.split(','); // '' ➡️ ['']  OK for toggle
 		const dsKey = toCamel(`data-${key}`);
 		const target = (el.closest(`[data-${key}]`) as HTMLElement) ?? document.body;
 

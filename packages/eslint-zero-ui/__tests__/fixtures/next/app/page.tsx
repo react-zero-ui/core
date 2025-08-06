@@ -1,5 +1,5 @@
 'use client';
-import { useUI } from '@react-zero-ui/core';
+import { useScopedUI, useUI } from '@react-zero-ui/core';
 import UseEffectComponent from './UseEffectComponent';
 import FAQ from './FAQ';
 import { ChildComponent } from './ChildComponent';
@@ -11,9 +11,9 @@ export default function Page() {
 	const [, setThemeThree] = useUI<'light' | 'dark'>('theme-three', 'light');
 	const [, setToggle] = useUI<'true' | 'false'>('toggle-boolean', 'true');
 	const [, setNumber] = useUI<'1' | '2'>('number', '1');
-	const [, setOpen] = useUI<'open' | 'closed'>('faq', 'closed'); // Same key everywhere!
-	const [, setScope] = useUI<'off' | 'on'>('scope', 'off');
-	const [, setMobile] = useUI<'true' | 'false'>('mobile', 'false');
+	const [, setOpen] = useScopedUI<'open' | 'closed'>('faq', 'closed'); // Same key everywhere!
+	const [, setScope] = useScopedUI<'off' | 'on'>('scope', 'off');
+	const [, setMobile] = useScopedUI<'true' | 'false'>('mobile', 'false');
 	const [, setChildOpen] = useUI<'open' | 'closed'>('child', 'closed');
 
 	const [, setToggleFunction] = useUI<'white' | 'black'>('toggle-function', 'white');
