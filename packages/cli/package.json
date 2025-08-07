@@ -40,7 +40,6 @@
 		"LICENSE"
 	],
 	"scripts": {
-		"prepare": "node tests/test-cli.js",
 		"test": "node --test ../core/__tests__/unit/cli.test.cjs"
 	},
 	"dependencies": {
