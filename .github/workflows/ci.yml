@@ -35,7 +35,7 @@ jobs:
       # 3 ▸ Node + pnpm-store cache
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: pnpm
 
       # 4 ▸ Install deps (deterministic)

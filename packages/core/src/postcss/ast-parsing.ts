@@ -33,20 +33,17 @@ export interface HookMeta {
 	scope: 'global' | 'scoped';
 }
 
-/**
- * Collect every `[ value, setterFn ] = useUI('key', 'initial')` in a file.
- * Re-uses `literalFromNode` so **initialArg** can be:
- *   • literal           `'dark'`
- *   • local const       `DARK`
- *   • static template   `` `da${'rk'}` ``
- * Throws if the key is dynamic or if the initial value cannot be
- * reduced to a space-free string.
- */
 const ALL_HOOK_NAMES = new Set([CONFIG.HOOK_NAME, CONFIG.LOCAL_HOOK_NAME]);
 type HookName = typeof CONFIG.HOOK_NAME | typeof CONFIG.LOCAL_HOOK_NAME;
 
-const OBJ_NAMES = new Set([CONFIG.SSR_HOOK_NAME, CONFIG.SSR_HOOK_NAME_SCOPED]);
+const SSR_HOOKS = new Set([CONFIG.SSR_HOOK_NAME, CONFIG.SSR_HOOK_NAME_SCOPED]);
 type LocalHookName = typeof CONFIG.SSR_HOOK_NAME | typeof CONFIG.SSR_HOOK_NAME_SCOPED;
+
+/**
+ * @param ast - The AST to traverse.
+ * @param sourceCode - The source code to use for resolving literals.
+ * @returns setterFnName, stateKey, initialValue, scope for every hook in the file.
+ */
 
 export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 	const hooks: HookMeta[] = [];
@@ -123,25 +120,18 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 				);
 			}
 
-			// const binding = path.scope.getBinding(setterEl.name);
-			// if (!binding) {
-			// 	throwCodeFrame(path, path.opts?.filename, sourceCode, `[Zero-UI] Could not resolve binding for setter "${setterEl.name}".`);
-			// }
-
 			const scope = init.callee.name === CONFIG.HOOK_NAME ? 'global' : 'scoped';
 
 			hooks.push({ setterFnName: setterEl.name, stateKey, initialValue, scope });
 		},
-		/* ────────────────────────────────────────────────────────────────
-    2. NEW: zeroSSR.onClick('key', ['v1','v2'])
-    ───────────────────────────────────────────────────────────────── */
 
+		// zeroSSR.onClick('key', ['v1','v2'])
 		CallExpression(path) {
 			const callee = path.node.callee;
 			if (
 				!t.isMemberExpression(callee) ||
 				!t.isIdentifier(callee.object) ||
-				!OBJ_NAMES.has(callee.object.name as LocalHookName) ||
+				!SSR_HOOKS.has(callee.object.name as LocalHookName) ||
 				!t.isIdentifier(callee.property, { name: 'onClick' })
 			)
 				return;
@@ -251,14 +241,22 @@ export async function processVariants(changedFiles: string[] | null = null): Pro
 		// Read the file
 		const code = fs.readFileSync(fp, 'utf8');
 
-		// AST Parse the file
-		const ast = parseJsLike(code, fp);
+		const isCodeFile = /\.[cm]?[jt]sx?$/.test(fp.toLowerCase());
+		console.log('isCodeFile: ', isCodeFile);
 
-		// Collect the useUI hooks
-		const hooks = collectUseUIHooks(ast, code);
+		if (isCodeFile) {
+			// AST Parse the file
+			const ast = parseJsLike(code, fp);
 
-		// Temporarily store empty token map; we'll fill it after we know all keys
-		fileCache.set(fp, { hash: sig, hooks, tokens: new Map() });
+			// Collect the useUI hooks
+			const hooks = collectUseUIHooks(ast, code);
+
+			// Temporarily store empty token map; we'll fill it after we know all keys
+			fileCache.set(fp, { hash: sig, hooks, tokens: new Map() });
+		} else {
+			// CSS file: no hooks, empty array
+			fileCache.set(fp, { hash: sig, hooks: [], tokens: new Map() });
+		}
 	});
 
 	/* Phase B - build global key set */

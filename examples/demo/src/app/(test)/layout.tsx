@@ -1,5 +1,3 @@
-import { CodeSandBox } from '../components/SandBox/CodeSandBox';
-
 const layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	return (
 		<div className="relative py-10">
