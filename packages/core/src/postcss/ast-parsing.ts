@@ -242,7 +242,6 @@ export async function processVariants(changedFiles: string[] | null = null): Pro
 		const code = fs.readFileSync(fp, 'utf8');
 
 		const isCodeFile = /\.[cm]?[jt]sx?$/.test(fp.toLowerCase());
-		console.log('isCodeFile: ', isCodeFile);
 
 		if (isCodeFile) {
 			// AST Parse the file
