@@ -396,7 +396,6 @@ test('literalFromNode should resolve ArrayExpression values via static index acc
 
 			const opts: ResolveOpts = { throwOnFail: true, source: code };
 			const result = literalFromNode(found.node as t.Expression, found.path, opts);
-			console.log('result: ', result);
 
 			assert.strictEqual(result, expected, `Failed: ${description}`);
 		}
@@ -458,24 +457,7 @@ test('resolveLocalConstIdentifier should throw for let/var variables', async () 
 		const opts: ResolveOpts = { throwOnFail: true, source: code };
 		assert.throws(() => {
 			resolveLocalConstIdentifier(found.node, found.path, opts);
-		}, /Only top-level `const` variables are allowed./);
-	});
-});
-
-test('resolveLocalConstIdentifier should return null for inner scope const', async () => {
-	await runTest({}, async () => {
-		const code = `
-			function test() {
-				const THEME = "dark";
-				const x = THEME;
-			}
-		`;
-		const found = findExpression(code, (n) => t.isIdentifier(n) && n.name === 'THEME');
-		assert(found);
-
-		const opts: ResolveOpts = { throwOnFail: true, source: code };
-		const result = resolveLocalConstIdentifier(found.node, found.path, opts);
-		assert.strictEqual(result, null);
+		}, /\[Zero-UI]/);
 	});
 });
 

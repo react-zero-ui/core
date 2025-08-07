@@ -14,7 +14,7 @@
  * --- */
 
 /** Map emitted by the compiler: every legal data-* key ➡️ true */
-export type VariantKeyMap = Record<string, true | string[] | '*'>;
+type VariantKeyMap = Record<string, true | string[] | '*'>;
 
 /* kebab ➡️ camel ("data-theme-dark" ➡️ "themeDark") */
 const kebabToCamel = (attr: string) => attr.slice(5).replace(/-([a-z])/g, (_, c) => c.toUpperCase());

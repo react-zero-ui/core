@@ -1,6 +1,8 @@
-// src/core/postcss/ast-parsing.cts
+// src/core/postcss/ast-parsing.ts
 import os from 'os';
-import { parse, ParserOptions } from '@babel/parser';
+import { TransformOptions, transformSync, type BabelFileResult } from '@babel/core';
+import tsPreset from '@babel/preset-typescript';
+import { type ParserOptions } from '@babel/parser';
 import * as t from '@babel/types';
 import { CONFIG } from '../config.js';
 import * as fs from 'fs';
@@ -12,7 +14,7 @@ import { findAllSourceFiles, mapLimit, toKebabCase } from './helpers.js';
 import { NodePath, Node } from '@babel/traverse';
 import traverse from './traverse.cjs';
 
-const PARSE_OPTS = (f: string): Partial<ParserOptions> => ({
+export const PARSE_OPTS = (f: string): Partial<ParserOptions> => ({
 	sourceType: 'module',
 	plugins: ['jsx', 'typescript', 'decorators-legacy', 'topLevelAwait'],
 	sourceFilename: f,
@@ -31,20 +33,17 @@ export interface HookMeta {
 	scope: 'global' | 'scoped';
 }
 
-/**
- * Collect every `[ value, setterFn ] = useUI('key', 'initial')` in a file.
- * Re-uses `literalFromNode` so **initialArg** can be:
- *   • literal           `'dark'`
- *   • local const       `DARK`
- *   • static template   `` `da${'rk'}` ``
- * Throws if the key is dynamic or if the initial value cannot be
- * reduced to a space-free string.
- */
 const ALL_HOOK_NAMES = new Set([CONFIG.HOOK_NAME, CONFIG.LOCAL_HOOK_NAME]);
 type HookName = typeof CONFIG.HOOK_NAME | typeof CONFIG.LOCAL_HOOK_NAME;
 
-const OBJ_NAMES = new Set([CONFIG.SSR_HOOK_NAME, CONFIG.SSR_HOOK_NAME_SCOPED]);
+const SSR_HOOKS = new Set([CONFIG.SSR_HOOK_NAME, CONFIG.SSR_HOOK_NAME_SCOPED]);
 type LocalHookName = typeof CONFIG.SSR_HOOK_NAME | typeof CONFIG.SSR_HOOK_NAME_SCOPED;
+
+/**
+ * @param ast - The AST to traverse.
+ * @param sourceCode - The source code to use for resolving literals.
+ * @returns setterFnName, stateKey, initialValue, scope for every hook in the file.
+ */
 
 export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 	const hooks: HookMeta[] = [];
@@ -121,25 +120,18 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 				);
 			}
 
-			// const binding = path.scope.getBinding(setterEl.name);
-			// if (!binding) {
-			// 	throwCodeFrame(path, path.opts?.filename, sourceCode, `[Zero-UI] Could not resolve binding for setter "${setterEl.name}".`);
-			// }
-
 			const scope = init.callee.name === CONFIG.HOOK_NAME ? 'global' : 'scoped';
 
 			hooks.push({ setterFnName: setterEl.name, stateKey, initialValue, scope });
 		},
-		/* ────────────────────────────────────────────────────────────────
-    2. NEW: zeroSSR.onClick('key', ['v1','v2'])
-    ───────────────────────────────────────────────────────────────── */
 
+		// zeroSSR.onClick('key', ['v1','v2'])
 		CallExpression(path) {
 			const callee = path.node.callee;
 			if (
 				!t.isMemberExpression(callee) ||
 				!t.isIdentifier(callee.object) ||
-				!OBJ_NAMES.has(callee.object.name as LocalHookName) ||
+				!SSR_HOOKS.has(callee.object.name as LocalHookName) ||
 				!t.isIdentifier(callee.property, { name: 'onClick' })
 			)
 				return;
@@ -249,14 +241,21 @@ export async function processVariants(changedFiles: string[] | null = null): Pro
 		// Read the file
 		const code = fs.readFileSync(fp, 'utf8');
 
-		// AST Parse the file
-		const ast = parse(code, PARSE_OPTS(fp));
+		const isCodeFile = /\.[cm]?[jt]sx?$/.test(fp.toLowerCase());
 
-		// Collect the useUI hooks
-		const hooks = collectUseUIHooks(ast, code);
+		if (isCodeFile) {
+			// AST Parse the file
+			const ast = parseJsLike(code, fp);
 
-		// Temporarily store empty token map; we'll fill it after we know all keys
-		fileCache.set(fp, { hash: sig, hooks, tokens: new Map() });
+			// Collect the useUI hooks
+			const hooks = collectUseUIHooks(ast, code);
+
+			// Temporarily store empty token map; we'll fill it after we know all keys
+			fileCache.set(fp, { hash: sig, hooks, tokens: new Map() });
+		} else {
+			// CSS file: no hooks, empty array
+			fileCache.set(fp, { hash: sig, hooks: [], tokens: new Map() });
+		}
 	});
 
 	/* Phase B - build global key set */
@@ -316,6 +315,29 @@ export async function processVariants(changedFiles: string[] | null = null): Pro
 	);
 
 	return { finalVariants, initialGlobalValues, sourceFiles: srcFiles };
+}
+
+const cache = new Map<string, t.File>();
+
+const defaultOpts: Partial<TransformOptions> = {
+	presets: [[tsPreset, { isTSX: true, allowDeclareFields: true, allExtensions: true }]],
+	parserOpts: { sourceType: 'module', plugins: ['jsx', 'decorators-legacy', 'typescript', 'topLevelAwait'] },
+	ast: true,
+	code: false,
+};
+
+export function parseJsLike(code: string, filename: string, opts: TransformOptions = defaultOpts): t.File {
+	const key = filename + '\0' + code.length;
+	if (cache.has(key)) return cache.get(key)!;
+
+	const result = transformSync(code, { ...opts, filename }) as BabelFileResult & { ast: t.File }; // <— narrow type
+
+	if (!result.ast) {
+		throw new Error(`[Zero-UI] Failed to parse file: ${filename}`);
+	}
+
+	cache.set(key, result.ast);
+	return result.ast;
 }
 
 /**

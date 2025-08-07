@@ -27,7 +27,7 @@ export const TopBarV2: React.FC = () => {
 									width={24}
 									className="rounded shadow-md"
 								/>
-								Serbyte Development
+								React ZERO UI
 							</Link>
 
 							{/* Desktop Navigation */}

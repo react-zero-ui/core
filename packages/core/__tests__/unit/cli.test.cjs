@@ -88,32 +88,6 @@ function runCLIScript(targetDir, timeout = 30000) {
 	});
 }
 
-// test('CLI script creates package.json if it does not exist', async () => {
-//   const testDir = createTestDir();
-
-//   try {
-//     // Ensure no package.json exists
-//     const packageJsonPath = path.join(testDir, 'package.json');
-//     assert(!fs.existsSync(packageJsonPath), 'package.json should not exist initially');
-
-//     // Run CLI (this will timeout on npm install, but that's ok for this test)
-//     const result = await runCLIScript(testDir, 5000).catch(err => {
-//       // We expect this to timeout/fail during npm install
-//       return { timedOut: true };
-//     });
-
-//     // Check that package.json was created
-//     assert(fs.existsSync(packageJsonPath), 'package.json should be created');
-
-//     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-//     assert(packageJson.name, 'package.json should have a name field');
-//     assert(packageJson.version, 'package.json should have a version field');
-
-//     console.log('✅ package.json created successfully');
-
-//   } finally {
-//     cleanupTestDir(testDir);
-//   }
 // });
 
 test('CLI script uses existing package.json if it exists', async () => {

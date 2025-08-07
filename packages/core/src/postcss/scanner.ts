@@ -1,37 +1,64 @@
-// scanner.ts
+import crypto from 'crypto';
+
+/** Signature helper – mtimes can collide on some FS; hash is bullet-proof */
+function sig(src: string, keys: Set<string>): string {
+	const hash = crypto
+		.createHash('sha1')
+		.update(src)
+		.update('\0') // delimiter
+		.update([...keys].sort().join(',')) // order-independent
+		.digest('base64url')
+		.slice(0, 12); // short but unique
+	return hash;
+}
+
+/* LRU: 2 000 recent files ≈ <3 MB RAM */
+const scanCache = new Map<string, Map<string, Set<string>> | Error>();
+
 export function scanVariantTokens(src: string, keys: Set<string>): Map<string, Set<string>> {
-	/* 1.  bootstrap the output */
+	const cacheKey = sig(src, keys);
+
+	/* ── 1. Cached hit ─────────────────────────────── */
+	const cached = scanCache.get(cacheKey);
+	if (cached instanceof Map) return cached;
+	if (cached instanceof Error) throw cached;
+
+	/* ── 2. Cold scan ──────────────────────────────── */
 	const out = new Map<string, Set<string>>();
 	keys.forEach((k) => out.set(k, new Set()));
+	if (keys.size === 0) {
+		scanCache.set(cacheKey, out);
+		return out;
+	}
 
-	if (keys.size === 0) return out;
+	try {
+		/* TOKEN logic identical to before */
+		const TOK1 = /[^<>"'`\s]*[^<>"'`\s:]/g;
+		const TOK2 = /[^<>"'`\s.(){}[\]#=%]*[^<>"'`\s.(){}[\]#=%:]/g;
+		const tokens = [...(src.match(TOK1) ?? []), ...(src.match(TOK2) ?? [])];
 
-	/* 2.  tokenize exactly the same way Tailwind splits a class string
-         (see  packages/tailwindcss/src/candidate.ts  ➡️  TOK1 / TOK2)       */
-	const TOK1 = /[^<>"'`\s]*[^<>"'`\s:]/g;
-	const TOK2 = /[^<>"'`\s.(){}[\]#=%]*[^<>"'`\s.(){}[\]#=%:]/g;
-	const tokens = [...(src.match(TOK1) ?? []), ...(src.match(TOK2) ?? [])];
-
-	if (tokens.length === 0) return out;
-
-	/* 3.  longest-key-first prevents "modal" matching before "modal-visible" */
-	const sortedKeys = [...keys].sort((a, b) => b.length - a.length);
-
-	/* 4.  scan every token */
-	for (const tokRaw of tokens) {
-		// Split on ":" ➡️ everything **before** the final utility part
-		const segments = tokRaw.split(':').slice(0, -1);
-
-		for (const seg of segments) {
-			for (const key of sortedKeys) {
-				if (seg.startsWith(key + '-')) {
-					const value = seg.slice(key.length + 1);
-					if (value) out.get(key)!.add(value);
-					break; // no smaller key can match
+		if (tokens.length) {
+			const sortedKeys = [...keys].sort((a, b) => b.length - a.length);
+			for (const tokRaw of tokens) {
+				const segments = tokRaw.split(':').slice(0, -1);
+				for (const seg of segments) {
+					for (const key of sortedKeys) {
+						if (seg.startsWith(key + '-')) {
+							const value = seg.slice(key.length + 1);
+							if (value) out.get(key)!.add(value);
+							break; // early-out
+						}
+					}
 				}
 			}
 		}
-	}
 
-	return out;
+		scanCache.set(cacheKey, out);
+		return out;
+	} catch (err) {
+		/* Cache the failure so we don’t loop-spam */
+		const e = err instanceof Error ? err : new Error(String(err));
+		scanCache.set(cacheKey, e);
+		throw e;
+	}
 }

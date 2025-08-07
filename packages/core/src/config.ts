@@ -1,3 +1,5 @@
+const EXT = '{ts,tsx,js,mjs,cjs,mts,cts,jsx,css,scss,sass,less}';
+
 export const CONFIG = {
 	SUPPORTED_EXTENSIONS: { TYPESCRIPT: ['.ts', '.tsx'], JAVASCRIPT: ['.js', '.jsx'] },
 	HOOK_NAME: 'useUI',
@@ -10,9 +12,9 @@ export const CONFIG = {
 	MAX_HOOK_ARGUMENTS: 2,
 	HEADER: '/* AUTO-GENERATED - DO NOT EDIT */',
 	ZERO_UI_DIR: '.zero-ui',
-	CONTENT: ['src/**/*.{ts,tsx,js,jsx}', 'app/**/*.{ts,tsx,js,jsx}', 'pages/**/*.{ts,tsx,js,jsx}'],
 	POSTCSS_PLUGIN: '@react-zero-ui/core/postcss',
 	VITE_PLUGIN: '@react-zero-ui/core/vite',
+	CONTENT: [`src/**/*.${EXT}`, `app/**/*.${EXT}`, `pages/**/*.${EXT}`],
 } as const;
 
 export const IGNORE_DIRS = [

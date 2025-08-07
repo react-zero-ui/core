@@ -9,7 +9,7 @@ export const bodyAttributes = {
   "data-toggle-function": "white",
   "data-use-effect-theme": "light"
 };
-export const variantKeyMap  = {
+export const variantKeyMap = {
   "data-child": true,
   "data-faq": true,
   "data-mobile": true,

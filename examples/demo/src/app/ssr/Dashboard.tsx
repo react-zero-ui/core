@@ -1,22 +1,22 @@
-import { zeroSSR } from '../../../.zero-ui';
+import { zeroSSR } from '@react-zero-ui/core/experimental';
 import { InnerDot } from './InnerDot';
 import Link from 'next/link';
 
 export const Dashboard: React.FC = () => {
-	const theme = 'theme-test';
-	const themeValues = ['dark', 'light'];
+	// const theme = 'theme-test-ssr';
+	// const themeValues = ['dark', 'light'];
 	return (
-		<div className="theme-test-light:bg-gray-200 theme-test-light:text-gray-900 theme-test-dark:bg-gray-900 theme-test-dark:text-gray-200 flex h-screen w-screen flex-col items-center justify-start p-5">
+		<div className="theme-test-ssr-light:bg-gray-200 theme-test-ssr-light:text-gray-900 theme-test-ssr-dark:bg-gray-900 theme-test-ssr-dark:text-gray-200 flex h-screen w-screen flex-col items-center justify-start p-5">
 			<div className="flex flex-row items-center gap-2">
 				<button
 					type="button"
-					{...zeroSSR.onClick(theme, themeValues)}
+					{...zeroSSR.onClick('theme-test-ssr', ['dark', 'light'])}
 					className="rounded-md bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600">
 					Toggle Theme (Current:{' '}
 					{
 						<>
-							<span className="theme-test-dark:hidden">light</span>
-							<span className="theme-test-light:hidden">dark</span>
+							<span className="theme-test-ssr-dark:hidden">light</span>
+							<span className="theme-test-ssr-light:hidden">dark</span>
 						</>
 					}
 					)
@@ -34,7 +34,7 @@ export const Dashboard: React.FC = () => {
 				{Array.from({ length: 10000 }).map((_, index) => (
 					<div
 						key={index}
-						className="theme-test-light:bg-gray-900 theme-test-dark:bg-gray-200 theme-test-light:text-gray-200 theme-test-dark:text-gray-900 flex items-center justify-center rounded-sm">
+						className="theme-test-ssr-light:bg-gray-900 theme-test-ssr-dark:bg-gray-200 theme-test-ssr-light:text-gray-200 theme-test-ssr-dark:text-gray-900 flex items-center justify-center rounded-sm">
 						<InnerDot />
 					</div>
 				))}

@@ -138,3 +138,26 @@ test('collectUseUIHooks should Resolve Logical Expressions &&', async () => {
 	assert.equal(hooks[0].stateKey, 'feature-enabled-2', 'stateKey should be feature-enabled-2');
 	assert.equal(hooks[0].initialValue, 'dark', 'initialValue should be true');
 });
+
+test('collectUseUIHooks should resolve function-scoped const variables', async () => {
+	const code = `
+import { useUI } from '@react-zero-ui/core';
+
+export const Dashboard: React.FC = () => {
+	const theme = 'theme-test';
+	const themeValues = ['dark', 'light'];
+	const [theme2, setTheme2] = useUI(theme, themeValues[0]);
+	return (
+		<div >
+		</div>
+	);
+};
+  `;
+	const ast = parse(code, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
+	const hooks = collectUseUIHooks(ast, code);
+
+	assert.equal(hooks.length, 1);
+	assert.equal(hooks[0].stateKey, 'theme-test', 'stateKey should be theme-test');
+	assert.equal(hooks[0].initialValue, 'dark', 'initialValue should be dark');
+	assert.equal(hooks[0].setterFnName, 'setTheme2', 'setterFnName should be setTheme2');
+});

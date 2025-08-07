@@ -6,13 +6,17 @@ import { CONFIG, IGNORE_DIRS } from '../config.js';
 import { parseJsonWithBabel, parseAndUpdatePostcssConfig, parseAndUpdateViteConfig } from './ast-generating.js';
 import { VariantData } from './ast-parsing.js';
 
-export function toKebabCase(str: string): string {
+export function sanitize(str: string) {
 	if (typeof str !== 'string') {
 		throw new Error(`Expected string but got: ${typeof str}`);
 	}
 	if (!/^[a-zA-Z0-9_-]+$/.test(str)) {
 		throw new Error(`Invalid state key/value "${str}". Only alphanumerics, underscores, and dashes are allowed.`);
 	}
+}
+
+export function toKebabCase(str: string): string {
+	sanitize(str);
 	return str
 		.replace(/_/g, '-')
 		.replace(/([a-z])([A-Z])/g, '$1-$2')
@@ -75,7 +79,7 @@ export async function generateAttributesFile(finalVariants: VariantData[], initi
 	/* JS file */
 	const jsContent = `${CONFIG.HEADER}
 export const bodyAttributes = ${JSON.stringify(initialGlobals, null, 2)};
-export const variantKeyMap  = ${JSON.stringify(variantKeyMap, null, 2)};
+export const variantKeyMap = ${JSON.stringify(variantKeyMap, null, 2)};
 `;
 
 	/* DTS file (types) */
@@ -92,7 +96,7 @@ ${variantDecl.join('\n')}
 };
 
 export declare const variantKeyMap: {
-  [key: string]: true;
+  [key: string]: true | string[] | '*';
 };
 `;
 

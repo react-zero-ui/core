@@ -7,7 +7,7 @@ import { IGNORE_DIRS } from '../config.js';
 import { type NodePath } from '@babel/traverse';
 import traverse from './traverse.cjs';
 
-const AST_CONFIG_OPTS: Partial<ParserOptions> = {
+export const AST_CONFIG_OPTS: Partial<ParserOptions> = {
 	sourceType: 'unambiguous',
 	plugins: [
 		'typescript', // in case it's postcss.config.ts / .cts / .mts

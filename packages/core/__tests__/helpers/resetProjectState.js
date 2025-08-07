@@ -41,7 +41,10 @@ export async function resetZeroUiState(projectDir, isNext = false) {
 	return;
 }
 
-const defaultLayoutContent = `import './globals.css';
+const defaultLayoutContent = `
+import './globals.css';
+
+import ZeroUiRuntime from './zero-runtime';
 
 export default function RootLayout({ children }) {
 	return (
@@ -49,6 +52,7 @@ export default function RootLayout({ children }) {
 			<body
 				className="bg-red test-ww this is to test the body tag"
 				id="88">
+        	<ZeroUiRuntime />
 				{children}
 			</body>
 		</html>
@@ -85,7 +89,7 @@ const defaultTsconfigContent = `{
     "incremental": true,
     "module": "ESNext",
     "esModuleInterop": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",

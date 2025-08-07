@@ -29,7 +29,7 @@ export interface ResolveOpts {
  * OptionalMemberExpression (a?.b)
  * ObjectExpression (via MemberExpression chains)
  * BooleanLiteral (handled explicitly by isBooleanLiteral)
- SequenceExpression (already handled explicitly by taking last expression)
+ * SequenceExpression (already handled explicitly by taking last expression)
 
  * @param node - The node to convert
  * @param path - The path to the node
@@ -64,8 +64,12 @@ export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts
 			const branch = testResult.value ? node.consequent : node.alternate;
 			return literalFromNode(branch as t.Expression, path, opts);
 		}
-		// If test isn't statically evaluable, return null
-		return null;
+		// If test isn't statically evaluable, return attempt to resolve it
+		const litTest = literalFromNode(node.test as t.Expression, path, opts);
+		if (litTest === 'true' || litTest === 'false') {
+			const branch = litTest === 'true' ? node.consequent : node.alternate;
+			return literalFromNode(branch as t.Expression, path, opts);
+		}
 	}
 
 	VERBOSE && console.log('70 -> literalFromNode');
@@ -101,6 +105,12 @@ export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts
 			case '-':
 				return typeof arg === 'number' || !isNaN(Number(arg)) ? String(-arg) : null;
 			case '!':
+				// Preserve Boolean semantics even after string coercion
+				if (arg === 'true') return 'false'; // !true -> false
+				if (arg === 'false') return 'true'; // !false -> true
+				if (arg === 'undefined') return 'true'; // !undefined === true
+				if (arg === 'null') return 'true'; // !null === true
+				// fallback: let JS decide for numbers / other strings
 				return String(!arg);
 			case 'void':
 				return 'undefined';
@@ -202,6 +212,7 @@ export function resolveLocalConstIdentifier(node: t.Expression, path: NodePath<t
 	if (!t.isIdentifier(node)) return null;
 
 	const binding = path.scope.getBinding(node.name);
+
 	if (!binding) return null;
 
 	/* 1. Reject imported bindings */
@@ -225,14 +236,14 @@ export function resolveLocalConstIdentifier(node: t.Expression, path: NodePath<t
 		);
 	}
 
-	/* 2. Allow only top-level `const` */
-	if (!binding.path.isVariableDeclarator() || binding.scope.block.type !== 'Program' || (binding.path.parent as t.VariableDeclaration).kind !== 'const') {
-		if ((binding.path.parent as t.VariableDeclaration).kind !== 'const') {
+	/* 2. Allow only `const` variables (from any scope) */
+	if (!binding.path.isVariableDeclarator() || (binding.path.parent as t.VariableDeclaration).kind !== 'const') {
+		if (binding.path.isVariableDeclarator() && (binding.path.parent as t.VariableDeclaration).kind !== 'const') {
 			throwCodeFrame(
 				path,
 				path.opts?.filename,
 				opts.source ?? path.opts?.source?.code,
-				`[Zero-UI] Only top-level \`const\` variables are allowed. '${node.name}' is not valid.`
+				`[Zero-UI] Only \`const\` variables are allowed. '${node.name}' is declared with '${(binding.path.parent as t.VariableDeclaration).kind}'.`
 			);
 		}
 		return null;
@@ -249,23 +260,20 @@ export function resolveLocalConstIdentifier(node: t.Expression, path: NodePath<t
 
 	let text: string | number | boolean | null = null;
 
-	if (t.isStringLiteral(init)) {
-		text = init.value;
-	} else if (t.isTemplateLiteral(init)) {
-		text = resolveTemplateLiteral(init, binding.path, literalFromNode, opts);
-	} else if (t.isNumericLiteral(init)) {
-		const raw = String(init.value);
-		if (/^\S+$/.test(raw)) text = raw;
-	} else if (t.isBooleanLiteral(init)) {
-		text = init.value; // ➡️ 'true' or 'false'
-	}
+	// StringLiteral
+	if (t.isStringLiteral(init)) return init.value;
+	// NumericLiteral - convert numbers to strings
+	if (t.isNumericLiteral(init)) return init.value;
+	// BooleanLiteral returned as string
+	if (t.isBooleanLiteral(init)) return init.value;
+	// TemplateLiteral without ${}
+	if (t.isTemplateLiteral(init) && init.expressions.length === 0) return init.quasis[0].value.cooked ?? init.quasis[0].value.raw;
+	if (t.isTemplateLiteral(init)) return resolveTemplateLiteral(init, binding.path, literalFromNode, opts);
 
 	return text;
 }
 
 /*──────────────────────────────────────────────────────────*\
-  resolveTemplateLiteral - a template literal is a string literal with ${expr} placeholders
-  ----------------------
   Accepts a **TemplateLiteral** node that *may* contain `${}` placeholders
   *and* a NodePath for scope look-ups.
 
@@ -347,7 +355,7 @@ export function resolveMemberExpression(
 ): string | null {
 	VERBOSE && console.log('resolveMemberExpression -> 352');
 	/** Collect the property chain (deep ➡️ shallow) */
-	const props: (string | number)[] = [];
+	const props: (string | number | boolean)[] = [];
 	let current: t.Expression | t.PrivateName = node;
 
 	// Walk up until we hit the root Identifier
@@ -361,7 +369,27 @@ export function resolveMemberExpression(
 				props.unshift(expr.value);
 			} else if (t.isNumericLiteral(expr)) {
 				props.unshift(expr.value);
+			} else if (t.isIdentifier(expr)) {
+				// Try to resolve the identifier to a const value
+				const resolved = resolveLocalConstIdentifier(expr, path, opts);
+				if (resolved !== null) {
+					props.unshift(resolved as string | number | boolean);
+				} else {
+					// Fall back to literalFromNode for other cases
+					const lit = literalFromNode(expr, path, { ...opts, throwOnFail: true });
+					if (lit === null) {
+						throwCodeFrame(
+							path,
+							path.opts?.filename,
+							opts.source ?? path.opts?.source?.code,
+							'[Zero-UI] Member expression must resolve to a static space-free string.\n' + 'only use const identifiers as keys.'
+						);
+					}
+					const num = Number(lit);
+					props.unshift(Number.isFinite(num) ? num : lit);
+				}
 			} else {
+				// Original else block for non-identifier expressions
 				const lit = literalFromNode(expr, path, { ...opts, throwOnFail: true });
 				if (lit === null) {
 					throwCodeFrame(
@@ -401,8 +429,8 @@ export function resolveMemberExpression(
 		);
 	}
 
-	// Must be `const` in Program scope
-	if (!binding.path.isVariableDeclarator() || binding.scope.block.type !== 'Program' || (binding.path.parent as t.VariableDeclaration).kind !== 'const') {
+	// Must be `const` (from any scope)
+	if (!binding.path.isVariableDeclarator() || (binding.path.parent as t.VariableDeclaration).kind !== 'const') {
 		return null;
 	}
 
@@ -467,8 +495,14 @@ export function resolveMemberExpression(
 \*──────────────────────────────────────────────────────────*/
 function resolveObjectValue(obj: t.ObjectExpression, key: string): t.Expression | null | undefined {
 	for (const p of obj.properties) {
-		// Matches: { dark: 'theme' } - key = 'dark'
-		if (t.isObjectProperty(p) && !p.computed && t.isIdentifier(p.key) && p.key.name === key) {
+		// Matches: { dark: 'theme' }  or  { 'dark-mode': 'theme' }
+		if (
+			t.isObjectProperty(p) &&
+			!p.computed &&
+			((t.isIdentifier(p.key) && p.key.name === key) ||
+				(t.isStringLiteral(p.key) && p.key.value === key) ||
+				(t.isNumericLiteral(p.key) && String(p.key.value) === key))
+		) {
 			return p.value as t.Expression;
 		}
 
@@ -476,16 +510,6 @@ function resolveObjectValue(obj: t.ObjectExpression, key: string): t.Expression 
 		if (t.isObjectProperty(p) && p.computed && t.isStringLiteral(p.key) && p.key.value === key) {
 			return p.value as t.Expression;
 		}
-
-		// Matches: { "dark": "theme" } or { "1": "theme" } - key = 'dark' or '1'
-		// if (t.isObjectProperty(p) && t.isStringLiteral(p.key) && p.key.value === key) {
-		// 	return p.value as t.Expression;
-		// }
-
-		// // ✅ New: Matches { 1: "theme" } - key = '1'
-		// if (t.isObjectProperty(p) && t.isNumericLiteral(p.key) && String(p.key.value) === key) {
-		// 	return p.value as t.Expression;
-		// }
 	}
 
 	return null;
@@ -518,13 +542,13 @@ function containsIllegalIdentifiers(node: t.Node, path: NodePath, opts: ResolveO
 			);
 		}
 
-		if (binding.scope.block.type !== 'Program' || (binding.path.parent as t.VariableDeclaration).kind !== 'const') {
+		if ((binding.path.parent as t.VariableDeclaration).kind !== 'const') {
 			throwCodeFrame(
 				path,
 				path.opts?.filename,
 				opts.source ?? path.opts?.source?.code,
-				`[Zero-UI] Invalid scope: '${subNode.name}' is not defined at the top level.\n\n` +
-					`➡️ Move this variable to the top of the file, outside any functions or blocks.`
+				`[Zero-UI] Only \`const\` variables are allowed. '${subNode.name}' is declared with '${(binding.path.parent as t.VariableDeclaration).kind}'.\n\n` +
+					`➡️ Change the declaration to use \`const\` instead.`
 			);
 		}
 	});
