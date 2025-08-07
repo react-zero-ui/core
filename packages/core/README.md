@@ -12,7 +12,7 @@ _Say goodbye to context and prop-drilling._
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![CI](https://github.com/react-zero-ui/core/actions/workflows/ci.yml/badge.svg?branch=main)
 
-[📖 See the proof](https://github.com/react-zero-ui/core/blob/main/docs/assets/demo.md) • [🚀 Quick Start](#-quick-start) • [📚 API Reference](#-api-reference) • [🤝 Contributing](#-contributing)
+[📖 See the proof](https://github.com/react-zero-ui/core/blob/main/docs/demo.md) • [🚀 Quick Start](#-quick-start) • [📚 API Reference](#-api-reference) • [🤝 Contributing](#-contributing)
 
 ---
 
@@ -63,8 +63,8 @@ npx create-zero-ui
 
 Manual config:
 
-- [Next.js Setup](/docs/installation-next.md)
-- [Vite Setup](/docs/installation-vite.md)
+- [Next.js Setup](https://github.com/react-zero-ui/core/blob/main/docs/installation-next.md)
+- [Vite Setup](https://github.com/react-zero-ui/core/blob/main/docs/installation-vite.md)
 
 ---
 
@@ -146,7 +146,7 @@ const [blur, setBlur] = useScopedUI('blur', '0px', CssVar);
 Enables interactivity **inside Server Components** without useEffect.  
 Only ~300 bytes of runtime.
 
-Read more: [experimental.md](/docs/experimental.md)
+Read more: [experimental.md](https://github.com/react-zero-ui/core/blob/main/docs/experimental.md)
 
 ---
 
@@ -168,7 +168,7 @@ We welcome all contributions!
 
 - 🐛 [Open an issue](https://github.com/react-zero-ui/core/issues)
 - 💡 [Start a discussion](https://github.com/react-zero-ui/core/discussions)
-- 🔧 [Read the contributing guide](/docs/CONTRIBUTING.md)
+- 🔧 [Read the contributing guide](https://github.com/react-zero-ui/core/blob/main/docs/CONTRIBUTING.md)
 
 ---
 
