@@ -1,9 +1,6 @@
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
-import assert from 'assert';
-import { literalFromNode, ResolveOpts } from './resolvers.js';
-import * as t from '@babel/types';
 
 // Helper to create temp directory and run test
 export async function runTest(files: Record<string, string>, callback: () => Promise<void>) {

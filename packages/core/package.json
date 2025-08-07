@@ -70,9 +70,11 @@
 		"!*.test.cjs"
 	],
 	"dependencies": {
+		"@babel/core": "^7.28.0",
 		"@babel/code-frame": "^7.27.1",
 		"@babel/generator": "^7.28.0",
 		"@babel/parser": "^7.28.0",
+		"@babel/preset-typescript": "^7.27.1",
 		"@babel/traverse": "^7.28.0",
 		"@babel/types": "^7.28.0",
 		"fast-glob": "^3.3.3",
@@ -81,6 +83,7 @@
 	"devDependencies": {
 		"@playwright/test": "^1.54.0",
 		"@types/babel__code-frame": "^7.0.6",
+		"@types/babel__core": "^7.20.5",
 		"@types/babel__generator": "^7.27.0",
 		"@types/babel__traverse": "^7.20.7",
 		"@types/react": "^19.1.8",

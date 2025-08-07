@@ -1,6 +1,8 @@
-// src/core/postcss/ast-parsing.cts
+// src/core/postcss/ast-parsing.ts
 import os from 'os';
-import { parse, ParserOptions } from '@babel/parser';
+import { TransformOptions, transformSync, type BabelFileResult } from '@babel/core';
+import tsPreset from '@babel/preset-typescript';
+import { type ParserOptions } from '@babel/parser';
 import * as t from '@babel/types';
 import { CONFIG } from '../config.js';
 import * as fs from 'fs';
@@ -250,7 +252,7 @@ export async function processVariants(changedFiles: string[] | null = null): Pro
 		const code = fs.readFileSync(fp, 'utf8');
 
 		// AST Parse the file
-		const ast = parse(code, PARSE_OPTS(fp));
+		const ast = parseJsLike(code, fp);
 
 		// Collect the useUI hooks
 		const hooks = collectUseUIHooks(ast, code);
@@ -316,6 +318,29 @@ export async function processVariants(changedFiles: string[] | null = null): Pro
 	);
 
 	return { finalVariants, initialGlobalValues, sourceFiles: srcFiles };
+}
+
+const cache = new Map<string, t.File>();
+
+const defaultOpts: Partial<TransformOptions> = {
+	presets: [[tsPreset, { isTSX: true, allowDeclareFields: true, allExtensions: true }]],
+	parserOpts: { sourceType: 'module', plugins: ['jsx', 'decorators-legacy', 'typescript', 'topLevelAwait'] },
+	ast: true,
+	code: false,
+};
+
+export function parseJsLike(code: string, filename: string, opts: TransformOptions = defaultOpts): t.File {
+	const key = filename + '\0' + code.length;
+	if (cache.has(key)) return cache.get(key)!;
+
+	const result = transformSync(code, { ...opts, filename }) as BabelFileResult & { ast: t.File }; // <— narrow type
+
+	if (!result.ast) {
+		throw new Error(`[Zero-UI] Failed to parse file: ${filename}`);
+	}
+
+	cache.set(key, result.ast);
+	return result.ast;
 }
 
 /**

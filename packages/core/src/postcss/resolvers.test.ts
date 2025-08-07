@@ -396,7 +396,6 @@ test('literalFromNode should resolve ArrayExpression values via static index acc
 
 			const opts: ResolveOpts = { throwOnFail: true, source: code };
 			const result = literalFromNode(found.node as t.Expression, found.path, opts);
-			console.log('result: ', result);
 
 			assert.strictEqual(result, expected, `Failed: ${description}`);
 		}
