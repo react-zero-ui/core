@@ -14,10 +14,10 @@ Experience the difference between React re-renders and Zero-UI's instant updates
 
 ## 🎯 Interactive Examples
 
-| Demo | Description | Live Link | Source Code |
-| -- | -- | -- | -- |
-| **🎛️ Interactive Menu** | Side-by-side comparison with render tracker | [Main Demo](https://zero-ui.dev/) | [GitHub](https://zero-ui.dev/react) |
-| **⚛️ React Benchmark** | Traditional React render path (10k nodes) | [React 10k](https://zero-ui.dev/react) | [GitHub](https://github.com/react-zero-ui/core/tree/main/examples/demo/src/app/react) |
+| Demo                      | Description                                       | Live Link                                  | Source Code                                                                             |
+| ------------------------- | ------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------- |
+| **🎛️ Interactive Menu**   | Side-by-side comparison with render tracker       | [Main Demo](https://zero-ui.dev/)          | [GitHub](https://zero-ui.dev/react)                                                     |
+| **⚛️ React Benchmark**    | Traditional React render path (10k nodes)         | [React 10k](https://zero-ui.dev/react)     | [GitHub](https://github.com/react-zero-ui/core/tree/main/examples/demo/src/app/react)   |
 | **⚡️ Zero-UI Benchmark** | Identical DOM with `data-*` switching (10k nodes) | [Zero-UI 10k](https://zero-ui.dev/zero-ui) | [GitHub](https://github.com/react-zero-ui/core/tree/main/examples/demo/src/app/zero-ui) |
 
 > **📁 Full Demo Source:** [Zero Rerender Demo](/examples/demo/)
@@ -47,10 +47,10 @@ _Tested on Apple M1 - Chrome DevTools Performance Tab_
 </div>
 
 | **Nodes Updated** | **React State** | **Zero-UI** | **Speed Improvement** |
-| :--: | :--: | :--: | :--: |
-| 10,000 | ~50 ms | ~5 ms | **🚀 10× faster** |
-| 25,000 | ~180 ms | ~15 ms | **🚀 12× faster** |
-| 50,000 | ~300 ms | ~20 ms | **🚀 15× faster**   |
+| :---------------: | :-------------: | :---------: | :-------------------: |
+|      10,000       |     ~50 ms      |    ~5 ms    |   **🚀 10× faster**   |
+|      25,000       |     ~180 ms     |   ~15 ms    |   **🚀 12× faster**   |
+|      50,000       |     ~300 ms     |   ~20 ms    |   **🚀 15× faster**   |
 
 > **🔬 Try it yourself:** Re-run these benchmarks using the demo links above with Chrome DevTools.
 

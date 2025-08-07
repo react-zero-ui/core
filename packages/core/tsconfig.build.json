@@ -2,13 +2,8 @@
 {
 	"extends": "../../tsconfig.base.json",
 	/* - compile exactly one file - */
-	"include": [
-		"src/**/*"
-	],
-	"exclude": [
-		"src/**/*.test.ts",
-		"./src/postcss/test-utilities.ts"
-	],
+	"include": ["src/**/*"],
+	"exclude": ["src/**/*.test.ts", "./src/postcss/test-utilities.ts"],
 	/* - compiler output - */
 	"compilerOptions": {
 		"esModuleInterop": true,

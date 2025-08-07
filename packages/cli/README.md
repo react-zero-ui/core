@@ -1,4 +1,3 @@
-
 # create-zero-ui
 
 > ⚡ Instantly scaffold React Zero-UI into your Next.js or Vite project
@@ -13,12 +12,11 @@ npx create-zero-ui
 
 ## 🚀 What It Sets Up
 
-
 ### ✅ Shared (Next.js & Vite)
 
-* Adds `@react-zero-ui/core` to your project
-* Generates `.zero-ui/attributes.js` + `attributes.d.ts`
-* Patches your `tsconfig.json`:
+- Adds `@react-zero-ui/core` to your project
+- Generates `.zero-ui/attributes.js` + `attributes.d.ts`
+- Patches your `tsconfig.json`:
 
   ```json
   "paths": {
@@ -30,37 +28,36 @@ npx create-zero-ui
 
 ### 🔷 Next.js Specific
 
-* Injects initial `data-*` attributes into `app/layout.tsx`
-* Adds `postcss.config` with:
+- Injects initial `data-*` attributes into `app/layout.tsx`
+- Adds `postcss.config` with:
 
   ```js
   plugins: [
-	// ❗zero-ui must come before tailwind
-    "@react-zero-ui/core/postcss",
-    "@tailwindcss/postcss"
-  ]
+  	// ❗zero-ui must come before tailwind
+  	'@react-zero-ui/core/postcss',
+  	'@tailwindcss/postcss',
+  ];
   ```
 
 ---
 
 ### 🔶 Vite Specific
 
-* Patches `vite.config.ts` with:
+- Patches `vite.config.ts` with:
 
   ```ts
-  export default defineConfig({
-    plugins: [zeroUI(), react()]
-  });
+  export default defineConfig({ plugins: [zeroUI(), react()] });
   ```
-* Vite **does not require** a PostCSS config
+
+- Vite **does not require** a PostCSS config
 
 ---
 
 ## 🧪 Works With
 
-* `Next.js` (App Router)
-* `Vite` (React projects)
-* `pnpm`, `yarn`, or `npm`
+- `Next.js` (App Router)
+- `Vite` (React projects)
+- `pnpm`, `yarn`, or `npm`
 
 ---
 
@@ -76,8 +73,8 @@ Follow the CLI prompts to scaffold your config in seconds.
 
 ## 📚 Related
 
-* [@react-zero-ui/core](https://github.com/react-zero-ui/core)
-* [Documentation](https://github.com/react-zero-ui/core/tree/main/docs)
+- [@react-zero-ui/core](https://github.com/react-zero-ui/core)
+- [Documentation](https://github.com/react-zero-ui/core/tree/main/docs)
 
 ---
 

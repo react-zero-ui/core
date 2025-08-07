@@ -12,7 +12,7 @@ import { findAllSourceFiles, mapLimit, toKebabCase } from './helpers.js';
 import { NodePath, Node } from '@babel/traverse';
 import traverse from './traverse.cjs';
 
-const PARSE_OPTS = (f: string): Partial<ParserOptions> => ({
+export const PARSE_OPTS = (f: string): Partial<ParserOptions> => ({
 	sourceType: 'module',
 	plugins: ['jsx', 'typescript', 'decorators-legacy', 'topLevelAwait'],
 	sourceFilename: f,

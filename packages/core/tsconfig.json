@@ -1,13 +1,8 @@
 {
 	"extends": "../../tsconfig.base.json",
 	/* - compile exactly one file - */
-	"include": [
-		"src/**/*",
-		"__tests__/fixtures/vite/src/ErrorBoundary.tsx"
-	],
-	"exclude": [
-		"node_modules"
-	],
+	"include": ["src/**/*"],
+	"exclude": ["node_modules", "dev/next"],
 	/* - compiler output - */
 	"compilerOptions": {
 		"moduleResolution": "nodenext",

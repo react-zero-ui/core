@@ -117,12 +117,12 @@ Everything funnels through **`literalFromNode`**. Think of it as a deterministic
 
 ### 3.2 Resolvers
 
-| Helper                            | Purpose                                                                                                                                    |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| **`resolveTemplateLiteral`**      | Ensures every `${expr}` resolves via `literalFromNode`.                                                                                    |
+| Helper                            | Purpose                                                                                                                                     |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`resolveTemplateLiteral`**      | Ensures every `${expr}` resolves via `literalFromNode`.                                                                                     |
 | **`resolveLocalConstIdentifier`** | Maps an `Identifier` ➡️ its `const` initializer _iff_ initializer is a local static string/template. Imported bindings rejected explicitly. |
-| **`resolveMemberExpression`**     | Static walk of `obj.prop`, `obj['prop']`, `obj?.prop`, arrays, numeric indexes, optional‑chaining… Throws if unresolved.                   |
-| **`literalFromNode`**             | Router calling above; memoised (`WeakMap`) per AST node.                                                                                   |
+| **`resolveMemberExpression`**     | Static walk of `obj.prop`, `obj['prop']`, `obj?.prop`, arrays, numeric indexes, optional‑chaining… Throws if unresolved.                    |
+| **`literalFromNode`**             | Router calling above; memoised (`WeakMap`) per AST node.                                                                                    |
 
 Resolvers throw contextual errors via **`throwCodeFrame`** (`@babel/code-frame`).
 

@@ -8,8 +8,6 @@ import CssVarDemo from './CssVarDemo';
 
 import { zeroSSR } from '@react-zero-ui/core/experimental';
 
-import ZeroUiRuntime from './zero-runtime';
-
 export default function Page() {
 	const [scope, setScope] = useScopedUI<'off' | 'on'>('scope', 'off');
 
@@ -33,7 +31,6 @@ export default function Page() {
 		<div
 			className="p-8 theme-light:bg-white theme-dark:bg-white bg-black relative"
 			data-testid="page-container">
-			<ZeroUiRuntime />
 			<h1 className="text-2xl font-bold py-5">Global State</h1>
 			<hr />
 			<div className=" space-y-4 border-2">

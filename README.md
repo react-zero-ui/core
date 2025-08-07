@@ -63,9 +63,10 @@ React Zero-UI uses a hyper-optimized AST resolver in development that scans your
 
 <small>Zero-UI CLI</small>
 
-**Pre-requisites:** 
-* <small>Vite or Next.js (App Router)</small>
-* <small>Tailwind V4 Configured. See [Tailwind V4 Installation](https://tailwindcss.com/docs/installation/using-vite)</small>
+**Pre-requisites:**
+
+- <small>Vite or Next.js (App Router)</small>
+- <small>Tailwind V4 Configured. See [Tailwind V4 Installation](https://tailwindcss.com/docs/installation/using-vite)</small>
 
 ```bash
 npx create-zero-ui
@@ -141,9 +142,10 @@ Sometimes CSS variables are more efficient. React Zero-UI makes it trivial by pa
 ```diff
 + Pass `CssVar` to either hook to use CSS variables
 
-useUI(<cssVariable>, <defaultValue>, CssVar); 
+useUI(<cssVariable>, <defaultValue>, CssVar);
 
 ```
+
 <small>automatically adds `--` to the Css Variable</small>
 
 **Global CSS Variable:**
@@ -200,26 +202,26 @@ React Zero-UI delivers the fastest, simplest, most performant way to handle glob
 
 ### 📚 Complete Guide Collection
 
-| Guide | Description |
-|-------|-------------|
-| [📚 API Reference](/docs/api-reference.md) | Complete API documentation for all hooks and utilities |
-| [📋 Usage Examples](/docs/usage-examples.md) | Practical patterns and real-world use cases |
-| [🔄 Migration Guide](/docs/migration-guide.md) | Step-by-step migration from useState, Context, Redux |
-| [🔧 Troubleshooting](/docs/troubleshooting.md) | Common issues and debugging techniques |
-| [❓ FAQ](/docs/faq.md) | Frequently asked questions and answers |
-| [🧪 Experimental Features](/docs/experimental.md) | SSR-safe server component interactivity |
+| Guide                                             | Description                                            |
+| ------------------------------------------------- | ------------------------------------------------------ |
+| [📚 API Reference](/docs/api-reference.md)        | Complete API documentation for all hooks and utilities |
+| [📋 Usage Examples](/docs/usage-examples.md)      | Practical patterns and real-world use cases            |
+| [🔄 Migration Guide](/docs/migration-guide.md)    | Step-by-step migration from useState, Context, Redux   |
+| [🔧 Troubleshooting](/docs/troubleshooting.md)    | Common issues and debugging techniques                 |
+| [❓ FAQ](/docs/faq.md)                            | Frequently asked questions and answers                 |
+| [🧪 Experimental Features](/docs/experimental.md) | SSR-safe server component interactivity                |
 
 ### 🛠️ Setup Guides
 
-| Framework | Guide |
-|-----------|-------|
+| Framework                                        | Guide                                   |
+| ------------------------------------------------ | --------------------------------------- |
 | [Next.js App Router](/docs/installation-next.md) | Complete Next.js setup with SSR support |
-| [Vite + React](/docs/installation-vite.md) | Vite configuration and optimization |
+| [Vite + React](/docs/installation-vite.md)       | Vite configuration and optimization     |
 
 ### 🎯 Learn by Example
 
 - [🎮 **Live Demo**](https://zero-ui.dev/) - Interactive playground
-- [📊 **Performance Demo**](https://zero-ui.dev/react) - 10k component benchmark  
+- [📊 **Performance Demo**](https://zero-ui.dev/react) - 10k component benchmark
 - [📁 **Demo Source Code**](/examples/demo/) - Complete example project
 
 ---

@@ -1,10 +1,10 @@
 import { Dashboard } from './Dashboard';
-import InitZeroUI from './init-zero-ui';
+import { InitZeroUI } from './init-zero-ui';
 
 export const metadata = {
 	title: 'Zero UI Demo SSR',
 	description: '10,000 live nodes. No virtual DOM. No re-renders. Just raw UI performance.',
-	alternates: { canonical: process.env.NEXT_PUBLIC_URL + '/zero-ui-ssr' },
+	alternates: { canonical: process.env.NEXT_PUBLIC_URL + '/ssr' },
 };
 
 export default function Page() {

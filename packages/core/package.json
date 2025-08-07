@@ -1,30 +1,19 @@
 {
 	"name": "@react-zero-ui/core",
-	"version": "0.3.3",
+	"version": "0.3.4",
 	"private": false,
-	"description": "Ultra-fast React UI state library with zero runtime, zero re-renders, Tailwind variant support, and automatic data-attribute/css-vars based styling. Replace context, prop drilling, and global stores with build-time magic.",
-	"keywords": [
-		"react",
-		"react state",
-		"ui state",
-		"global state",
-		"scoped state",
-		"state management",
-		"tailwind",
-		"tailwind variants",
-		"postcss plugin",
-		"fastest ui updates",
-		"zero rerenders",
-		"zero render",
-		"no context",
-		"no prop drilling",
-		"css driven state",
-		"data attributes",
-		"ssr safe",
-		"instant ui updates",
-		"react optimization",
-		"high performance react"
-	],
+	"scripts": {
+		"build": "rm -rf dist && tsc -p tsconfig.build.json",
+		"dev": "tsc -p tsconfig.json --watch",
+		"prepack": "pnpm run build",
+		"smoke": "node scripts/smoke-test.js",
+		"test:all": "pnpm run test:vite && pnpm run test:next && pnpm run test:unit && pnpm run test:cli && pnpm run test:integration",
+		"test:cli": "node --test __tests__/unit/*.test.cjs",
+		"test:integration": "node --test __tests__/unit/index.test.cjs",
+		"test:next": "playwright test -c __tests__/config/playwright.next.config.js",
+		"test:unit": "tsx --test src/**/*.test.ts",
+		"test:vite": "playwright test -c __tests__/config/playwright.vite.config.js"
+	},
 	"homepage": "https://github.com/react-zero-ui/core#readme",
 	"bugs": {
 		"url": "https://github.com/react-zero-ui/core/issues"
@@ -44,6 +33,9 @@
 		"./dist/experimental/runtime.js"
 	],
 	"type": "module",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
@@ -70,9 +62,6 @@
 			"import": "./dist/experimental/runtime.js"
 		}
 	},
-	"main": "./dist/index.js",
-	"module": "./dist/index.js",
-	"types": "./dist/index.d.ts",
 	"files": [
 		"dist/**/*",
 		"README.md",
@@ -80,18 +69,6 @@
 		"!*.test.js",
 		"!*.test.cjs"
 	],
-	"scripts": {
-		"build": "rm -rf dist && tsc -p tsconfig.build.json",
-		"dev": "tsc -p tsconfig.json --watch",
-		"prepack": "pnpm run build",
-		"smoke": "node scripts/smoke-test.js",
-		"test:all": "pnpm run test:vite && pnpm run test:next && pnpm run test:unit && pnpm run test:cli && pnpm run test:integration",
-		"test:cli": "node --test __tests__/unit/*.test.cjs",
-		"test:integration": "node --test __tests__/unit/index.test.cjs",
-		"test:next": "playwright test -c __tests__/config/playwright.next.config.js",
-		"test:unit": "tsx --test src/**/*.test.ts",
-		"test:vite": "playwright test -c __tests__/config/playwright.vite.config.js"
-	},
 	"dependencies": {
 		"@babel/code-frame": "^7.27.1",
 		"@babel/generator": "^7.28.0",
@@ -116,5 +93,28 @@
 	},
 	"engines": {
 		"node": ">=18.0.0"
-	}
+	},
+	"description": "Ultra-fast React UI state library with zero runtime, zero re-renders, Tailwind variant support, and automatic data-attribute/css-vars based styling. Replace context, prop drilling, and global stores with build-time magic.",
+	"keywords": [
+		"react",
+		"react state",
+		"ui state",
+		"global state",
+		"scoped state",
+		"state management",
+		"tailwind",
+		"tailwind variants",
+		"postcss plugin",
+		"fastest ui updates",
+		"zero rerenders",
+		"zero render",
+		"no context",
+		"no prop drilling",
+		"css driven state",
+		"data attributes",
+		"ssr safe",
+		"instant ui updates",
+		"react optimization",
+		"high performance react"
+	]
 }

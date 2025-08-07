@@ -1,5 +1,5 @@
 // src/internal.ts
-import { UIAction } from './index.js';
+import type { UIAction } from './index.js';
 
 export const cssVar: unique symbol = Symbol('cssVar');
 
@@ -34,7 +34,6 @@ export function makeSetter<T extends string>(key: string, initialValue: T, getTa
 		const registry = typeof globalThis !== 'undefined' ? ((globalThis as any).__useUIRegistry ||= new Map()) : new Map();
 
 		const prev = registry.get(key);
-		// TODO try to add per page error boundaries
 		if (prev !== undefined && prev !== initialValue) {
 			console.error(
 				`[useUI] Inconsistent initial values for key "${key}": ` +

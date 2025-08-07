@@ -1,4 +1,3 @@
-
 <div align="center">
 
 # 📚 API Reference
@@ -12,6 +11,7 @@ Detailed reference for all hooks, utilities, and configuration options.
 ---
 
 ## 📚 Table of Contents
+
 - [🔨 Core Hooks](#-core-hooks)
 - [🌈 Utilities](#-utilities)
 - [🧪 Experimental APIs](#-experimental-apis)
@@ -34,18 +34,18 @@ const [staleValue, setter] = useUI(key, initial, flag?);
 
 #### Parameters
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `key` | `string` | The state key (becomes `data-{key}` attribute) |
-| `initial` | `T` | Initial/default value for SSR |
-| `flag?` | `typeof CssVar` | Optional: Use CSS variables instead of data attributes |
+| Parameter | Type            | Description                                            |
+| --------- | --------------- | ------------------------------------------------------ |
+| `key`     | `string`        | The state key (becomes `data-{key}` attribute)         |
+| `initial` | `T`             | Initial/default value for SSR                          |
+| `flag?`   | `typeof CssVar` | Optional: Use CSS variables instead of data attributes |
 
 #### Returns
 
-| Return | Type | Description |
-|--------|------|-------------|
-| `staleValue` | `T` | Initial value (doesn't update, use for SSR only) |
-| `setter` | `GlobalSetterFn<T>` | Function to update the global state |
+| Return       | Type                | Description                                      |
+| ------------ | ------------------- | ------------------------------------------------ |
+| `staleValue` | `T`                 | Initial value (doesn't update, use for SSR only) |
+| `setter`     | `GlobalSetterFn<T>` | Function to update the global state              |
 
 #### Examples
 
@@ -62,7 +62,7 @@ const [color, setColor] = useUI('primary', '#blue', CssVar);
 setColor('#red'); // Sets --primary: #red on <body>
 
 // Functional updates
-setTheme(prev => prev === 'light' ? 'dark' : 'light');
+setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
 ```
 
 ---
@@ -81,10 +81,10 @@ Same as `useUI`, but affects only the element assigned to `setter.ref`.
 
 #### Returns
 
-| Return | Type | Description |
-|--------|------|-------------|
-| `staleValue` | `T` | Initial value (doesn't update, use for SSR only) |
-| `setter` | `ScopedSetterFn<T>` | Function with attached `ref` property |
+| Return       | Type                | Description                                      |
+| ------------ | ------------------- | ------------------------------------------------ |
+| `staleValue` | `T`                 | Initial value (doesn't update, use for SSR only) |
+| `setter`     | `ScopedSetterFn<T>` | Function with attached `ref` property            |
 
 #### Examples
 
@@ -92,24 +92,22 @@ Same as `useUI`, but affects only the element assigned to `setter.ref`.
 // Basic scoped usage
 const [modal, setModal] = useScopedUI('modal', 'closed');
 
-<div 
+<div
 	ref={setModal.ref}
 	data-modal={modal} // Prevents FOUC
-	className="modal-closed:hidden modal-open:block"
->
+	className="modal-closed:hidden modal-open:block">
 	Modal content
-</div>
+</div>;
 
 // With CSS variables
 const [blur, setBlur] = useScopedUI('blur', '0px', CssVar);
 
-<div 
+<div
 	ref={setBlur.ref}
 	style={{ '--blur': blur }}
-	className="backdrop-blur-[var(--blur)]"
->
+	className="backdrop-blur-[var(--blur)]">
 	Blurred content
-</div>
+</div>;
 ```
 
 ---
@@ -148,10 +146,10 @@ const clickHandler = zeroSSR.onClick(key, values);
 
 #### Parameters
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `key` | `string` | State key (kebab-case required) |
-| `values` | `string[]` | Array of values to cycle through |
+| Parameter | Type       | Description                      |
+| --------- | ---------- | -------------------------------- |
+| `key`     | `string`   | State key (kebab-case required)  |
+| `values`  | `string[]` | Array of values to cycle through |
 
 #### Returns
 
@@ -189,13 +187,9 @@ Same as `zeroSSR.onClick`, but affects the closest ancestor with `data-{key}` at
 
 ```tsx
 <div data-modal="closed">
-	<button {...scopedZeroSSR.onClick('modal', ['closed', 'open'])}>
-		Open Modal
-	</button>
-	
-	<div className="modal-closed:hidden modal-open:block">
-		Modal content
-	</div>
+	<button {...scopedZeroSSR.onClick('modal', ['closed', 'open'])}>Open Modal</button>
+
+	<div className="modal-closed:hidden modal-open:block">Modal content</div>
 </div>
 ```
 
@@ -214,8 +208,8 @@ activateZeroUiRuntime(variantKeyMap);
 
 #### Parameters
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter    | Type                       | Description                                  |
+| ------------ | -------------------------- | -------------------------------------------- |
 | `variantMap` | `Record<string, string[]>` | Generated variant mapping from build process |
 
 #### Setup
@@ -285,16 +279,13 @@ interface ScopedSetterFn<T extends string = string> {
 ## 🚨 Limitations & Constraints
 
 ### State Key Requirements
+
 - DO NOT USE IMPORTED VARIABLES IN THE STATE KEY
 - Must be valid HTML attribute names
 - Kebab-case required: `'sidebar-state'` not `'sidebarState'`
 - Avoid conflicts with existing data attributes
 - Must resolve to a non-spaced string: `'sidebar-state'` not `'sidebar State'`
-- Must be a local constant that resolves to a string: 
-
-
-
-
+- Must be a local constant that resolves to a string:
 
 ### Scoped UI Constraints
 
@@ -325,12 +316,11 @@ Generated variant mapping for runtime activation.
 ```ts
 /* AUTO-GENERATED - DO NOT EDIT */
 export const bodyAttributes = {
-  "data-theme": "light",
-  "data-accent": "violet",
-  "data-scrolled": "up",
-  // ...
+	'data-theme': 'light',
+	'data-accent': 'violet',
+	'data-scrolled': 'up',
+	// ...
 };
-
 ```
 
 ### `.zero-ui/styles.css` (Vite)
@@ -339,7 +329,7 @@ Generated CSS variants for Vite projects.
 
 ```css
 /* Auto-generated Tailwind variants */
-[data-theme="dark"] .theme-dark\:bg-gray-900 {
+[data-theme='dark'] .theme-dark\:bg-gray-900 {
 	background-color: rgb(17 24 39);
 }
 /* ... */
@@ -385,14 +375,14 @@ cat .zero-ui/attributes.ts
 
 ```tsx
 // ✅ Good: Descriptive and clear
-useUI('theme', 'light')
-useUI('sidebar-state', 'collapsed')
-useUI('modal-visibility', 'hidden')
+useUI('theme', 'light');
+useUI('sidebar-state', 'collapsed');
+useUI('modal-visibility', 'hidden');
 
 // ❌ Avoid: Generic or unclear
-useUI('state', 'on')
-useUI('x', 'y')
-useUI('toggle', 'true')
+useUI('state', 'on');
+useUI('x', 'y');
+useUI('toggle', 'true');
 ```
 
 ### TypeScript Usage
@@ -411,13 +401,13 @@ const [, setModal] = useUI<ModalState>('modal', 'closed');
 
 ```tsx
 // ✅ Use CSS for conditional rendering
-<div className="modal-closed:hidden modal-open:block">
-	Modal content
-</div>
+<div className="modal-closed:hidden modal-open:block">Modal content</div>;
 
 // ❌ Avoid reading stale values for logic
 const [modal, setModal] = useUI('modal', 'closed');
-{modal === 'open' && <Modal />} // Won't work as expected
+{
+	modal === 'open' && <Modal />;
+} // Won't work as expected
 ```
 
 ---

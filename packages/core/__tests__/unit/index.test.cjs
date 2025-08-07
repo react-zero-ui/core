@@ -472,7 +472,7 @@ test('patchTsConfig - config file patching', async (t) => {
   // TypeScript configuration
   "compilerOptions": {
     "target": "ES2015",
-    "module": "ESNext", // Comment here
+    "module": "bundler", // Comment here
   },
   "include": ["src/**/*"], // Another comment
 }`;

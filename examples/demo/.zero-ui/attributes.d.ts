@@ -7,4 +7,9 @@ export declare const bodyAttributes: {
   "data-scrolled": "down" | "up";
   "data-theme": "dark" | "light";
   "data-theme-test": "dark" | "light";
+  "data-theme-test-ssr": "dark" | "light";
+};
+
+export declare const variantKeyMap: {
+  [key: string]: true;
 };

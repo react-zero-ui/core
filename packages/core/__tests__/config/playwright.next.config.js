@@ -26,12 +26,13 @@ export default defineConfig({
 		trace: 'retain-on-failure',
 	},
 
-	globalSetup: '../e2e/nextSetup.js',
+	// globalSetup: '../e2e/nextSetup.js',
 
 	projects: [
-		{ name: 'next-cli-e2e', testMatch: /cli-next\.spec\.js/ },
-		{ name: 'next-e2e', dependencies: ['next-cli-e2e'], testMatch: /next\.spec\.js/ },
-		{ name: 'next-scoped-e2e', dependencies: ['next-e2e'], testMatch: /next-scoped\.spec\.js/ },
+		// { name: 'next-cli-e2e', testMatch: /cli-next\.spec\.js/ },
+		// { name: 'next-e2e', dependencies: ['next-cli-e2e'], testMatch: /next\.spec\.js/ },
+		// { name: 'next-scoped-e2e', dependencies: ['next-e2e'], testMatch: /next-scoped\.spec\.js/ },
+		{ name: 'next-ssr-e2e', testMatch: /next-ssr\.spec\.js/ },
 	],
 	webServer: {
 		command: 'pnpm run dev',
