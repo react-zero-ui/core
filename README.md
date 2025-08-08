@@ -23,7 +23,7 @@ Zero runtime, zero React re-renders, and the simplest developer experience ever.
 
 ## 🔥 Core Concept: _"Pre-Rendering"_
 
-Why re-render UI if all states are known at build time? React Zero-UI **pre-renders** UI states once ( at no runtime cost ), and flips `data-*` attribute to update - that's it.
+Why re-render UI if all states are known at build time? React Zero-UI **pre-renders** UI states once ( at no runtime cost ), and flips `data-*` attributes to update - that's it.
 
 **Example:**
 
@@ -238,10 +238,11 @@ We welcome contributions from the community! Whether it's bug fixes, feature req
 
 > **First time contributor?** We have good first issues labeled `good-first-issue` to help you get started!
 
---
+
+
+
 
 <div align="center">
-
 Made with ❤️ for the React community by [@austin1serb](https://github.com/austin1serb)
 
 </div>
