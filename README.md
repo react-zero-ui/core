@@ -5,7 +5,7 @@
 </a>
 
 <p align="center" style="display:flex; align-items:center;">
- <img width="1000" height="144" alt="Frame 342" src="https://raw.githubusercontent.com/react-zero-ui/core/upgrade/resolver/docs/assets/zero-ui-logo.png" />
+ <img width="1000" height="144" alt="Frame 342" src="/docs/assets/zero-ui-logo.png" />
 </p>
 
 <div align="center">
