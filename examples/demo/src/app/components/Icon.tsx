@@ -5,7 +5,7 @@ interface Props extends React.SVGProps<SVGSVGElement> {
 export const Icon: React.FC<Props> = ({ name, ...rest }) => {
 	return (
 		<svg {...rest}>
-			<use xlinkHref={`/icons.svg#${name}`} />
+			<use xlinkHref={`/icons-old.svg#${name}`} />
 		</svg>
 	);
 };

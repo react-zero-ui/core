@@ -1,4 +1,3 @@
-import { ReactScan } from './components/ReactScan';
 import { bodyAttributes } from '@zero-ui/attributes';
 import './globals.css';
 import { TopBarV2 } from './components/TopBar';
@@ -12,9 +11,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 			<body
 				className="flex h-full w-full items-center justify-center bg-gray-100 antialiased"
 				{...bodyAttributes}>
-				<script src="https://unpkg.com/react-scan/dist/auto.global.js" />
-
-				<ReactScan />
 				<TopBarV2 />
 				{children}
 				{process.env.NODE_ENV === 'production' && <Analytics />}

@@ -1,7 +1,8 @@
 # @react-zero-ui/core
 
 ![Tagline](https://img.shields.io/badge/The_ZERO_re--render_UI_state_library-%235500AD?style=flat&label=)
-![Zero UI logo](https://raw.githubusercontent.com/react-zero-ui/core/upgrade/resolver/docs/assets/zero-ui-logo.png)
+
+![Zero UI logo](https://raw.githubusercontent.com/react-zero-ui/core/main/docs/assets/zero-ui-logo.png)
 
 **The fastest possible UI updates in React. Period.**  
 Zero runtime, zero React re-renders, and the simplest developer experience ever.  

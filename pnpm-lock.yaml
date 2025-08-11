@@ -44,9 +44,9 @@ importers:
       '@react-zero-ui/core':
         specifier: ^0.3.3
         version: 0.3.3(@tailwindcss/postcss@4.1.11)(react@19.1.1)
-      '@react-zero-ui/svg-sprite':
-        specifier: ^0.1.0
-        version: 0.1.0(react@19.1.1)
+      '@react-zero-ui/icon-sprite':
+        specifier: ^0.1.4
+        version: 0.1.4(react@19.1.1)
       '@vercel/analytics':
         specifier: ^1.5.0
         version: 1.5.0(next@15.4.5(@babel/core@7.28.0)(@playwright/test@1.54.2)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react@19.1.1)
@@ -867,8 +867,8 @@ packages:
       '@tailwindcss/postcss': ^4.1.10
       react: '>=16.8.0'
 
-  '@react-zero-ui/svg-sprite@0.1.0':
-    resolution: {integrity: sha512-kTJDWANf9b0t6t3vButyQe7dM8TuUGTAPz95BrcbjeUMqbJOF8DrkvytMWqVESwyIu0J9SrEUhtjaDZEyhJFYg==}
+  '@react-zero-ui/icon-sprite@0.1.4':
+    resolution: {integrity: sha512-5ud+LhiAp30zqntZdTen49Mc2rjBGgAoKBdSE6rmIunuUDco0Y2DWi9+N1jkVxxcGFwYVNwGjHf8Bd1YFPPPmg==}
     hasBin: true
     peerDependencies:
       react: '>=17'
@@ -3291,7 +3291,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@react-zero-ui/svg-sprite@0.1.0(react@19.1.1)':
+  '@react-zero-ui/icon-sprite@0.1.4(react@19.1.1)':
     dependencies:
       '@babel/core': 7.28.0
       '@babel/preset-react': 7.27.1(@babel/core@7.28.0)

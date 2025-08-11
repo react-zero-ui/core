@@ -1,6 +1,11 @@
+import { ReactScan } from '../components/ReactScan';
+
 const layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	return (
-		<div className="relative py-10">
+		<div className="relative pt-10">
+			<script src="https://unpkg.com/react-scan/dist/auto.global.js" />
+
+			<ReactScan />
 			{children}
 
 			{/* <div className="fixed right-0 bottom-0 z-10 h-fit w-full rounded-lg bg-white/80 px-4 py-2 ring-1 ring-black/5 backdrop-blur-sm md:bg-white/20">
