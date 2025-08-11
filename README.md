@@ -243,6 +243,6 @@ We welcome contributions from the community! Whether it's bug fixes, feature req
 
 
 <div align="center">
-Made with ❤️ for the React community by [@austin1serb](https://github.com/austin1serb)
+Made with ❤️ for the React community by <a href="https://github.com/austin1serb"> @austin1serb</a>
 
 </div>
