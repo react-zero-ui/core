@@ -173,14 +173,14 @@ const page = () => {
 				<section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
 					<StatsCard
 						title="This page"
-						value="23.0kb"
-						badgeText="+270%"
+						value="19.5kb"
+						badgeText="+260%"
 						badgeTone="negative"
 					/>
 					<StatsCard
 						title="Zero UI Icon Sprite"
-						value="8.5kb"
-						badgeText="-270%"
+						value="7.5kb"
+						badgeText="-260%"
 						badgeTone="positive"
 					/>
 				</section>

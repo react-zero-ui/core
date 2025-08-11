@@ -155,13 +155,6 @@ import HeaderBar from '../components/HeaderBar';
 import StatsCard from '../components/StatsCard';
 import { SectionGrid } from '../components/SectionGrid';
 
-export const metadata = {
-	title: 'React Zero Icon Sprite - Lucide to SVG sprite solution',
-	description:
-		'Reduce HTML bundle by 300%. Use thousands of Lucide icons in React with a single SVG sprite. Zero client-side re-renders, tiny bundles, and instant performance.',
-	alternates: { canonical: 'https://zero-ui.dev/icon-sprite' },
-};
-
 const page = () => {
 	return (
 		<div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950">
@@ -185,14 +178,14 @@ const page = () => {
 				<section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
 					<StatsCard
 						title="This page"
-						value="8.5kb"
-						badgeText="-290%"
+						value="7.5kb"
+						badgeText="-260%"
 						badgeTone="positive"
 					/>
 					<StatsCard
 						title="Lucide React page"
-						value="23.0kb"
-						badgeText="+270%"
+						value="19.5kb"
+						badgeText="+260%"
 						badgeTone="negative"
 					/>
 				</section>
