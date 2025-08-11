@@ -6,7 +6,7 @@ import { MobileMenuButton } from './MobileMenuButton';
 const navItems = [
 	{ name: 'Zero UI', href: '/zero-ui' },
 	{ name: 'React State', href: '/react' },
-	{ name: 'Zero Sprite', href: '/zero-icon-sprite' },
+	{ name: 'Zero Icons', href: '/icon-sprite' },
 ];
 
 export const TopBarV2: React.FC = () => {

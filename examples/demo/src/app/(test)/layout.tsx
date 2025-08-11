@@ -1,8 +1,14 @@
 import { ReactScan } from '../components/ReactScan';
 
+export const metadata = {
+	title: 'React Zero UI Demo - Zero Re-Render State Management for React',
+	description: 'Compare the difference in re-renders between React and Zero UI.',
+	alternates: { canonical: 'https://zero-ui.dev/' },
+};
+
 const layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 	return (
-		<div className="relative pt-10">
+		<div className="relative pt-20 sm:pt-28">
 			<script src="https://unpkg.com/react-scan/dist/auto.global.js" />
 
 			<ReactScan />

@@ -139,17 +139,37 @@ import {
 	Instagram,
 	Linkedin,
 	InspectionPanel,
+	GitMerge,
+	GitPullRequest,
+	GitBranch,
+	PencilRuler,
+	GitGraph,
+	PencilLine,
+	Pen,
+	Pencil,
+	Pin,
+	GitCommitVertical,
 } from '@react-zero-ui/icon-sprite';
 import Link from 'next/link';
+import HeaderBar from '../components/HeaderBar';
+import StatsCard from '../components/StatsCard';
+import { SectionGrid } from '../components/SectionGrid';
+
+export const metadata = {
+	title: 'React Zero Icon Sprite - Lucide to SVG sprite solution',
+	description:
+		'Reduce HTML bundle by 300%. Use thousands of Lucide icons in React with a single SVG sprite. Zero client-side re-renders, tiny bundles, and instant performance.',
+	alternates: { canonical: 'https://zero-ui.dev/icon-sprite' },
+};
 
 const page = () => {
 	return (
 		<div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950">
 			<main className="mx-auto max-w-7xl px-4 py-8 space-y-6">
-				<div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-					<div>
-						<h1 className="text-3xl font-semibold tracking-tight">Zero UI Icon Sprite</h1>
-						<p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+				<HeaderBar
+					title="Zero UI Icon Sprite"
+					subtitle={
+						<>
 							Lucide to SVG sprite solution for React. w/custom icon support.{' '}
 							<Link
 								href="https://github.com/react-zero-ui/icon-sprite#readme"
@@ -157,48 +177,51 @@ const page = () => {
 								target="_blank">
 								See Github
 							</Link>
-						</p>
-					</div>
-					<div className="inline-flex rounded-xl border border-slate-200 dark:border-slate-700 bg-white/70 w-fit dark:bg-slate-900/60 backdrop-blur supports-[backdrop-filter]:bg-white/50 shadow-sm overflow-hidden">
-						<Link
-							href="/zero-icon-sprite"
-							className="px-3 py-2 text-sm font-medium bg-slate-900 text-white dark:bg-white dark:text-slate-900 w-fit"
-							aria-current="page">
-							Zero UI Sprite
-						</Link>
-						<Link
-							href="/lucide-react"
-							className="px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-700 w-fit">
-							Lucide React
-						</Link>
-					</div>
-				</div>
+						</>
+					}
+					activeTab="sprite"
+				/>
 
 				<section className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-					<div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 backdrop-blur supports-[backdrop-filter]:bg-white/50 p-4 shadow-sm">
-						<div className="text-xs uppercase tracking-wide text-slate-500">This page</div>
-						<div className="mt-1 flex items-baseline gap-2">
-							<div className="text-xl sm:text-2xl font-semibold">HTML size: 6.9kb</div>
-							<span className="inline-flex items-center rounded-full bg-green-100 text-green-700 px-2 py-0.5 text-xs font-medium">-290%</span>
-						</div>
-					</div>
-					<div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 backdrop-blur supports-[backdrop-filter]:bg-white/50 p-4 shadow-sm">
-						<div className="text-xs uppercase tracking-wide text-slate-500">Lucide React page</div>
-						<div className="mt-1 flex items-baseline gap-2">
-							<div className="text-xl sm:text-2xl font-semibold">HTML size: 19.5kb</div>
-							<span className="inline-flex items-center rounded-full bg-red-100 text-red-700 px-2 py-0.5 text-xs font-medium">+290%</span>
-						</div>
-					</div>
+					<StatsCard
+						title="This page"
+						value="8.5kb"
+						badgeText="-290%"
+						badgeTone="positive"
+					/>
+					<StatsCard
+						title="Lucide React page"
+						value="23.0kb"
+						badgeText="+270%"
+						badgeTone="negative"
+					/>
 				</section>
 
 				<p className="text-sm text-slate-600 dark:text-slate-300">Open DevTools → Elements to compare document size and structure.</p>
 
-				<div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60 backdrop-blur supports-[backdrop-filter]:bg-white/50 p-4 shadow-sm">
+				<div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-900/60  p-4 shadow-sm">
 					<div className="mb-3 flex items-center justify-between">
-						<h2 className="text-sm font-medium text-slate-700 dark:text-slate-200">150 Icons</h2>
+						<h2 className="text-sm font-medium text-slate-700 dark:text-slate-200">150 Icons - loaded with Zero Icon Sprite</h2>
 						<div className="text-xs text-slate-500">Sprite-based rendering</div>
 					</div>
-					<div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2 md:gap-3 **:rounded-md **:bg-blue-600 **:text-white **:p-2 **:shadow-sm **:transition **:duration-150 **:hover:scale-105 **:w-9 **:h-9 justify-items-center">
+					<SectionGrid>
+						<Facebook size={24} />
+						<Instagram
+							height={24}
+							width={24}
+						/>
+						<Linkedin size={24} />
+						<InspectionPanel size={24} />
+						<Pin size={24} />
+						<Pencil size={24} />
+						<Pen size={24} />
+						<PencilLine size={24} />
+						<PencilRuler size={24} />
+						<GitGraph size={24} />
+						<GitBranch size={24} />
+						<GitPullRequest size={24} />
+						<GitMerge size={24} />
+						<GitCommitVertical size={24} />
 						<AlarmSmoke size={24} />
 						<Album size={24} />
 						<AArrowDown size={24} />
@@ -335,11 +358,7 @@ const page = () => {
 						<Bath size={24} />
 						<Battery size={24} />
 						<BluetoothSearching size={24} />
-						<Facebook size={24} />
-						<Instagram size={24} />
-						<Linkedin size={24} />
-						<InspectionPanel size={24} />
-					</div>
+					</SectionGrid>
 				</div>
 			</main>
 		</div>
