@@ -155,6 +155,12 @@ import HeaderBar from '../components/HeaderBar';
 import StatsCard from '../components/StatsCard';
 import { SectionGrid } from '../components/SectionGrid';
 
+export const metadata = {
+	title: 'Zero UI Icon Sprite - The fastest way to do icons in React',
+	description: 'Lucide to SVG sprite for React. w/custom icon support.',
+	alternates: { canonical: 'https://zero-ui.dev/icon-sprite' },
+};
+
 const page = () => {
 	return (
 		<div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-950">
