@@ -421,8 +421,8 @@ if (theme === 'dark') {
 
 ## 📊 Before/After Comparison
 
-| Aspect            | Before (Traditional)          | After (React Zero-UI)      |
-| ----------------- | ----------------------------- | -------------------------- |
+| Aspect | Before (Traditional) | After (React Zero-UI) |
+| --- | --- | --- |
 | **Bundle Size**   | +5KB (Redux) / +2KB (Context) | +350 bytes                 |
 | **Re-renders**    | Every state change            | Zero                       |
 | **Performance**   | Slower with scale             | Constant fast              |

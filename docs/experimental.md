@@ -174,13 +174,13 @@ import { scopedZeroSSR } from '@react-zero-ui/core/experimental';
 
 ## 📋 Summary
 
-| Feature                         | Description                                               |
-| ------------------------------- | --------------------------------------------------------- |
+| Feature | Description |
+| --- | --- |
 | **`activateZeroUiRuntime()`**   | Enables click handling on static components via `data-ui` |
-| **`zeroSSR` / `scopedZeroSSR`** | Generate valid click handlers as JSX props                |
-| **Runtime Overhead**            | ~300 bytes total                                          |
-| **React Re-renders**            | Zero                                                      |
-| **Server Component Support**    | ✅ Full compatibility                                     |
+| **`zeroSSR` / `scopedZeroSSR`** | Generate valid click handlers as JSX props   |
+| **Runtime Overhead**   | ~300 bytes total   |
+| **React Re-renders**   | Zero   |
+| **Server Component Support**    | ✅ Full compatibility   |
 
 > **Source Code:** See [experimental](/packages/core/src/experimental) for implementation details.
 

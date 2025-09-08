@@ -4,9 +4,11 @@ import { cssVar, makeSetter } from './internal.js';
 
 type UIAction<T extends string> = T | ((prev: T) => T);
 
+type ScopedRef = RefObject<HTMLElement | null> | (((node: HTMLElement | null) => void) & { current: HTMLElement | null });
+
 interface ScopedSetterFn<T extends string = string> {
 	(action: UIAction<T>): void; //  ← SINGLE source of truth
-	ref?: RefObject<any> | ((node: HTMLElement | null) => void);
+	ref?: ScopedRef;
 	cssVar?: typeof cssVar;
 }
 
@@ -28,7 +30,7 @@ function useScopedUI<T extends string = string>(key: string, initialValue: T, fl
 		// Attach the ref to the setter function so users can write: <div ref={setterFn.ref} />
 		const refAttachCount = useRef(0);
 		// DEV: Wrap scopeRef to detect multiple attachments
-		(setterFn as ScopedSetterFn<T>).ref = (node: HTMLElement | null) => {
+		const attachRef = ((node: HTMLElement | null) => {
 			if (node) {
 				refAttachCount!.current++;
 				if (refAttachCount!.current > 1) {
@@ -36,7 +38,8 @@ function useScopedUI<T extends string = string>(key: string, initialValue: T, fl
 					throw new Error(
 						`[useUI] Multiple ref attachments detected for key "${key}". ` +
 							`Each useScopedUI hook supports only one ref attachment per component. ` +
-							`Solution: Create separate component. and reuse.\n`
+							`Solution: Create separate component. and reuse.\n` +
+							`React Strict Mode May Cause the Ref to be attached multiple times.`
 					);
 				}
 			} else {
@@ -44,7 +47,10 @@ function useScopedUI<T extends string = string>(key: string, initialValue: T, fl
 				refAttachCount!.current = Math.max(0, refAttachCount!.current - 1);
 			}
 			scopeRef.current = node;
-		};
+			attachRef.current = node;
+		}) as ((node: HTMLElement | null) => void) & { current: HTMLElement | null };
+		attachRef.current = null;
+		(setterFn as ScopedSetterFn<T>).ref = attachRef;
 	} else {
 		// PROD: Direct ref assignment for zero overhead
 		setterFn.ref = scopeRef;

@@ -34,18 +34,18 @@ const [staleValue, setter] = useUI(key, initial, flag?);
 
 #### Parameters
 
-| Parameter | Type            | Description                                            |
-| --------- | --------------- | ------------------------------------------------------ |
-| `key`     | `string`        | The state key (becomes `data-{key}` attribute)         |
-| `initial` | `T`             | Initial/default value for SSR                          |
+| Parameter | Type   | Description |
+| --------- | ------ | ----------- |
+| `key`     | `string` | The state key (becomes `data-{key}` attribute) |
+| `initial` | `T` | Initial/default value for SSR |
 | `flag?`   | `typeof CssVar` | Optional: Use CSS variables instead of data attributes |
 
 #### Returns
 
-| Return       | Type                | Description                                      |
-| ------------ | ------------------- | ------------------------------------------------ |
-| `staleValue` | `T`                 | Initial value (doesn't update, use for SSR only) |
-| `setter`     | `GlobalSetterFn<T>` | Function to update the global state              |
+| Return | Type | Description |
+| ------ | ---- | ----------- |
+| `staleValue` | `T` | Initial value (doesn't update, use for SSR only) |
+| `setter` | `GlobalSetterFn<T>` | Function to update the global state |
 
 #### Examples
 
@@ -81,10 +81,10 @@ Same as `useUI`, but affects only the element assigned to `setter.ref`.
 
 #### Returns
 
-| Return       | Type                | Description                                      |
-| ------------ | ------------------- | ------------------------------------------------ |
-| `staleValue` | `T`                 | Initial value (doesn't update, use for SSR only) |
-| `setter`     | `ScopedSetterFn<T>` | Function with attached `ref` property            |
+| Return | Type | Description |
+| ------ | ---- | ----------- |
+| `staleValue` | `T` | Initial value (doesn't update, use for SSR only) |
+| `setter` | `ScopedSetterFn<T>` | Function with attached `ref` property |
 
 #### Examples
 
@@ -146,10 +146,10 @@ const clickHandler = zeroSSR.onClick(key, values);
 
 #### Parameters
 
-| Parameter | Type       | Description                      |
-| --------- | ---------- | -------------------------------- |
-| `key`     | `string`   | State key (kebab-case required)  |
-| `values`  | `string[]` | Array of values to cycle through |
+| Parameter | Type | Description |
+| --------- | ---- | ----------- |
+| `key` | `string` | State key (kebab-case required) |
+| `values` | `string[]` | Array of values to cycle through |
 
 #### Returns
 
@@ -208,8 +208,8 @@ activateZeroUiRuntime(variantKeyMap);
 
 #### Parameters
 
-| Parameter    | Type                       | Description                                  |
-| ------------ | -------------------------- | -------------------------------------------- |
+| Parameter | Type | Description |
+| --------- | ---- | ----------- |
 | `variantMap` | `Record<string, string[]>` | Generated variant mapping from build process |
 
 #### Setup
