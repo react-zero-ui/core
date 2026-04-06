@@ -36,7 +36,7 @@ pnpm bootstrap    # builds + installs local tarball into test fixtures
 pnpm test         # runs all tests (unit + E2E)
 ```
 
-> Node 18+ and PNPM required.  
+> Node 22+ and PNPM required.  
 > Run from repo root.
 
 ---

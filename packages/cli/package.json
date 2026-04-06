@@ -44,5 +44,8 @@
 	},
 	"dependencies": {
 		"@react-zero-ui/core": "^0.3.3"
+	},
+	"engines": {
+		"node": ">=22"
 	}
 }

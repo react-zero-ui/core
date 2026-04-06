@@ -95,7 +95,7 @@
 		"react": ">=16.8.0"
 	},
 	"engines": {
-		"node": ">=18.0.0"
+		"node": ">=22"
 	},
 	"description": "Ultra-fast React UI state library with zero runtime, zero re-renders, Tailwind variant support, and automatic data-attribute/css-vars based styling. Replace context, prop drilling, and global stores with build-time magic.",
 	"keywords": [
