@@ -55,7 +55,7 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 					if (pluginsProperty && t.isExpression(pluginsProperty.value)) {
 						const result = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
 						handled ||= result !== "unsupported";
-						modified ||= result === "added";
+						modified ||= result === "added" || result === "reordered";
 					}
 				}
 			},
@@ -70,7 +70,7 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 					if (pluginsProperty && t.isExpression(pluginsProperty.value)) {
 						const result = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
 						handled ||= result !== "unsupported";
-						modified ||= result === "added";
+						modified ||= result === "added" || result === "reordered";
 					}
 				}
 			},
@@ -85,7 +85,7 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 					if (pluginsProperty && t.isExpression(pluginsProperty.value)) {
 						const result = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
 						handled ||= result !== "unsupported";
-						modified ||= result === "added";
+						modified ||= result === "added" || result === "reordered";
 					}
 				}
 			},
@@ -110,39 +110,78 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
  * Helper function to add Zero-UI plugin to plugins configuration
  * Handles both object format {plugin: {}} and array format [plugin]
  */
-function addZeroUiToPlugins(pluginsNode: t.Expression, zeroUiPlugin: string): "added" | "present" | "unsupported" {
+function addZeroUiToPlugins(pluginsNode: t.Expression, zeroUiPlugin: string): "added" | "reordered" | "present" | "unsupported" {
 	if (t.isObjectExpression(pluginsNode)) {
-		const alreadyPresent = pluginsNode.properties.some(
-			(prop) => t.isObjectProperty(prop) && t.isStringLiteral(prop.key) && prop.key.value === zeroUiPlugin
+		const zeroIndex = pluginsNode.properties.findIndex(
+			(prop) => t.isObjectProperty(prop) && getPluginObjectKey(prop) === zeroUiPlugin
 		);
-		if (alreadyPresent) return "present";
+		const tailwindIndex = pluginsNode.properties.findIndex(
+			(prop) => t.isObjectProperty(prop) && getPluginObjectKey(prop) === "@tailwindcss/postcss"
+		);
+
+		if (zeroIndex !== -1) {
+			if (tailwindIndex !== -1 && zeroIndex > tailwindIndex) {
+				const [zeroProp] = pluginsNode.properties.splice(zeroIndex, 1);
+				const nextTailwindIndex = pluginsNode.properties.findIndex(
+					(prop) => t.isObjectProperty(prop) && getPluginObjectKey(prop) === "@tailwindcss/postcss"
+				);
+				pluginsNode.properties.splice(nextTailwindIndex, 0, zeroProp);
+				return "reordered";
+			}
+			return "present";
+		}
 
 		// Object format: { 'plugin': {} }
-		pluginsNode.properties.unshift(t.objectProperty(t.stringLiteral(zeroUiPlugin), t.objectExpression([])));
+		const newProp = t.objectProperty(t.stringLiteral(zeroUiPlugin), t.objectExpression([]));
+		if (tailwindIndex !== -1) {
+			pluginsNode.properties.splice(tailwindIndex, 0, newProp);
+		} else {
+			pluginsNode.properties.unshift(newProp);
+		}
 		return "added";
 	} else if (t.isArrayExpression(pluginsNode)) {
-		const alreadyPresent = pluginsNode.elements.some((el) => isZeroUiPostcssEntry(el, zeroUiPlugin));
-		if (alreadyPresent) return "present";
+		const zeroIndex = pluginsNode.elements.findIndex((el) => isPluginArrayEntry(el, zeroUiPlugin));
+		const tailwindIndex = pluginsNode.elements.findIndex((el) => isPluginArrayEntry(el, "@tailwindcss/postcss"));
+
+		if (zeroIndex !== -1) {
+			if (tailwindIndex !== -1 && zeroIndex > tailwindIndex) {
+				const [zeroEntry] = pluginsNode.elements.splice(zeroIndex, 1);
+				const nextTailwindIndex = pluginsNode.elements.findIndex((el) => isPluginArrayEntry(el, "@tailwindcss/postcss"));
+				pluginsNode.elements.splice(nextTailwindIndex, 0, zeroEntry);
+				return "reordered";
+			}
+			return "present";
+		}
 
 		// Array format: ['plugin']
-		pluginsNode.elements.unshift(t.stringLiteral(zeroUiPlugin));
+		if (tailwindIndex !== -1) {
+			pluginsNode.elements.splice(tailwindIndex, 0, t.stringLiteral(zeroUiPlugin));
+		} else {
+			pluginsNode.elements.unshift(t.stringLiteral(zeroUiPlugin));
+		}
 		return "added";
 	}
 	return "unsupported";
 }
 
-function isZeroUiPostcssEntry(node: t.ArrayExpression["elements"][number], zeroUiPlugin: string): boolean {
+function isPluginArrayEntry(node: t.ArrayExpression["elements"][number], pluginName: string): boolean {
 	if (!node) return false;
-	if (t.isStringLiteral(node)) return node.value === zeroUiPlugin;
+	if (t.isStringLiteral(node)) return node.value === pluginName;
 	if (
 		t.isCallExpression(node) &&
 		t.isIdentifier(node.callee, { name: "require" }) &&
 		node.arguments.length === 1 &&
 		t.isStringLiteral(node.arguments[0])
 	) {
-		return node.arguments[0].value === zeroUiPlugin;
+		return node.arguments[0].value === pluginName;
 	}
 	return false;
+}
+
+function getPluginObjectKey(node: t.ObjectProperty): string | null {
+	if (t.isStringLiteral(node.key)) return node.key.value;
+	if (t.isIdentifier(node.key)) return node.key.name;
+	return null;
 }
 
 /**

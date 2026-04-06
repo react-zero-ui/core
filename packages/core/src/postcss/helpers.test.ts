@@ -242,6 +242,22 @@ test("patchPostcssConfig does not duplicate Zero-UI in array plugin configs", as
 	});
 });
 
+test("patchPostcssConfig reorders array plugin configs when Tailwind comes first", async () => {
+	const original = `module.exports = {
+  plugins: ["${TAIL}", "${ZERO}"],
+};`;
+
+	await runTest({ "postcss.config.js": original }, async () => {
+		await patchPostcssConfig();
+
+		const updated = readFile("postcss.config.js");
+		const zeroCount = updated.split(ZERO).length - 1;
+
+		assert.equal(zeroCount, 1, "Zero-UI plugin must not be duplicated");
+		assert.ok(zeroBeforeTail(updated), "Zero-UI must precede Tailwind");
+	});
+});
+
 test("patchViteConfig creates defineConfig setup when no plugin array exists", async () => {
 	await runTest(
 		{
