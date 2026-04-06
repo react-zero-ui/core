@@ -112,56 +112,47 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
  */
 function addZeroUiToPlugins(pluginsNode: t.Expression, zeroUiPlugin: string): "added" | "reordered" | "present" | "unsupported" {
 	if (t.isObjectExpression(pluginsNode)) {
-		const zeroIndex = pluginsNode.properties.findIndex(
-			(prop) => t.isObjectProperty(prop) && getPluginObjectKey(prop) === zeroUiPlugin
+		return normalizePluginEntries(
+			pluginsNode.properties,
+			(prop): prop is t.ObjectProperty => t.isObjectProperty(prop) && getPluginObjectKey(prop) === zeroUiPlugin,
+			(prop): prop is t.ObjectProperty => t.isObjectProperty(prop) && getPluginObjectKey(prop) === "@tailwindcss/postcss",
+			() => t.objectProperty(t.stringLiteral(zeroUiPlugin), t.objectExpression([]))
 		);
-		const tailwindIndex = pluginsNode.properties.findIndex(
-			(prop) => t.isObjectProperty(prop) && getPluginObjectKey(prop) === "@tailwindcss/postcss"
-		);
-
-		if (zeroIndex !== -1) {
-			if (tailwindIndex !== -1 && zeroIndex > tailwindIndex) {
-				const [zeroProp] = pluginsNode.properties.splice(zeroIndex, 1);
-				const nextTailwindIndex = pluginsNode.properties.findIndex(
-					(prop) => t.isObjectProperty(prop) && getPluginObjectKey(prop) === "@tailwindcss/postcss"
-				);
-				pluginsNode.properties.splice(nextTailwindIndex, 0, zeroProp);
-				return "reordered";
-			}
-			return "present";
-		}
-
-		// Object format: { 'plugin': {} }
-		const newProp = t.objectProperty(t.stringLiteral(zeroUiPlugin), t.objectExpression([]));
-		if (tailwindIndex !== -1) {
-			pluginsNode.properties.splice(tailwindIndex, 0, newProp);
-		} else {
-			pluginsNode.properties.unshift(newProp);
-		}
-		return "added";
 	} else if (t.isArrayExpression(pluginsNode)) {
-		const zeroIndex = pluginsNode.elements.findIndex((el) => isPluginArrayEntry(el, zeroUiPlugin));
-		const tailwindIndex = pluginsNode.elements.findIndex((el) => isPluginArrayEntry(el, "@tailwindcss/postcss"));
-
-		if (zeroIndex !== -1) {
-			if (tailwindIndex !== -1 && zeroIndex > tailwindIndex) {
-				const [zeroEntry] = pluginsNode.elements.splice(zeroIndex, 1);
-				const nextTailwindIndex = pluginsNode.elements.findIndex((el) => isPluginArrayEntry(el, "@tailwindcss/postcss"));
-				pluginsNode.elements.splice(nextTailwindIndex, 0, zeroEntry);
-				return "reordered";
-			}
-			return "present";
-		}
-
-		// Array format: ['plugin']
-		if (tailwindIndex !== -1) {
-			pluginsNode.elements.splice(tailwindIndex, 0, t.stringLiteral(zeroUiPlugin));
-		} else {
-			pluginsNode.elements.unshift(t.stringLiteral(zeroUiPlugin));
-		}
-		return "added";
+		return normalizePluginEntries(
+			pluginsNode.elements,
+			(el) => isPluginArrayEntry(el, zeroUiPlugin),
+			(el) => isPluginArrayEntry(el, "@tailwindcss/postcss"),
+			() => t.stringLiteral(zeroUiPlugin)
+		);
 	}
 	return "unsupported";
+}
+
+function normalizePluginEntries<T>(
+	items: T[],
+	isZeroUi: (item: T) => boolean,
+	isTailwind: (item: T) => boolean,
+	createZeroUi: () => T
+): "added" | "reordered" | "present" {
+	const firstZeroUi = items.findIndex(isZeroUi);
+	const existingZeroUi = firstZeroUi === -1 ? null : items[firstZeroUi];
+	const normalized = items.filter((item) => !isZeroUi(item));
+	const tailwindIndex = normalized.findIndex(isTailwind);
+	const targetIndex = tailwindIndex !== -1 ? tailwindIndex : firstZeroUi === -1 ? 0 : firstZeroUi;
+
+	normalized.splice(targetIndex, 0, existingZeroUi ?? createZeroUi());
+
+	if (sameOrder(items, normalized)) {
+		return "present";
+	}
+
+	items.splice(0, items.length, ...normalized);
+	return existingZeroUi ? "reordered" : "added";
+}
+
+function sameOrder<T>(left: T[], right: T[]): boolean {
+	return left.length === right.length && left.every((item, index) => item === right[index]);
 }
 
 function isPluginArrayEntry(node: t.ArrayExpression["elements"][number], pluginName: string): boolean {
