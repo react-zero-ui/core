@@ -1,6 +1,6 @@
-import { bodyAttributes } from '@zero-ui/attributes';
-import './globals.css';
-import ZeroUiRuntime from './zero-runtime';
+import { bodyAttributes } from "@zero-ui/attributes";
+import "./globals.css";
+import ZeroUiRuntime from "./zero-runtime";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
 	return (

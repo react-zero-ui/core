@@ -1,6 +1,6 @@
 # create-zero-ui
 
-> ⚡ Instantly scaffold React Zero-UI into your Next.js or Vite project
+> Instantly scaffold React Zero-UI into your Next.js or Vite project
 
 ```bash
 
@@ -10,9 +10,9 @@ npx create-zero-ui
 
 ---
 
-## 🚀 What It Sets Up
+## What It Sets Up
 
-### ✅ Shared (Next.js & Vite)
+### Shared (Next.js & Vite)
 
 - Adds `@react-zero-ui/core` to your project
 - Generates `.zero-ui/attributes.js` + `attributes.d.ts`
@@ -26,22 +26,22 @@ npx create-zero-ui
 
 ---
 
-### 🔷 Next.js Specific
+### Next.js Specific
 
 - Injects initial `data-*` attributes into `app/layout.tsx`
 - Adds `postcss.config` with:
 
   ```js
   plugins: [
-  	// ❗zero-ui must come before tailwind
-  	'@react-zero-ui/core/postcss',
-  	'@tailwindcss/postcss',
+  	// zero-ui must come before tailwind
+  	"@react-zero-ui/core/postcss",
+  	"@tailwindcss/postcss",
   ];
   ```
 
 ---
 
-### 🔶 Vite Specific
+### Vite Specific
 
 - Patches `vite.config.ts` with:
 
@@ -53,7 +53,7 @@ npx create-zero-ui
 
 ---
 
-## 🧪 Works With
+## Works With
 
 - `Next.js` (App Router)
 - `Vite` (React projects)
@@ -61,7 +61,7 @@ npx create-zero-ui
 
 ---
 
-## 🛠 Usage
+## Usage
 
 ```bash
 npx create-zero-ui
@@ -71,14 +71,14 @@ Follow the CLI prompts to scaffold your config in seconds.
 
 ---
 
-## 📚 Related
+## Related
 
 - [@react-zero-ui/core](https://github.com/react-zero-ui/core)
 - [Documentation](https://github.com/react-zero-ui/core/tree/main/docs)
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Found a bug or want to help?
 PRs welcome at [react-zero-ui/core](https://github.com/react-zero-ui/core).

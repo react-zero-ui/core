@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { useUI } from '@react-zero-ui/core';
+import { useUI } from "@react-zero-ui/core";
 
 export function TestComponentZero() {
-	const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
-	const [, setAccent] = useUI<'violet' | 'emerald' | 'amber'>('accent', 'violet');
-	const [, setMenuOpen] = useUI<'true' | 'false'>('menu-open', 'false');
+	const [, setTheme] = useUI<"light" | "dark">("theme", "light");
+	const [, setAccent] = useUI<"violet" | "emerald" | "amber">("accent", "violet");
+	const [, setMenuOpen] = useUI<"true" | "false">("menu-open", "false");
 
 	return (
 		<div className="theme-light:bg-gray-100 theme-dark:bg-gray-900 flex h-full w-full flex-col justify-between space-y-4 py-8 **:transition-all **:duration-300">
 			<Header />
 			<ThemeSwitcher setTheme={setTheme} />
 			<AccentPicker setAccent={setAccent} />
-			<InteractiveCard toggleMenu={() => setMenuOpen((prev) => (prev === 'true' ? 'false' : 'true'))} />
+			<InteractiveCard toggleMenu={() => setMenuOpen((prev) => (prev === "true" ? "false" : "true"))} />
 			<StateDisplay />
 		</div>
 	);
@@ -27,8 +27,8 @@ function Header() {
 			<p className="theme-light:text-gray-600 theme-dark:text-gray-400">
 				Reactive state without re-rendering .<br />
 				<span className="text-sm">
-					<span className="theme-light:text-gray-900 theme-dark:text-white font-bold">Zero</span> re-renders,{' '}
-					<span className="theme-light:text-gray-900 theme-dark:text-white font-bold">Reactive</span> &{' '}
+					<span className="theme-light:text-gray-900 theme-dark:text-white font-bold">Zero</span> re-renders,{" "}
+					<span className="theme-light:text-gray-900 theme-dark:text-white font-bold">Reactive</span> &{" "}
 					<span className="theme-light:text-gray-900 theme-dark:text-white font-bold">Global</span> state.
 				</span>
 			</p>
@@ -37,18 +37,18 @@ function Header() {
 }
 
 // Theme Switcher - Never re-renders!
-function ThemeSwitcher({ setTheme }: { setTheme: (t: 'light' | 'dark') => void }) {
+function ThemeSwitcher({ setTheme }: { setTheme: (t: "light" | "dark") => void }) {
 	return (
 		<div className="flex justify-center gap-2">
 			<button
 				aria-label="button"
-				onClick={() => setTheme('light')}
+				onClick={() => setTheme("light")}
 				className={`theme-light:bg-gray-900 theme-light:text-white theme-dark:bg-gray-700 theme-dark:text-gray-200 rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105`}>
 				☀️ Light
 			</button>
 			<button
 				aria-label="button"
-				onClick={() => setTheme('dark')}
+				onClick={() => setTheme("dark")}
 				className={`theme-dark:bg-white theme-dark:text-gray-900 theme-light:bg-gray-200 theme-light:text-gray-600 rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105`}>
 				🌙 Dark
 			</button>
@@ -57,24 +57,24 @@ function ThemeSwitcher({ setTheme }: { setTheme: (t: 'light' | 'dark') => void }
 }
 
 // Accent Picker - Never re-renders!
-function AccentPicker({ setAccent }: { setAccent: (a: 'violet' | 'emerald' | 'amber') => void }) {
+function AccentPicker({ setAccent }: { setAccent: (a: "violet" | "emerald" | "amber") => void }) {
 	return (
 		<div className="space-y-4 pb-2">
 			<h2 className="theme-light:text-gray-800 theme-dark:text-gray-200 text-center text-lg font-semibold">Choose Accent</h2>
 			<div className="flex justify-center gap-3">
 				<button
 					aria-label="button"
-					onClick={() => setAccent('violet')}
+					onClick={() => setAccent("violet")}
 					className="accent-violet:ring-6 accent-violet:ring-violet-200 accent-violet:bg-violet-500 theme-dark:accent-violet:ring-violet-900 h-12 w-12 rounded-full bg-violet-500/50 ring-violet-900 hover:scale-110"
 				/>
 				<button
 					aria-label="button"
-					onClick={() => setAccent('emerald')}
+					onClick={() => setAccent("emerald")}
 					className="accent-emerald:ring-6 accent-emerald:ring-emerald-200 theme-dark:accent-emerald:ring-emerald-900 accent-emerald:bg-emerald-500 h-12 w-12 rounded-full bg-emerald-500/50 hover:scale-110"
 				/>
 				<button
 					aria-label="button"
-					onClick={() => setAccent('amber')}
+					onClick={() => setAccent("amber")}
 					className="accent-amber:ring-6 accent-amber:ring-amber-200 theme-dark:accent-amber:ring-amber-900 accent-amber:bg-amber-500 h-12 w-12 rounded-full bg-amber-500/50 hover:scale-110"
 				/>
 			</div>

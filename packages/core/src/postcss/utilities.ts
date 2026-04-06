@@ -8,10 +8,10 @@ export function formatError(err: unknown) {
 	/* ❷ Broader categories for non-frame errors (kept from your code) */
 	const isSyntaxError =
 		!isCodeFrame &&
-		(error.message.includes('State key cannot be resolved') ||
-			error.message.includes('initial value cannot be resolved') ||
-			error.message.includes('SyntaxError'));
-	const isFileError = !isCodeFrame && (error.message.includes('ENOENT') || error.message.includes('Cannot find module'));
+		(error.message.includes("State key cannot be resolved") ||
+			error.message.includes("initial value cannot be resolved") ||
+			error.message.includes("SyntaxError"));
+	const isFileError = !isCodeFrame && (error.message.includes("ENOENT") || error.message.includes("Cannot find module"));
 
 	let friendly = error.message;
 	if (isCodeFrame)
@@ -31,6 +31,6 @@ export type Result = {
 
 export function registerDeps(result: Result, plugin: string, files: string[], parent: string) {
 	files.forEach((file) => {
-		result.messages.push({ type: 'dependency', plugin, file, parent });
+		result.messages.push({ type: "dependency", plugin, file, parent });
 	});
 }

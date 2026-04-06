@@ -1,12 +1,12 @@
-import Link from 'next/link';
-import { Icon } from './Icon';
-import { MobileMenu } from './MobileMenu';
-import { MobileMenuButton } from './MobileMenuButton';
+import Link from "next/link";
+import { Icon } from "./Icon";
+import { MobileMenu } from "./MobileMenu";
+import { MobileMenuButton } from "./MobileMenuButton";
 
 const navItems = [
-	{ name: 'Zero UI', href: '/zero-ui' },
-	{ name: 'React State', href: '/react' },
-	{ name: 'Zero Icons', href: '/icon-sprite' },
+	{ name: "Zero UI", href: "/zero-ui" },
+	{ name: "React State", href: "/react" },
+	{ name: "Zero Icons", href: "/icon-sprite" },
 ];
 
 export const TopBarV2: React.FC = () => {

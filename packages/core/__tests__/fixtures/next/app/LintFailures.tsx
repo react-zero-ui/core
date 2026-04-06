@@ -1,19 +1,19 @@
-'use client';
-import { useScopedUI } from '@react-zero-ui/core';
+"use client";
+import { useScopedUI } from "@react-zero-ui/core";
 
 /**
  * This component is intentionally WRONG.
- * – Missing data-attr on <section>
- * – Missing ref attachment on <aside>
+ * - Missing data-attr on <section>
+ * - Missing ref attachment on <aside>
  *
  * The Zero-UI ESLint rule should flag both.
  */
 export default function LintFailures() {
 	// #1  Setter attached but no data-scope attr  ➡️  missingAttr error
-	const [scope, setScope] = useScopedUI<'off' | 'on'>('scope', 'off');
+	const [scope, setScope] = useScopedUI<"off" | "on">("scope", "off");
 
 	// #2  No ref at all  ➡️  missingRef error
-	const [, setDialog] = useScopedUI<'open' | 'closed'>('dialog', 'closed');
+	const [, setDialog] = useScopedUI<"open" | "closed">("dialog", "closed");
 
 	return (
 		<main className="space-y-6 p-6">
@@ -23,7 +23,7 @@ export default function LintFailures() {
 				className="scope-off:bg-red-100 scope-on:bg-red-600 scope-on:text-white p-4 rounded">
 				<button
 					className="border px-3 py-1"
-					onClick={() => setScope((prev) => (prev === 'on' ? 'off' : 'on'))}>
+					onClick={() => setScope((prev) => (prev === "on" ? "off" : "on"))}>
 					Toggle scope
 				</button>
 			</section>

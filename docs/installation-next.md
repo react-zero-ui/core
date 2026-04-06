@@ -17,8 +17,8 @@ npm install @tailwindcss/postcss
 ```js
 // postcss.config.* ESM Syntax
 const config = {
-	// ❗️ Zero-UI must come before Tailwind
-	plugins: ['@react-zero-ui/core/postcss', '@tailwindcss/postcss'],
+	//  Zero-UI must come before Tailwind
+	plugins: ["@react-zero-ui/core/postcss", "@tailwindcss/postcss"],
 };
 export default config;
 ```
@@ -26,8 +26,8 @@ export default config;
 ```js
 // postcss.config.* Common Module Syntax
 module.exports = {
-	// ❗️ Zero-UI must come before Tailwind
-	plugins: { '@react-zero-ui/core/postcss': {}, tailwindcss: {} },
+	//  Zero-UI must come before Tailwind
+	plugins: { "@react-zero-ui/core/postcss": {}, tailwindcss: {} },
 };
 ```
 
@@ -56,12 +56,12 @@ Spread `bodyAttributes` on `<body>` in your root layout.
 
 ```tsx
 // app/layout.tsx
-import { bodyAttributes } from './.zero-ui/attributes';
+import { bodyAttributes } from "./.zero-ui/attributes";
 
 export default function RootLayout({ children }) {
 	return (
 		<html lang="en">
-			// ❗️ Spread the bodyAttributes on the body tag
+			// Spread the bodyAttributes on the body tag
 			<body {...bodyAttributes}>{children}</body>
 		</html>
 	);
@@ -71,6 +71,6 @@ export default function RootLayout({ children }) {
 **Thats it.**
 Zero-UI will now add used data-\* attributes to the body tag and the CSS will be injected and transformed by tailwind.
 
-** 🧪 Checkout our Experimental SSR Safe OnClick Handler **
+**Checkout our Experimental SSR Safe OnClick Handler**
 
-[**🚀 Zero UI OnClick**](/docs/experimental.md)
+[**Zero UI OnClick**](/docs/experimental.md)

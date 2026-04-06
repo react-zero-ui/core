@@ -1,23 +1,23 @@
-import { parse, parseExpression, ParserOptions } from '@babel/parser';
-import * as t from '@babel/types';
-import { generate } from '@babel/generator';
-import * as fs from 'fs';
-import fg from 'fast-glob';
-import { IGNORE_DIRS } from '../config.js';
-import { type NodePath } from '@babel/traverse';
-import traverse from './traverse.cjs';
+import { parse, parseExpression, ParserOptions } from "@babel/parser";
+import * as t from "@babel/types";
+import { generate } from "@babel/generator";
+import * as fs from "fs";
+import fg from "fast-glob";
+import { IGNORE_DIRS } from "../config.js";
+import { type NodePath } from "@babel/traverse";
+import traverse from "./traverse.cjs";
 
 export const AST_CONFIG_OPTS: Partial<ParserOptions> = {
-	sourceType: 'unambiguous',
+	sourceType: "unambiguous",
 	plugins: [
-		'typescript', // in case it's postcss.config.ts / .cts / .mts
-		'jsx', // harmless, needed for rare edge cases
-		'classProperties', // safe if someone uses class-based config
-		'decorators-legacy', // legacy decorators (safe fallback)
-		'dynamicImport', // some setups use dynamic import()
-		'importMeta', // future-proofing
-		'jsonStrings', // for JSON config files
-		'topLevelAwait', // for async config
+		"typescript", // in case it's postcss.config.ts / .cts / .mts
+		"jsx", // harmless, needed for rare edge cases
+		"classProperties", // safe if someone uses class-based config
+		"decorators-legacy", // legacy decorators (safe fallback)
+		"dynamicImport", // some setups use dynamic import()
+		"importMeta", // future-proofing
+		"jsonStrings", // for JSON config files
+		"topLevelAwait", // for async config
 	],
 };
 
@@ -43,12 +43,12 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 
 				// Check for module.exports or exports assignment
 				const isModuleExports =
-					t.isMemberExpression(left) && t.isIdentifier(left.object, { name: 'module' }) && t.isIdentifier(left.property, { name: 'exports' });
-				const isExportsAssignment = t.isIdentifier(left, { name: 'exports' });
+					t.isMemberExpression(left) && t.isIdentifier(left.object, { name: "module" }) && t.isIdentifier(left.property, { name: "exports" });
+				const isExportsAssignment = t.isIdentifier(left, { name: "exports" });
 
 				if ((isModuleExports || isExportsAssignment) && t.isObjectExpression(right)) {
 					const pluginsProperty = right.properties.find(
-						(prop): prop is t.ObjectProperty => t.isObjectProperty(prop) && t.isIdentifier(prop.key, { name: 'plugins' })
+						(prop): prop is t.ObjectProperty => t.isObjectProperty(prop) && t.isIdentifier(prop.key, { name: "plugins" })
 					);
 
 					if (pluginsProperty && t.isExpression(pluginsProperty.value)) {
@@ -61,7 +61,7 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 			ExportDefaultDeclaration(path: NodePath<t.ExportDefaultDeclaration>) {
 				if (isESModule && t.isObjectExpression(path.node.declaration)) {
 					const pluginsProperty = path.node.declaration.properties.find(
-						(prop): prop is t.ObjectProperty => t.isObjectProperty(prop) && t.isIdentifier(prop.key, { name: 'plugins' })
+						(prop): prop is t.ObjectProperty => t.isObjectProperty(prop) && t.isIdentifier(prop.key, { name: "plugins" })
 					);
 
 					if (pluginsProperty && t.isExpression(pluginsProperty.value)) {
@@ -74,7 +74,7 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 			VariableDeclarator(path: NodePath<t.VariableDeclarator>) {
 				if (isESModule && path.node.init && t.isObjectExpression(path.node.init)) {
 					const pluginsProperty = path.node.init.properties.find(
-						(prop): prop is t.ObjectProperty => t.isObjectProperty(prop) && t.isIdentifier(prop.key, { name: 'plugins' })
+						(prop): prop is t.ObjectProperty => t.isObjectProperty(prop) && t.isIdentifier(prop.key, { name: "plugins" })
 					);
 
 					if (pluginsProperty && t.isExpression(pluginsProperty.value)) {
@@ -135,13 +135,13 @@ export function parseAndUpdateViteConfig(source: string, zeroUiImportPath: strin
 		Program(p: NodePath<t.Program>) {
 			// inject import once
 			if (!source.includes(zeroUiImportPath)) {
-				p.node.body.unshift(t.importDeclaration([t.importDefaultSpecifier(t.identifier('zeroUI'))], t.stringLiteral(zeroUiImportPath)));
+				p.node.body.unshift(t.importDeclaration([t.importDefaultSpecifier(t.identifier("zeroUI"))], t.stringLiteral(zeroUiImportPath)));
 				modified = true;
 			}
 		},
 
 		CallExpression(p: NodePath<t.CallExpression>) {
-			if (t.isIdentifier(p.node.callee, { name: 'defineConfig' }) && t.isObjectExpression(p.node.arguments[0])) {
+			if (t.isIdentifier(p.node.callee, { name: "defineConfig" }) && t.isObjectExpression(p.node.arguments[0])) {
 				if (processConfigObject(p.node.arguments[0])) modified = true;
 			}
 		},
@@ -171,7 +171,7 @@ export function parseAndUpdateViteConfig(source: string, zeroUiImportPath: strin
 		},
 
 		ImportDeclaration(p: NodePath<t.ImportDeclaration>) {
-			if (p.node.source.value.startsWith('@tailwindcss/')) {
+			if (p.node.source.value.startsWith("@tailwindcss/")) {
 				p.remove();
 				modified = true;
 			}
@@ -188,10 +188,10 @@ function processConfigObject(obj: t.ObjectExpression): boolean {
 	let touched = false;
 
 	// locate/create plugins array
-	let prop = obj.properties.find((p): p is t.ObjectProperty => t.isObjectProperty(p) && t.isIdentifier(p.key, { name: 'plugins' }));
+	let prop = obj.properties.find((p): p is t.ObjectProperty => t.isObjectProperty(p) && t.isIdentifier(p.key, { name: "plugins" }));
 
 	if (!prop) {
-		prop = t.objectProperty(t.identifier('plugins'), t.arrayExpression([]));
+		prop = t.objectProperty(t.identifier("plugins"), t.arrayExpression([]));
 		obj.properties.push(prop);
 		touched = true;
 	}
@@ -202,13 +202,13 @@ function processConfigObject(obj: t.ObjectExpression): boolean {
 	arr.elements = arr.elements.filter(
 		(el) =>
 			!(
-				(t.isStringLiteral(el) && el.value.startsWith('@tailwindcss/')) || // ← ❸ filter all Tailwind strings
-				(t.isCallExpression(el) && t.isIdentifier(el.callee, { name: 'tailwindcss' }))
+				(t.isStringLiteral(el) && el.value.startsWith("@tailwindcss/")) || // ← ❸ filter all Tailwind strings
+				(t.isCallExpression(el) && t.isIdentifier(el.callee, { name: "tailwindcss" }))
 			)
 	);
 	// prepend zeroUI() if missing
-	if (!arr.elements.some((el) => t.isCallExpression(el) && t.isIdentifier(el.callee, { name: 'zeroUI' }))) {
-		arr.elements.unshift(t.callExpression(t.identifier('zeroUI'), []));
+	if (!arr.elements.some((el) => t.isCallExpression(el) && t.isIdentifier(el.callee, { name: "zeroUI" }))) {
+		arr.elements.unshift(t.callExpression(t.identifier("zeroUI"), []));
 		touched = true;
 	}
 
@@ -216,11 +216,11 @@ function processConfigObject(obj: t.ObjectExpression): boolean {
 }
 
 function findLayoutWithBody(root = process.cwd()): string[] {
-	const files = fg.sync('**/layout.{tsx,jsx,js,ts}', { cwd: root, ignore: IGNORE_DIRS, absolute: true });
+	const files = fg.sync("**/layout.{tsx,jsx,js,ts}", { cwd: root, ignore: IGNORE_DIRS, absolute: true });
 
 	return files.filter((file) => {
-		const source = fs.readFileSync(file, 'utf8');
-		return source.includes('<body');
+		const source = fs.readFileSync(file, "utf8");
+		return source.includes("<body");
 	});
 }
 
@@ -233,7 +233,7 @@ export async function patchNextBodyTag(): Promise<void> {
 	}
 
 	const filePath = matches[0];
-	const code = fs.readFileSync(filePath, 'utf8');
+	const code = fs.readFileSync(filePath, "utf8");
 
 	// Parse the file into an AST
 	const ast = parse(code, AST_CONFIG_OPTS);
@@ -243,9 +243,9 @@ export async function patchNextBodyTag(): Promise<void> {
 		ImportDeclaration(path: NodePath<t.ImportDeclaration>) {
 			const specifiers = path.node.specifiers;
 			const source = path.node.source.value;
-			if (source === '@zero-ui/attributes') {
+			if (source === "@zero-ui/attributes") {
 				for (const spec of specifiers) {
-					if (t.isImportSpecifier(spec) && t.isIdentifier(spec.imported) && spec.imported.name === 'bodyAttributes') {
+					if (t.isImportSpecifier(spec) && t.isIdentifier(spec.imported) && spec.imported.name === "bodyAttributes") {
 						hasImport = true;
 					}
 				}
@@ -257,8 +257,8 @@ export async function patchNextBodyTag(): Promise<void> {
 		Program(path: NodePath<t.Program>) {
 			if (!hasImport) {
 				const importDecl = t.importDeclaration(
-					[t.importSpecifier(t.identifier('bodyAttributes'), t.identifier('bodyAttributes'))],
-					t.stringLiteral('@zero-ui/attributes')
+					[t.importSpecifier(t.identifier("bodyAttributes"), t.identifier("bodyAttributes"))],
+					t.stringLiteral("@zero-ui/attributes")
 				);
 				path.node.body.unshift(importDecl);
 			}
@@ -269,11 +269,11 @@ export async function patchNextBodyTag(): Promise<void> {
 	let injected = false;
 	traverse(ast, {
 		JSXOpeningElement(path: NodePath<t.JSXOpeningElement>) {
-			if (!injected && t.isJSXIdentifier(path.node.name, { name: 'body' })) {
+			if (!injected && t.isJSXIdentifier(path.node.name, { name: "body" })) {
 				// Prevent duplicate injection
-				const hasSpread = path.node.attributes.some((attr) => t.isJSXSpreadAttribute(attr) && t.isIdentifier(attr.argument, { name: 'bodyAttributes' }));
+				const hasSpread = path.node.attributes.some((attr) => t.isJSXSpreadAttribute(attr) && t.isIdentifier(attr.argument, { name: "bodyAttributes" }));
 				if (!hasSpread) {
-					path.node.attributes.unshift(t.jsxSpreadAttribute(t.identifier('bodyAttributes')));
+					path.node.attributes.unshift(t.jsxSpreadAttribute(t.identifier("bodyAttributes")));
 					injected = true;
 				}
 			}
@@ -281,7 +281,7 @@ export async function patchNextBodyTag(): Promise<void> {
 	});
 
 	const output = generate(ast, { retainLines: true, decoratorsBeforeExport: true }, code).code;
-	fs.writeFileSync(filePath, output, 'utf8');
+	fs.writeFileSync(filePath, output, "utf8");
 	console.log(`[Zero-UI] ✅ Patched <body> in ${filePath} with {...bodyAttributes}`);
 }
 
@@ -290,7 +290,7 @@ export async function patchNextBodyTag(): Promise<void> {
  */
 export function parseJsonWithBabel(source: string): any {
 	try {
-		const ast = parseExpression(source, { sourceType: 'module', plugins: ['jsonStrings'] });
+		const ast = parseExpression(source, { sourceType: "module", plugins: ["jsonStrings"] });
 		// Convert Babel AST back to plain JS object
 		return eval(`(${generate(ast).code})`);
 	} catch (err: unknown) {

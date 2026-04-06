@@ -1,9 +1,9 @@
-import { Dashboard } from './Dashboard';
+import { Dashboard } from "./Dashboard";
 
 export const metadata = {
-	title: 'React State Demo',
-	description: 'React re-renders 10,000 components per toggle. Expect noticeable lag.',
-	alternates: { canonical: process.env.NEXT_PUBLIC_URL + '/react' },
+	title: "React State Demo",
+	description: "React re-renders 10,000 components per toggle. Expect noticeable lag.",
+	alternates: { canonical: process.env.NEXT_PUBLIC_URL + "/react" },
 };
 
 export default function Page() {

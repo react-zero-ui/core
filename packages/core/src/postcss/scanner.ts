@@ -1,13 +1,13 @@
-import crypto from 'crypto';
+import crypto from "crypto";
 
-/** Signature helper – mtimes can collide on some FS; hash is bullet-proof */
+/** Signature helper - mtimes can collide on some FS; hash is bullet-proof */
 function sig(src: string, keys: Set<string>): string {
 	const hash = crypto
-		.createHash('sha1')
+		.createHash("sha1")
 		.update(src)
-		.update('\0') // delimiter
-		.update([...keys].sort().join(',')) // order-independent
-		.digest('base64url')
+		.update("\0") // delimiter
+		.update([...keys].sort().join(",")) // order-independent
+		.digest("base64url")
 		.slice(0, 12); // short but unique
 	return hash;
 }
@@ -40,10 +40,10 @@ export function scanVariantTokens(src: string, keys: Set<string>): Map<string, S
 		if (tokens.length) {
 			const sortedKeys = [...keys].sort((a, b) => b.length - a.length);
 			for (const tokRaw of tokens) {
-				const segments = tokRaw.split(':').slice(0, -1);
+				const segments = tokRaw.split(":").slice(0, -1);
 				for (const seg of segments) {
 					for (const key of sortedKeys) {
-						if (seg.startsWith(key + '-')) {
+						if (seg.startsWith(key + "-")) {
 							const value = seg.slice(key.length + 1);
 							if (value) out.get(key)!.add(value);
 							break; // early-out

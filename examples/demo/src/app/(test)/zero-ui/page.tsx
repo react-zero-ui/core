@@ -1,9 +1,9 @@
-import { Dashboard } from './Dashboard';
+import { Dashboard } from "./Dashboard";
 
 export const metadata = {
-	title: 'Zero UI Demo',
-	description: '10,000 live nodes. No virtual DOM. No re-renders. Just raw UI performance.',
-	alternates: { canonical: process.env.NEXT_PUBLIC_URL + '/zero-ui' },
+	title: "Zero UI Demo",
+	description: "10,000 live nodes. No virtual DOM. No re-renders. Just raw UI performance.",
+	alternates: { canonical: process.env.NEXT_PUBLIC_URL + "/zero-ui" },
 };
 
 export default function Page() {

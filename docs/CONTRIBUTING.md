@@ -4,7 +4,7 @@
 
 ---
 
-## ⚡ Core Philosophy
+## Core Philosophy
 
 **React Zero-UI** is built on a radical idea:
 
@@ -19,17 +19,17 @@ Stay **pre-rendered, declarative, and brutally fast.**
 
 ---
 
-## 🧠 Monorepo Structure
+## Monorepo Structure
 
 ```
-📁 packages/
-├── core            ➡️ @react-zero-ui/core (library logic + postcss)
-└── cli             ➡️ create-zero-ui (npx installer)
+ packages/
+├── core            -> @react-zero-ui/core (library logic + postcss)
+└── cli             -> create-zero-ui (npx installer)
 ```
 
 ---
 
-## ⚙️ Local Setup
+## Local Setup
 
 ```bash
 pnpm bootstrap    # builds + installs local tarball into test fixtures
@@ -41,7 +41,16 @@ pnpm test         # runs all tests (unit + E2E)
 
 ---
 
-## ✅ Contribution Flow
+## Project Context Files
+
+- `.codex/project-summary.md` is the high-level overview of what this repo is and what it is for.
+- `.codex/project-memory.md` is the working memory file for current repo state, recent decisions, and next steps. Helpful for LLM-based context bootstrapping.
+- Keep `.codex/project-summary.md` durable and product-level.
+- Keep `.codex/project-memory.md` short, tactical, and current.
+
+---
+
+## Contribution Flow
 
 ### 1. [Start a Discussion](https://github.com/react-zero-ui/core/discussions)
 
@@ -51,8 +60,8 @@ For questions, proposals, or early feedback. Share ideas before building.
 
 Use the templates.
 
-- **Bug** ➡️ Include steps to reproduce, expected vs. actual behavior.
-- **Feature** ➡️ Explain the _why_, and sketch a possible approach.
+- **Bug** -> Include steps to reproduce, expected vs. actual behavior.
+- **Feature** -> Explain the _why_, and sketch a possible approach.
 
 ### 3. Pull Requests
 
@@ -63,7 +72,7 @@ Use the templates.
 
 ---
 
-## 🧪 Test Commands
+## Test Commands
 
 ```bash
 pnpm test:unit        # Core logic tests
@@ -76,13 +85,13 @@ pnpm test             # Runs all of the above
 
 ---
 
-## 🤝 Code of Conduct
+## Code of Conduct
 
 Keep it respectful and accessible. Push ideas hard, not people.
 
 ---
 
-## 📬 Contact
+## Contact
 
 > Got a big idea? DM me:  
 > [linkedin.com/in/austin-serb](https://www.linkedin.com/in/austin-serb/)

@@ -1,14 +1,14 @@
-'use client';
-import { useEffect, useState } from 'react';
-import { useUI } from '@react-zero-ui/core';
+"use client";
+import { useEffect, useState } from "react";
+import { useUI } from "@react-zero-ui/core";
 
 // Component that automatically cycles through themes using useEffect
 export default function UseEffectComponent() {
-	const [, setAutoTheme] = useUI<'light' | 'dark'>('use-effect-theme', 'light');
+	const [, setAutoTheme] = useUI<"light" | "dark">("use-effect-theme", "light");
 	const [state, setState] = useState(false);
 
 	useEffect(() => {
-		setAutoTheme(state ? 'dark' : 'light');
+		setAutoTheme(state ? "dark" : "light");
 	}, [state]);
 
 	return (

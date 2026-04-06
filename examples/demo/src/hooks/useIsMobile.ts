@@ -1,6 +1,6 @@
-'use client';
-import { useSyncExternalStore } from 'react';
-import { getMediaQueryStore } from '../utils/getMediaQueryStore';
+"use client";
+import { useSyncExternalStore } from "react";
+import { getMediaQueryStore } from "../utils/getMediaQueryStore";
 
 /**
  * Hook to check if the screen is mobile

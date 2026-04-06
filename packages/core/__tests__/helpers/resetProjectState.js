@@ -1,8 +1,8 @@
 // __tests__/helpers/resetProjectState.js
-import fs from 'node:fs';
-import path from 'node:path';
-import { rmSync } from 'node:fs';
-import { overwriteFile } from './overwriteFile.js';
+import fs from "node:fs";
+import path from "node:path";
+import { rmSync } from "node:fs";
+import { overwriteFile } from "./overwriteFile.js";
 
 /**
  * Reset everything the Zero-UI CLI generates inside a fixture.
@@ -12,32 +12,32 @@ import { overwriteFile } from './overwriteFile.js';
  *                   false ➡️ Vite fixture   (vite.config.ts)
  */
 export async function resetZeroUiState(projectDir, isNext = false) {
-	console.log(`[Reset] Starting Zero-UI state reset for ${isNext ? 'Next.js' : 'Vite'} project`);
+	console.log(`[Reset] Starting Zero-UI state reset for ${isNext ? "Next.js" : "Vite"} project`);
 	console.log(`[Reset] Project directory: ${projectDir}`);
 
 	/* ─── 1. wipe .zero-ui  ─────────────────────────────────────────────── */
-	const zeroUiDir = path.join(projectDir, '.zero-ui');
+	const zeroUiDir = path.join(projectDir, ".zero-ui");
 	if (fs.existsSync(zeroUiDir)) {
 		rmSync(zeroUiDir, { recursive: true, force: true });
-		console.log('[Reset] ✅ Removed .zero-ui directory');
+		console.log("[Reset] ✅ Removed .zero-ui directory");
 	} else {
-		console.log('[Reset] ⏭️  .zero-ui directory not found, skipping');
+		console.log("[Reset] ⏭️  .zero-ui directory not found, skipping");
 	}
 
 	/* ─── 2. Next.js cleanup (tsconfig + postcss)  ──────────────────────── */
 	if (isNext) {
-		console.log('[Reset] 🔧 Running Next.js cleanup');
-		await overwriteFile(path.join(projectDir, 'tsconfig.json'), defaultTsconfigContent);
+		console.log("[Reset] 🔧 Running Next.js cleanup");
+		await overwriteFile(path.join(projectDir, "tsconfig.json"), defaultTsconfigContent);
 
-		await overwriteFile(path.join(projectDir, 'app/layout.tsx'), defaultLayoutContent);
-		await overwriteFile(path.join(projectDir, 'postcss.config.mjs'), defaultPostcssConfigContent);
+		await overwriteFile(path.join(projectDir, "app/layout.tsx"), defaultLayoutContent);
+		await overwriteFile(path.join(projectDir, "postcss.config.mjs"), defaultPostcssConfigContent);
 	}
 	/* ─── 3. Vite cleanup (vite.config.ts)  ─────────────────────────────── */
 	if (!isNext) {
-		console.log('[Reset] ⚡ Running Vite cleanup');
-		await overwriteFile(path.join(projectDir, 'vite.config.ts'), defaultViteConfigContent);
+		console.log("[Reset] ⚡ Running Vite cleanup");
+		await overwriteFile(path.join(projectDir, "vite.config.ts"), defaultViteConfigContent);
 	}
-	console.log('[Reset] ✨ Reset complete!');
+	console.log("[Reset] ✨ Reset complete!");
 	return;
 }
 

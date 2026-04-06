@@ -1,14 +1,14 @@
 // src/postcss/resolvers.ts
-import * as t from '@babel/types';
-import { NodePath } from '@babel/traverse';
-import { throwCodeFrame } from './ast-parsing.js';
-import { generate } from '@babel/generator';
+import * as t from "@babel/types";
+import { NodePath } from "@babel/traverse";
+import { throwCodeFrame } from "./ast-parsing.js";
+import { generate } from "@babel/generator";
 
 const VERBOSE = false;
 export interface ResolveOpts {
 	throwOnFail?: boolean; // default false
 	source?: string; // optional; fall back to path.hub.file.code
-	hook?: 'stateKey' | 'initialValue' | 'setterFnName'; // default 'stateKey'
+	hook?: "stateKey" | "initialValue" | "setterFnName"; // default 'stateKey'
 }
 
 /**
@@ -45,17 +45,17 @@ export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts
 	// TemplateLiteral without ${}
 	if (t.isTemplateLiteral(node) && node.expressions.length === 0) return node.quasis[0].value.cooked ?? node.quasis[0].value.raw;
 
-	VERBOSE && console.log('48 -> literalFromNode');
+	VERBOSE && console.log("48 -> literalFromNode");
 
 	/* ── Fast path via Babel constant-folder ───────────── */
 	const ev = fastEval(node, path);
 
-	if (ev.confident && typeof ev.value === 'string') {
+	if (ev.confident && typeof ev.value === "string") {
 		containsIllegalIdentifiers(node, path, opts); // 👈 throws if invalid
 		return ev.value;
 	}
 
-	VERBOSE && console.log('58 -> literalFromNode -> ev: ');
+	VERBOSE && console.log("58 -> literalFromNode -> ev: ");
 
 	// ConditionalExpression
 	if (t.isConditionalExpression(node)) {
@@ -66,16 +66,16 @@ export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts
 		}
 		// If test isn't statically evaluable, return attempt to resolve it
 		const litTest = literalFromNode(node.test as t.Expression, path, opts);
-		if (litTest === 'true' || litTest === 'false') {
-			const branch = litTest === 'true' ? node.consequent : node.alternate;
+		if (litTest === "true" || litTest === "false") {
+			const branch = litTest === "true" ? node.consequent : node.alternate;
 			return literalFromNode(branch as t.Expression, path, opts);
 		}
 	}
 
-	VERBOSE && console.log('70 -> literalFromNode');
+	VERBOSE && console.log("70 -> literalFromNode");
 
 	// BinaryExpression with + operator
-	if (t.isBinaryExpression(node) && node.operator === '+') {
+	if (t.isBinaryExpression(node) && node.operator === "+") {
 		// Resolve left
 		const left = literalFromNode(node.left as t.Expression, path, opts);
 		// Resolve right
@@ -83,7 +83,7 @@ export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts
 		return left !== null && right !== null ? left + right : null;
 	}
 
-	VERBOSE && console.log('82 -> literalFromNode');
+	VERBOSE && console.log("82 -> literalFromNode");
 
 	// SequenceExpression (already handled explicitly by taking last expression)
 	if (t.isSequenceExpression(node)) {
@@ -91,78 +91,78 @@ export function literalFromNode(node: t.Expression, path: NodePath<t.Node>, opts
 		if (last) return literalFromNode(last, path, opts);
 	}
 
-	VERBOSE && console.log('89 -> literalFromNode');
+	VERBOSE && console.log("89 -> literalFromNode");
 
 	if (t.isUnaryExpression(node)) {
 		const arg = literalFromNode(node.argument as t.Expression, path, opts);
 		if (arg === null) return null;
 
 		switch (node.operator) {
-			case 'typeof':
+			case "typeof":
 				return typeof arg;
-			case '+':
-				return typeof arg === 'number' || !isNaN(Number(arg)) ? String(+arg) : null;
-			case '-':
-				return typeof arg === 'number' || !isNaN(Number(arg)) ? String(-arg) : null;
-			case '!':
+			case "+":
+				return typeof arg === "number" || !isNaN(Number(arg)) ? String(+arg) : null;
+			case "-":
+				return typeof arg === "number" || !isNaN(Number(arg)) ? String(-arg) : null;
+			case "!":
 				// Preserve Boolean semantics even after string coercion
-				if (arg === 'true') return 'false'; // !true -> false
-				if (arg === 'false') return 'true'; // !false -> true
-				if (arg === 'undefined') return 'true'; // !undefined === true
-				if (arg === 'null') return 'true'; // !null === true
+				if (arg === "true") return "false"; // !true -> false
+				if (arg === "false") return "true"; // !false -> true
+				if (arg === "undefined") return "true"; // !undefined === true
+				if (arg === "null") return "true"; // !null === true
 				// fallback: let JS decide for numbers / other strings
 				return String(!arg);
-			case 'void':
-				return 'undefined';
+			case "void":
+				return "undefined";
 			default:
 				return null;
 		}
 	}
 
-	VERBOSE && console.log('112 -> literalFromNode');
+	VERBOSE && console.log("112 -> literalFromNode");
 
 	/* ── Logical fallback  (a || b ,  a ?? b) ───────────── */
-	if (t.isLogicalExpression(node) && (node.operator === '||' || node.operator === '??')) {
+	if (t.isLogicalExpression(node) && (node.operator === "||" || node.operator === "??")) {
 		// try left; if it resolves, use it, otherwise fall back to right
 		const left = literalFromNode(node.left as t.Expression, path, opts);
-		if (left === 'true') return left;
-		if (left === 'false' || left === 'undefined' || left === 'null') {
+		if (left === "true") return left;
+		if (left === "false" || left === "undefined" || left === "null") {
 			return literalFromNode(node.right as t.Expression, path, opts);
 		}
 	}
-	if (t.isLogicalExpression(node) && node.operator === '&&') {
+	if (t.isLogicalExpression(node) && node.operator === "&&") {
 		const left = literalFromNode(node.left as t.Expression, path, opts);
-		if (left === 'false' || left === 'undefined' || left === 'null') return null;
-		if (left === 'true') return literalFromNode(node.right as t.Expression, path, opts);
+		if (left === "false" || left === "undefined" || left === "null") return null;
+		if (left === "true") return literalFromNode(node.right as t.Expression, path, opts);
 		if (opts.throwOnFail) {
 			throwCodeFrame(path, path.opts?.filename, opts.source ?? path.opts?.source?.code, `[Zero-UI] Logical && expression could not be resolved at build time.`);
 		}
 	}
 
-	VERBOSE && console.log('122 -> literalFromNode');
+	VERBOSE && console.log("122 -> literalFromNode");
 
 	// 	"Is this node an Identifier?"
 	// "If yes, can I resolve it to a literal value like a string, number, or boolean?"
 	const idLit = resolveLocalConstIdentifier(node, path, opts);
-	VERBOSE && console.log('127 -> literalFromNode -> idLit: ', idLit);
+	VERBOSE && console.log("127 -> literalFromNode -> idLit: ", idLit);
 	if (idLit !== null) return String(idLit);
 
-	VERBOSE && console.log('130 -> literalFromNode');
+	VERBOSE && console.log("130 -> literalFromNode");
 
 	// Template literal with ${expr} or ${CONSTANT}
 	if (t.isTemplateLiteral(node)) {
-		VERBOSE && console.log('135 -> literalFromNode -> template literal');
+		VERBOSE && console.log("135 -> literalFromNode -> template literal");
 		return resolveTemplateLiteral(node, path, literalFromNode, opts);
 	}
 
-	VERBOSE && console.log('138 -> literalFromNode');
+	VERBOSE && console.log("138 -> literalFromNode");
 
 	if (t.isMemberExpression(node) || t.isOptionalMemberExpression(node)) {
 		//   treat optional-member exactly the same
 		return resolveMemberExpression(node as t.MemberExpression, path, literalFromNode, opts);
 	}
 
-	VERBOSE && console.log('END -> literalFromNode', node);
+	VERBOSE && console.log("END -> literalFromNode", node);
 
 	return null;
 }
@@ -207,7 +207,7 @@ export function fastEval(node: t.Expression, path: NodePath<t.Node>): { confiden
   developer gets a consistent, actionable error message.
 \*──────────────────────────────────────────────────────────*/
 export function resolveLocalConstIdentifier(node: t.Expression, path: NodePath<t.Node>, opts: ResolveOpts): string | number | boolean | null {
-	VERBOSE && console.log('resolveLocalConstIdentifier -> 190');
+	VERBOSE && console.log("resolveLocalConstIdentifier -> 190");
 	/* Fast-exit when node isn't an Identifier */
 	if (!t.isIdentifier(node)) return null;
 
@@ -225,20 +225,20 @@ export function resolveLocalConstIdentifier(node: t.Expression, path: NodePath<t
 				`Example:\n import { ${node.name} } from "./filePath";\n ` +
 				`const ${node.name}Local = ${node.name};\n ` +
 				`${
-					opts.hook === 'stateKey'
+					opts.hook === "stateKey"
 						? `useUI(${node.name}Local, initialValue);`
-						: opts.hook === 'initialValue'
+						: opts.hook === "initialValue"
 							? `useUI(stateKey, ${node.name}Local);`
-							: opts.hook === 'setterFnName'
+							: opts.hook === "setterFnName"
 								? `setterFunction(${node.name}Local)`
-								: ''
+								: ""
 				}\n`
 		);
 	}
 
 	/* 2. Allow only `const` variables (from any scope) */
-	if (!binding.path.isVariableDeclarator() || (binding.path.parent as t.VariableDeclaration).kind !== 'const') {
-		if (binding.path.isVariableDeclarator() && (binding.path.parent as t.VariableDeclaration).kind !== 'const') {
+	if (!binding.path.isVariableDeclarator() || (binding.path.parent as t.VariableDeclaration).kind !== "const") {
+		if (binding.path.isVariableDeclarator() && (binding.path.parent as t.VariableDeclaration).kind !== "const") {
 			throwCodeFrame(
 				path,
 				path.opts?.filename,
@@ -254,7 +254,7 @@ export function resolveLocalConstIdentifier(node: t.Expression, path: NodePath<t
 	if (!init) return null;
 	/* unwrap  '... as const'  or  <const>foo  */
 	// @ts-expect-error Babel lacks helper for TSConstAssertion
-	if (t.isTSAsExpression(init) || t.isTSTypeAssertion(init) || init.type === 'TSConstAssertion') {
+	if (t.isTSAsExpression(init) || t.isTSTypeAssertion(init) || init.type === "TSConstAssertion") {
 		init = (init as any).expression; // step into the real value
 	}
 
@@ -297,7 +297,7 @@ export function resolveTemplateLiteral(
 	literalFromNode: (expr: t.Expression, p: NodePath, opts: ResolveOpts) => string | null,
 	opts: ResolveOpts
 ): string | null {
-	let result = '';
+	let result = "";
 
 	// ── fast path: `` `dark` ``
 	if (node.expressions.length === 0) {
@@ -318,7 +318,7 @@ export function resolveTemplateLiteral(
 		if (expr) {
 			const lit = literalFromNode(expr as t.Expression, path, opts);
 			if (lit === null && opts.throwOnFail) {
-				throwCodeFrame(path, path.opts?.filename, opts.source ?? path.opts?.source?.code, '[Zero-UI] Template literal must resolve to a space-free string.');
+				throwCodeFrame(path, path.opts?.filename, opts.source ?? path.opts?.source?.code, "[Zero-UI] Template literal must resolve to a space-free string.");
 			}
 			if (lit === null) return null;
 			result += lit;
@@ -353,7 +353,7 @@ export function resolveMemberExpression(
 	literalFromNode: (expr: t.Expression, p: NodePath, opts: ResolveOpts) => string | null,
 	opts: ResolveOpts
 ): string | null {
-	VERBOSE && console.log('resolveMemberExpression -> 352');
+	VERBOSE && console.log("resolveMemberExpression -> 352");
 	/** Collect the property chain (deep ➡️ shallow) */
 	const props: (string | number | boolean)[] = [];
 	let current: t.Expression | t.PrivateName = node;
@@ -382,7 +382,7 @@ export function resolveMemberExpression(
 							path,
 							path.opts?.filename,
 							opts.source ?? path.opts?.source?.code,
-							'[Zero-UI] Member expression must resolve to a static space-free string.\n' + 'only use const identifiers as keys.'
+							"[Zero-UI] Member expression must resolve to a static space-free string.\n" + "only use const identifiers as keys."
 						);
 					}
 					const num = Number(lit);
@@ -396,7 +396,7 @@ export function resolveMemberExpression(
 						path,
 						path.opts?.filename,
 						opts.source ?? path.opts?.source?.code,
-						'[Zero-UI] Member expression must resolve to a static space-free string.\n' + 'only use const identifiers as keys.'
+						"[Zero-UI] Member expression must resolve to a static space-free string.\n" + "only use const identifiers as keys."
 					);
 				}
 				const num = Number(lit);
@@ -430,7 +430,7 @@ export function resolveMemberExpression(
 	}
 
 	// Must be `const` (from any scope)
-	if (!binding.path.isVariableDeclarator() || (binding.path.parent as t.VariableDeclaration).kind !== 'const') {
+	if (!binding.path.isVariableDeclarator() || (binding.path.parent as t.VariableDeclaration).kind !== "const") {
 		return null;
 	}
 
@@ -442,7 +442,7 @@ export function resolveMemberExpression(
 
 		if (t.isObjectExpression(value)) {
 			value = resolveObjectValue(value, String(key));
-		} else if (t.isArrayExpression(value) && typeof key === 'number') {
+		} else if (t.isArrayExpression(value) && typeof key === "number") {
 			value = value.elements[key] as t.Expression | null | undefined;
 		} else {
 			value = null; // chain broke - handled below
@@ -483,7 +483,7 @@ export function resolveMemberExpression(
 		if (!resolvedInit) return null;
 		return literalFromNode(resolvedInit as t.Expression, idBinding.path, opts);
 	}
-	VERBOSE && console.log('resolveMemberExpression -> 460');
+	VERBOSE && console.log("resolveMemberExpression -> 460");
 	return null;
 }
 
@@ -542,7 +542,7 @@ function containsIllegalIdentifiers(node: t.Node, path: NodePath, opts: ResolveO
 			);
 		}
 
-		if ((binding.path.parent as t.VariableDeclaration).kind !== 'const') {
+		if ((binding.path.parent as t.VariableDeclaration).kind !== "const") {
 			throwCodeFrame(
 				path,
 				path.opts?.filename,

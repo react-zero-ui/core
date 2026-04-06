@@ -1,12 +1,12 @@
 ---
-name: 🚀 Feature request
+name: Feature request
 about: Suggest an improvement or new idea for React Zero-UI
-title: '[Feature]: '
-labels: ['enhancement']
-assignees: ''
+title: "[Feature]: "
+labels: ["enhancement"]
+assignees: ""
 ---
 
-## ✨ Problem
+## Problem
 
 Is your feature request related to a problem or pain point?
 
@@ -14,19 +14,19 @@ Is your feature request related to a problem or pain point?
 
 ---
 
-## ✅ Proposed Solution
+## Proposed Solution
 
 How would you like this to work? Be specific.
 
 ---
 
-## 🔄 Alternatives Considered
+## Alternatives Considered
 
 Have you tried workarounds or other approaches? Share them here.
 
 ---
 
-## 📎 Additional Context
+## Additional Context
 
 Add screenshots, references, or related discussions if relevant.
 

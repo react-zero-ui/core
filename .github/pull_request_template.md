@@ -8,12 +8,12 @@
 
 <!-- Select one or more by replacing `[ ]` with `[x]` -->
 
-- [ ] 🐛 Bug fix
-- [ ] ✨ New feature
-- [ ] 🛠 Refactor
-- [ ] 🧪 Test improvement
-- [ ] 📝 Docs update
-- [ ] ⚙️ CI/tooling
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Refactor
+- [ ] Test improvement
+- [ ] Docs update
+- [ ] CI/tooling
 
 ---
 

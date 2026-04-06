@@ -1,29 +1,29 @@
-'use client';
-import { cssVar, useScopedUI, useUI } from '@react-zero-ui/core';
-import UseEffectComponent from './UseEffectComponent';
-import FAQ from './FAQ';
-import { ChildComponent } from './ChildComponent';
-import { ChildWithoutSetter } from './ChildWithoutSetter';
-import CssVarDemo from './CssVarDemo';
-import { zeroSSR } from '@react-zero-ui/core/experimental';
+"use client";
+import { cssVar, useScopedUI, useUI } from "@react-zero-ui/core";
+import UseEffectComponent from "./UseEffectComponent";
+import FAQ from "./FAQ";
+import { ChildComponent } from "./ChildComponent";
+import { ChildWithoutSetter } from "./ChildWithoutSetter";
+import CssVarDemo from "./CssVarDemo";
+import { zeroSSR } from "@react-zero-ui/core/experimental";
 
 export default function Page() {
-	const [scope, setScope] = useScopedUI<'off' | 'on'>('scope', 'off');
+	const [scope, setScope] = useScopedUI<"off" | "on">("scope", "off");
 
-	const [, setTheme] = useUI<'light' | 'dark'>('theme', 'light');
-	const [, setTheme2] = useUI<'light' | 'dark'>('theme-2', 'light');
-	const [, setThemeThree] = useUI<'light' | 'dark'>('theme-three', 'light');
-	const [, setToggle] = useUI<'true' | 'false'>('toggle-boolean', 'true');
-	const [, setNumber] = useUI<'1' | '2'>('number', '1');
-	const [open, setOpen] = useScopedUI<'open' | 'closed'>('faq', 'closed');
-	const [mobile, setMobile] = useScopedUI<'true' | 'false'>('mobile', 'false');
-	const [, setChildOpen] = useUI<'open' | 'closed'>('child', 'closed');
+	const [, setTheme] = useUI<"light" | "dark">("theme", "light");
+	const [, setTheme2] = useUI<"light" | "dark">("theme-2", "light");
+	const [, setThemeThree] = useUI<"light" | "dark">("theme-three", "light");
+	const [, setToggle] = useUI<"true" | "false">("toggle-boolean", "true");
+	const [, setNumber] = useUI<"1" | "2">("number", "1");
+	const [open, setOpen] = useScopedUI<"open" | "closed">("faq", "closed");
+	const [mobile, setMobile] = useScopedUI<"true" | "false">("mobile", "false");
+	const [, setChildOpen] = useUI<"open" | "closed">("child", "closed");
 
-	const [, setToggleFunction] = useUI<'white' | 'black'>('toggle-function', 'white');
-	const [, setGlobal] = useUI<'0px' | '4px'>('blur-global', '0px', cssVar);
+	const [, setToggleFunction] = useUI<"white" | "black">("toggle-function", "white");
+	const [, setGlobal] = useUI<"0px" | "4px">("blur-global", "0px", cssVar);
 
 	const toggleFunction = () => {
-		setToggleFunction((prev) => (prev === 'white' ? 'black' : 'white'));
+		setToggleFunction((prev) => (prev === "white" ? "black" : "white"));
 	};
 
 	return (
@@ -45,7 +45,7 @@ export default function Page() {
 					<button
 						data-testid="theme-ssr-toggle"
 						className="border-2 border-red-500 theme-ssr-light:text-blue-500 theme-ssr-dark:text-red-500"
-						{...zeroSSR.onClick('theme-ssr', ['light', 'dark'])}>
+						{...zeroSSR.onClick("theme-ssr", ["light", "dark"])}>
 						Toggle SSR SAFE THEME
 					</button>
 					<div className="flex gap-2">
@@ -69,7 +69,7 @@ export default function Page() {
 					data-testid="theme-container">
 					<button
 						type="button"
-						onClick={() => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))}
+						onClick={() => setTheme((prev) => (prev === "light" ? "dark" : "light"))}
 						className="border-2 border-red-500"
 						data-testid="theme-toggle">
 						Toggle Theme (default)
@@ -86,7 +86,7 @@ export default function Page() {
 					data-testid="theme-container-secondary">
 					<button
 						type="button"
-						onClick={() => setTheme2((prev) => (prev === 'light' ? 'dark' : 'light'))}
+						onClick={() => setTheme2((prev) => (prev === "light" ? "dark" : "light"))}
 						className="border-2 border-red-500"
 						data-testid="theme-toggle-secondary">
 						Toggle Theme Secondary (w/ number in string)
@@ -103,7 +103,7 @@ export default function Page() {
 					data-testid="theme-container-3">
 					<button
 						type="button"
-						onClick={() => setThemeThree((prev) => (prev === 'light' ? 'dark' : 'light'))}
+						onClick={() => setThemeThree((prev) => (prev === "light" ? "dark" : "light"))}
 						className="border-2 border-red-500"
 						data-testid="theme-toggle-3">
 						Toggle Theme 3 (w/ camelCase)
@@ -120,7 +120,7 @@ export default function Page() {
 					data-testid="toggle-boolean-container">
 					<button
 						type="button"
-						onClick={() => setToggle((prev) => (prev === 'true' ? 'false' : 'true'))}
+						onClick={() => setToggle((prev) => (prev === "true" ? "false" : "true"))}
 						className="border-2 border-red-500"
 						data-testid="toggle-boolean">
 						Toggle Boolean ({`w/ boolean + prev => !prev`})
@@ -136,7 +136,7 @@ export default function Page() {
 					data-testid="toggle-number-container">
 					<button
 						type="button"
-						onClick={() => setNumber((prev) => (prev === '1' ? '2' : '1'))}
+						onClick={() => setNumber((prev) => (prev === "1" ? "2" : "1"))}
 						className="border-2 border-red-500"
 						data-testid="toggle-number">
 						Toggle Number ({`w/ number + prev => prev === 1 ? 2 : 1`})
@@ -179,7 +179,7 @@ export default function Page() {
 					ref={setScope.ref}>
 					<button
 						type="button"
-						onClick={() => setScope((prev) => (prev === 'on' ? 'off' : 'on'))}
+						onClick={() => setScope((prev) => (prev === "on" ? "off" : "on"))}
 						className="border-2 border-red-500"
 						data-testid="scope-toggle">
 						Toggle Scope
@@ -202,14 +202,14 @@ export default function Page() {
 					<button
 						type="button"
 						onClick={() => {
-							if (typeof window !== 'undefined') {
+							if (typeof window !== "undefined") {
 								if (window.innerWidth > 768) {
 									// allow the user to toggle the mobile state
-									setMobile((prev) => (prev === 'true' ? 'false' : 'true'));
+									setMobile((prev) => (prev === "true" ? "false" : "true"));
 								}
 								if (window.innerWidth < 768) {
 									// force the mobile state to false on click
-									setMobile('true');
+									setMobile("true");
 								}
 							}
 						}}
@@ -231,7 +231,7 @@ export default function Page() {
 				data-faq={open}>
 				<button
 					className="bg-blue-500 text-white p-2 rounded-md m-5"
-					onClick={() => setOpen((prev) => (prev === 'open' ? 'closed' : 'open'))}>
+					onClick={() => setOpen((prev) => (prev === "open" ? "closed" : "open"))}>
 					question 0 +
 				</button>
 				<div className="faq-open:block faq-closed:hidden">answer</div>
@@ -265,13 +265,13 @@ export default function Page() {
 				<button
 					data-testid={`global-toggle`}
 					className="bg-blue-500 text-white p-2 rounded-md"
-					onClick={() => setGlobal((prev) => (prev === '0px' ? '4px' : '0px'))}>
+					onClick={() => setGlobal((prev) => (prev === "0px" ? "4px" : "0px"))}>
 					Global blur toggle
 				</button>
 				<div
 					data-testid={`global-blur`}
 					className="absolute inset-0 z-10 pointer-events-none"
-					style={{ backdropFilter: 'blur(var(--blur-global, 0px))' }} // read the var
+					style={{ backdropFilter: "blur(var(--blur-global, 0px))" }} // read the var
 				/>
 			</div>
 		</div>

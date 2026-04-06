@@ -1,7 +1,7 @@
-import { bodyAttributes } from '@zero-ui/attributes';
-import './globals.css';
+import { bodyAttributes } from "@zero-ui/attributes";
+import "./globals.css";
 
-import ZeroUiRuntime from './zero-runtime';
+import ZeroUiRuntime from "./zero-runtime";
 
 export default function RootLayout({ children }) {
 	return (

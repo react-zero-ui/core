@@ -1,7 +1,7 @@
-import React from 'react';
+import React from "react";
 
-export const InnerDot = React.memo(({ theme }: { theme: 'light' | 'dark' }) => {
-	const itemClasses2 = theme === 'dark' ? 'bg-red-400' : 'bg-blue-400';
+export const InnerDot = React.memo(({ theme }: { theme: "light" | "dark" }) => {
+	const itemClasses2 = theme === "dark" ? "bg-red-400" : "bg-blue-400";
 
 	return (
 		<Layer1>

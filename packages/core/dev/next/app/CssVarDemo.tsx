@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useScopedUI, cssVar } from '@react-zero-ui/core';
+import { useScopedUI, cssVar } from "@react-zero-ui/core";
 
 /**
  * CssVarDemo - minimal fixture for Playwright
@@ -11,17 +11,17 @@ import { useScopedUI, cssVar } from '@react-zero-ui/core';
  */
 export default function CssVarDemo({ index = 0 }) {
 	// 👇 pass `cssVar` flag to switch makeSetter into CSS-var mode
-	const [blur, setBlur] = useScopedUI<'0px' | '4px'>('blur', '0px', cssVar);
+	const [blur, setBlur] = useScopedUI<"0px" | "4px">("blur", "0px", cssVar);
 	// global test
 	return (
 		<div
 			ref={setBlur.ref} // element that owns --blur
 			data-testid={`demo-${index}`}
-			style={{ filter: 'blur(var(--blur, 0px))' }} // read the var
+			style={{ filter: "blur(var(--blur, 0px))" }} // read the var
 			className="m-4 p-6 rounded bg-slate-200 space-y-3">
 			<button
 				data-testid={`toggle-${index}`}
-				onClick={() => setBlur((prev) => (prev === '0px' ? '4px' : '0px'))}
+				onClick={() => setBlur((prev) => (prev === "0px" ? "4px" : "0px"))}
 				className="px-3 py-1 rounded bg-black text-white">
 				toggle blur
 			</button>

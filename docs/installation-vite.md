@@ -12,7 +12,7 @@ npm install @tailwindcss/postcss
 
 ---
 
-## 🔧 Setup
+## Setup
 
 ### Vite
 
@@ -20,13 +20,13 @@ npm install @tailwindcss/postcss
 
 ```js
 // vite.config.*
-import zeroUI from '@react-zero-ui/core/vite';
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import tailwindCss from '@tailwindcss/postcss';
+import zeroUI from "@react-zero-ui/core/vite";
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindCss from "@tailwindcss/postcss";
 
 export default defineConfig({
-	// ❗️Remove the default `tailwindcss()` plugin - and pass it into the `zeroUI` plugin
+	// Remove the default `tailwindcss()` plugin - and pass it into the `zeroUI` plugin
 	plugins: [zeroUI({ tailwind: tailwindCss }), react()],
 });
 ```

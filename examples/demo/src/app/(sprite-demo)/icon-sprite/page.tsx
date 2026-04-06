@@ -149,16 +149,16 @@ import {
 	Pencil,
 	Pin,
 	GitCommitVertical,
-} from '@react-zero-ui/icon-sprite';
-import Link from 'next/link';
-import HeaderBar from '../components/HeaderBar';
-import StatsCard from '../components/StatsCard';
-import { SectionGrid } from '../components/SectionGrid';
+} from "@react-zero-ui/icon-sprite";
+import Link from "next/link";
+import HeaderBar from "../components/HeaderBar";
+import StatsCard from "../components/StatsCard";
+import { SectionGrid } from "../components/SectionGrid";
 
 export const metadata = {
-	title: 'Zero UI Icon Sprite - The fastest way to do icons in React',
-	description: 'Lucide to SVG sprite for React. w/custom icon support.',
-	alternates: { canonical: 'https://zero-ui.dev/icon-sprite' },
+	title: "Zero UI Icon Sprite - The fastest way to do icons in React",
+	description: "Lucide to SVG sprite for React. w/custom icon support.",
+	alternates: { canonical: "https://zero-ui.dev/icon-sprite" },
 };
 
 const page = () => {
@@ -169,7 +169,7 @@ const page = () => {
 					title="Zero UI Icon Sprite"
 					subtitle={
 						<>
-							Lucide to SVG sprite solution for React. w/custom icon support.{' '}
+							Lucide to SVG sprite solution for React. w/custom icon support.{" "}
 							<Link
 								href="https://github.com/react-zero-ui/icon-sprite#readme"
 								className="text-blue-500 hover:underline"

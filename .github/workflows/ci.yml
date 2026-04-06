@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'packages/**'
-      - '.github/workflows/ci.yml'
-      - 'scripts/**'
-      - 'pnpm-lock.yaml'
-      - '!packages/**/README.md'
+      - "packages/**"
+      - ".github/workflows/ci.yml"
+      - "scripts/**"
+      - "pnpm-lock.yaml"
+      - "!packages/**/README.md"
   pull_request:
 
 concurrency:

@@ -1,13 +1,13 @@
-import { test } from 'node:test';
-import assert from 'node:assert';
-import { collectUseUIHooks, processVariants } from './ast-parsing.js';
-import { parse } from '@babel/parser';
-import { readFile, runTest } from './test-utilities.js';
+import { test } from "node:test";
+import assert from "node:assert";
+import { collectUseUIHooks, processVariants } from "./ast-parsing.js";
+import { parse } from "@babel/parser";
+import { readFile, runTest } from "./test-utilities.js";
 
-test('collectUseUIHooks should collect setters from a component', async () => {
+test("collectUseUIHooks should collect setters from a component", async () => {
 	await runTest(
 		{
-			'app/boolean-edge-cases.tsx': `
+			"app/boolean-edge-cases.tsx": `
       import { useUI } from '@react-zero-ui/core';
 
 			const feat = 'feature-enabled';
@@ -31,33 +31,33 @@ return (
 		},
 
 		async () => {
-			const src = readFile('app/boolean-edge-cases.tsx');
-			const ast = parse(src, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
+			const src = readFile("app/boolean-edge-cases.tsx");
+			const ast = parse(src, { sourceType: "module", plugins: ["jsx", "typescript"] });
 			const setters = collectUseUIHooks(ast, src);
 
-			assert(setters[0].initialValue === 'false', 'initialValue should be false');
-			assert(setters[0].stateKey === 'modal-visible', 'stateKey should be modal-visible');
-			assert(setters[0].setterFnName === 'setIsVisible', 'setterFnName should be setIsVisible');
+			assert(setters[0].initialValue === "false", "initialValue should be false");
+			assert(setters[0].stateKey === "modal-visible", "stateKey should be modal-visible");
+			assert(setters[0].setterFnName === "setIsVisible", "setterFnName should be setIsVisible");
 
-			assert(setters[1].initialValue === 'true', 'initialValue should be true');
-			assert(setters[1].stateKey === 'feature-enabled', 'stateKey should be feature-enabled');
-			assert(setters[1].setterFnName === 'setIsEnabled', 'setterFnName should be setIsEnabled');
+			assert(setters[1].initialValue === "true", "initialValue should be true");
+			assert(setters[1].stateKey === "feature-enabled", "stateKey should be feature-enabled");
+			assert(setters[1].setterFnName === "setIsEnabled", "setterFnName should be setIsEnabled");
 
-			const { finalVariants } = await processVariants(['app/boolean-edge-cases.tsx']);
-			assert(finalVariants[0].key === 'feature-enabled', 'key should be feature-enabled');
-			assert(finalVariants[0].values.includes('false'), 'values should include false');
-			assert(finalVariants[0].initialValue === 'true', 'initialValue should be true');
-			assert(finalVariants[1].key === 'modal-visible', 'key should be modal-visible');
-			assert(finalVariants[1].values.includes('true'), 'values should include true');
-			assert(finalVariants[1].initialValue === 'false', 'initialValue should be false');
+			const { finalVariants } = await processVariants(["app/boolean-edge-cases.tsx"]);
+			assert(finalVariants[0].key === "feature-enabled", "key should be feature-enabled");
+			assert(finalVariants[0].values.includes("false"), "values should include false");
+			assert(finalVariants[0].initialValue === "true", "initialValue should be true");
+			assert(finalVariants[1].key === "modal-visible", "key should be modal-visible");
+			assert(finalVariants[1].values.includes("true"), "values should include true");
+			assert(finalVariants[1].initialValue === "false", "initialValue should be false");
 		}
 	);
 });
 
-test('collectUseUIHooks should resolve const-based args for useScopedUI', async () => {
+test("collectUseUIHooks should resolve const-based args for useScopedUI", async () => {
 	await runTest(
 		{
-			'app/tabs.tsx': `
+			"app/tabs.tsx": `
         import { useScopedUI } from '@react-zero-ui/core';
 
         const KEY = 'tabs';
@@ -70,18 +70,18 @@ test('collectUseUIHooks should resolve const-based args for useScopedUI', async 
       `,
 		},
 		async () => {
-			const src = readFile('app/tabs.tsx');
-			const ast = parse(src, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
+			const src = readFile("app/tabs.tsx");
+			const ast = parse(src, { sourceType: "module", plugins: ["jsx", "typescript"] });
 			const [meta] = collectUseUIHooks(ast, src);
 
-			assert.equal(meta.stateKey, 'tabs');
-			assert.equal(meta.initialValue, 'first');
-			assert.equal(meta.scope, 'scoped');
+			assert.equal(meta.stateKey, "tabs");
+			assert.equal(meta.initialValue, "first");
+			assert.equal(meta.scope, "scoped");
 		}
 	);
 });
 
-test('collectUseUIHooks handles + both hooks', async () => {
+test("collectUseUIHooks handles + both hooks", async () => {
 	const code = `
     import { useUI, useScopedUI } from '@react-zero-ui/core';
     export function Comp() {
@@ -90,20 +90,20 @@ test('collectUseUIHooks handles + both hooks', async () => {
       return <section ref={setAcc.ref} />;
     }
   `;
-	const ast = parse(code, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
+	const ast = parse(code, { sourceType: "module", plugins: ["jsx", "typescript"] });
 	const hooks = collectUseUIHooks(ast, code);
 
 	assert.equal(hooks.length, 2);
 	assert.deepEqual(
 		hooks.map((h) => [h.stateKey, h.scope]),
 		[
-			['theme', 'global'],
-			['accordion', 'scoped'],
+			["theme", "global"],
+			["accordion", "scoped"],
 		]
 	);
 });
 
-test('collectUseUIHooks NumericLiterals bound to const identifiers', async () => {
+test("collectUseUIHooks NumericLiterals bound to const identifiers", async () => {
 	const code = `
     import { useUI, useScopedUI } from '@react-zero-ui/core';
 		const T = "true"; const M = { "true": "dark", "false": "light" }; const x = M[T]
@@ -112,14 +112,14 @@ test('collectUseUIHooks NumericLiterals bound to const identifiers', async () =>
        return <section ref={setAcc.ref} />;
     }
   `;
-	const ast = parse(code, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
+	const ast = parse(code, { sourceType: "module", plugins: ["jsx", "typescript"] });
 
 	assert.throws(() => {
 		collectUseUIHooks(ast, code);
 	}, /Only local, fully-static/i);
 });
 
-test('collectUseUIHooks should Resolve Logical Expressions &&', async () => {
+test("collectUseUIHooks should Resolve Logical Expressions &&", async () => {
 	const code = `
     import { useUI, useScopedUI } from '@react-zero-ui/core';
 
@@ -131,15 +131,15 @@ test('collectUseUIHooks should Resolve Logical Expressions &&', async () => {
 
     }
   `;
-	const ast = parse(code, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
+	const ast = parse(code, { sourceType: "module", plugins: ["jsx", "typescript"] });
 	const hooks = collectUseUIHooks(ast, code);
 
 	assert.equal(hooks.length, 1);
-	assert.equal(hooks[0].stateKey, 'feature-enabled-2', 'stateKey should be feature-enabled-2');
-	assert.equal(hooks[0].initialValue, 'dark', 'initialValue should be true');
+	assert.equal(hooks[0].stateKey, "feature-enabled-2", "stateKey should be feature-enabled-2");
+	assert.equal(hooks[0].initialValue, "dark", "initialValue should be true");
 });
 
-test('collectUseUIHooks should resolve function-scoped const variables', async () => {
+test("collectUseUIHooks should resolve function-scoped const variables", async () => {
 	const code = `
 import { useUI } from '@react-zero-ui/core';
 
@@ -153,11 +153,11 @@ export const Dashboard: React.FC = () => {
 	);
 };
   `;
-	const ast = parse(code, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
+	const ast = parse(code, { sourceType: "module", plugins: ["jsx", "typescript"] });
 	const hooks = collectUseUIHooks(ast, code);
 
 	assert.equal(hooks.length, 1);
-	assert.equal(hooks[0].stateKey, 'theme-test', 'stateKey should be theme-test');
-	assert.equal(hooks[0].initialValue, 'dark', 'initialValue should be dark');
-	assert.equal(hooks[0].setterFnName, 'setTheme2', 'setterFnName should be setTheme2');
+	assert.equal(hooks[0].stateKey, "theme-test", "stateKey should be theme-test");
+	assert.equal(hooks[0].initialValue, "dark", "initialValue should be dark");
+	assert.equal(hooks[0].setterFnName, "setTheme2", "setterFnName should be setTheme2");
 });

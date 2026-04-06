@@ -1,4 +1,4 @@
-const isClient = typeof window !== 'undefined';
+const isClient = typeof window !== "undefined";
 
 type MediaQueryStore = {
 	/** Latest match result (true / false) */
@@ -32,7 +32,7 @@ export function getMediaQueryStore(breakpoint: number, fn?: () => void): MediaQu
 		fn?.();
 	};
 
-	if (mqList.addEventListener) mqList.addEventListener('change', update);
+	if (mqList.addEventListener) mqList.addEventListener("change", update);
 	// for Safari < 14
 	else if (mqList.addListener) mqList.addListener(update);
 

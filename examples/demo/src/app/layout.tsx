@@ -1,7 +1,7 @@
-import { bodyAttributes } from '@zero-ui/attributes';
-import './globals.css';
-import { TopBarV2 } from './components/TopBar';
-import { Analytics } from '@vercel/analytics/next';
+import { bodyAttributes } from "@zero-ui/attributes";
+import "./globals.css";
+import { TopBarV2 } from "./components/TopBar";
+import { Analytics } from "@vercel/analytics/next";
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
 	return (
@@ -11,7 +11,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 				{...bodyAttributes}>
 				<TopBarV2 />
 				{children}
-				{process.env.NODE_ENV === 'production' && <Analytics />}
+				{process.env.NODE_ENV === "production" && <Analytics />}
 			</body>
 		</html>
 	);

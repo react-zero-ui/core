@@ -1,11 +1,11 @@
-import { test } from 'node:test';
-import assert from 'node:assert';
-import { parse } from '@babel/parser';
-import * as t from '@babel/types';
-import { NodePath } from '@babel/traverse';
-import { literalFromNode, resolveLocalConstIdentifier, resolveTemplateLiteral, resolveMemberExpression, ResolveOpts } from './resolvers.js';
-import { runTest } from './test-utilities.js';
-import traverse from './traverse.cjs';
+import { test } from "node:test";
+import assert from "node:assert";
+import { parse } from "@babel/parser";
+import * as t from "@babel/types";
+import { NodePath } from "@babel/traverse";
+import { literalFromNode, resolveLocalConstIdentifier, resolveTemplateLiteral, resolveMemberExpression, ResolveOpts } from "./resolvers.js";
+import { runTest } from "./test-utilities.js";
+import traverse from "./traverse.cjs";
 
 /*
 Test Coverage:
@@ -49,7 +49,7 @@ Test Coverage:
 
 // Helper to find a specific expression node
 function findExpression(code: string, predicate: (node: t.Node) => boolean): { node: t.Expression; path: NodePath } | null {
-	const ast = parse(code, { sourceType: 'module', plugins: ['jsx', 'typescript'] });
+	const ast = parse(code, { sourceType: "module", plugins: ["jsx", "typescript"] });
 
 	let result: { node: t.Expression; path: NodePath } | null = null;
 
@@ -67,43 +67,43 @@ function findExpression(code: string, predicate: (node: t.Node) => boolean): { n
 }
 
 // Tests for literalFromNode
-test('literalFromNode should resolve string literals', async () => {
+test("literalFromNode should resolve string literals", async () => {
 	await runTest({}, async () => {
 		const code = `const x = "hello world";`;
-		const found = findExpression(code, (n) => t.isStringLiteral(n) && n.value === 'hello world');
+		const found = findExpression(code, (n) => t.isStringLiteral(n) && n.value === "hello world");
 		assert(found);
 
 		const opts: ResolveOpts = { throwOnFail: true, source: code };
 		const result = literalFromNode(found.node, found.path, opts);
-		assert.strictEqual(result, 'hello world');
+		assert.strictEqual(result, "hello world");
 	});
 });
 
-test('literalFromNode should resolve UnaryExpression that results in a string', async () => {
+test("literalFromNode should resolve UnaryExpression that results in a string", async () => {
 	await runTest({}, async () => {
 		const code = `const x = typeof "hello";`;
 		const found = findExpression(
 			code,
-			(n) => t.isUnaryExpression(n) && n.operator === 'typeof' && t.isStringLiteral(n.argument) && n.argument.value === 'hello'
+			(n) => t.isUnaryExpression(n) && n.operator === "typeof" && t.isStringLiteral(n.argument) && n.argument.value === "hello"
 		);
 		assert(found);
 
 		const opts: ResolveOpts = { throwOnFail: true, source: code };
 		const result = literalFromNode(found.node, found.path, opts);
-		assert.strictEqual(result, 'string');
+		assert.strictEqual(result, "string");
 	});
 });
 
-test('literalFromNode should resolve UnaryExpression coerced in TemplateLiteral', async () => {
+test("literalFromNode should resolve UnaryExpression coerced in TemplateLiteral", async () => {
 	await runTest({}, async () => {
-		const code = 'const x = `${!true}`;';
+		const code = "const x = `${!true}`;";
 		const found = findExpression(
 			code,
 			(n) =>
 				t.isTemplateLiteral(n) &&
 				n.expressions.length === 1 &&
 				t.isUnaryExpression(n.expressions[0]) &&
-				n.expressions[0].operator === '!' &&
+				n.expressions[0].operator === "!" &&
 				t.isBooleanLiteral(n.expressions[0].argument) &&
 				n.expressions[0].argument.value === true
 		);
@@ -111,20 +111,20 @@ test('literalFromNode should resolve UnaryExpression coerced in TemplateLiteral'
 
 		const opts: ResolveOpts = { throwOnFail: true, source: code };
 		const result = literalFromNode(found.node, found.path, opts);
-		assert.strictEqual(result, 'false');
+		assert.strictEqual(result, "false");
 	});
 });
 
-test('literalFromNode should resolve !false inside TemplateLiteral', async () => {
+test("literalFromNode should resolve !false inside TemplateLiteral", async () => {
 	await runTest({}, async () => {
-		const code = 'const x = `flag is: ${!false}`;';
+		const code = "const x = `flag is: ${!false}`;";
 		const found = findExpression(
 			code,
 			(n) =>
 				t.isTemplateLiteral(n) &&
 				n.expressions.length === 1 &&
 				t.isUnaryExpression(n.expressions[0]) &&
-				n.expressions[0].operator === '!' &&
+				n.expressions[0].operator === "!" &&
 				t.isBooleanLiteral(n.expressions[0].argument) &&
 				n.expressions[0].argument.value === false
 		);
@@ -132,13 +132,13 @@ test('literalFromNode should resolve !false inside TemplateLiteral', async () =>
 
 		const opts: ResolveOpts = { throwOnFail: true, source: code };
 		const result = literalFromNode(found.node, found.path, opts);
-		assert.strictEqual(result, 'flag is: true');
+		assert.strictEqual(result, "flag is: true");
 	});
 });
 
-test('literalFromNode should resolve multiple UnaryExpressions inside TemplateLiteral', async () => {
+test("literalFromNode should resolve multiple UnaryExpressions inside TemplateLiteral", async () => {
 	await runTest({}, async () => {
-		const code = 'const x = `${+true}${-2}${typeof null}`;';
+		const code = "const x = `${+true}${-2}${typeof null}`;";
 		const found = findExpression(
 			code,
 			(n) =>
@@ -152,26 +152,26 @@ test('literalFromNode should resolve multiple UnaryExpressions inside TemplateLi
 
 		const opts: ResolveOpts = { throwOnFail: true, source: code };
 		const result = literalFromNode(found.node, found.path, opts);
-		assert.strictEqual(result, '1-2object');
+		assert.strictEqual(result, "1-2object");
 	});
 });
 
-test('literalFromNode should resolve typeof null inside TemplateLiteral', async () => {
+test("literalFromNode should resolve typeof null inside TemplateLiteral", async () => {
 	await runTest({}, async () => {
-		const code = 'const x = `type: ${typeof null}`;';
+		const code = "const x = `type: ${typeof null}`;";
 		const found = findExpression(
 			code,
-			(n) => t.isTemplateLiteral(n) && n.expressions.length === 1 && t.isUnaryExpression(n.expressions[0]) && n.expressions[0].operator === 'typeof'
+			(n) => t.isTemplateLiteral(n) && n.expressions.length === 1 && t.isUnaryExpression(n.expressions[0]) && n.expressions[0].operator === "typeof"
 		);
 		assert(found);
 
 		const opts: ResolveOpts = { throwOnFail: true, source: code };
 		const result = literalFromNode(found.node, found.path, opts);
-		assert.strictEqual(result, 'type: object');
+		assert.strictEqual(result, "type: object");
 	});
 });
 
-test('literalFromNode should resolve !someConst with local const', async () => {
+test("literalFromNode should resolve !someConst with local const", async () => {
 	await runTest({}, async () => {
 		const code = `
 			const someConst = true;
@@ -184,30 +184,30 @@ test('literalFromNode should resolve !someConst with local const', async () => {
 				n.expressions.length === 1 &&
 				t.isUnaryExpression(n.expressions[0]) &&
 				t.isIdentifier(n.expressions[0].argument) &&
-				n.expressions[0].operator === '!'
+				n.expressions[0].operator === "!"
 		);
 		assert(found);
 
 		const opts: ResolveOpts = { throwOnFail: true, source: code };
 		const result = literalFromNode(found.node, found.path, opts);
-		assert.strictEqual(result, 'prefix-false');
+		assert.strictEqual(result, "prefix-false");
 	});
 });
 
-test('literalFromNode should resolve UnaryExpressions to strings', async () => {
+test("literalFromNode should resolve UnaryExpressions to strings", async () => {
 	const cases = [
-		{ description: 'typeof "hello"', code: `const x = typeof "hello";`, expected: 'string' },
-		{ description: '+42 coerced to string', code: 'const x = `${+42}`;', expected: '42' },
-		{ description: '-5 coerced to string', code: 'const x = `${-5}`;', expected: '-5' },
-		{ description: '!false coerced to string', code: 'const x = `${!false}`;', expected: 'true' },
-		{ description: 'void 0 coerced to string', code: 'const x = `${void 0}`;', expected: 'undefined' },
+		{ description: 'typeof "hello"', code: `const x = typeof "hello";`, expected: "string" },
+		{ description: "+42 coerced to string", code: "const x = `${+42}`;", expected: "42" },
+		{ description: "-5 coerced to string", code: "const x = `${-5}`;", expected: "-5" },
+		{ description: "!false coerced to string", code: "const x = `${!false}`;", expected: "true" },
+		{ description: "void 0 coerced to string", code: "const x = `${void 0}`;", expected: "undefined" },
 	];
 
 	await runTest({}, async () => {
 		for (const testCase of cases) {
 			const { code, expected, description } = testCase;
 
-			const found = findExpression(code, (n) => t.isTemplateLiteral(n) || (t.isUnaryExpression(n) && ['typeof', '+', '-', '!', 'void'].includes(n.operator)));
+			const found = findExpression(code, (n) => t.isTemplateLiteral(n) || (t.isUnaryExpression(n) && ["typeof", "+", "-", "!", "void"].includes(n.operator)));
 			assert(found, `Expected expression for: ${description}`);
 
 			const opts: ResolveOpts = { throwOnFail: true, source: code };
@@ -218,31 +218,31 @@ test('literalFromNode should resolve UnaryExpressions to strings', async () => {
 	});
 });
 
-test('literalFromNode should resolve template literals with no expressions', async () => {
+test("literalFromNode should resolve template literals with no expressions", async () => {
 	await runTest({}, async () => {
-		const code = 'const x = `hello world`;';
+		const code = "const x = `hello world`;";
 		const found = findExpression(code, (n) => t.isTemplateLiteral(n));
 		assert(found);
 
 		const opts: ResolveOpts = { throwOnFail: true, source: code };
 		const result = literalFromNode(found.node, found.path, opts);
-		assert.strictEqual(result, 'hello world');
+		assert.strictEqual(result, "hello world");
 	});
 });
 
-test('literalFromNode should return null or throw on invalid UnaryExpressions', async () => {
+test("literalFromNode should return null or throw on invalid UnaryExpressions", async () => {
 	const cases = [
-		{ description: 'typeof function call (dynamic)', code: `const x = typeof getValue();`, shouldThrow: false, expectedResult: null },
-		{ description: 'typeof runtime identifier (undeclared)', code: `const x = typeof runtimeValue;`, shouldThrow: false, expectedResult: null },
-		{ description: '+imported identifier (illegal)', code: `import { value } from './lib.js'; const x = \`\${+value}\`;`, shouldThrow: true },
-		{ description: 'Unary ! with non-const identifier', code: `let flag = true; const x = \`\${!flag}\`;`, shouldThrow: false, expectedResult: null },
-		{ description: 'typeof Symbol() (non-serializable)', code: `const x = \`\${typeof Symbol()}\`;`, shouldThrow: false, expectedResult: null },
+		{ description: "typeof function call (dynamic)", code: `const x = typeof getValue();`, shouldThrow: false, expectedResult: null },
+		{ description: "typeof runtime identifier (undeclared)", code: `const x = typeof runtimeValue;`, shouldThrow: false, expectedResult: null },
+		{ description: "+imported identifier (illegal)", code: `import { value } from './lib.js'; const x = \`\${+value}\`;`, shouldThrow: true },
+		{ description: "Unary ! with non-const identifier", code: `let flag = true; const x = \`\${!flag}\`;`, shouldThrow: false, expectedResult: null },
+		{ description: "typeof Symbol() (non-serializable)", code: `const x = \`\${typeof Symbol()}\`;`, shouldThrow: false, expectedResult: null },
 	];
 
 	await runTest({}, async () => {
 		for (const testCase of cases) {
 			const { code, description, shouldThrow } = testCase;
-			const found = findExpression(code, (n) => t.isTemplateLiteral(n) || (t.isUnaryExpression(n) && ['typeof', '+', '-', '!', 'void'].includes(n.operator)));
+			const found = findExpression(code, (n) => t.isTemplateLiteral(n) || (t.isUnaryExpression(n) && ["typeof", "+", "-", "!", "void"].includes(n.operator)));
 			assert(found, `Expected expression for: ${description}`);
 
 			const opts: ResolveOpts = { throwOnFail: shouldThrow, source: code };
@@ -266,7 +266,7 @@ test('literalFromNode should return null or throw on invalid UnaryExpressions', 
 });
 
 // Conditional Expression
-test('literalFromNode should handle ConditionalExpression', async () => {
+test("literalFromNode should handle ConditionalExpression", async () => {
 	await runTest({}, async () => {
 		const code = `
 			const x = true ? "isTrue" : "isFalse";
@@ -276,32 +276,32 @@ test('literalFromNode should handle ConditionalExpression', async () => {
 
 		const opts: ResolveOpts = { throwOnFail: true, source: code };
 		const result = literalFromNode(found.node as t.ConditionalExpression, found.path, opts);
-		assert.strictEqual(result, 'isTrue');
+		assert.strictEqual(result, "isTrue");
 	});
 });
 
-test('literalFromNode should resolve binary string concatenation', async () => {
+test("literalFromNode should resolve binary string concatenation", async () => {
 	await runTest({}, async () => {
 		const code = `const x = "hello" + " " + "world";`;
-		const found = findExpression(code, (n) => t.isBinaryExpression(n) && n.operator === '+');
+		const found = findExpression(code, (n) => t.isBinaryExpression(n) && n.operator === "+");
 		assert(found);
 
 		const opts: ResolveOpts = { throwOnFail: true, source: code };
 		const result = literalFromNode(found.node, found.path, opts);
-		assert.strictEqual(result, 'hello world');
+		assert.strictEqual(result, "hello world");
 	});
 });
 
-test('literalFromNode should resolve various LogicalExpressions to strings', async () => {
+test("literalFromNode should resolve various LogicalExpressions to strings", async () => {
 	const cases = [
-		{ description: 'OR: undefined || "default"', code: `const undef=undefined; const x = undef || "default";`, expected: 'default' },
-		{ description: 'OR: "primary" || "fallback"', code: `const x = "primary" || "fallback";`, expected: 'primary' },
-		{ description: 'OR: null || undefined || "final"', code: `const n=null; const undef=undefined; const x = n || undef || "final";`, expected: 'final' },
-		{ description: 'OR: null || fallback identifier', code: `const fallback = "default"; const x = null || fallback;`, expected: 'default' },
-		{ description: 'OR: null || fallback identifier', code: `const fallback = "default"; const x = null || fallback;`, expected: 'default' },
-		{ description: 'AND: "truthy" && "final"', code: `const x = "truthy" && "final";`, expected: 'final' },
-		{ description: 'Nullish: null ?? "default"', code: `const x = null ?? "default";`, expected: 'default' },
-		{ description: 'Nullish: "set" ?? "default"', code: `const x = "set" ?? "default";`, expected: 'set' },
+		{ description: 'OR: undefined || "default"', code: `const undef=undefined; const x = undef || "default";`, expected: "default" },
+		{ description: 'OR: "primary" || "fallback"', code: `const x = "primary" || "fallback";`, expected: "primary" },
+		{ description: 'OR: null || undefined || "final"', code: `const n=null; const undef=undefined; const x = n || undef || "final";`, expected: "final" },
+		{ description: "OR: null || fallback identifier", code: `const fallback = "default"; const x = null || fallback;`, expected: "default" },
+		{ description: "OR: null || fallback identifier", code: `const fallback = "default"; const x = null || fallback;`, expected: "default" },
+		{ description: 'AND: "truthy" && "final"', code: `const x = "truthy" && "final";`, expected: "final" },
+		{ description: 'Nullish: null ?? "default"', code: `const x = null ?? "default";`, expected: "default" },
+		{ description: 'Nullish: "set" ?? "default"', code: `const x = "set" ?? "default";`, expected: "set" },
 	];
 
 	await runTest({}, async () => {
@@ -319,37 +319,37 @@ test('literalFromNode should resolve various LogicalExpressions to strings', asy
 	});
 });
 
-test('literalFromNode should resolve nullish coalescing', async () => {
+test("literalFromNode should resolve nullish coalescing", async () => {
 	await runTest({}, async () => {
 		const code = `
 			const fallback = "default";
 			const x = null ?? fallback;
 		`;
-		const found = findExpression(code, (n) => t.isLogicalExpression(n) && n.operator === '??');
+		const found = findExpression(code, (n) => t.isLogicalExpression(n) && n.operator === "??");
 		assert(found);
 
 		const opts: ResolveOpts = { throwOnFail: true, source: code };
 		const result = literalFromNode(found.node, found.path, opts);
-		assert.strictEqual(result, 'default');
+		assert.strictEqual(result, "default");
 	});
 });
 
-test('literalFromNode should resolve identifiers bound to const', async () => {
+test("literalFromNode should resolve identifiers bound to const", async () => {
 	await runTest({}, async () => {
 		const code = `
 			const THEME = "dark";
 			const x = THEME;
 		`;
-		const found = findExpression(code, (n) => t.isIdentifier(n) && n.name === 'THEME');
+		const found = findExpression(code, (n) => t.isIdentifier(n) && n.name === "THEME");
 		assert(found);
 
 		const opts: ResolveOpts = { throwOnFail: true, source: code };
 		const result = literalFromNode(found.node, found.path, opts);
-		assert.strictEqual(result, 'dark');
+		assert.strictEqual(result, "dark");
 	});
 });
 
-test('literalFromNode should resolve template literals with expressions', async () => {
+test("literalFromNode should resolve template literals with expressions", async () => {
 	await runTest({}, async () => {
 		const code = `
 			const prefix = "hello";
@@ -361,11 +361,11 @@ test('literalFromNode should resolve template literals with expressions', async 
 
 		const opts: ResolveOpts = { throwOnFail: true, source: code };
 		const result = literalFromNode(found.node, found.path, opts);
-		assert.strictEqual(result, 'hello world');
+		assert.strictEqual(result, "hello world");
 	});
 });
 
-test('literalFromNode should return null for non-literal expressions', async () => {
+test("literalFromNode should return null for non-literal expressions", async () => {
 	await runTest({}, async () => {
 		const code = `const x = someFunction();`;
 		const found = findExpression(code, (n) => t.isCallExpression(n));
@@ -377,10 +377,10 @@ test('literalFromNode should return null for non-literal expressions', async () 
 	});
 });
 
-test('literalFromNode should resolve ArrayExpression values via static index access', async () => {
+test("literalFromNode should resolve ArrayExpression values via static index access", async () => {
 	const cases = [
-		{ description: 'array access with numeric index', code: `const COLORS = ["red", "green", "blue"]; const x = COLORS[1];`, expected: 'green' },
-		{ description: 'array access with numeric index', code: `const idx = 0; const COLORS = ["red", "green", "blue"]; const x = COLORS[idx];`, expected: 'red' },
+		{ description: "array access with numeric index", code: `const COLORS = ["red", "green", "blue"]; const x = COLORS[1];`, expected: "green" },
+		{ description: "array access with numeric index", code: `const idx = 0; const COLORS = ["red", "green", "blue"]; const x = COLORS[idx];`, expected: "red" },
 		// { description: 'nested object in array access', code: `const THEMES = [{ name: "light" }, { name: "dark" }]; const x = THEMES[1].name;`, expected: 'dark' },
 		// { description: 'template literal inside array', code: 'const VALUES = [`va${"lue"}`]; const x = VALUES[0];', expected: 'value' },
 		// { description: 'computed numeric index from const', code: `const IDX = 2; const LIST = ["a", "b", 'c']; const x = LIST[IDX];`, expected: 'c' },
@@ -403,37 +403,37 @@ test('literalFromNode should resolve ArrayExpression values via static index acc
 });
 
 // Tests for resolveLocalConstIdentifier
-test('resolveLocalConstIdentifier should resolve const string literals', async () => {
+test("resolveLocalConstIdentifier should resolve const string literals", async () => {
 	await runTest({}, async () => {
 		const code = `
 			const THEME = "dark";
 			const x = THEME;
 		`;
-		const found = findExpression(code, (n) => t.isIdentifier(n) && n.name === 'THEME');
+		const found = findExpression(code, (n) => t.isIdentifier(n) && n.name === "THEME");
 		assert(found);
 
 		const opts: ResolveOpts = { throwOnFail: true, source: code };
 		const result = resolveLocalConstIdentifier(found.node, found.path, opts);
-		assert.strictEqual(result, 'dark');
+		assert.strictEqual(result, "dark");
 	});
 });
 
-test('resolveLocalConstIdentifier should resolve const template literals', async () => {
+test("resolveLocalConstIdentifier should resolve const template literals", async () => {
 	await runTest({}, async () => {
 		const code = `
 			const THEME = \`dark\`;
 			const x = THEME;
 		`;
-		const found = findExpression(code, (n) => t.isIdentifier(n) && n.name === 'THEME');
+		const found = findExpression(code, (n) => t.isIdentifier(n) && n.name === "THEME");
 		assert(found);
 
 		const opts: ResolveOpts = { throwOnFail: true, source: code };
 		const result = resolveLocalConstIdentifier(found.node, found.path, opts);
-		assert.strictEqual(result, 'dark');
+		assert.strictEqual(result, "dark");
 	});
 });
 
-test('resolveLocalConstIdentifier should return null for non-identifier', async () => {
+test("resolveLocalConstIdentifier should return null for non-identifier", async () => {
 	await runTest({}, async () => {
 		const code = `const x = "literal";`;
 		const found = findExpression(code, (n) => t.isStringLiteral(n));
@@ -445,13 +445,13 @@ test('resolveLocalConstIdentifier should return null for non-identifier', async 
 	});
 });
 
-test('resolveLocalConstIdentifier should throw for let/var variables', async () => {
+test("resolveLocalConstIdentifier should throw for let/var variables", async () => {
 	await runTest({}, async () => {
 		const code = `
 			let THEME = "dark";
 			const x = THEME;
 		`;
-		const found = findExpression(code, (n) => t.isIdentifier(n) && n.name === 'THEME');
+		const found = findExpression(code, (n) => t.isIdentifier(n) && n.name === "THEME");
 		assert(found);
 
 		const opts: ResolveOpts = { throwOnFail: true, source: code };
@@ -461,16 +461,16 @@ test('resolveLocalConstIdentifier should throw for let/var variables', async () 
 	});
 });
 
-test('resolveLocalConstIdentifier should throw for imported variables', async () => {
+test("resolveLocalConstIdentifier should throw for imported variables", async () => {
 	await runTest({}, async () => {
 		const code = `
 			import { THEME } from './constants';
 			const x = THEME;
 		`;
-		const found = findExpression(code, (n) => t.isIdentifier(n) && n.name === 'THEME' && !(n as any).isDeclaration);
+		const found = findExpression(code, (n) => t.isIdentifier(n) && n.name === "THEME" && !(n as any).isDeclaration);
 		assert(found);
 
-		const opts: ResolveOpts = { throwOnFail: true, source: code, hook: 'stateKey' };
+		const opts: ResolveOpts = { throwOnFail: true, source: code, hook: "stateKey" };
 		assert.throws(() => {
 			resolveLocalConstIdentifier(found.node, found.path, opts);
 		}, /Cannot use imported variables/);
@@ -478,19 +478,19 @@ test('resolveLocalConstIdentifier should throw for imported variables', async ()
 });
 
 // Tests for resolveTemplateLiteral
-test('resolveTemplateLiteral should resolve simple templates', async () => {
+test("resolveTemplateLiteral should resolve simple templates", async () => {
 	await runTest({}, async () => {
-		const code = 'const x = `hello world`;';
+		const code = "const x = `hello world`;";
 		const found = findExpression(code, (n) => t.isTemplateLiteral(n));
 		assert(found);
 
 		const opts: ResolveOpts = { throwOnFail: true, source: code };
 		const result = resolveTemplateLiteral(found.node as t.TemplateLiteral, found.path, literalFromNode, opts);
-		assert.strictEqual(result, 'hello world');
+		assert.strictEqual(result, "hello world");
 	});
 });
 
-test('resolveTemplateLiteral should resolve templates with const expressions', async () => {
+test("resolveTemplateLiteral should resolve templates with const expressions", async () => {
 	await runTest({}, async () => {
 		const code = `
 			const PREFIX = "hello";
@@ -502,11 +502,11 @@ test('resolveTemplateLiteral should resolve templates with const expressions', a
 
 		const opts: ResolveOpts = { throwOnFail: true, source: code };
 		const result = resolveTemplateLiteral(found.node as t.TemplateLiteral, found.path, literalFromNode, opts);
-		assert.strictEqual(result, 'hello world');
+		assert.strictEqual(result, "hello world");
 	});
 });
 
-test('resolveTemplateLiteral should handle nested templates', async () => {
+test("resolveTemplateLiteral should handle nested templates", async () => {
 	await runTest({}, async () => {
 		const code = `
 			const inner = "world";
@@ -517,13 +517,13 @@ test('resolveTemplateLiteral should handle nested templates', async () => {
 
 		const opts: ResolveOpts = { throwOnFail: true, source: code };
 		const result = resolveTemplateLiteral(found.node as t.TemplateLiteral, found.path, literalFromNode, opts);
-		assert.strictEqual(result, 'hello world');
+		assert.strictEqual(result, "hello world");
 	});
 });
 
-test('resolveTemplateLiteral should throw for dynamic expressions', async () => {
+test("resolveTemplateLiteral should throw for dynamic expressions", async () => {
 	await runTest({}, async () => {
-		const code = 'const x = `hello ${someFunction()}`;';
+		const code = "const x = `hello ${someFunction()}`;";
 		const found = findExpression(code, (n) => t.isTemplateLiteral(n) && n.expressions.length > 0);
 		assert(found);
 
@@ -536,37 +536,37 @@ test('resolveTemplateLiteral should throw for dynamic expressions', async () => 
 
 // Tests for resolveMemberExpression
 
-test('resolveMemberExpression should handle valid and invalid member expressions', async () => {
+test("resolveMemberExpression should handle valid and invalid member expressions", async () => {
 	const cases = [
 		{
-			description: 'simple object property',
+			description: "simple object property",
 			code: `const THEMES = { dark: "dark-theme", light: "light-theme" }; const x = THEMES.dark;`,
-			expected: 'dark-theme',
+			expected: "dark-theme",
 		},
 		{
-			description: 'computed property access',
+			description: "computed property access",
 			code: `const THEMES = { dark: "dark-theme", light: "light-theme" }; const x = THEMES["dark"];`,
-			expected: 'dark-theme',
+			expected: "dark-theme",
 		},
 		{
-			description: 'nested object property',
+			description: "nested object property",
 			code: `const THEMES = { brand: { primary: "blue", secondary: "green" } }; const x = THEMES.brand.primary;`,
-			expected: 'blue',
+			expected: "blue",
 		},
-		{ description: 'array access by index', code: `const COLORS = ["red", "green", "blue"]; const x = COLORS[1];`, expected: 'green' },
-		{ description: 'optional member expression', code: `const THEMES = { dark: "dark-theme" }; const x = THEMES?.dark;`, expected: 'dark-theme' },
+		{ description: "array access by index", code: `const COLORS = ["red", "green", "blue"]; const x = COLORS[1];`, expected: "green" },
+		{ description: "optional member expression", code: `const THEMES = { dark: "dark-theme" }; const x = THEMES?.dark;`, expected: "dark-theme" },
 		{
-			description: 'computed property using const identifier',
+			description: "computed property using const identifier",
 			code: `const KEY = "dark"; const THEMES = { dark: "dark-theme" }; const x = THEMES[KEY];`,
-			expected: 'dark-theme',
+			expected: "dark-theme",
 		},
-		{ description: 'TypeScript const assertion', code: `const THEMES = { dark: "dark-theme" } as const; const x = THEMES.dark;`, expected: 'dark-theme' },
+		{ description: "TypeScript const assertion", code: `const THEMES = { dark: "dark-theme" } as const; const x = THEMES.dark;`, expected: "dark-theme" },
 		{
-			description: 'nonexistent property should throw',
+			description: "nonexistent property should throw",
 			code: `const THEMES = { dark: "dark-theme" }; const x = THEMES.nonexistent;`,
 			shouldThrow: /cannot be resolved at build-time/,
 		},
-		{ description: 'imported object should throw', code: `import { THEMES } from './constants'; const x = THEMES.dark;`, shouldThrow: /Zero-UI/ },
+		{ description: "imported object should throw", code: `import { THEMES } from './constants'; const x = THEMES.dark;`, shouldThrow: /Zero-UI/ },
 	];
 
 	await runTest({}, async () => {
@@ -594,12 +594,12 @@ test('resolveMemberExpression should handle valid and invalid member expressions
 	});
 });
 
-test.skip('literalFromNode should resolve NumericLiterals bound to const identifiers', async () => {
+test.skip("literalFromNode should resolve NumericLiterals bound to const identifiers", async () => {
 	const cases = [
-		{ description: 'const binding to numeric literal', code: `const IDX = 2; const x = IDX;`, expected: '2' },
-		{ description: 'numeric const as object key', code: `const idx = 1; const M = { "1": "yes", 2: "no" }; const x = M[idx];`, expected: 'yes' },
+		{ description: "const binding to numeric literal", code: `const IDX = 2; const x = IDX;`, expected: "2" },
+		{ description: "numeric const as object key", code: `const idx = 1; const M = { "1": "yes", 2: "no" }; const x = M[idx];`, expected: "yes" },
 		{
-			description: 'rejected let-bound numeric literal',
+			description: "rejected let-bound numeric literal",
 			code: `let IDX = 0; const LIST = ["a", "b"]; const x = LIST[IDX];`,
 			shouldThrow: /Only top-level `const` variables are allowed/,
 		},
@@ -630,15 +630,15 @@ test.skip('literalFromNode should resolve NumericLiterals bound to const identif
 	});
 });
 
-test.skip('literalFromNode should resolve NumericLiterals bound to const identifiers', async () => {
+test.skip("literalFromNode should resolve NumericLiterals bound to const identifiers", async () => {
 	const cases = [
 		{
-			description: 'object access with boolean identifier',
+			description: "object access with boolean identifier",
 			code: `const T = true; const M = { "true": "yes", "false": "no" }; const x = M[T];`,
-			expected: 'yes',
+			expected: "yes",
 		},
 		// { description: 'boolean literal as key', code: `const x = { true: 'yes' }[true];`, expected: 'yes' },
-		{ description: 'boolean const used as key', code: `const FLAG = "false"; const x = { true: 'yes', false: 'no' }[FLAG];`, expected: 'no' },
+		{ description: "boolean const used as key", code: `const FLAG = "false"; const x = { true: 'yes', false: 'no' }[FLAG];`, expected: "no" },
 	];
 
 	await runTest({}, async () => {
@@ -654,10 +654,10 @@ test.skip('literalFromNode should resolve NumericLiterals bound to const identif
 	});
 });
 
-test('literalFromNode should resolve SequenceExpression values', async () => {
+test("literalFromNode should resolve SequenceExpression values", async () => {
 	const cases = [
-		{ description: 'sequence returns last string literal', code: `const doSomething = () => {}; const x = (doSomething(), "hello");`, expected: 'hello' },
-		{ description: 'sequence returns last numeric literal', code: `const doSomething = () => {}; const x = (doSomething(), "42");`, expected: '42' },
+		{ description: "sequence returns last string literal", code: `const doSomething = () => {}; const x = (doSomething(), "hello");`, expected: "hello" },
+		{ description: "sequence returns last numeric literal", code: `const doSomething = () => {}; const x = (doSomething(), "42");`, expected: "42" },
 	];
 
 	await runTest({}, async () => {

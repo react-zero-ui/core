@@ -1,21 +1,21 @@
-const postcss = require('postcss');
-const { test } = require('node:test');
-const assert = require('node:assert');
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
+const postcss = require("postcss");
+const { test } = require("node:test");
+const assert = require("node:assert");
+const fs = require("fs");
+const path = require("path");
+const os = require("os");
 //  This file is the entry point for the react-zero-ui library, that uses postcss to trigger the build process
-const plugin = require('../../dist/postcss/index.cjs');
+const plugin = require("../../dist/postcss/index.cjs");
 
-const { patchTsConfig, toKebabCase, patchPostcssConfig, patchViteConfig } = require('../../dist/postcss/helpers.js');
+const { patchTsConfig, toKebabCase, patchPostcssConfig, patchViteConfig } = require("../../dist/postcss/helpers.js");
 
 function getAttrFile() {
-	return path.join(process.cwd(), '.zero-ui', 'attributes.js');
+	return path.join(process.cwd(), ".zero-ui", "attributes.js");
 }
 
 // Helper to create temp directory and run test
 async function runTest(files, callback, cache = true) {
-	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-test'));
+	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-test"));
 	const originalCwd = process.cwd();
 
 	try {
@@ -24,7 +24,7 @@ async function runTest(files, callback, cache = true) {
 		// Clear the global file cache to prevent stale entries from previous tests
 		if (cache) {
 			try {
-				const astParsing = require('../../dist/postcss/ast-parsing.js');
+				const astParsing = require("../../dist/postcss/ast-parsing.js");
 				astParsing.clearCache();
 			} catch {
 				// Cache clearing is best-effort
@@ -34,7 +34,7 @@ async function runTest(files, callback, cache = true) {
 		// Create test files
 		for (const [filePath, content] of Object.entries(files)) {
 			const dir = path.dirname(filePath);
-			if (dir !== '.') {
+			if (dir !== ".") {
 				fs.mkdirSync(dir, { recursive: true });
 			}
 			fs.writeFileSync(filePath, content);
@@ -46,12 +46,12 @@ async function runTest(files, callback, cache = true) {
 		}
 
 		// Run PostCSS
-		const result = await postcss([plugin()]).process('', { from: undefined });
+		const result = await postcss([plugin()]).process("", { from: undefined });
 
 		// Run assertions
 		await callback(result);
 	} catch (e) {
-		console.log('error in runTest: ', e.message);
+		console.log("error in runTest: ", e.message);
 		console.log(e.stack);
 		throw e;
 	} finally {
@@ -67,10 +67,10 @@ async function runTest(files, callback, cache = true) {
 	}
 }
 
-test('generates body attributes file correctly', async () => {
+test("generates body attributes file correctly", async () => {
 	await runTest(
 		{
-			'app/test.jsx': `
+			"app/test.jsx": `
       import { useUI } from '@react-zero-ui/core';
       
       function Component() {
@@ -82,24 +82,24 @@ test('generates body attributes file correctly', async () => {
 		},
 		() => {
 			// Check attributes file exists
-			assert(fs.existsSync(getAttrFile()), 'Attributes file should exist');
+			assert(fs.existsSync(getAttrFile()), "Attributes file should exist");
 
 			// Read and parse attributes
-			const content = fs.readFileSync(getAttrFile(), 'utf-8');
-			console.log('\n📄 Generated attributes file:');
+			const content = fs.readFileSync(getAttrFile(), "utf-8");
+			console.log("\n📄 Generated attributes file:");
 
 			// Verify content
-			assert(content.includes('export const bodyAttributes'), 'Should export bodyAttributes');
-			assert(content.includes('"data-theme": "light"'), 'Should have theme attribute');
-			assert(content.includes('"data-sidebar": "expanded"'), 'Should have sidebar attribute');
+			assert(content.includes("export const bodyAttributes"), "Should export bodyAttributes");
+			assert(content.includes('"data-theme": "light"'), "Should have theme attribute");
+			assert(content.includes('"data-sidebar": "expanded"'), "Should have sidebar attribute");
 		}
 	);
 });
 
-test('warns instead of auto-initializing when project setup is missing', async () => {
+test("warns instead of auto-initializing when project setup is missing", async () => {
 	await runTest(
 		{
-			'app/test.jsx': `
+			"app/test.jsx": `
       import { useUI } from '@react-zero-ui/core';
 
       function Component() {
@@ -109,26 +109,24 @@ test('warns instead of auto-initializing when project setup is missing', async (
     `,
 		},
 		(result) => {
-			assert(fs.existsSync(getAttrFile()), 'Attributes file should still be generated');
-			assert(!fs.existsSync('postcss.config.js'), 'PostCSS plugin should not create postcss.config.js');
-			assert(!fs.existsSync('postcss.config.mjs'), 'PostCSS plugin should not create postcss.config.mjs');
-			assert(!fs.existsSync('tsconfig.json'), 'PostCSS plugin should not patch tsconfig');
+			assert(fs.existsSync(getAttrFile()), "Attributes file should still be generated");
+			assert(!fs.existsSync("postcss.config.js"), "PostCSS plugin should not create postcss.config.js");
+			assert(!fs.existsSync("postcss.config.mjs"), "PostCSS plugin should not create postcss.config.mjs");
+			assert(!fs.existsSync("tsconfig.json"), "PostCSS plugin should not patch tsconfig");
 
 			const warnings = result.warnings().map((warning) => warning.text);
 			assert(
-				warnings.some(
-					(text) => text.includes('Zero UI is not initialized') && text.includes('react-zero-ui')
-				),
-				'Expected a setup warning instead of auto-initialization'
+				warnings.some((text) => text.includes("Zero UI is not initialized") && text.includes("react-zero-ui")),
+				"Expected a setup warning instead of auto-initialization"
 			);
 		}
 	);
 });
 
-test('generates body attributes file correctly when kebab-case is used', async () => {
+test("generates body attributes file correctly when kebab-case is used", async () => {
 	await runTest(
 		{
-			'app/test.jsx': `
+			"app/test.jsx": `
       import { useUI } from '@react-zero-ui/core';
       
       function Component() {
@@ -144,29 +142,29 @@ test('generates body attributes file correctly when kebab-case is used', async (
 		},
 		() => {
 			// Check attributes file exists
-			assert(fs.existsSync(getAttrFile()), 'Attributes file should exist');
+			assert(fs.existsSync(getAttrFile()), "Attributes file should exist");
 
-			const content = fs.readFileSync(getAttrFile(), 'utf-8');
+			const content = fs.readFileSync(getAttrFile(), "utf-8");
 
 			// Verify content
-			assert(content.includes('export const bodyAttributes'), 'Should export bodyAttributes');
-			assert(content.includes('"data-theme-secondary": "light"'), 'Should have theme-secondary attribute');
-			assert(content.includes('"data-sidebar-new": "expanded"'), 'Should have sidebar-new attribute');
+			assert(content.includes("export const bodyAttributes"), "Should export bodyAttributes");
+			assert(content.includes('"data-theme-secondary": "light"'), "Should have theme-secondary attribute");
+			assert(content.includes('"data-sidebar-new": "expanded"'), "Should have sidebar-new attribute");
 		}
 	);
 });
 
-test('handles multiple files and deduplication', async () => {
+test("handles multiple files and deduplication", async () => {
 	await runTest(
 		{
-			'src/header.jsx': `
+			"src/header.jsx": `
       import { useUI } from '@react-zero-ui/core';
       function Header() {
         const [theme, setTheme] = useUI('theme', 'light');
         return <button className="theme-light:bg-white theme-dark:bg-black" >Dark</button>;
       }
     `,
-			'src/footer.jsx': `
+			"src/footer.jsx": `
       import { useUI } from '@react-zero-ui/core';
       function Footer() {
         const [theme, setTheme] = useUI('theme', 'light');
@@ -177,7 +175,7 @@ test('handles multiple files and deduplication', async () => {
 			</div>;
       }
     `,
-			'app/sidebar.tsx': `
+			"app/sidebar.tsx": `
       import { useUI } from '@react-zero-ui/core';
       function Sidebar() {
         const [theme, setTheme] = useUI<'light' | 'dark' | 'auto'>('theme', 'light');
@@ -190,31 +188,31 @@ test('handles multiple files and deduplication', async () => {
 		},
 		(result) => {
 			// Should combine all theme values from all files
-			const themeVariants = ['light', 'dark', 'blue', 'auto'];
+			const themeVariants = ["light", "dark", "blue", "auto"];
 			themeVariants.forEach((variant) => {
 				assert(result.css.includes(`@custom-variant theme-${variant}`), `Should have theme-${variant}`);
 			});
 
 			// Count occurrences - should be deduplicated
 			const lightCount = (result.css.match(/@custom-variant theme-light/g) || []).length;
-			assert.equal(lightCount, 1, 'Should deduplicate variants');
+			assert.equal(lightCount, 1, "Should deduplicate variants");
 		}
 	);
 });
 
-test('throws on empty string initial value', () => {
-	assert.throws(() => toKebabCase(''));
+test("throws on empty string initial value", () => {
+	assert.throws(() => toKebabCase(""));
 });
 
-test('watches for file changes', async () => {
-	if (process.env.NODE_ENV === 'production') {
-		console.log('Skipping watch test in production');
+test("watches for file changes", async () => {
+	if (process.env.NODE_ENV === "production") {
+		console.log("Skipping watch test in production");
 		return;
 	}
 
 	await runTest(
 		{
-			'src/initial.jsx': `
+			"src/initial.jsx": `
       import { useUI } from '@react-zero-ui/core';
       function Initial() {
         const [state, setState] = useUI('watch-test', 'initial');
@@ -224,11 +222,11 @@ test('watches for file changes', async () => {
 		},
 		async (result) => {
 			// Initial state
-			assert(result.css.includes('@custom-variant watch-test-initial'));
+			assert(result.css.includes("@custom-variant watch-test-initial"));
 
 			// Add a new file
 			fs.writeFileSync(
-				'src/new.jsx',
+				"src/new.jsx",
 				`
       import { useUI } from '@react-zero-ui/core';
       function New() {
@@ -242,31 +240,31 @@ test('watches for file changes', async () => {
 			await new Promise((resolve) => setTimeout(resolve, 500));
 
 			// Re-process to check if watcher picked up changes
-			const result2 = await postcss([plugin()]).process('', { from: undefined });
+			const result2 = await postcss([plugin()]).process("", { from: undefined });
 
-			assert(result2.css.includes('@custom-variant watch-test-updated'), 'Should detect new state');
+			assert(result2.css.includes("@custom-variant watch-test-updated"), "Should detect new state");
 		}
 	);
 });
 
-test('ignores node_modules and hidden directories', async () => {
+test("ignores node_modules and hidden directories", async () => {
 	await runTest(
 		{
-			'src/valid.jsx': `
+			"src/valid.jsx": `
       import { useUI } from '@react-zero-ui/core';
       function Valid() {
         const [state, setState] = useUI('valid', 'yes');
         return <div>Valid</div>;
       }
     `,
-			'node_modules/package/file.jsx': `
+			"node_modules/package/file.jsx": `
       import { useUI } from '@react-zero-ui/core';
       function Ignored() {
         const [state] = useUI('ignored', 'shouldNotAppear');
         return <div>Should be ignored</div>;
       }
     `,
-			'.next/file.jsx': `
+			".next/file.jsx": `
       import { useUI } from '@react-zero-ui/core';
       function Hidden() {
         const [state] = useUI('hidden', 'shouldNotAppear');
@@ -275,16 +273,16 @@ test('ignores node_modules and hidden directories', async () => {
     `,
 		},
 		() => {
-			const attributes = fs.readFileSync(getAttrFile(), 'utf-8');
-			console.log('attributes: ', attributes);
-			assert(attributes.includes('yes'), 'Should process valid files');
-			assert(!attributes.includes('ignored'), 'Should ignore node_modules');
-			assert(!attributes.includes('hidden'), 'Should ignore hidden directories');
+			const attributes = fs.readFileSync(getAttrFile(), "utf-8");
+			console.log("attributes: ", attributes);
+			assert(attributes.includes("yes"), "Should process valid files");
+			assert(!attributes.includes("ignored"), "Should ignore node_modules");
+			assert(!attributes.includes("hidden"), "Should ignore hidden directories");
 		}
 	);
 });
 
-test('handles large projects efficiently - 500 files', async function () {
+test("handles large projects efficiently - 500 files", async function () {
 	const files = {};
 
 	// Generate 50 files
@@ -306,20 +304,20 @@ test('handles large projects efficiently - 500 files', async function () {
 
 		console.log(`\n⚡ Performance: Processed 1000 files in ${duration}ms`);
 
-		const attributes = fs.readFileSync(getAttrFile(), 'utf-8');
+		const attributes = fs.readFileSync(getAttrFile(), "utf-8");
 		// Should process all files
-		assert(attributes.includes('value49'), 'Should process all files');
+		assert(attributes.includes("value49"), "Should process all files");
 
 		// Should complete in reasonable time
-		assert(duration < 1000, 'Should process 1000 files in under 1000ms');
+		assert(duration < 1000, "Should process 1000 files in under 1000ms");
 	});
 });
 
-test('handles concurrent file modifications', async () => {
+test("handles concurrent file modifications", async () => {
 	// Test that rapid changes don't cause issues
 	await runTest(
 		{
-			'src/rapid.jsx': `
+			"src/rapid.jsx": `
       import { useUI } from '@react-zero-ui/core';
       function Rapid() {
         const [count,setCount] = useUI('count', 'zero');
@@ -331,7 +329,7 @@ test('handles concurrent file modifications', async () => {
 			// Simulate rapid file changes
 			for (let i = 0; i < 5; i++) {
 				fs.writeFileSync(
-					'src/rapid.jsx',
+					"src/rapid.jsx",
 					`
         import { useUI } from '@react-zero-ui/core';
         function Rapid() {
@@ -346,36 +344,36 @@ test('handles concurrent file modifications', async () => {
 			}
 
 			// Final processing should work correctly
-			const finalResult = await postcss([plugin()]).process('', { from: undefined });
+			const finalResult = await postcss([plugin()]).process("", { from: undefined });
 
-			assert(finalResult.css.includes('AUTO-GENERATED'), 'Should handle rapid changes');
+			assert(finalResult.css.includes("AUTO-GENERATED"), "Should handle rapid changes");
 		}
 	);
 });
 
-test('patchTsConfig - config file patching', async (t) => {
-	await t.test('patches tsconfig.json when it exists', async () => {
-		const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-config-test'));
+test("patchTsConfig - config file patching", async (t) => {
+	await t.test("patches tsconfig.json when it exists", async () => {
+		const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-config-test"));
 		const originalCwd = process.cwd();
 
 		try {
 			process.chdir(testDir);
 
 			// Create a basic tsconfig.json
-			const tsconfigContent = { compilerOptions: { target: 'ES2015', module: 'ESNext' } };
-			fs.writeFileSync('tsconfig.json', JSON.stringify(tsconfigContent, null, 2));
+			const tsconfigContent = { compilerOptions: { target: "ES2015", module: "ESNext" } };
+			fs.writeFileSync("tsconfig.json", JSON.stringify(tsconfigContent, null, 2));
 
 			// Run patchTsConfig
 			patchTsConfig();
 
 			// Read the updated config
-			const updatedConfig = JSON.parse(fs.readFileSync('tsconfig.json', 'utf-8'));
+			const updatedConfig = JSON.parse(fs.readFileSync("tsconfig.json", "utf-8"));
 			// Verify the path alias was added
-			assert(updatedConfig.compilerOptions.baseUrl === '.', 'Should set baseUrl');
-			assert(updatedConfig.compilerOptions.paths, 'Should have paths object');
+			assert(updatedConfig.compilerOptions.baseUrl === ".", "Should set baseUrl");
+			assert(updatedConfig.compilerOptions.paths, "Should have paths object");
 			assert(
-				JSON.stringify(updatedConfig.compilerOptions.paths['@zero-ui/attributes']) === JSON.stringify(['./.zero-ui/attributes.js']),
-				'Should have correct path alias'
+				JSON.stringify(updatedConfig.compilerOptions.paths["@zero-ui/attributes"]) === JSON.stringify(["./.zero-ui/attributes.js"]),
+				"Should have correct path alias"
 			);
 		} finally {
 			process.chdir(originalCwd);
@@ -383,29 +381,29 @@ test('patchTsConfig - config file patching', async (t) => {
 		}
 	});
 
-	await t.test('patches jsconfig.json when tsconfig.json does not exist', async () => {
-		const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-config-test'));
+	await t.test("patches jsconfig.json when tsconfig.json does not exist", async () => {
+		const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-config-test"));
 		const originalCwd = process.cwd();
 
 		try {
 			process.chdir(testDir);
 
 			// Create a basic jsconfig.json
-			const jsconfigContent = { compilerOptions: { target: 'ES2015' } };
-			fs.writeFileSync('jsconfig.json', JSON.stringify(jsconfigContent, null, 2));
+			const jsconfigContent = { compilerOptions: { target: "ES2015" } };
+			fs.writeFileSync("jsconfig.json", JSON.stringify(jsconfigContent, null, 2));
 
 			// Run patchTsConfig
 			patchTsConfig();
 
 			// Read the updated config
-			const updatedConfig = JSON.parse(fs.readFileSync('jsconfig.json', 'utf-8'));
+			const updatedConfig = JSON.parse(fs.readFileSync("jsconfig.json", "utf-8"));
 
 			// Verify the path alias was added
-			assert(updatedConfig.compilerOptions.baseUrl === '.', 'Should set baseUrl');
-			assert(updatedConfig.compilerOptions.paths, 'Should have paths object');
+			assert(updatedConfig.compilerOptions.baseUrl === ".", "Should set baseUrl");
+			assert(updatedConfig.compilerOptions.paths, "Should have paths object");
 			assert(
-				JSON.stringify(updatedConfig.compilerOptions.paths['@zero-ui/attributes']) === JSON.stringify(['./.zero-ui/attributes.js']),
-				'Should have correct path alias'
+				JSON.stringify(updatedConfig.compilerOptions.paths["@zero-ui/attributes"]) === JSON.stringify(["./.zero-ui/attributes.js"]),
+				"Should have correct path alias"
 			);
 		} finally {
 			process.chdir(originalCwd);
@@ -413,8 +411,8 @@ test('patchTsConfig - config file patching', async (t) => {
 		}
 	});
 
-	await t.test('does nothing when no config files exist', async () => {
-		const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-config-test'));
+	await t.test("does nothing when no config files exist", async () => {
+		const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-config-test"));
 		const originalCwd = process.cwd();
 
 		try {
@@ -424,16 +422,16 @@ test('patchTsConfig - config file patching', async (t) => {
 			patchTsConfig();
 
 			// Verify no files were created
-			assert(!fs.existsSync('tsconfig.json'), 'Should not create tsconfig.json');
-			assert(!fs.existsSync('jsconfig.json'), 'Should not create jsconfig.json');
+			assert(!fs.existsSync("tsconfig.json"), "Should not create tsconfig.json");
+			assert(!fs.existsSync("jsconfig.json"), "Should not create jsconfig.json");
 		} finally {
 			process.chdir(originalCwd);
 			fs.rmSync(testDir, { recursive: true, force: true });
 		}
 	});
 
-	await t.test('handles existing correct path alias', async () => {
-		const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-config-test'));
+	await t.test("handles existing correct path alias", async () => {
+		const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-config-test"));
 		const originalCwd = process.cwd();
 
 		try {
@@ -442,50 +440,50 @@ test('patchTsConfig - config file patching', async (t) => {
 			// Create tsconfig.json with existing correct alias
 			const tsconfigContent = {
 				compilerOptions: {
-					baseUrl: '.',
-					paths: { '@zero-ui/attributes': ['./.zero-ui/attributes.js'], '@/*': ['./src/*'] },
-					include: ['.zero-ui/**/*.d.ts', '.next/**/*.d.ts'],
+					baseUrl: ".",
+					paths: { "@zero-ui/attributes": ["./.zero-ui/attributes.js"], "@/*": ["./src/*"] },
+					include: [".zero-ui/**/*.d.ts", ".next/**/*.d.ts"],
 				},
 			};
-			fs.writeFileSync('tsconfig.json', JSON.stringify(tsconfigContent, null, 2));
-			const originalContent = fs.readFileSync('tsconfig.json', 'utf-8');
+			fs.writeFileSync("tsconfig.json", JSON.stringify(tsconfigContent, null, 2));
+			const originalContent = fs.readFileSync("tsconfig.json", "utf-8");
 
 			// Run patchTsConfig
 			patchTsConfig();
 
 			// Verify the config was not modified
-			const updatedContent = fs.readFileSync('tsconfig.json', 'utf-8');
-			assert.equal(originalContent, updatedContent, 'Should not modify config with correct alias');
+			const updatedContent = fs.readFileSync("tsconfig.json", "utf-8");
+			assert.equal(originalContent, updatedContent, "Should not modify config with correct alias");
 		} finally {
 			process.chdir(originalCwd);
 			fs.rmSync(testDir, { recursive: true, force: true });
 		}
 	});
 
-	await t.test('handles config with missing compilerOptions', async () => {
-		const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-config-test'));
+	await t.test("handles config with missing compilerOptions", async () => {
+		const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-config-test"));
 		const originalCwd = process.cwd();
 
 		try {
 			process.chdir(testDir);
 
 			// Create tsconfig.json without compilerOptions
-			const tsconfigContent = { include: ['src/**/*'] };
-			fs.writeFileSync('tsconfig.json', JSON.stringify(tsconfigContent, null, 2));
+			const tsconfigContent = { include: ["src/**/*"] };
+			fs.writeFileSync("tsconfig.json", JSON.stringify(tsconfigContent, null, 2));
 
 			// Run patchTsConfig
 			patchTsConfig();
 
 			// Read the updated config
-			const updatedConfig = JSON.parse(fs.readFileSync('tsconfig.json', 'utf-8'));
+			const updatedConfig = JSON.parse(fs.readFileSync("tsconfig.json", "utf-8"));
 
 			// Verify compilerOptions was created with correct structure
-			assert(updatedConfig.compilerOptions, 'Should create compilerOptions');
-			assert(updatedConfig.compilerOptions.baseUrl === '.', 'Should set baseUrl');
-			assert(updatedConfig.compilerOptions.paths, 'Should create paths object');
+			assert(updatedConfig.compilerOptions, "Should create compilerOptions");
+			assert(updatedConfig.compilerOptions.baseUrl === ".", "Should set baseUrl");
+			assert(updatedConfig.compilerOptions.paths, "Should create paths object");
 			assert(
-				JSON.stringify(updatedConfig.compilerOptions.paths['@zero-ui/attributes']) === JSON.stringify(['./.zero-ui/attributes.js']),
-				'Should have correct path alias'
+				JSON.stringify(updatedConfig.compilerOptions.paths["@zero-ui/attributes"]) === JSON.stringify(["./.zero-ui/attributes.js"]),
+				"Should have correct path alias"
 			);
 		} finally {
 			process.chdir(originalCwd);
@@ -493,8 +491,8 @@ test('patchTsConfig - config file patching', async (t) => {
 		}
 	});
 
-	await t.test('handles config with comments and trailing commas', async () => {
-		const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-config-test'));
+	await t.test("handles config with comments and trailing commas", async () => {
+		const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-config-test"));
 		const originalCwd = process.cwd();
 
 		try {
@@ -509,17 +507,17 @@ test('patchTsConfig - config file patching', async (t) => {
   },
   "include": ["src/**/*"], // Another comment
 }`;
-			fs.writeFileSync('tsconfig.json', tsconfigContent);
+			fs.writeFileSync("tsconfig.json", tsconfigContent);
 
 			// Run patchTsConfig
 			patchTsConfig();
 
 			// Verify file was updated (should parse despite comments)
-			const updatedConfig = JSON.parse(fs.readFileSync('tsconfig.json', 'utf-8'));
-			assert(updatedConfig.compilerOptions.paths, 'Should create paths object');
+			const updatedConfig = JSON.parse(fs.readFileSync("tsconfig.json", "utf-8"));
+			assert(updatedConfig.compilerOptions.paths, "Should create paths object");
 			assert(
-				JSON.stringify(updatedConfig.compilerOptions.paths['@zero-ui/attributes']) === JSON.stringify(['./.zero-ui/attributes.js']),
-				'Should have correct path alias'
+				JSON.stringify(updatedConfig.compilerOptions.paths["@zero-ui/attributes"]) === JSON.stringify(["./.zero-ui/attributes.js"]),
+				"Should have correct path alias"
 			);
 		} finally {
 			process.chdir(originalCwd);
@@ -527,28 +525,28 @@ test('patchTsConfig - config file patching', async (t) => {
 		}
 	});
 
-	await t.test('patchTsConfig prefers tsconfig.json over jsconfig.json', async () => {
-		const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-config-test'));
+	await t.test("patchTsConfig prefers tsconfig.json over jsconfig.json", async () => {
+		const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-config-test"));
 		const originalCwd = process.cwd();
 
 		try {
 			process.chdir(testDir);
 
 			// Create both config files
-			fs.writeFileSync('tsconfig.json', JSON.stringify({ compilerOptions: {} }, null, 2));
-			fs.writeFileSync('jsconfig.json', JSON.stringify({ compilerOptions: {} }, null, 2));
+			fs.writeFileSync("tsconfig.json", JSON.stringify({ compilerOptions: {} }, null, 2));
+			fs.writeFileSync("jsconfig.json", JSON.stringify({ compilerOptions: {} }, null, 2));
 
 			// Run patchTsConfig
 			patchTsConfig();
 
 			// Verify tsconfig.json was modified
-			const tsconfigContent = JSON.parse(fs.readFileSync('tsconfig.json', 'utf-8'));
-			assert(tsconfigContent.compilerOptions.paths, 'Should modify tsconfig.json');
-			assert(tsconfigContent.compilerOptions.paths['@zero-ui/attributes'], 'Should add alias to tsconfig.json');
+			const tsconfigContent = JSON.parse(fs.readFileSync("tsconfig.json", "utf-8"));
+			assert(tsconfigContent.compilerOptions.paths, "Should modify tsconfig.json");
+			assert(tsconfigContent.compilerOptions.paths["@zero-ui/attributes"], "Should add alias to tsconfig.json");
 
 			// Verify jsconfig.json was not modified
-			const jsconfigContent = JSON.parse(fs.readFileSync('jsconfig.json', 'utf-8'));
-			assert(!jsconfigContent.compilerOptions.paths, 'Should not modify jsconfig.json');
+			const jsconfigContent = JSON.parse(fs.readFileSync("jsconfig.json", "utf-8"));
+			assert(!jsconfigContent.compilerOptions.paths, "Should not modify jsconfig.json");
 		} finally {
 			process.chdir(originalCwd);
 			fs.rmSync(testDir, { recursive: true, force: true });
@@ -557,44 +555,44 @@ test('patchTsConfig - config file patching', async (t) => {
 });
 
 // PostCSS Config Tests
-test('PostCSS config - creates new .js config for Next.js project', async () => {
-	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-postcss-test'));
+test("PostCSS config - creates new .js config for Next.js project", async () => {
+	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-postcss-test"));
 	const originalCwd = process.cwd();
 
 	try {
 		process.chdir(testDir);
 
 		// Create Next.js project indicators
-		fs.writeFileSync('next.config.cjs', 'module.exports = {}');
-		fs.writeFileSync('package.json', JSON.stringify({ dependencies: { next: '^14.0.0' } }));
+		fs.writeFileSync("next.config.cjs", "module.exports = {}");
+		fs.writeFileSync("package.json", JSON.stringify({ dependencies: { next: "^14.0.0" } }));
 
 		// Run patchPostcssConfig
 		patchPostcssConfig();
 
 		// Verify postcss.config.js was created
-		assert(fs.existsSync('postcss.config.js'), 'Should create postcss.config.js');
+		assert(fs.existsSync("postcss.config.js"), "Should create postcss.config.js");
 
-		const configContent = fs.readFileSync('postcss.config.js', 'utf-8');
-		console.log('\n📄 Generated PostCSS config:');
+		const configContent = fs.readFileSync("postcss.config.js", "utf-8");
+		console.log("\n📄 Generated PostCSS config:");
 
-		assert(configContent.includes('@react-zero-ui/core/postcss'), 'Should include Zero-UI plugin');
-		assert(configContent.includes('@tailwindcss/postcss'), 'Should include Tailwind plugin');
-		assert(configContent.includes('module.exports'), 'Should use CommonJS format');
+		assert(configContent.includes("@react-zero-ui/core/postcss"), "Should include Zero-UI plugin");
+		assert(configContent.includes("@tailwindcss/postcss"), "Should include Tailwind plugin");
+		assert(configContent.includes("module.exports"), "Should use CommonJS format");
 	} finally {
 		process.chdir(originalCwd);
 		fs.rmSync(testDir, { recursive: true, force: true });
 	}
 });
 
-test('PostCSS config - updates existing .js config', async () => {
-	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-postcss-test'));
+test("PostCSS config - updates existing .js config", async () => {
+	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-postcss-test"));
 	const originalCwd = process.cwd();
 
 	try {
 		process.chdir(testDir);
 
 		// Create Next.js project
-		fs.writeFileSync('next.config.js', 'module.exports = {}');
+		fs.writeFileSync("next.config.js", "module.exports = {}");
 
 		// Create existing PostCSS config without Zero-UI
 		const existingConfig = `module.exports = {
@@ -603,32 +601,32 @@ test('PostCSS config - updates existing .js config', async () => {
     '@tailwindcss/postcss': {}
   }
 };`;
-		fs.writeFileSync('postcss.config.js', existingConfig);
+		fs.writeFileSync("postcss.config.js", existingConfig);
 
 		// Run patchPostcssConfig
 		patchPostcssConfig();
 
 		// Verify config was updated
-		const updatedContent = fs.readFileSync('postcss.config.js', 'utf-8');
+		const updatedContent = fs.readFileSync("postcss.config.js", "utf-8");
 
-		assert(updatedContent.includes('@react-zero-ui/core/postcss'), 'Should add Zero-UI plugin');
-		assert(updatedContent.includes('autoprefixer'), 'Should preserve existing plugins');
-		assert(updatedContent.includes('@tailwindcss/postcss'), 'Should preserve Tailwind');
+		assert(updatedContent.includes("@react-zero-ui/core/postcss"), "Should add Zero-UI plugin");
+		assert(updatedContent.includes("autoprefixer"), "Should preserve existing plugins");
+		assert(updatedContent.includes("@tailwindcss/postcss"), "Should preserve Tailwind");
 	} finally {
 		process.chdir(originalCwd);
 		fs.rmSync(testDir, { recursive: true, force: true });
 	}
 });
 
-test('PostCSS config - updates existing .mjs config', async () => {
-	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-postcss-test'));
+test("PostCSS config - updates existing .mjs config", async () => {
+	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-postcss-test"));
 	const originalCwd = process.cwd();
 
 	try {
 		process.chdir(testDir);
 
 		// Create Next.js project
-		fs.writeFileSync('next.config.mjs', 'export default {}');
+		fs.writeFileSync("next.config.mjs", "export default {}");
 
 		// Create existing .mjs PostCSS config with array format
 		const existingConfig = `const config = {
@@ -639,32 +637,32 @@ test('PostCSS config - updates existing .mjs config', async () => {
 };
 
 export default config;`;
-		fs.writeFileSync('postcss.config.mjs', existingConfig);
+		fs.writeFileSync("postcss.config.mjs", existingConfig);
 
 		// Run patchPostcssConfig
 		patchPostcssConfig();
 
 		// Verify config was updated
-		const updatedContent = fs.readFileSync('postcss.config.mjs', 'utf-8');
+		const updatedContent = fs.readFileSync("postcss.config.mjs", "utf-8");
 
-		assert(updatedContent.includes('@react-zero-ui/core/postcss'), 'Should add Zero-UI plugin');
-		assert(updatedContent.includes('export default'), 'Should preserve ES module format');
-		assert(updatedContent.includes('autoprefixer'), 'Should preserve existing plugins');
+		assert(updatedContent.includes("@react-zero-ui/core/postcss"), "Should add Zero-UI plugin");
+		assert(updatedContent.includes("export default"), "Should preserve ES module format");
+		assert(updatedContent.includes("autoprefixer"), "Should preserve existing plugins");
 	} finally {
 		process.chdir(originalCwd);
 		fs.rmSync(testDir, { recursive: true });
 	}
 });
 
-test('PostCSS config - handles complex existing configs w/comments', async () => {
-	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-postcss-test'));
+test("PostCSS config - handles complex existing configs w/comments", async () => {
+	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-postcss-test"));
 	const originalCwd = process.cwd();
 
 	try {
 		process.chdir(testDir);
 
 		// Create Next.js project
-		fs.writeFileSync('next.config.js', 'module.exports = {}');
+		fs.writeFileSync("next.config.js", "module.exports = {}");
 
 		// Create complex PostCSS config
 		const complexConfig = `module.exports = {
@@ -682,41 +680,41 @@ test('PostCSS config - handles complex existing configs w/comments', async () =>
     '@tailwindcss/postcss': {}
   }
 };`;
-		fs.writeFileSync('postcss.config.js', complexConfig);
+		fs.writeFileSync("postcss.config.js", complexConfig);
 
 		// Run patchPostcssConfig
 		patchPostcssConfig();
 
 		// Verify Zero-UI was added at the beginning
-		const updatedContent = fs.readFileSync('postcss.config.js', 'utf-8');
+		const updatedContent = fs.readFileSync("postcss.config.js", "utf-8");
 
-		assert(updatedContent.includes('@react-zero-ui/core/postcss'), 'Should add Zero-UI plugin');
-		assert(updatedContent.includes('postcss-flexbugs-fixes'), 'Should preserve existing plugins');
-		assert(updatedContent.includes('postcss-preset-env'), 'Should preserve complex plugin configs');
+		assert(updatedContent.includes("@react-zero-ui/core/postcss"), "Should add Zero-UI plugin");
+		assert(updatedContent.includes("postcss-flexbugs-fixes"), "Should preserve existing plugins");
+		assert(updatedContent.includes("postcss-preset-env"), "Should preserve complex plugin configs");
 
 		// Verify Zero-UI comes before other plugins
-		const zeroUiIndex = updatedContent.indexOf('@react-zero-ui/core/postcss');
-		const tailwindIndex = updatedContent.indexOf('@tailwindcss/postcss');
-		assert(zeroUiIndex < tailwindIndex, 'Zero-UI should come before Tailwind');
+		const zeroUiIndex = updatedContent.indexOf("@react-zero-ui/core/postcss");
+		const tailwindIndex = updatedContent.indexOf("@tailwindcss/postcss");
+		assert(zeroUiIndex < tailwindIndex, "Zero-UI should come before Tailwind");
 	} finally {
 		process.chdir(originalCwd);
 		fs.rmSync(testDir, { recursive: true, force: true });
 	}
 });
 
-test('PostCSS config - prefers .js over .mjs when both exist', async () => {
-	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-postcss-test'));
+test("PostCSS config - prefers .js over .mjs when both exist", async () => {
+	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-postcss-test"));
 	const originalCwd = process.cwd();
 
 	try {
 		process.chdir(testDir);
 
 		// Create Next.js project
-		fs.writeFileSync('next.config.js', 'module.exports = {}');
+		fs.writeFileSync("next.config.js", "module.exports = {}");
 
 		// Create both .js and .mjs configs
 		fs.writeFileSync(
-			'postcss.config.js',
+			"postcss.config.js",
 			`module.exports = {
   plugins: {
     '@tailwindcss/postcss': {}
@@ -725,7 +723,7 @@ test('PostCSS config - prefers .js over .mjs when both exist', async () => {
 		);
 
 		fs.writeFileSync(
-			'postcss.config.mjs',
+			"postcss.config.mjs",
 			`const config = {
   plugins: [
     '@tailwindcss/postcss'
@@ -735,21 +733,21 @@ test('PostCSS config - prefers .js over .mjs when both exist', async () => {
 export default config;`
 		);
 
-		const originalJsContent = fs.readFileSync('postcss.config.js', 'utf-8');
-		const originalMjsContent = fs.readFileSync('postcss.config.mjs', 'utf-8');
+		const originalJsContent = fs.readFileSync("postcss.config.js", "utf-8");
+		const originalMjsContent = fs.readFileSync("postcss.config.mjs", "utf-8");
 
-		console.log('\n📄 Original .js config:');
+		console.log("\n📄 Original .js config:");
 		console.log(originalJsContent);
 
 		// Run patchPostcssConfig
 		patchPostcssConfig();
 
 		// Verify .js was modified, .mjs was not
-		const updatedJsContent = fs.readFileSync('postcss.config.js', 'utf-8');
-		const updatedMjsContent = fs.readFileSync('postcss.config.mjs', 'utf-8');
+		const updatedJsContent = fs.readFileSync("postcss.config.js", "utf-8");
+		const updatedMjsContent = fs.readFileSync("postcss.config.mjs", "utf-8");
 
-		assert(updatedJsContent.includes('@react-zero-ui/core/postcss'), 'Should modify .js config');
-		assert.equal(originalMjsContent, updatedMjsContent, 'Should not modify .mjs config when .js exists');
+		assert(updatedJsContent.includes("@react-zero-ui/core/postcss"), "Should modify .js config");
+		assert.equal(originalMjsContent, updatedMjsContent, "Should not modify .mjs config when .js exists");
 	} finally {
 		process.chdir(originalCwd);
 		fs.rmSync(testDir, { recursive: true, force: true });
@@ -757,8 +755,8 @@ export default config;`
 });
 
 // Vite Config Tests
-test('Vite config - adds zeroUI plugin to existing config without Tailwind', async () => {
-	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+test("Vite config - adds zeroUI plugin to existing config without Tailwind", async () => {
+	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-vite-test"));
 	const originalCwd = process.cwd();
 
 	try {
@@ -773,27 +771,27 @@ export default defineConfig({
     react()
   ]
 })`;
-		fs.writeFileSync('vite.config.ts', existingConfig);
+		fs.writeFileSync("vite.config.ts", existingConfig);
 
 		// Run patchViteConfig
 		patchViteConfig();
 
 		// Verify config was updated
-		const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
-		console.log('\n📄 Updated Vite config:');
+		const updatedContent = fs.readFileSync("vite.config.ts", "utf-8");
+		console.log("\n📄 Updated Vite config:");
 		console.log(updatedContent);
 
-		assert(updatedContent.includes('@react-zero-ui/core/vite'), 'Should add Zero-UI import');
-		assert(updatedContent.includes('zeroUI()'), 'Should add zeroUI plugin');
-		assert(updatedContent.includes('react()'), 'Should preserve existing plugins');
+		assert(updatedContent.includes("@react-zero-ui/core/vite"), "Should add Zero-UI import");
+		assert(updatedContent.includes("zeroUI()"), "Should add zeroUI plugin");
+		assert(updatedContent.includes("react()"), "Should preserve existing plugins");
 	} finally {
 		process.chdir(originalCwd);
 		fs.rmSync(testDir, { recursive: true, force: true });
 	}
 });
 
-test('Vite config - replaces Tailwind CSS v4+ plugin with zeroUI', async () => {
-	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+test("Vite config - replaces Tailwind CSS v4+ plugin with zeroUI", async () => {
+	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-vite-test"));
 	const originalCwd = process.cwd();
 
 	try {
@@ -810,29 +808,29 @@ export default defineConfig({
     tailwindcss()
   ]
 })`;
-		fs.writeFileSync('vite.config.ts', existingConfig);
+		fs.writeFileSync("vite.config.ts", existingConfig);
 
 		// Run patchViteConfig
 		patchViteConfig();
 
 		// Verify config was updated
-		const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
-		console.log('\n📄 Vite config with Tailwind replaced:');
+		const updatedContent = fs.readFileSync("vite.config.ts", "utf-8");
+		console.log("\n📄 Vite config with Tailwind replaced:");
 		console.log(updatedContent);
 
-		assert(updatedContent.includes('@react-zero-ui/core/vite'), 'Should add Zero-UI import');
-		assert(updatedContent.includes('zeroUI()'), 'Should add zeroUI plugin');
-		assert(!updatedContent.includes('@tailwindcss/vite'), 'Should remove Tailwind import');
-		assert(!updatedContent.includes('tailwindcss()'), 'Should replace Tailwind plugin');
-		assert(updatedContent.includes('react()'), 'Should preserve other plugins');
+		assert(updatedContent.includes("@react-zero-ui/core/vite"), "Should add Zero-UI import");
+		assert(updatedContent.includes("zeroUI()"), "Should add zeroUI plugin");
+		assert(!updatedContent.includes("@tailwindcss/vite"), "Should remove Tailwind import");
+		assert(!updatedContent.includes("tailwindcss()"), "Should replace Tailwind plugin");
+		assert(updatedContent.includes("react()"), "Should preserve other plugins");
 	} finally {
 		process.chdir(originalCwd);
 		fs.rmSync(testDir, { recursive: true, force: true });
 	}
 });
 
-test('Vite config - handles .js files when .ts does not exist', async () => {
-	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+test("Vite config - handles .js files when .ts does not exist", async () => {
+	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-vite-test"));
 	const originalCwd = process.cwd();
 
 	try {
@@ -847,26 +845,26 @@ export default defineConfig({
     tailwindcss()
   ]
 })`;
-		fs.writeFileSync('vite.config.js', existingConfig);
+		fs.writeFileSync("vite.config.js", existingConfig);
 
 		// Run patchViteConfig
 		patchViteConfig();
 
 		// Verify config was updated
-		const updatedContent = fs.readFileSync('vite.config.js', 'utf-8');
-		console.log('\n📄 Updated .js Vite config:');
+		const updatedContent = fs.readFileSync("vite.config.js", "utf-8");
+		console.log("\n📄 Updated .js Vite config:");
 		console.log(updatedContent);
 
-		assert(updatedContent.includes('zeroUI()'), 'Should replace Tailwind with zeroUI');
-		assert(!updatedContent.includes('tailwindcss()'), 'Should remove Tailwind plugin');
+		assert(updatedContent.includes("zeroUI()"), "Should replace Tailwind with zeroUI");
+		assert(!updatedContent.includes("tailwindcss()"), "Should remove Tailwind plugin");
 	} finally {
 		process.chdir(originalCwd);
 		fs.rmSync(testDir, { recursive: true, force: true });
 	}
 });
 
-test('Vite config - prefers .ts over .js when both exist', async () => {
-	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+test("Vite config - prefers .ts over .js when both exist", async () => {
+	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-vite-test"));
 	const originalCwd = process.cwd();
 
 	try {
@@ -874,7 +872,7 @@ test('Vite config - prefers .ts over .js when both exist', async () => {
 
 		// Create both .ts and .js configs
 		fs.writeFileSync(
-			'vite.config.ts',
+			"vite.config.ts",
 			`import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 
@@ -884,7 +882,7 @@ export default defineConfig({
 		);
 
 		fs.writeFileSync(
-			'vite.config.js',
+			"vite.config.js",
 			`import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 
@@ -893,25 +891,25 @@ export default defineConfig({
 })`
 		);
 
-		const originalJsContent = fs.readFileSync('vite.config.js', 'utf-8');
+		const originalJsContent = fs.readFileSync("vite.config.js", "utf-8");
 
 		// Run patchViteConfig
 		patchViteConfig();
 
 		// Verify .ts was modified, .js was not
-		const updatedTsContent = fs.readFileSync('vite.config.ts', 'utf-8');
-		const updatedJsContent = fs.readFileSync('vite.config.js', 'utf-8');
+		const updatedTsContent = fs.readFileSync("vite.config.ts", "utf-8");
+		const updatedJsContent = fs.readFileSync("vite.config.js", "utf-8");
 
-		assert(updatedTsContent.includes('zeroUI()'), 'Should modify .ts config');
-		assert.equal(originalJsContent, updatedJsContent, 'Should not modify .js config when .ts exists');
+		assert(updatedTsContent.includes("zeroUI()"), "Should modify .ts config");
+		assert.equal(originalJsContent, updatedJsContent, "Should not modify .js config when .ts exists");
 	} finally {
 		process.chdir(originalCwd);
 		fs.rmSync(testDir, { recursive: true, force: true });
 	}
 });
 
-test('Vite config - skips if zeroUI already configured', async () => {
-	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+test("Vite config - skips if zeroUI already configured", async () => {
+	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-vite-test"));
 	const originalCwd = process.cwd();
 
 	try {
@@ -928,23 +926,23 @@ export default defineConfig({
     zeroUI()
   ]
 })`;
-		fs.writeFileSync('vite.config.ts', existingConfig);
-		const originalContent = fs.readFileSync('vite.config.ts', 'utf-8');
+		fs.writeFileSync("vite.config.ts", existingConfig);
+		const originalContent = fs.readFileSync("vite.config.ts", "utf-8");
 
 		// Run patchViteConfig
 		patchViteConfig();
 
 		// Verify config was not modified
-		const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
-		assert.equal(originalContent, updatedContent, 'Should not modify config with zeroUI already present');
+		const updatedContent = fs.readFileSync("vite.config.ts", "utf-8");
+		assert.equal(originalContent, updatedContent, "Should not modify config with zeroUI already present");
 	} finally {
 		process.chdir(originalCwd);
 		fs.rmSync(testDir, { recursive: true, force: true });
 	}
 });
 
-test('Vite config - skips when no vite config exists', async () => {
-	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+test("Vite config - skips when no vite config exists", async () => {
+	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-vite-test"));
 	const originalCwd = process.cwd();
 
 	try {
@@ -955,16 +953,16 @@ test('Vite config - skips when no vite config exists', async () => {
 		patchViteConfig();
 
 		// Verify no files were created
-		assert(!fs.existsSync('vite.config.ts'), 'Should not create vite.config.ts');
-		assert(!fs.existsSync('vite.config.js'), 'Should not create vite.config.js');
+		assert(!fs.existsSync("vite.config.ts"), "Should not create vite.config.ts");
+		assert(!fs.existsSync("vite.config.js"), "Should not create vite.config.js");
 	} finally {
 		process.chdir(originalCwd);
 		fs.rmSync(testDir, { recursive: true, force: true });
 	}
 });
 
-test('Vite config - handles complex existing configs', async () => {
-	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+test("Vite config - handles complex existing configs", async () => {
+	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-vite-test"));
 	const originalCwd = process.cwd();
 
 	try {
@@ -992,31 +990,31 @@ export default defineConfig({
     port: 3000
   }
 })`;
-		fs.writeFileSync('vite.config.ts', complexConfig);
+		fs.writeFileSync("vite.config.ts", complexConfig);
 
 		// Run patchViteConfig
 		patchViteConfig();
 
 		// Verify Zero-UI was added and Tailwind replaced
-		const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
-		console.log('\n📄 Complex config update:');
+		const updatedContent = fs.readFileSync("vite.config.ts", "utf-8");
+		console.log("\n📄 Complex config update:");
 		console.log(updatedContent);
 
-		assert(updatedContent.includes('@react-zero-ui/core/vite'), 'Should add Zero-UI import');
-		assert(updatedContent.includes('zeroUI()'), 'Should add zeroUI plugin');
-		assert(!updatedContent.includes('@tailwindcss/vite'), 'Should remove Tailwind import');
-		assert(!updatedContent.includes('tailwindcss()'), 'Should replace Tailwind plugin');
-		assert(updatedContent.includes('react({'), 'Should preserve React plugin with options');
-		assert(updatedContent.includes('resolve:'), 'Should preserve other config options');
-		assert(updatedContent.includes('server:'), 'Should preserve server config');
+		assert(updatedContent.includes("@react-zero-ui/core/vite"), "Should add Zero-UI import");
+		assert(updatedContent.includes("zeroUI()"), "Should add zeroUI plugin");
+		assert(!updatedContent.includes("@tailwindcss/vite"), "Should remove Tailwind import");
+		assert(!updatedContent.includes("tailwindcss()"), "Should replace Tailwind plugin");
+		assert(updatedContent.includes("react({"), "Should preserve React plugin with options");
+		assert(updatedContent.includes("resolve:"), "Should preserve other config options");
+		assert(updatedContent.includes("server:"), "Should preserve server config");
 	} finally {
 		process.chdir(originalCwd);
 		fs.rmSync(testDir, { recursive: true, force: true });
 	}
 });
 
-test('Vite config - handles multiple Tailwind instances', async () => {
-	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+test("Vite config - handles multiple Tailwind instances", async () => {
+	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-vite-test"));
 	const originalCwd = process.cwd();
 
 	try {
@@ -1033,28 +1031,28 @@ export default defineConfig({
     tailwindcss()
   ]
 })`;
-		fs.writeFileSync('vite.config.ts', existingConfig);
+		fs.writeFileSync("vite.config.ts", existingConfig);
 
 		// Run patchViteConfig
 		patchViteConfig();
 
 		// Verify only first Tailwind was replaced
-		const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
-		console.log('\n📄 Multiple Tailwind instances:');
+		const updatedContent = fs.readFileSync("vite.config.ts", "utf-8");
+		console.log("\n📄 Multiple Tailwind instances:");
 		console.log(updatedContent);
 
-		assert(updatedContent.includes('zeroUI()'), 'Should add zeroUI plugin');
+		assert(updatedContent.includes("zeroUI()"), "Should add zeroUI plugin");
 		// Should replace first instance
 		const zeroUICount = (updatedContent.match(/zeroUI\(\)/g) || []).length;
-		assert.equal(zeroUICount, 1, 'Should add zeroUI once');
+		assert.equal(zeroUICount, 1, "Should add zeroUI once");
 	} finally {
 		process.chdir(originalCwd);
 		fs.rmSync(testDir, { recursive: true, force: true });
 	}
 });
 
-test('Vite config - handles config with variable assignment', async () => {
-	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+test("Vite config - handles config with variable assignment", async () => {
+	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-vite-test"));
 	const originalCwd = process.cwd();
 
 	try {
@@ -1073,27 +1071,27 @@ const config = defineConfig({
 })
 
 export default config`;
-		fs.writeFileSync('vite.config.ts', existingConfig);
+		fs.writeFileSync("vite.config.ts", existingConfig);
 
 		// Run patchViteConfig
 		patchViteConfig();
 
 		// Verify config was updated
-		const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
-		console.log('\n📄 Variable assignment config:');
+		const updatedContent = fs.readFileSync("vite.config.ts", "utf-8");
+		console.log("\n📄 Variable assignment config:");
 		console.log(updatedContent);
 
-		assert(updatedContent.includes('@react-zero-ui/core/vite'), 'Should add Zero-UI import');
-		assert(updatedContent.includes('zeroUI()'), 'Should add zeroUI plugin');
-		assert(!updatedContent.includes('tailwindcss()'), 'Should replace Tailwind plugin');
+		assert(updatedContent.includes("@react-zero-ui/core/vite"), "Should add Zero-UI import");
+		assert(updatedContent.includes("zeroUI()"), "Should add zeroUI plugin");
+		assert(!updatedContent.includes("tailwindcss()"), "Should replace Tailwind plugin");
 	} finally {
 		process.chdir(originalCwd);
 		fs.rmSync(testDir, { recursive: true, force: true });
 	}
 });
 
-test('Vite config - handles config with no plugins array', async () => {
-	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+test("Vite config - handles config with no plugins array", async () => {
+	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-vite-test"));
 	const originalCwd = process.cwd();
 
 	try {
@@ -1110,26 +1108,26 @@ export default defineConfig({
     outDir: 'dist'
   }
 })`;
-		fs.writeFileSync('vite.config.ts', existingConfig);
+		fs.writeFileSync("vite.config.ts", existingConfig);
 
 		// Run patchViteConfig
 		patchViteConfig();
 
 		// Verify config was updated with new plugins array
-		const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
+		const updatedContent = fs.readFileSync("vite.config.ts", "utf-8");
 		console.log(updatedContent);
 
-		assert(updatedContent.includes('@react-zero-ui/core/vite'), 'Should add Zero-UI import');
-		assert(updatedContent.includes('zeroUI()'), 'Should add zeroUI plugin');
-		assert(updatedContent.includes('plugins:'), 'Should add plugins array');
+		assert(updatedContent.includes("@react-zero-ui/core/vite"), "Should add Zero-UI import");
+		assert(updatedContent.includes("zeroUI()"), "Should add zeroUI plugin");
+		assert(updatedContent.includes("plugins:"), "Should add plugins array");
 	} finally {
 		process.chdir(originalCwd);
 		fs.rmSync(testDir, { recursive: true, force: true });
 	}
 });
 
-test('Vite config - handles empty plugins array', async () => {
-	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-vite-test'));
+test("Vite config - handles empty plugins array", async () => {
+	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-vite-test"));
 	const originalCwd = process.cwd();
 
 	try {
@@ -1141,27 +1139,27 @@ test('Vite config - handles empty plugins array', async () => {
 export default defineConfig({
   plugins: []
 })`;
-		fs.writeFileSync('vite.config.ts', existingConfig);
+		fs.writeFileSync("vite.config.ts", existingConfig);
 
 		// Run patchViteConfig
 		patchViteConfig();
 
 		// Verify config was updated
-		const updatedContent = fs.readFileSync('vite.config.ts', 'utf-8');
+		const updatedContent = fs.readFileSync("vite.config.ts", "utf-8");
 		console.log(updatedContent);
 
-		assert(updatedContent.includes('@react-zero-ui/core/vite'), 'Should add Zero-UI import');
-		assert(updatedContent.includes('zeroUI()'), 'Should add zeroUI plugin to empty array');
+		assert(updatedContent.includes("@react-zero-ui/core/vite"), "Should add Zero-UI import");
+		assert(updatedContent.includes("zeroUI()"), "Should add zeroUI plugin to empty array");
 	} finally {
 		process.chdir(originalCwd);
 		fs.rmSync(testDir, { recursive: true, force: true });
 	}
 });
 
-test('generated variants for initial value without setterFn', async () => {
+test("generated variants for initial value without setterFn", async () => {
 	await runTest(
 		{
-			'app/initial-value.jsx': `
+			"app/initial-value.jsx": `
 				import { useUI } from '@react-zero-ui/core';
 				function Component() {
 					const [theme,setTheme] = useUI('theme', 'light');
@@ -1170,9 +1168,9 @@ test('generated variants for initial value without setterFn', async () => {
 			`,
 		},
 		(result) => {
-			console.log('\n📄 Initial value without setterFn:');
-			console.log('result.css.', result.css);
-			assert(result.css.includes('@custom-variant theme-light'));
+			console.log("\n📄 Initial value without setterFn:");
+			console.log("result.css.", result.css);
+			assert(result.css.includes("@custom-variant theme-light"));
 		}
 	);
 });

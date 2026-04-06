@@ -149,15 +149,15 @@ import {
 	GitPullRequest,
 	GitMerge,
 	GitCommit,
-} from 'lucide-react';
-import HeaderBar from '../components/HeaderBar';
-import StatsCard from '../components/StatsCard';
-import { SectionGrid } from '../components/SectionGrid';
+} from "lucide-react";
+import HeaderBar from "../components/HeaderBar";
+import StatsCard from "../components/StatsCard";
+import { SectionGrid } from "../components/SectionGrid";
 
 export const metadata = {
-	title: 'Lucide React Icon Demo - Lucide to React solution',
-	description: 'See the size difference between Lucide React and Zero UI Icon Sprite. Zero UI Icon Sprite is 300% smaller.',
-	alternates: { canonical: 'https://zero-ui.dev/lucide-react' },
+	title: "Lucide React Icon Demo - Lucide to React solution",
+	description: "See the size difference between Lucide React and Zero UI Icon Sprite. Zero UI Icon Sprite is 300% smaller.",
+	alternates: { canonical: "https://zero-ui.dev/lucide-react" },
 };
 
 const page = () => {

@@ -13,20 +13,20 @@ _Say goodbye to context and prop-drilling._
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![CI](https://github.com/react-zero-ui/core/actions/workflows/ci.yml/badge.svg?branch=main)
 
-[📖 See the proof](https://github.com/react-zero-ui/core/blob/main/docs/demo.md) • [🚀 Quick Start](#-quick-start) • [📚 API Reference](#-api-reference) • [🤝 Contributing](#-contributing)
+[See the proof](https://github.com/react-zero-ui/core/blob/main/docs/demo.md) • [Quick Start](#quick-start) • [API Reference](#api-reference) • [Contributing](#contributing)
 
 ---
 
-## 🔥 Core Concept: _"Pre-Rendering"_
+## Core Concept: _"Pre-Rendering"_
 
 Why re-render UI if all states are known at build time?  
 React Zero-UI **pre-renders** UI states once - at no runtime cost - and flips `data-*` attributes to update. That's it.
 
 ```tsx
-const [, setTheme] = useUI('theme', 'dark');
+const [, setTheme] = useUI("theme", "dark");
 
 // Flip theme to "light"
-setTheme('light'); // data-theme="light" on body
+setTheme("light"); // data-theme="light" on body
 ```
 
 Tailwind usage:
@@ -37,7 +37,7 @@ Tailwind usage:
 
 ---
 
-## 🚀 How it Works (Build-Time Magic)
+## How it Works (Build-Time Magic)
 
 React Zero-UI uses a hyper-optimized AST resolver in development that scans your codebase for:
 
@@ -54,7 +54,7 @@ This generates:
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 **Requires:** Vite or Next.js (App Router)
 
@@ -69,26 +69,26 @@ Manual config:
 
 ---
 
-## 📚 API Reference
+## API Reference
 
 ### Basic Hook Signature
 
 ```tsx
-const [staleValue, setValue] = useUI('key', 'value');
+const [staleValue, setValue] = useUI("key", "value");
 ```
 
-- `key` ➡️ becomes `data-key` on `<body>`
-- `value` ➡️ default SSR value
-- `staleValue` ➡️ SSR fallback (doesn't update after mount)
+- `key` -> becomes `data-key` on `<body>`
+- `value` -> default SSR value
+- `staleValue` -> SSR fallback (doesn't update after mount)
 
 ---
 
-### 🔨 `useUI` – Global UI State
+### `useUI` - Global UI State
 
 ```tsx
-import { useUI } from '@react-zero-ui/core';
+import { useUI } from "@react-zero-ui/core";
 
-const [theme, setTheme] = useUI('theme', 'dark');
+const [theme, setTheme] = useUI("theme", "dark");
 ```
 
 - Updates `data-theme` on `<body>`
@@ -97,12 +97,12 @@ const [theme, setTheme] = useUI('theme', 'dark');
 
 ---
 
-### 🎯 `useScopedUI` – Scoped UI State
+### `useScopedUI` - Scoped UI State
 
 ```tsx
-import { useScopedUI } from '@react-zero-ui/core';
+import { useScopedUI } from "@react-zero-ui/core";
 
-const [theme, setTheme] = useScopedUI('theme', 'dark');
+const [theme, setTheme] = useScopedUI("theme", "dark");
 
 <div
 	ref={setTheme.ref}
@@ -117,32 +117,32 @@ const [theme, setTheme] = useScopedUI('theme', 'dark');
 
 ---
 
-### 🌈 CSS Variable Support
+### CSS Variable Support
 
 Pass the `CssVar` flag for variable-based state:
 
 ```tsx
-import { CssVar } from '@react-zero-ui/core';
+import { CssVar } from "@react-zero-ui/core";
 
-const [blur, setBlur] = useUI('blur', '0px', CssVar);
-setBlur('5px'); // body { --blur: 5px }
+const [blur, setBlur] = useUI("blur", "0px", CssVar);
+setBlur("5px"); // body { --blur: 5px }
 ```
 
 Scoped example:
 
 ```tsx
-const [blur, setBlur] = useScopedUI('blur', '0px', CssVar);
+const [blur, setBlur] = useScopedUI("blur", "0px", CssVar);
 
 <div
 	ref={setBlur.ref}
-	style={{ '--blur': blur }}>
+	style={{ "--blur": blur }}>
 	Scoped blur effect
 </div>;
 ```
 
 ---
 
-## 🧪 Experimental Feature: `zeroOnClick`
+## Experimental Feature: `zeroOnClick`
 
 Enables interactivity **inside Server Components** without useEffect.  
 Only ~300 bytes of runtime.
@@ -151,26 +151,26 @@ Read more: [experimental.md](https://github.com/react-zero-ui/core/blob/main/doc
 
 ---
 
-## 📦 Summary of Benefits
+## Summary of Benefits
 
-- 🚀 **Zero React re-renders**
-- ⚡️ **Pre-rendered UI**: state embedded at build time
-- 📦 **<350B runtime footprint**
-- 💫 **Simple DX**: hooks + Tailwind variants
-- ⚙️ **AST-powered**: cached fast builds
+- **Zero React re-renders**
+- **Pre-rendered UI**: state embedded at build time
+- **<350B runtime footprint**
+- **Simple DX**: hooks + Tailwind variants
+- **AST-powered**: cached fast builds
 
 Zero re-renders. Zero runtime. Infinite scalability.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 We welcome all contributions!
 
-- 🐛 [Open an issue](https://github.com/react-zero-ui/core/issues)
-- 💡 [Start a discussion](https://github.com/react-zero-ui/core/discussions)
-- 🔧 [Read the contributing guide](https://github.com/react-zero-ui/core/blob/main/docs/CONTRIBUTING.md)
+- [Open an issue](https://github.com/react-zero-ui/core/issues)
+- [Start a discussion](https://github.com/react-zero-ui/core/discussions)
+- [Read the contributing guide](https://github.com/react-zero-ui/core/blob/main/docs/CONTRIBUTING.md)
 
 ---
 
-Made with ❤️ for the React community by [@austin1serb](https://github.com/austin1serb)
+Made for the React community by [@austin1serb](https://github.com/austin1serb)

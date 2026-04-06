@@ -1,13 +1,13 @@
-const { test } = require('node:test');
-const assert = require('node:assert');
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-const { spawn } = require('node:child_process');
+const { test } = require("node:test");
+const assert = require("node:assert");
+const fs = require("fs");
+const path = require("path");
+const os = require("os");
+const { spawn } = require("node:child_process");
 
 // Helper to create isolated test directory
 function createTestDir() {
-	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'zero-ui-cli-test-'));
+	const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "zero-ui-cli-test-"));
 	return testDir;
 }
 
@@ -56,32 +56,32 @@ function cleanupTestDir(testDir) {
 function runCLIScript(targetDir, timeout = 30000) {
 	return new Promise((resolve, reject) => {
 		// Updated path to the correct CLI script location
-		const binScript = path.resolve(__dirname, '../../../cli/bin');
+		const binScript = path.resolve(__dirname, "../../../cli/bin");
 
-		const child = spawn('node', [binScript, '.'], { cwd: targetDir, stdio: ['pipe', 'pipe', 'pipe'] });
+		const child = spawn("node", [binScript, "."], { cwd: targetDir, stdio: ["pipe", "pipe", "pipe"] });
 
-		let stdout = '';
-		let stderr = '';
+		let stdout = "";
+		let stderr = "";
 
-		child.stdout.on('data', (data) => {
+		child.stdout.on("data", (data) => {
 			stdout += data.toString();
 		});
 
-		child.stderr.on('data', (data) => {
+		child.stderr.on("data", (data) => {
 			stderr += data.toString();
 		});
 
 		const timer = setTimeout(() => {
-			child.kill('SIGKILL');
+			child.kill("SIGKILL");
 			reject(new Error(`CLI script timed out after ${timeout}ms`));
 		}, timeout);
 
-		child.on('close', (code) => {
+		child.on("close", (code) => {
 			clearTimeout(timer);
 			resolve({ code, stdout, stderr, success: code === 0 });
 		});
 
-		child.on('error', (error) => {
+		child.on("error", (error) => {
 			clearTimeout(timer);
 			reject(error);
 		});
@@ -90,42 +90,42 @@ function runCLIScript(targetDir, timeout = 30000) {
 
 // });
 
-test('CLI script uses existing package.json if it exists', async () => {
+test("CLI script uses existing package.json if it exists", async () => {
 	const testDir = createTestDir();
 
 	try {
 		// Create a custom package.json
-		const customPackageJson = { name: 'my-test-app', version: '2.0.0', description: 'Custom test app' };
+		const customPackageJson = { name: "my-test-app", version: "2.0.0", description: "Custom test app" };
 
-		const packageJsonPath = path.join(testDir, 'package.json');
+		const packageJsonPath = path.join(testDir, "package.json");
 		fs.writeFileSync(packageJsonPath, JSON.stringify(customPackageJson, null, 2));
 
 		// Run CLI (this will timeout on npm install, but that's ok for this test)
 		await runCLIScript(testDir, 5000).catch((err) => {
 			// We expect this to timeout/fail during npm install
-			console.log('CLI run resulted in:', err.message);
+			console.log("CLI run resulted in:", err.message);
 			return { timedOut: true };
 		});
 
 		// Check that our custom package.json is preserved
-		const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
-		assert.strictEqual(packageJson.name, 'my-test-app', 'Custom name should be preserved');
-		assert.strictEqual(packageJson.version, '2.0.0', 'Custom version should be preserved');
-		assert.strictEqual(packageJson.description, 'Custom test app', 'Custom description should be preserved');
+		const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
+		assert.strictEqual(packageJson.name, "my-test-app", "Custom name should be preserved");
+		assert.strictEqual(packageJson.version, "2.0.0", "Custom version should be preserved");
+		assert.strictEqual(packageJson.description, "Custom test app", "Custom description should be preserved");
 
-		console.log('✅ Existing package.json preserved');
+		console.log("✅ Existing package.json preserved");
 	} finally {
 		cleanupTestDir(testDir);
 	}
 });
 
-test('CLI script installs correct dependencies', async () => {
+test("CLI script installs correct dependencies", async () => {
 	const testDir = createTestDir();
 
 	try {
 		// Create package.json to avoid npm init
-		const packageJson = { name: 'test-app', version: '1.0.0', scripts: {}, dependencies: {}, devDependencies: {} };
-		fs.writeFileSync(path.join(testDir, 'package.json'), JSON.stringify(packageJson, null, 2));
+		const packageJson = { name: "test-app", version: "1.0.0", scripts: {}, dependencies: {}, devDependencies: {} };
+		fs.writeFileSync(path.join(testDir, "package.json"), JSON.stringify(packageJson, null, 2));
 
 		// Mock npm by creating a fake npm script that logs what would be installed
 		const mockNpmScript = `#!/bin/bash
@@ -156,9 +156,9 @@ test('CLI script installs correct dependencies', async () => {
     fi
     `;
 
-		const mockNpmPath = path.join(testDir, 'npm');
+		const mockNpmPath = path.join(testDir, "npm");
 		fs.writeFileSync(mockNpmPath, mockNpmScript);
-		fs.chmodSync(mockNpmPath, '755');
+		fs.chmodSync(mockNpmPath, "755");
 
 		// Update PATH to use our mock npm
 		const originalPath = process.env.PATH;
@@ -167,33 +167,33 @@ test('CLI script installs correct dependencies', async () => {
 		try {
 			// Run CLI script
 			await runCLIScript(testDir, 10000).catch((err) => {
-				console.log('CLI run resulted in:', err.message);
+				console.log("CLI run resulted in:", err.message);
 				return { error: err.message };
 			});
 
 			// Check that npm was called
-			const npmCallsPath = path.join(testDir, 'npm-calls.log');
+			const npmCallsPath = path.join(testDir, "npm-calls.log");
 			if (fs.existsSync(npmCallsPath)) {
-				const npmCalls = fs.readFileSync(npmCallsPath, 'utf-8');
-				console.log('NPM calls:', npmCalls);
+				const npmCalls = fs.readFileSync(npmCallsPath, "utf-8");
+				console.log("NPM calls:", npmCalls);
 
-				assert(npmCalls.includes('install'), 'npm install should be called');
-				assert(npmCalls.includes('@react-zero-ui/core'), 'Should install react-zero-ui');
-				assert(npmCalls.includes('tailwindcss'), 'Should install tailwindcss');
-				assert(npmCalls.includes('postcss'), 'Should install postcss');
-				assert(npmCalls.includes('@tailwindcss/postcss'), 'Should install @tailwindcss/postcss');
+				assert(npmCalls.includes("install"), "npm install should be called");
+				assert(npmCalls.includes("@react-zero-ui/core"), "Should install react-zero-ui");
+				assert(npmCalls.includes("tailwindcss"), "Should install tailwindcss");
+				assert(npmCalls.includes("postcss"), "Should install postcss");
+				assert(npmCalls.includes("@tailwindcss/postcss"), "Should install @tailwindcss/postcss");
 			}
 
 			// Check package.json was updated with dependencies
-			const finalPackageJson = JSON.parse(fs.readFileSync(path.join(testDir, 'package.json'), 'utf-8'));
+			const finalPackageJson = JSON.parse(fs.readFileSync(path.join(testDir, "package.json"), "utf-8"));
 
 			// Updated assertion - react-zero-ui should be in dependencies (production), not devDependencies
-			assert(finalPackageJson.dependencies['@react-zero-ui/core'], 'react-zero-ui should be in dependencies');
-			assert(finalPackageJson.devDependencies['tailwindcss'], 'tailwindcss should be in devDependencies');
-			assert(finalPackageJson.devDependencies['postcss'], 'postcss should be in devDependencies');
-			assert(finalPackageJson.devDependencies['@tailwindcss/postcss'], '@tailwindcss/postcss should be in devDependencies');
+			assert(finalPackageJson.dependencies["@react-zero-ui/core"], "react-zero-ui should be in dependencies");
+			assert(finalPackageJson.devDependencies["tailwindcss"], "tailwindcss should be in devDependencies");
+			assert(finalPackageJson.devDependencies["postcss"], "postcss should be in devDependencies");
+			assert(finalPackageJson.devDependencies["@tailwindcss/postcss"], "@tailwindcss/postcss should be in devDependencies");
 
-			console.log('✅ All required dependencies installed');
+			console.log("✅ All required dependencies installed");
 		} finally {
 			process.env.PATH = originalPath;
 		}
@@ -202,53 +202,53 @@ test('CLI script installs correct dependencies', async () => {
 	}
 });
 
-test('CLI script handles different target directories', async () => {
+test("CLI script handles different target directories", async () => {
 	const baseTestDir = createTestDir();
-	const subDir = path.join(baseTestDir, 'my-project');
+	const subDir = path.join(baseTestDir, "my-project");
 
 	try {
 		// Create subdirectory
 		fs.mkdirSync(subDir, { recursive: true });
 
 		// Run CLI with subdirectory target
-		const binScript = path.resolve(__dirname, '../../../cli/bin.js');
+		const binScript = path.resolve(__dirname, "../../../cli/bin.js");
 
 		await new Promise((resolve, reject) => {
-			const child = spawn('node', [binScript, 'my-project'], { cwd: baseTestDir, stdio: ['pipe', 'pipe', 'pipe'] });
+			const child = spawn("node", [binScript, "my-project"], { cwd: baseTestDir, stdio: ["pipe", "pipe", "pipe"] });
 
 			const timer = setTimeout(() => {
-				child.kill('SIGKILL');
+				child.kill("SIGKILL");
 				resolve({ timedOut: true });
 			}, 5000);
 
-			child.on('close', (code) => {
+			child.on("close", (code) => {
 				clearTimeout(timer);
 				resolve({ code });
 			});
 
-			child.on('error', (error) => {
+			child.on("error", (error) => {
 				clearTimeout(timer);
 				reject(error);
 			});
 		});
 
 		// Check that package.json was created in subdirectory
-		const packageJsonPath = path.join(subDir, 'package.json');
-		assert(fs.existsSync(packageJsonPath), 'package.json should be created in target subdirectory');
+		const packageJsonPath = path.join(subDir, "package.json");
+		assert(fs.existsSync(packageJsonPath), "package.json should be created in target subdirectory");
 
-		console.log('✅ CLI script works with target directories');
+		console.log("✅ CLI script works with target directories");
 	} finally {
 		cleanupTestDir(baseTestDir);
 	}
 });
 
 // Additional test for library CLI functionality
-test('Library CLI initializes project correctly', async () => {
+test("Library CLI initializes project correctly", async () => {
 	const testDir = createTestDir();
 
 	try {
 		// Create a test React component with useUI hook
-		const componentDir = path.join(testDir, 'dist', 'components');
+		const componentDir = path.join(testDir, "dist", "components");
 		fs.mkdirSync(componentDir, { recursive: true });
 
 		const testComponent = `
@@ -267,16 +267,16 @@ export function TestComponent() {
 }
 `;
 
-		fs.writeFileSync(path.join(componentDir, 'TestComponent.jsx'), testComponent);
+		fs.writeFileSync(path.join(componentDir, "TestComponent.jsx"), testComponent);
 
 		// Import and run the library CLI directly
-		const { runZeroUiInit } = require('../../dist/cli/postInstall');
+		const { runZeroUiInit } = require("../../dist/cli/postInstall");
 
 		// Mock console to capture output
 		const originalConsoleLog = console.log;
 		const logMessages = [];
 		console.log = (...args) => {
-			logMessages.push(args.join(' '));
+			logMessages.push(args.join(" "));
 			originalConsoleLog(...args);
 		};
 
@@ -288,11 +288,11 @@ export function TestComponent() {
 			await runZeroUiInit();
 
 			// Check that initialization messages were logged
-			const logOutput = logMessages.join('\n');
-			assert(logOutput.includes('[Zero-UI] Initializing...'), 'Should log initialization message');
-			assert(logOutput.includes('[Zero-UI] ✅ Initialized') || logOutput.includes('No useUI hooks found'), 'Should complete initialization');
+			const logOutput = logMessages.join("\n");
+			assert(logOutput.includes("[Zero-UI] Initializing..."), "Should log initialization message");
+			assert(logOutput.includes("[Zero-UI] ✅ Initialized") || logOutput.includes("No useUI hooks found"), "Should complete initialization");
 
-			console.log('✅ Library CLI initializes project correctly');
+			console.log("✅ Library CLI initializes project correctly");
 		} finally {
 			process.chdir(originalCwd);
 			console.log = originalConsoleLog;
@@ -303,7 +303,7 @@ export function TestComponent() {
 });
 
 // Test error handling in library CLI
-test('Library CLI handles errors gracefully', async () => {
+test("Library CLI handles errors gracefully", async () => {
 	const testDir = createTestDir();
 
 	try {
@@ -315,7 +315,7 @@ test('Library CLI handles errors gracefully', async () => {
 		const originalConsoleError = console.error;
 		const errorMessages = [];
 		console.error = (...args) => {
-			errorMessages.push(args.join(' '));
+			errorMessages.push(args.join(" "));
 			originalConsoleError(...args);
 		};
 
@@ -328,16 +328,16 @@ test('Library CLI handles errors gracefully', async () => {
 		};
 
 		try {
-			const { runZeroUiInit } = require('../../dist/cli/postInstall');
+			const { runZeroUiInit } = require("../../dist/cli/postInstall");
 
 			// This should complete without errors in most cases
 			await runZeroUiInit();
 
-			console.log('✅ Library CLI handles execution without crashing');
+			console.log("✅ Library CLI handles execution without crashing");
 		} catch (error) {
 			// If an error occurs, make sure it's handled gracefully
 			if (exitCalled) {
-				console.log('✅ Library CLI properly exits on error');
+				console.log("✅ Library CLI properly exits on error");
 			} else {
 				throw error;
 			}
@@ -352,7 +352,7 @@ test('Library CLI handles errors gracefully', async () => {
 });
 
 // Test CLI script with no arguments (current directory)
-test('CLI script works with no target directory (defaults to current)', async () => {
+test("CLI script works with no target directory (defaults to current)", async () => {
 	const testDir = createTestDir();
 
 	try {
@@ -364,45 +364,45 @@ if [[ "$*" == *"init"* ]] && [[ ! -f "package.json" ]]; then
   echo '{"name": "test-project", "version": "1.0.0", "description": ""}' > package.json
 fi
 `;
-		const mockNpmPath = path.join(testDir, 'npm');
+		const mockNpmPath = path.join(testDir, "npm");
 		fs.writeFileSync(mockNpmPath, mockNpmScript);
-		fs.chmodSync(mockNpmPath, '755');
+		fs.chmodSync(mockNpmPath, "755");
 
 		const originalPath = process.env.PATH;
 		process.env.PATH = `${testDir}:${originalPath}`;
 
 		try {
 			// Run CLI without any arguments (should default to current directory)
-			const binScript = path.resolve(__dirname, '../../../cli/bin.js');
+			const binScript = path.resolve(__dirname, "../../../cli/bin.js");
 
 			await new Promise((resolve, reject) => {
-				const child = spawn('node', [binScript], {
+				const child = spawn("node", [binScript], {
 					// No target directory argument
 					cwd: testDir,
-					stdio: ['pipe', 'pipe', 'pipe'],
+					stdio: ["pipe", "pipe", "pipe"],
 				});
 
 				const timer = setTimeout(() => {
-					child.kill('SIGKILL');
+					child.kill("SIGKILL");
 					resolve({ timedOut: true });
 				}, 5000);
 
-				child.on('close', (code) => {
+				child.on("close", (code) => {
 					clearTimeout(timer);
 					resolve({ code });
 				});
 
-				child.on('error', (error) => {
+				child.on("error", (error) => {
 					clearTimeout(timer);
 					reject(error);
 				});
 			});
 
 			// Check that package.json was created in current directory
-			const packageJsonPath = path.join(testDir, 'package.json');
-			assert(fs.existsSync(packageJsonPath), 'package.json should be created in current directory');
+			const packageJsonPath = path.join(testDir, "package.json");
+			assert(fs.existsSync(packageJsonPath), "package.json should be created in current directory");
 
-			console.log('✅ CLI script works with no target directory specified');
+			console.log("✅ CLI script works with no target directory specified");
 		} finally {
 			process.env.PATH = originalPath;
 		}
@@ -412,53 +412,53 @@ fi
 });
 
 // Test CLI script with invalid target directory
-test('CLI script handles invalid target directory', async () => {
+test("CLI script handles invalid target directory", async () => {
 	const testDir = createTestDir();
 
 	try {
 		// Try to run CLI with a non-existent directory
-		const binScript = path.resolve(__dirname, '../../../cli/bin.js');
+		const binScript = path.resolve(__dirname, "../../../cli/bin.js");
 
 		const result = await new Promise((resolve) => {
-			const child = spawn('node', [binScript, 'non-existent-dir'], { cwd: testDir, stdio: ['pipe', 'pipe', 'pipe'] });
+			const child = spawn("node", [binScript, "non-existent-dir"], { cwd: testDir, stdio: ["pipe", "pipe", "pipe"] });
 
-			let stderr = '';
-			child.stderr.on('data', (data) => {
+			let stderr = "";
+			child.stderr.on("data", (data) => {
 				stderr += data.toString();
 			});
 
 			const timer = setTimeout(() => {
-				child.kill('SIGKILL');
+				child.kill("SIGKILL");
 				resolve({ timedOut: true, stderr });
 			}, 5000);
 
-			child.on('close', (code) => {
+			child.on("close", (code) => {
 				clearTimeout(timer);
 				resolve({ code, stderr });
 			});
 
-			child.on('error', (error) => {
+			child.on("error", (error) => {
 				clearTimeout(timer);
 				resolve({ error: error.message });
 			});
 		});
 
 		// The CLI should either create the directory or handle the error gracefully
-		assert(result.code !== undefined || result.error || result.timedOut, 'CLI should handle invalid directory gracefully');
+		assert(result.code !== undefined || result.error || result.timedOut, "CLI should handle invalid directory gracefully");
 
-		console.log('✅ CLI script handles invalid target directory');
+		console.log("✅ CLI script handles invalid target directory");
 	} finally {
 		cleanupTestDir(testDir);
 	}
 });
 
 // Test library CLI with actual useUI components
-test('Library CLI processes useUI hooks correctly', async () => {
+test("Library CLI processes useUI hooks correctly", async () => {
 	const testDir = createTestDir();
 
 	try {
 		// Create multiple test components with useUI hooks
-		const componentsDir = path.join(testDir, 'dist', 'components');
+		const componentsDir = path.join(testDir, "dist", "components");
 		fs.mkdirSync(componentsDir, { recursive: true });
 
 		const component1 = `
@@ -493,16 +493,16 @@ export function Toggle() {
 }
 `;
 
-		fs.writeFileSync(path.join(componentsDir, 'Counter.jsx'), component1);
-		fs.writeFileSync(path.join(componentsDir, 'Toggle.jsx'), component2);
+		fs.writeFileSync(path.join(componentsDir, "Counter.jsx"), component1);
+		fs.writeFileSync(path.join(componentsDir, "Toggle.jsx"), component2);
 
 		// Import and run the library CLI
-		const { runZeroUiInit } = require('../../dist/cli/postInstall');
+		const { runZeroUiInit } = require("../../dist/cli/postInstall");
 
 		const originalConsoleLog = console.log;
 		const logMessages = [];
 		console.log = (...args) => {
-			logMessages.push(args.join(' '));
+			logMessages.push(args.join(" "));
 			originalConsoleLog(...args);
 		};
 
@@ -512,16 +512,16 @@ export function Toggle() {
 		try {
 			await runZeroUiInit();
 
-			const logOutput = logMessages.join('\n');
-			assert(logOutput.includes('[Zero-UI] Initializing...'), 'Should log initialization');
+			const logOutput = logMessages.join("\n");
+			assert(logOutput.includes("[Zero-UI] Initializing..."), "Should log initialization");
 
 			// Check that variants were processed
-			const hasVariants = logOutput.includes('variants from') && !logOutput.includes('0 variants');
-			const hasNoVariants = logOutput.includes('No useUI hooks found');
+			const hasVariants = logOutput.includes("variants from") && !logOutput.includes("0 variants");
+			const hasNoVariants = logOutput.includes("No useUI hooks found");
 
-			assert(hasVariants || hasNoVariants, 'Should process variants or indicate none found');
+			assert(hasVariants || hasNoVariants, "Should process variants or indicate none found");
 
-			console.log('✅ Library CLI processes useUI hooks correctly');
+			console.log("✅ Library CLI processes useUI hooks correctly");
 		} finally {
 			process.chdir(originalCwd);
 			console.log = originalConsoleLog;
@@ -532,44 +532,44 @@ export function Toggle() {
 });
 
 // Test package.json validation
-test('CLI script validates and preserves existing package.json fields', async () => {
+test("CLI script validates and preserves existing package.json fields", async () => {
 	const testDir = createTestDir();
 
 	try {
 		// Create a comprehensive package.json with various fields
 		const complexPackageJson = {
-			name: 'my-complex-app',
-			version: '1.5.0',
-			description: 'A complex test application',
-			main: 'index.js',
-			scripts: { start: 'node index.js', test: 'jest', build: 'webpack' },
-			dependencies: { react: '^18.0.0', 'react-dom': '^18.0.0' },
-			devDependencies: { jest: '^29.0.0', webpack: '^5.0.0' },
-			keywords: ['react', 'test'],
-			author: 'Test Author',
-			license: 'MIT',
-			repository: { type: 'git', url: 'https://github.com/test/repo.git' },
+			name: "my-complex-app",
+			version: "1.5.0",
+			description: "A complex test application",
+			main: "index.js",
+			scripts: { start: "node index.js", test: "jest", build: "webpack" },
+			dependencies: { react: "^18.0.0", "react-dom": "^18.0.0" },
+			devDependencies: { jest: "^29.0.0", webpack: "^5.0.0" },
+			keywords: ["react", "test"],
+			author: "Test Author",
+			license: "MIT",
+			repository: { type: "git", url: "https://github.com/test/repo.git" },
 		};
 
-		const packageJsonPath = path.join(testDir, 'package.json');
+		const packageJsonPath = path.join(testDir, "package.json");
 		fs.writeFileSync(packageJsonPath, JSON.stringify(complexPackageJson, null, 2));
 
 		// Run CLI with timeout to avoid full installation
 		await runCLIScript(testDir, 3000).catch(() => ({ timedOut: true }));
 
 		// Verify all original fields are preserved
-		const updatedPackageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
+		const updatedPackageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
 
-		assert.strictEqual(updatedPackageJson.name, 'my-complex-app', 'Name should be preserved');
-		assert.strictEqual(updatedPackageJson.version, '1.5.0', 'Version should be preserved');
-		assert.strictEqual(updatedPackageJson.description, 'A complex test application', 'Description should be preserved');
-		assert.strictEqual(updatedPackageJson.main, 'index.js', 'Main should be preserved');
-		assert.deepStrictEqual(updatedPackageJson.scripts, complexPackageJson.scripts, 'Scripts should be preserved');
-		assert.strictEqual(updatedPackageJson.dependencies.react, '^18.0.0', 'Existing dependencies should be preserved');
-		assert.strictEqual(updatedPackageJson.author, 'Test Author', 'Author should be preserved');
-		assert.strictEqual(updatedPackageJson.license, 'MIT', 'License should be preserved');
+		assert.strictEqual(updatedPackageJson.name, "my-complex-app", "Name should be preserved");
+		assert.strictEqual(updatedPackageJson.version, "1.5.0", "Version should be preserved");
+		assert.strictEqual(updatedPackageJson.description, "A complex test application", "Description should be preserved");
+		assert.strictEqual(updatedPackageJson.main, "index.js", "Main should be preserved");
+		assert.deepStrictEqual(updatedPackageJson.scripts, complexPackageJson.scripts, "Scripts should be preserved");
+		assert.strictEqual(updatedPackageJson.dependencies.react, "^18.0.0", "Existing dependencies should be preserved");
+		assert.strictEqual(updatedPackageJson.author, "Test Author", "Author should be preserved");
+		assert.strictEqual(updatedPackageJson.license, "MIT", "License should be preserved");
 
-		console.log('✅ CLI script validates and preserves existing package.json fields');
+		console.log("✅ CLI script validates and preserves existing package.json fields");
 	} finally {
 		cleanupTestDir(testDir);
 	}

@@ -2,7 +2,7 @@ name: Compatibility
 
 on:
   schedule:
-    - cron: '0 14 * * 1'
+    - cron: "0 14 * * 1"
   workflow_dispatch:
     inputs:
       next_version:
@@ -16,7 +16,7 @@ on:
       react_dom_version:
         description: Optional react-dom override
         required: false
-        default: ''
+        default: ""
       types_react_version:
         description: Optional @types/react override
         required: false

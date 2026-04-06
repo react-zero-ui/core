@@ -1,22 +1,22 @@
 // src/core/postcss/ast-parsing.ts
-import os from 'os';
-import { TransformOptions, transformSync, type BabelFileResult } from '@babel/core';
-import tsPreset from '@babel/preset-typescript';
-import { type ParserOptions } from '@babel/parser';
-import * as t from '@babel/types';
-import { CONFIG } from '../config.js';
-import * as fs from 'fs';
-import { literalFromNode, ResolveOpts } from './resolvers.js';
-import { codeFrameColumns } from '@babel/code-frame';
-import { LRUCache as LRU } from 'lru-cache';
-import { scanVariantTokens } from './scanner.js';
-import { findAllSourceFiles, mapLimit, toKebabCase } from './helpers.js';
-import { NodePath, Node } from '@babel/traverse';
-import traverse from './traverse.cjs';
+import os from "os";
+import { TransformOptions, transformSync, type BabelFileResult } from "@babel/core";
+import tsPreset from "@babel/preset-typescript";
+import { type ParserOptions } from "@babel/parser";
+import * as t from "@babel/types";
+import { CONFIG } from "../config.js";
+import * as fs from "fs";
+import { literalFromNode, ResolveOpts } from "./resolvers.js";
+import { codeFrameColumns } from "@babel/code-frame";
+import { LRUCache as LRU } from "lru-cache";
+import { scanVariantTokens } from "./scanner.js";
+import { findAllSourceFiles, mapLimit, toKebabCase } from "./helpers.js";
+import { NodePath, Node } from "@babel/traverse";
+import traverse from "./traverse.cjs";
 
 export const PARSE_OPTS = (f: string): Partial<ParserOptions> => ({
-	sourceType: 'module',
-	plugins: ['jsx', 'typescript', 'decorators-legacy', 'topLevelAwait'],
+	sourceType: "module",
+	plugins: ["jsx", "typescript", "decorators-legacy", "topLevelAwait"],
 	sourceFilename: f,
 });
 
@@ -30,7 +30,7 @@ export interface HookMeta {
 	/** Literal initial value as string, or `null` if non-literal */
 	initialValue: string | null;
 	/** Whether the hook is scoped to a specific element or global */
-	scope: 'global' | 'scoped';
+	scope: "global" | "scoped";
 }
 
 const ALL_HOOK_NAMES = new Set([CONFIG.HOOK_NAME, CONFIG.LOCAL_HOOK_NAME]);
@@ -52,7 +52,7 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 
 	const optsBase = { throwOnFail: true, source: sourceCode } as ResolveOpts;
 
-	function resolveLiteralMemoized(node: t.Expression, p: NodePath<t.Node>, hook: ResolveOpts['hook']): string | null {
+	function resolveLiteralMemoized(node: t.Expression, p: NodePath<t.Node>, hook: ResolveOpts["hook"]): string | null {
 		if (memo.has(node)) return memo.get(node)!;
 
 		// clone instead of mutate
@@ -91,7 +91,7 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 			const [keyArg, initialArg] = init.arguments;
 
 			// resolve state key with new helpers
-			const stateKey = resolveLiteralMemoized(keyArg as t.Expression, path as NodePath<t.Node>, 'stateKey');
+			const stateKey = resolveLiteralMemoized(keyArg as t.Expression, path as NodePath<t.Node>, "stateKey");
 
 			if (stateKey === null) {
 				throwCodeFrame(
@@ -106,7 +106,7 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 			}
 
 			// resolve initial value with helpers
-			const initialValue = resolveLiteralMemoized(initialArg as t.Expression, path as NodePath<t.Node>, 'initialValue');
+			const initialValue = resolveLiteralMemoized(initialArg as t.Expression, path as NodePath<t.Node>, "initialValue");
 
 			if (initialValue === null) {
 				throwCodeFrame(
@@ -120,7 +120,7 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 				);
 			}
 
-			const scope = init.callee.name === CONFIG.HOOK_NAME ? 'global' : 'scoped';
+			const scope = init.callee.name === CONFIG.HOOK_NAME ? "global" : "scoped";
 
 			hooks.push({ setterFnName: setterEl.name, stateKey, initialValue, scope });
 		},
@@ -132,7 +132,7 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 				!t.isMemberExpression(callee) ||
 				!t.isIdentifier(callee.object) ||
 				!SSR_HOOKS.has(callee.object.name as LocalHookName) ||
-				!t.isIdentifier(callee.property, { name: 'onClick' })
+				!t.isIdentifier(callee.property, { name: "onClick" })
 			)
 				return;
 
@@ -141,7 +141,7 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 			const [keyArg, arrArg] = path.node.arguments;
 
 			/* --- resolve key ------------------------------------------------ */
-			const stateKey = resolveLiteralMemoized(keyArg as t.Expression, path, 'stateKey');
+			const stateKey = resolveLiteralMemoized(keyArg as t.Expression, path, "stateKey");
 			if (stateKey === null) {
 				throwCodeFrame(keyArg, path.opts?.filename, sourceCode, `[Zero-UI] zeroSSR.onClick("key"): key must be a fully-static string.`);
 			}
@@ -157,7 +157,7 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 			}
 			const values: string[] = [];
 			for (const el of arrArg.elements) {
-				const v = resolveLiteralMemoized(el as t.Expression, path, 'initialValue');
+				const v = resolveLiteralMemoized(el as t.Expression, path, "initialValue");
 				if (v === null) {
 					throwCodeFrame(el!, path.opts?.filename, sourceCode, `[Zero-UI] zeroSSR.onClick("${stateKey}",[string]): array values must be static strings.`);
 				}
@@ -169,10 +169,10 @@ export function collectUseUIHooks(ast: t.File, sourceCode: string): HookMeta[] {
 
 			/* --- push synthetic HookMeta ----------------------------------- */
 			hooks.push({
-				setterFnName: '_', // placeholder
+				setterFnName: "_", // placeholder
 				stateKey,
 				initialValue: values[0], // first element becomes default
-				scope: isScoped ? 'scoped' : 'global',
+				scope: isScoped ? "scoped" : "global",
 			});
 		},
 	});
@@ -187,7 +187,7 @@ export interface VariantData {
 	/** Literal initial value as string, or `null` if non-literal */
 	initialValue: string | null;
 	/** Whether the variant is global or scoped */
-	scope: 'global' | 'scoped';
+	scope: "global" | "scoped";
 }
 
 /* ── LRU cache keyed by absolute file path ──────────────────────────── */
@@ -239,7 +239,7 @@ export async function processVariants(changedFiles: string[] | null = null): Pro
 		if (fileCache.get(fp)?.hash === sig) return;
 
 		// Read the file
-		const code = fs.readFileSync(fp, 'utf8');
+		const code = fs.readFileSync(fp, "utf8");
 
 		const isCodeFile = /\.[cm]?[jt]sx?$/.test(fp.toLowerCase());
 
@@ -269,14 +269,14 @@ export async function processVariants(changedFiles: string[] | null = null): Pro
 
 		if (!needsRescan) continue;
 
-		const code = fs.readFileSync(fp, 'utf8'); // cheap: regex only
+		const code = fs.readFileSync(fp, "utf8"); // cheap: regex only
 		entry.tokens = scanVariantTokens(code, keySet);
 	}
 
 	/* Phase D - aggregate variant & initial-value maps */
 	const variantMap = new Map<string, Set<string>>();
 	const initMap = new Map<string, string>();
-	const scopeMap = new Map<string, 'global' | 'scoped'>();
+	const scopeMap = new Map<string, "global" | "scoped">();
 
 	for (const { hooks, tokens } of fileCache.values()) {
 		hooks.forEach((h) => {
@@ -311,7 +311,7 @@ export async function processVariants(changedFiles: string[] | null = null): Pro
 
 	const initialGlobalValues = Object.fromEntries(
 		// only include global variants in the initialGlobalValues object because scoped variants are handled by the component data-attributes
-		finalVariants.filter((v) => v.scope === 'global').map((v) => [`data-${toKebabCase(v.key)}`, v.initialValue ?? v.values[0] ?? ''])
+		finalVariants.filter((v) => v.scope === "global").map((v) => [`data-${toKebabCase(v.key)}`, v.initialValue ?? v.values[0] ?? ""])
 	);
 
 	return { finalVariants, initialGlobalValues, sourceFiles: srcFiles };
@@ -321,13 +321,13 @@ const cache = new Map<string, t.File>();
 
 const defaultOpts: Partial<TransformOptions> = {
 	presets: [[tsPreset, { isTSX: true, allowDeclareFields: true, allExtensions: true }]],
-	parserOpts: { sourceType: 'module', plugins: ['jsx', 'decorators-legacy', 'typescript', 'topLevelAwait'] },
+	parserOpts: { sourceType: "module", plugins: ["jsx", "decorators-legacy", "typescript", "topLevelAwait"] },
 	ast: true,
 	code: false,
 };
 
 export function parseJsLike(code: string, filename: string, opts: TransformOptions = defaultOpts): t.File {
-	const key = filename + '\0' + code.length;
+	const key = filename + "\0" + code.length;
 	if (cache.has(key)) return cache.get(key)!;
 
 	const result = transformSync(code, { ...opts, filename }) as BabelFileResult & { ast: t.File }; // <— narrow type
@@ -355,7 +355,7 @@ export function throwCodeFrame(nodeOrPath: Node | NodePath, filename: string, so
 	if (!node.loc) throw new Error(msg); // defensive
 
 	const { start, end } = node.loc;
-	const header = `${filename ?? ''}:${start.line}:${start.column}\n`;
+	const header = `${filename ?? ""}:${start.line}:${start.column}\n`;
 	const frame = codeFrameColumns(source, { start, end }, { highlightCode: true, linesAbove: 1, linesBelow: 1 });
 
 	throw new Error(`${header}${msg}\n${frame}`);

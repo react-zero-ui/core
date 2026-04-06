@@ -14,7 +14,7 @@
  * --- */
 
 /** Map emitted by the compiler: every legal data-* key ➡️ true */
-type VariantKeyMap = Record<string, true | string[] | '*'>;
+type VariantKeyMap = Record<string, true | string[] | "*">;
 
 /* kebab ➡️ camel ("data-theme-dark" ➡️ "themeDark") */
 const kebabToCamel = (attr: string) => attr.slice(5).replace(/-([a-z])/g, (_, c) => c.toUpperCase());
@@ -33,30 +33,30 @@ function cycleDatasetValue(el: HTMLElement, camelKey: string, values: readonly s
  *  Public entry                                                       *
  * ------------------------------------------------------------------ */
 export function activateZeroUiRuntime(map: VariantKeyMap) {
-	if (typeof window === 'undefined' || (window as any).__zero) return;
+	if (typeof window === "undefined" || (window as any).__zero) return;
 	(window as any).__zero = true; // idempotent flag
 
-	if (process.env.NODE_ENV !== 'production') {
-		console.log('🧩 Zero-UI runtime attached');
+	if (process.env.NODE_ENV !== "production") {
+		console.log("🧩 Zero-UI runtime attached");
 	}
 
-	document.addEventListener('click', (ev) => {
+	document.addEventListener("click", (ev) => {
 		/* 1. nearest ancestor with data-ui */
-		const host = (ev.target as HTMLElement).closest<HTMLElement>('[data-ui]');
+		const host = (ev.target as HTMLElement).closest<HTMLElement>("[data-ui]");
 		if (!host) return;
 
 		/* 2. parse directive */
 		const match = DATA_UI_RE.exec(host.dataset.ui!);
 		if (!match) return;
 
-		const [, scope, key, raw = ''] = match;
+		const [, scope, key, raw = ""] = match;
 		if (!map[`data-${key}`]) return;
 
-		const values = raw ? raw.split(',') : ['']; // '' > toggle
+		const values = raw ? raw.split(",") : [""]; // '' > toggle
 		const camelKey = kebabToCamel(`data-${key}`);
 
 		/* 3. decide target element */
-		const target = scope === 'global' ? document.body : ((host.closest(`[data-${key}]`) as HTMLElement) ?? host);
+		const target = scope === "global" ? document.body : ((host.closest(`[data-${key}]`) as HTMLElement) ?? host);
 
 		/* 4. mutate data-attribute */
 		cycleDatasetValue(target, camelKey, values);

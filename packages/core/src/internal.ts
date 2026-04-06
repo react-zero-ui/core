@@ -1,13 +1,13 @@
 // src/internal.ts
-import type { UIAction } from './index.js';
+import type { UIAction } from "./index.js";
 
-export const cssVar: unique symbol = Symbol('cssVar');
+export const cssVar: unique symbol = Symbol("cssVar");
 
 export function makeSetter<T extends string>(key: string, initialValue: T, getTarget: () => HTMLElement, flag?: typeof cssVar) {
 	const camelKey = key.replace(/-([a-z])/g, (_, l) => l.toUpperCase());
 	const isCss = flag === cssVar;
-	if (process.env.NODE_ENV !== 'production') {
-		if (key.includes(' ') || initialValue.includes(' ')) {
+	if (process.env.NODE_ENV !== "production") {
+		if (key.includes(" ") || initialValue.includes(" ")) {
 			throw new Error(`[Zero-UI] useUI(key, initialValue); key and initialValue must not contain spaces, got "${key}" and "${initialValue}"`);
 		}
 
@@ -19,19 +19,19 @@ export function makeSetter<T extends string>(key: string, initialValue: T, getTa
 		}
 
 		// Validate inputs with helpful error messages
-		if (!key || typeof key !== 'string' || key.trim() === '') {
+		if (!key || typeof key !== "string" || key.trim() === "") {
 			throw new Error(`useUI(key, initialValue); key must be a non-empty string, got "${key}"`);
 		}
 		// force string type for initialValue
-		if (typeof initialValue !== 'string') {
+		if (typeof initialValue !== "string") {
 			throw new Error(`useUI(key, initialValue); initialValue must be or resolve to a string, got "${typeof initialValue}"`);
 		}
 
-		if (initialValue === '' || initialValue == null) {
+		if (initialValue === "" || initialValue == null) {
 			throw new Error(`useUI(key, initialValue); initialValue cannot be empty string, null, or undefined, got "${initialValue}"`);
 		}
 		// One shared registry per window / Node context
-		const registry = typeof globalThis !== 'undefined' ? ((globalThis as any).__useUIRegistry ||= new Map()) : new Map();
+		const registry = typeof globalThis !== "undefined" ? ((globalThis as any).__useUIRegistry ||= new Map()) : new Map();
 
 		const prev = registry.get(key);
 		if (prev !== undefined && prev !== initialValue) {
@@ -46,14 +46,14 @@ export function makeSetter<T extends string>(key: string, initialValue: T, getTa
 	}
 	return (valueOrFn: UIAction<T>) => {
 		// SSR safety: bail out if running on server where window is undefined
-		if (typeof window === 'undefined') return;
+		if (typeof window === "undefined") return;
 
 		const target = getTarget();
 
 		const prev = isCss ? ((target.style.getPropertyValue(`--${key}`) || initialValue) as T) : ((target.dataset[camelKey] || initialValue) as T);
 
 		const next =
-			typeof valueOrFn === 'function'
+			typeof valueOrFn === "function"
 				? (valueOrFn as (p: T) => T)(prev) //  ← CALL the updater
 				: valueOrFn;
 

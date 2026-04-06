@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 :root {
 	--gradient: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
@@ -19,7 +19,7 @@ div.relative.py-10 {
 	border: 1px dotted red;
 } */
 button:not(:disabled),
-[role='button']:not(:disabled) {
+[role="button"]:not(:disabled) {
 	cursor: pointer;
 }
 
@@ -45,7 +45,7 @@ button:not(:disabled),
 		}
 	}
 }
-body[data-mobile-menu='closed'] {
+body[data-mobile-menu="closed"] {
 	.bounce > span {
 		/* animation: customBounce 2s cubic-bezier(0.8, 0.5, 0.2, 1.4) infinite; */
 		animation-delay: var(--delay, 0s);
@@ -60,7 +60,7 @@ body[data-mobile-menu='closed'] {
 		opacity: 0;
 	}
 }
-body[data-mobile-menu='open'] {
+body[data-mobile-menu="open"] {
 	.dot-menu-icon {
 		:first-child {
 			height: 0.125rem;

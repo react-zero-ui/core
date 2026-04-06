@@ -1,6 +1,6 @@
-'use client';
-import { useRef } from 'react';
-import { cssVar, makeSetter } from './internal.js';
+"use client";
+import { useRef } from "react";
+import { cssVar, makeSetter } from "./internal.js";
 
 type UIAction<T extends string> = T | ((prev: T) => T);
 
@@ -28,7 +28,7 @@ function useScopedUI<T extends string = string>(key: string, initialValue: T, fl
 
 	if (!attachRef.current) {
 		attachRef.current = ((node: HTMLElement | null) => {
-			if (process.env.NODE_ENV !== 'production') {
+			if (process.env.NODE_ENV !== "production") {
 				if (node) {
 					refAttachCount.current++;
 					if (refAttachCount.current > 1) {

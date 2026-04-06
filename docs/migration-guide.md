@@ -1,4 +1,4 @@
-# 🔄 Migration Guide
+# Migration Guide
 
 <div align="center">
 
@@ -10,21 +10,21 @@ Step-by-step guides for common migration scenarios.
 
 ---
 
-## 🎯 From React useState
+## From React useState
 
 ### Basic State Migration
 
 **Before (React useState):**
 
 ```tsx
-import { useState } from 'react';
+import { useState } from "react";
 
 function ThemeToggle() {
-	const [theme, setTheme] = useState('light');
+	const [theme, setTheme] = useState("light");
 
 	return (
-		<div className={theme === 'dark' ? 'bg-gray-900' : 'bg-white'}>
-			<button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>Toggle Theme</button>
+		<div className={theme === "dark" ? "bg-gray-900" : "bg-white"}>
+			<button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>Toggle Theme</button>
 		</div>
 	);
 }
@@ -33,14 +33,14 @@ function ThemeToggle() {
 **After (React Zero-UI):**
 
 ```tsx
-import { useUI } from '@react-zero-ui/core';
+import { useUI } from "@react-zero-ui/core";
 
 function ThemeToggle() {
-	const [, setTheme] = useUI('theme', 'light');
+	const [, setTheme] = useUI("theme", "light");
 
 	return (
 		<div className="theme-light:bg-white theme-dark:bg-gray-900">
-			<button onClick={() => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))}>Toggle Theme</button>
+			<button onClick={() => setTheme((prev) => (prev === "light" ? "dark" : "light"))}>Toggle Theme</button>
 		</div>
 	);
 }
@@ -81,15 +81,15 @@ function App() {
 
 ```tsx
 function App() {
-	const [, setModal] = useUI('modal', 'closed');
+	const [, setModal] = useUI("modal", "closed");
 
 	return (
 		<>
-			<button onClick={() => setModal('open')}>Open Modal</button>
+			<button onClick={() => setModal("open")}>Open Modal</button>
 
 			<div className="modal-closed:hidden fixed inset-0 bg-black/50">
 				<div className="bg-white p-6">
-					<button onClick={() => setModal('closed')}>Close</button>
+					<button onClick={() => setModal("closed")}>Close</button>
 				</div>
 			</div>
 		</>
@@ -99,7 +99,7 @@ function App() {
 
 ---
 
-## ⚡️ From Context API
+## From Context API
 
 ### Global Theme Context
 
@@ -109,11 +109,11 @@ function App() {
 const ThemeContext = createContext();
 
 function ThemeProvider({ children }) {
-	const [theme, setTheme] = useState('light');
+	const [theme, setTheme] = useState("light");
 
 	return (
 		<ThemeContext.Provider value={{ theme, setTheme }}>
-			<div className={theme === 'dark' ? 'dark' : 'light'}>{children}</div>
+			<div className={theme === "dark" ? "dark" : "light"}>{children}</div>
 		</ThemeContext.Provider>
 	);
 }
@@ -121,7 +121,7 @@ function ThemeProvider({ children }) {
 function ThemeToggle() {
 	const { theme, setTheme } = useContext(ThemeContext);
 
-	return <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>Current: {theme}</button>;
+	return <button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>Current: {theme}</button>;
 }
 ```
 
@@ -135,10 +135,10 @@ function App({ children }) {
 }
 
 function ThemeToggle() {
-	const [, setTheme] = useUI('theme', 'light');
+	const [, setTheme] = useUI("theme", "light");
 
 	return (
-		<button onClick={() => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))}>
+		<button onClick={() => setTheme((prev) => (prev === "light" ? "dark" : "light"))}>
 			<span className="theme-light:inline theme-dark:hidden">Light</span>
 			<span className="theme-dark:inline theme-light:hidden">Dark</span>
 		</button>
@@ -148,14 +148,14 @@ function ThemeToggle() {
 
 **Benefits:**
 
-- ❌ No more context providers
-- ❌ No more prop drilling
-- ❌ No re-renders when state changes
-- ✅ State accessible anywhere via Tailwind classes
+- No more context providers
+- No more prop drilling
+- No re-renders when state changes
+- State accessible anywhere via Tailwind classes
 
 ---
 
-## 🏪 From Redux/Zustand
+## From Redux/Zustand
 
 ### Redux Theme Slice
 
@@ -164,11 +164,11 @@ function ThemeToggle() {
 ```tsx
 // store/themeSlice.ts
 const themeSlice = createSlice({
-	name: 'theme',
-	initialState: { value: 'light' },
+	name: "theme",
+	initialState: { value: "light" },
 	reducers: {
 		toggleTheme: (state) => {
-			state.value = state.value === 'light' ? 'dark' : 'light';
+			state.value = state.value === "light" ? "dark" : "light";
 		},
 	},
 });
@@ -179,7 +179,7 @@ function ThemeToggle() {
 	const dispatch = useDispatch();
 
 	return (
-		<div className={theme === 'dark' ? 'bg-gray-900' : 'bg-white'}>
+		<div className={theme === "dark" ? "bg-gray-900" : "bg-white"}>
 			<button onClick={() => dispatch(toggleTheme())}>Toggle Theme</button>
 		</div>
 	);
@@ -192,11 +192,11 @@ function ThemeToggle() {
 // No store setup needed!
 
 function ThemeToggle() {
-	const [, setTheme] = useUI('theme', 'light');
+	const [, setTheme] = useUI("theme", "light");
 
 	return (
 		<div className="theme-light:bg-white theme-dark:bg-gray-900">
-			<button onClick={() => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))}>Toggle Theme</button>
+			<button onClick={() => setTheme((prev) => (prev === "light" ? "dark" : "light"))}>Toggle Theme</button>
 		</div>
 	);
 }
@@ -207,13 +207,13 @@ function ThemeToggle() {
 **Before (Zustand):**
 
 ```tsx
-const useThemeStore = create((set) => ({ theme: 'light', toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })) }));
+const useThemeStore = create((set) => ({ theme: "light", toggleTheme: () => set((state) => ({ theme: state.theme === "light" ? "dark" : "light" })) }));
 
 function ThemeToggle() {
 	const { theme, toggleTheme } = useThemeStore();
 
 	return (
-		<div className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+		<div className={`${theme === "dark" ? "bg-gray-900" : "bg-white"}`}>
 			<button onClick={toggleTheme}>Current: {theme}</button>
 		</div>
 	);
@@ -224,11 +224,11 @@ function ThemeToggle() {
 
 ```tsx
 function ThemeToggle() {
-	const [, setTheme] = useUI('theme', 'light');
+	const [, setTheme] = useUI("theme", "light");
 
 	return (
 		<div className="theme-light:bg-white theme-dark:bg-gray-900">
-			<button onClick={() => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))}>
+			<button onClick={() => setTheme((prev) => (prev === "light" ? "dark" : "light"))}>
 				<span className="theme-light:inline theme-dark:hidden">Light</span>
 				<span className="theme-dark:inline theme-light:hidden">Dark</span>
 			</button>
@@ -239,7 +239,7 @@ function ThemeToggle() {
 
 ---
 
-## 🎨 From CSS-in-JS Solutions
+## From CSS-in-JS Solutions
 
 ### Styled Components with Theme
 
@@ -251,14 +251,14 @@ const ThemeProvider = styled.div`
 	color: ${(props) => props.theme.text};
 `;
 
-const theme = { light: { bg: 'white', text: 'black' }, dark: { bg: 'black', text: 'white' } };
+const theme = { light: { bg: "white", text: "black" }, dark: { bg: "black", text: "white" } };
 
 function App() {
-	const [currentTheme, setCurrentTheme] = useState('light');
+	const [currentTheme, setCurrentTheme] = useState("light");
 
 	return (
 		<ThemeProvider theme={theme[currentTheme]}>
-			<button onClick={() => setCurrentTheme(currentTheme === 'light' ? 'dark' : 'light')}>Toggle</button>
+			<button onClick={() => setCurrentTheme(currentTheme === "light" ? "dark" : "light")}>Toggle</button>
 		</ThemeProvider>
 	);
 }
@@ -268,11 +268,11 @@ function App() {
 
 ```tsx
 function App() {
-	const [, setTheme] = useUI('theme', 'light');
+	const [, setTheme] = useUI("theme", "light");
 
 	return (
 		<div className="theme-light:bg-white theme-light:text-black theme-dark:bg-black theme-dark:text-white">
-			<button onClick={() => setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))}>Toggle</button>
+			<button onClick={() => setTheme((prev) => (prev === "light" ? "dark" : "light"))}>Toggle</button>
 		</div>
 	);
 }
@@ -280,7 +280,7 @@ function App() {
 
 ---
 
-## 📱 From Component State to Global State
+## From Component State to Global State
 
 ### Converting Local State to Global
 
@@ -291,14 +291,14 @@ function Sidebar() {
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
-		<div className={`${isOpen ? 'w-64' : 'w-16'} transition-all`}>
+		<div className={`${isOpen ? "w-64" : "w-16"} transition-all`}>
 			<button onClick={() => setIsOpen(!isOpen)}>Toggle</button>
 		</div>
 	);
 }
 
 function Header() {
-	// Can't access sidebar state! 😞
+	// Can't access sidebar state!
 	return <div>Header content</div>;
 }
 ```
@@ -307,24 +307,24 @@ function Header() {
 
 ```tsx
 function Sidebar() {
-	const [, setSidebar] = useUI('sidebar', 'closed');
+	const [, setSidebar] = useUI("sidebar", "closed");
 
 	return (
 		<div className="sidebar-closed:w-16 sidebar-open:w-64 transition-all">
-			<button onClick={() => setSidebar((prev) => (prev === 'closed' ? 'open' : 'closed'))}>Toggle</button>
+			<button onClick={() => setSidebar((prev) => (prev === "closed" ? "open" : "closed"))}>Toggle</button>
 		</div>
 	);
 }
 
 function Header() {
-	// Can respond to sidebar state! 🎉
+	// Can respond to sidebar state!
 	return <div className="sidebar-open:ml-64 sidebar-closed:ml-16 transition-all">Header content</div>;
 }
 ```
 
 ---
 
-## 🔧 Migration Checklist
+## Migration Checklist
 
 ### Step 1: Identify UI State
 
@@ -361,26 +361,26 @@ Or manual setup:
 
 ---
 
-## 🚨 Migration Gotchas
+## Migration Gotchas
 
 ### 1. State Key Naming
 
 ```tsx
-// ❌ Avoid conflicts with existing data attributes
-const [, setState] = useUI('id', 'default'); // conflicts with data-id
+//  Avoid conflicts with existing data attributes
+const [, setState] = useUI("id", "default"); // conflicts with data-id
 
-// ✅ Use descriptive, unique keys
-const [, setState] = useUI('modal-state', 'closed');
+//  Use descriptive, unique keys
+const [, setState] = useUI("modal-state", "closed");
 ```
 
 ### 2. Initial Value Consistency
 
 ```tsx
-// ❌ Ensure initial values match what CSS expects
-const [, setTheme] = useUI('theme', 'lite'); // typo!
+//  Ensure initial values match what CSS expects
+const [, setTheme] = useUI("theme", "lite"); // typo!
 
-// ✅ Match your Tailwind variants exactly
-const [, setTheme] = useUI('theme', 'light'); // matches theme-light:
+//  Match your Tailwind variants exactly
+const [, setTheme] = useUI("theme", "light"); // matches theme-light:
 ```
 
 ---
@@ -390,39 +390,39 @@ const [, setTheme] = useUI('theme', 'light'); // matches theme-light:
 Imported variables can't be resolved statically — even if reassigned locally.
 
 ```ts
-// ❌ This will fail at build time
-import { THEME_KEY } from './constants';
+//  This will fail at build time
+import { THEME_KEY } from "./constants";
 const localKey = THEME_KEY;
-const [, setTheme] = useUI(localKey, 'dark');
+const [, setTheme] = useUI(localKey, "dark");
 ```
 
 ```ts
-// ✅ Inline the string directly or re-declare as a top-level const
-const THEME_KEY = 'theme';
-const [, setTheme] = useUI(THEME_KEY, 'dark');
+//  Inline the string directly or re-declare as a top-level const
+const THEME_KEY = "theme";
+const [, setTheme] = useUI(THEME_KEY, "dark");
 ```
 
-> 🧠 We're working on support for imported bindings once Next.js exposes a plugin API for Turbopack. Until then, stick with top-level `const` literals.
+> We're working on support for imported bindings once Next.js exposes a plugin API for Turbopack. Until then, stick with top-level `const` literals.
 
 ### 4. Don't Read Stale Values
 
 ```tsx
-// ❌ Don't use returned value for logic
-const [theme, setTheme] = useUI('theme', 'light');
-if (theme === 'dark') {
+//  Don't use returned value for logic
+const [theme, setTheme] = useUI("theme", "light");
+if (theme === "dark") {
 	/* Won't work! */
 }
 
-// ✅ Use CSS classes for visual state
+//  Use CSS classes for visual state
 <div className="theme-dark:hidden">Only visible in light mode</div>;
 ```
 
 ---
 
-## 📊 Before/After Comparison
+## Before/After Comparison
 
-| Aspect | Before (Traditional) | After (React Zero-UI) |
-| --- | --- | --- |
+| Aspect            | Before (Traditional)          | After (React Zero-UI)      |
+| ----------------- | ----------------------------- | -------------------------- |
 | **Bundle Size**   | +5KB (Redux) / +2KB (Context) | +350 bytes                 |
 | **Re-renders**    | Every state change            | Zero                       |
 | **Performance**   | Slower with scale             | Constant fast              |
@@ -434,10 +434,10 @@ if (theme === 'dark') {
 
 <div align="center">
 
-### 🎯 Migration Complete!
+### Migration Complete!
 
 Your app should now be faster, simpler, and more maintainable.
 
-[**🚀 Next: Usage Examples**](./usage-examples.md) | [**📖 API Reference**](../README.md#-api-reference)
+[**Next: Usage Examples**](./usage-examples.md) | [**API Reference**](../README.md#api-reference)
 
 </div>

@@ -1,11 +1,11 @@
 // src/cli/postInstall.ts
-import { patchNextBodyTag } from '../postcss/ast-generating.js';
-import { generateAttributesFile, patchTsConfig, patchPostcssConfig, patchViteConfig, hasViteConfig } from '../postcss/helpers.js';
-import { processVariants } from '../postcss/ast-parsing.js';
+import { patchNextBodyTag } from "../postcss/ast-generating.js";
+import { generateAttributesFile, patchTsConfig, patchPostcssConfig, patchViteConfig, hasViteConfig } from "../postcss/helpers.js";
+import { processVariants } from "../postcss/ast-parsing.js";
 
 export async function runZeroUiInit() {
 	try {
-		console.log('[Zero-UI] Initializing...');
+		console.log("[Zero-UI] Initializing...");
 
 		// Patch Vite config for Vite projects
 		if (hasViteConfig()) {
@@ -32,10 +32,10 @@ export async function runZeroUiInit() {
 		}
 
 		if (finalVariants.length === 0) {
-			console.log('[Zero-UI] ℹ️  No useUI hooks found yet. Files will be updated when you add them.');
+			console.log("[Zero-UI] ℹ️  No useUI hooks found yet. Files will be updated when you add them.");
 		}
 	} catch (error) {
-		console.error('[Zero-UI] ❌ Initialization failed:', error);
+		console.error("[Zero-UI] ❌ Initialization failed:", error);
 		process.exit(1);
 	}
 }

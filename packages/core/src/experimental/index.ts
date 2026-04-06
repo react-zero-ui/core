@@ -1,15 +1,15 @@
 // src/experimental/index.ts
 
-type Attrs<V extends string[]> = { readonly 'data-ui': `global:${string}(${string})` } | { readonly 'data-ui': `scoped:${string}(${string})` };
+type Attrs<V extends string[]> = { readonly "data-ui": `global:${string}(${string})` } | { readonly "data-ui": `scoped:${string}(${string})` };
 
 const makeOnClick =
 	<T extends string>(scoped: boolean) =>
 	<const V extends string[]>(key: T, vals: [...V]): Attrs<V> => {
-		if (process.env.NODE_ENV !== 'production') {
+		if (process.env.NODE_ENV !== "production") {
 			assertKey(key);
 			assertVals(vals);
 		}
-		return { 'data-ui': `${scoped ? 'scoped' : 'global'}:${key}(${vals.join(',')})` } as const;
+		return { "data-ui": `${scoped ? "scoped" : "global"}:${key}(${vals.join(",")})` } as const;
 	};
 
 export const zeroSSR = { onClick: makeOnClick(false) }; // global intent
@@ -23,6 +23,6 @@ function assertKey(key: string) {
 
 function assertVals(vals: string[]) {
 	if (vals.length === 0) {
-		throw new Error('[Zero-UI] onClick(): value array cannot be empty.');
+		throw new Error("[Zero-UI] onClick(): value array cannot be empty.");
 	}
 }
