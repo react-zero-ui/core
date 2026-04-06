@@ -45,7 +45,7 @@
 		"prepack:core": "pnpm -F @react-zero-ui/core pack --pack-destination ./dist",
 		"reset": "git clean -fdx && pnpm install --frozen-lockfile && pnpm prepack:core && pnpm i-tarball",
 		"size": "npx esbuild ./packages/core/dist/index.js --bundle --minify --format=esm --external:react --define:process.env.NODE_ENV='\"production\"' | gzip -c | wc -c",
-		"test": "cd packages/core && pnpm test:all && pnpm smoke",
+		"test": "eslint . && cd packages/core && pnpm test:all && pnpm smoke",
 		"test:cli": "cd packages/core && pnpm test:cli",
 		"test:integration": "cd packages/core && pnpm test:integration",
 		"test:next": "cd packages/core && pnpm test:next",
@@ -74,9 +74,6 @@
 		},
 		{
 			"path": "packages/cli"
-		},
-		{
-			"path": "packages/eslint-zero-ui"
 		}
 	]
 }

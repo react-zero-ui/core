@@ -24,8 +24,7 @@ Stay **pre-rendered, declarative, and brutally fast.**
 ```
 📁 packages/
 ├── core            ➡️ @react-zero-ui/core (library logic + postcss)
-├── cli             ➡️ create-zero-ui (npx installer)
-└── eslint-zero-ui  ➡️ eslint-zero-ui - in development
+└── cli             ➡️ create-zero-ui (npx installer)
 ```
 
 ---
