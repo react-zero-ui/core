@@ -9,17 +9,17 @@
 		"build-and-preview": "vite build && vite preview --port 5173"
 	},
 	"dependencies": {
-		"react": "^19.1.0",
-		"react-dom": "^19.1.0"
+		"react": "19.2.4",
+		"react-dom": "19.2.4"
 	},
 	"devDependencies": {
-		"@tailwindcss/postcss": "^4.1.10",
-		"@types/react": "^19.1.2",
-		"@types/react-dom": "^19.1.2",
-		"@vitejs/plugin-react": "^4.4.1",
-		"postcss": "^8.5.5",
-		"tailwindcss": "^4.1.10",
+		"@tailwindcss/postcss": "4.2.2",
+		"@types/react": "19.2.14",
+		"@types/react-dom": "19.2.3",
+		"@vitejs/plugin-react": "6.0.1",
+		"postcss": "8.5.8",
+		"tailwindcss": "4.2.2",
 		"typescript": "~5.8.3",
-		"vite": "^6.3.5"
+		"vite": "8.0.3"
 	}
 }

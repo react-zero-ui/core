@@ -1,10 +1,10 @@
 'use client';
-import { useRef, type RefObject } from 'react';
+import { useRef } from 'react';
 import { cssVar, makeSetter } from './internal.js';
 
 type UIAction<T extends string> = T | ((prev: T) => T);
 
-type ScopedRef = RefObject<HTMLElement | null> | (((node: HTMLElement | null) => void) & { current: HTMLElement | null });
+type ScopedRef = ((node: HTMLElement | null) => void) & { current: HTMLElement | null };
 
 interface ScopedSetterFn<T extends string = string> {
 	(action: UIAction<T>): void; //  ← SINGLE source of truth
@@ -22,39 +22,37 @@ function useScopedUI<T extends string = string>(key: string, initialValue: T, fl
 	// Create a ref to hold the DOM element that will receive the data-* attributes
 	// This allows scoping UI state to specific elements instead of always using document.body
 	const scopeRef = useRef<HTMLElement | null>(null);
-
 	const setterFn = useRef(makeSetter(key, initialValue, () => scopeRef.current!, flag)).current as ScopedSetterFn<T>;
+	const refAttachCount = useRef(0);
+	const attachRef = useRef<ScopedRef | null>(null);
 
-	if (process.env.NODE_ENV !== 'production') {
-		//  -- DEV-ONLY MULTIPLE REF GUARD (removed in production by modern bundlers)  --
-		// Attach the ref to the setter function so users can write: <div ref={setterFn.ref} />
-		const refAttachCount = useRef(0);
-		// DEV: Wrap scopeRef to detect multiple attachments
-		const attachRef = ((node: HTMLElement | null) => {
-			if (node) {
-				refAttachCount!.current++;
-				if (refAttachCount!.current > 1) {
-					// TODO add documentation link
-					throw new Error(
-						`[useUI] Multiple ref attachments detected for key "${key}". ` +
-							`Each useScopedUI hook supports only one ref attachment per component. ` +
-							`Solution: Create separate component. and reuse.\n` +
-							`React Strict Mode May Cause the Ref to be attached multiple times.`
-					);
+	if (!attachRef.current) {
+		attachRef.current = ((node: HTMLElement | null) => {
+			if (process.env.NODE_ENV !== 'production') {
+				if (node) {
+					refAttachCount.current++;
+					if (refAttachCount.current > 1) {
+						// TODO add documentation link
+						throw new Error(
+							`[useUI] Multiple ref attachments detected for key "${key}". ` +
+								`Each useScopedUI hook supports only one ref attachment per component. ` +
+								`Solution: Create separate component. and reuse.\n` +
+								`React Strict Mode May Cause the Ref to be attached multiple times.`
+						);
+					}
+				} else {
+					// Handle cleanup when ref is detached
+					refAttachCount.current = Math.max(0, refAttachCount.current - 1);
 				}
-			} else {
-				// Handle cleanup when ref is detached
-				refAttachCount!.current = Math.max(0, refAttachCount!.current - 1);
 			}
+
 			scopeRef.current = node;
-			attachRef.current = node;
-		}) as ((node: HTMLElement | null) => void) & { current: HTMLElement | null };
-		attachRef.current = null;
-		(setterFn as ScopedSetterFn<T>).ref = attachRef;
-	} else {
-		// PROD: Direct ref assignment for zero overhead
-		setterFn.ref = scopeRef;
+			attachRef.current!.current = node;
+		}) as ScopedRef;
+		attachRef.current.current = null;
 	}
+
+	setterFn.ref = attachRef.current;
 
 	// Return tuple matching React's useState pattern: [initialValue, setter]
 	return [initialValue, setterFn];
