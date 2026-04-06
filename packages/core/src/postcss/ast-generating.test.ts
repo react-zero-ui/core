@@ -27,6 +27,22 @@ export default config;
 	);
 });
 
+test("parseAndUpdatePostcssConfig is idempotent for array plugin configs", () => {
+	const source = `module.exports = { plugins: ["@react-zero-ui/core/postcss", "@tailwindcss/postcss"] };`;
+	const updated = parseAndUpdatePostcssConfig(source, zeroUiPlugin, false);
+
+	assert.equal(updated, source);
+	assert.equal((updated?.split(zeroUiPlugin).length ?? 1) - 1, 1);
+});
+
+test("parseAndUpdatePostcssConfig is idempotent for object plugin configs", () => {
+	const source = `module.exports = { plugins: { "@react-zero-ui/core/postcss": {}, "@tailwindcss/postcss": {} } };`;
+	const updated = parseAndUpdatePostcssConfig(source, zeroUiPlugin, false);
+
+	assert.equal(updated, source);
+	assert.equal((updated?.split(zeroUiPlugin).length ?? 1) - 1, 1);
+});
+
 const FIXTURES = {
 	// 1. ESM object
 	"vite.config.js": `

@@ -215,14 +215,30 @@ test("patchPostcssConfig inserts Zero-UI before Tailwind in existing config", as
 test("patchPostcssConfig is idempotent when Zero-UI plugin already present", async () => {
 	const original = `module.exports = {
   plugins: {
-    ${ZERO}: {},
-    ${TAIL}: {},
+    "${ZERO}": {},
+    "${TAIL}": {},
   },
 };`;
 
 	await runTest({ "postcss.config.js": original }, async () => {
 		await patchPostcssConfig();
 		assert.strictEqual(readFile("postcss.config.js"), original, "Zero-UI plugin must be idempotent");
+	});
+});
+
+test("patchPostcssConfig does not duplicate Zero-UI in array plugin configs", async () => {
+	const original = `module.exports = {
+  plugins: ["${ZERO}", "${TAIL}"],
+};`;
+
+	await runTest({ "postcss.config.js": original }, async () => {
+		await patchPostcssConfig();
+
+		const updated = readFile("postcss.config.js");
+		const zeroCount = updated.split(ZERO).length - 1;
+
+		assert.equal(zeroCount, 1, "Zero-UI plugin must not be duplicated");
+		assert.ok(zeroBeforeTail(updated), "Zero-UI must precede Tailwind");
 	});
 });
 

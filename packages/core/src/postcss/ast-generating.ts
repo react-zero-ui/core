@@ -35,6 +35,7 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 		const ast = parse(source, AST_CONFIG_OPTS);
 
 		let modified = false;
+		let handled = false;
 
 		traverse(ast, {
 			// Handle CommonJS: module.exports = { ... } and exports = { ... }
@@ -52,7 +53,9 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 					);
 
 					if (pluginsProperty && t.isExpression(pluginsProperty.value)) {
-						modified = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
+						const result = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
+						handled ||= result !== "unsupported";
+						modified ||= result === "added";
 					}
 				}
 			},
@@ -65,7 +68,9 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 					);
 
 					if (pluginsProperty && t.isExpression(pluginsProperty.value)) {
-						modified = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
+						const result = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
+						handled ||= result !== "unsupported";
+						modified ||= result === "added";
 					}
 				}
 			},
@@ -78,7 +83,9 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 					);
 
 					if (pluginsProperty && t.isExpression(pluginsProperty.value)) {
-						modified = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
+						const result = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
+						handled ||= result !== "unsupported";
+						modified ||= result === "added";
 					}
 				}
 			},
@@ -86,6 +93,8 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 
 		if (modified) {
 			return generate(ast).code;
+		} else if (handled) {
+			return source;
 		} else {
 			console.warn(`[Zero-UI] Failed to automatically modify PostCSS config: ${source}`);
 			return null; // Could not automatically modify
@@ -101,15 +110,37 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
  * Helper function to add Zero-UI plugin to plugins configuration
  * Handles both object format {plugin: {}} and array format [plugin]
  */
-function addZeroUiToPlugins(pluginsNode: t.Expression, zeroUiPlugin: string): boolean {
+function addZeroUiToPlugins(pluginsNode: t.Expression, zeroUiPlugin: string): "added" | "present" | "unsupported" {
 	if (t.isObjectExpression(pluginsNode)) {
+		const alreadyPresent = pluginsNode.properties.some(
+			(prop) => t.isObjectProperty(prop) && t.isStringLiteral(prop.key) && prop.key.value === zeroUiPlugin
+		);
+		if (alreadyPresent) return "present";
+
 		// Object format: { 'plugin': {} }
 		pluginsNode.properties.unshift(t.objectProperty(t.stringLiteral(zeroUiPlugin), t.objectExpression([])));
-		return true;
+		return "added";
 	} else if (t.isArrayExpression(pluginsNode)) {
+		const alreadyPresent = pluginsNode.elements.some((el) => isZeroUiPostcssEntry(el, zeroUiPlugin));
+		if (alreadyPresent) return "present";
+
 		// Array format: ['plugin']
 		pluginsNode.elements.unshift(t.stringLiteral(zeroUiPlugin));
-		return true;
+		return "added";
+	}
+	return "unsupported";
+}
+
+function isZeroUiPostcssEntry(node: t.ArrayExpression["elements"][number], zeroUiPlugin: string): boolean {
+	if (!node) return false;
+	if (t.isStringLiteral(node)) return node.value === zeroUiPlugin;
+	if (
+		t.isCallExpression(node) &&
+		t.isIdentifier(node.callee, { name: "require" }) &&
+		node.arguments.length === 1 &&
+		t.isStringLiteral(node.arguments[0])
+	) {
+		return node.arguments[0].value === zeroUiPlugin;
 	}
 	return false;
 }
