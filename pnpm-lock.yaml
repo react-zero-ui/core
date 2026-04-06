@@ -45,8 +45,8 @@ importers:
         specifier: ^2.20.0
         version: 2.20.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@react-zero-ui/core':
-        specifier: ^0.3.3
-        version: 0.3.3(@tailwindcss/postcss@4.1.11)(react@19.1.1)
+        specifier: ^0.4.0
+        version: 0.4.0(@tailwindcss/postcss@4.1.11)(react@19.1.1)
       '@react-zero-ui/icon-sprite':
         specifier: ^0.1.4
         version: 0.1.4(react@19.1.1)
@@ -850,9 +850,9 @@ packages:
     peerDependencies:
       react: '>=16.8'
 
-  '@react-zero-ui/core@0.3.3':
-    resolution: {integrity: sha512-ePcck57gfZrspPf8OqFc8gFsjGkCeBEYGXwIxuSsKwg/Z/AENcIt2RoAsRjY0chywAY5h3Xdk3dOeqrb7jnlqg==}
-    engines: {node: '>=18.0.0'}
+  '@react-zero-ui/core@0.4.0':
+    resolution: {integrity: sha512-0ID068etBheJyT8QPJsDzgtAnoKTWNrZJV4HaLgyXrn1lYfJSV0ZS1S/KwNaaYtxlcYxZ3rzpURZ/9ZPZP8QAA==}
+    engines: {node: '>=22'}
     peerDependencies:
       '@tailwindcss/postcss': ^4.1.10
       react: '>=16.8.0'
@@ -3319,11 +3319,13 @@ snapshots:
     dependencies:
       react: 19.1.1
 
-  '@react-zero-ui/core@0.3.3(@tailwindcss/postcss@4.1.11)(react@19.1.1)':
+  '@react-zero-ui/core@0.4.0(@tailwindcss/postcss@4.1.11)(react@19.1.1)':
     dependencies:
       '@babel/code-frame': 7.27.1
+      '@babel/core': 7.28.0
       '@babel/generator': 7.28.0
       '@babel/parser': 7.28.0
+      '@babel/preset-typescript': 7.27.1(@babel/core@7.28.0)
       '@babel/traverse': 7.28.0
       '@babel/types': 7.28.2
       '@tailwindcss/postcss': 4.1.11
