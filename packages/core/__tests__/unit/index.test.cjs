@@ -96,6 +96,35 @@ test('generates body attributes file correctly', async () => {
 	);
 });
 
+test('warns instead of auto-initializing when project setup is missing', async () => {
+	await runTest(
+		{
+			'app/test.jsx': `
+      import { useUI } from '@react-zero-ui/core';
+
+      function Component() {
+        const [theme, setTheme] = useUI('theme', 'light');
+        return <div>Test</div>;
+      }
+    `,
+		},
+		(result) => {
+			assert(fs.existsSync(getAttrFile()), 'Attributes file should still be generated');
+			assert(!fs.existsSync('postcss.config.js'), 'PostCSS plugin should not create postcss.config.js');
+			assert(!fs.existsSync('postcss.config.mjs'), 'PostCSS plugin should not create postcss.config.mjs');
+			assert(!fs.existsSync('tsconfig.json'), 'PostCSS plugin should not patch tsconfig');
+
+			const warnings = result.warnings().map((warning) => warning.text);
+			assert(
+				warnings.some(
+					(text) => text.includes('Zero UI is not initialized') && text.includes('react-zero-ui')
+				),
+				'Expected a setup warning instead of auto-initialization'
+			);
+		}
+	);
+});
+
 test('generates body attributes file correctly when kebab-case is used', async () => {
 	await runTest(
 		{

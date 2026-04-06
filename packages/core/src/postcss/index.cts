@@ -2,21 +2,60 @@
 /**
  * @type {import('postcss').PluginCreator}
  */
-import { buildCss, generateAttributesFile, isZeroUiInitialized } from './helpers';
-import { runZeroUiInit } from '../cli/postInstall.js';
-import { processVariants } from './ast-parsing';
-import { CONFIG } from '../config';
-import { formatError, registerDeps, Result } from './utilities.js';
-
 type Root = { prepend: (css: string) => void };
+type Result = {
+	messages: { type: string; plugin: string; file: string; parent: string }[];
+	opts: { from: string };
+	prepend: (css: string) => void;
+	warn: (message: string, options?: { endIndex?: number; index?: number; node?: Node; plugin?: string; word?: string }) => void;
+};
+type RuntimeModules = {
+	buildCss: typeof import('./helpers.js').buildCss;
+	generateAttributesFile: typeof import('./helpers.js').generateAttributesFile;
+	isZeroUiInitialized: typeof import('./helpers.js').isZeroUiInitialized;
+	processVariants: typeof import('./ast-parsing.js').processVariants;
+	formatError: typeof import('./utilities.js').formatError;
+	registerDeps: typeof import('./utilities.js').registerDeps;
+};
 
-const zeroUIPlugin = CONFIG.PLUGIN_NAME;
+const zeroUIPlugin = 'postcss-react-zero-ui';
+const warnedCwds = new Set<string>();
+let runtimeModulesPromise: Promise<RuntimeModules> | null = null;
+
+function loadRuntimeModules(): Promise<RuntimeModules> {
+	if (!runtimeModulesPromise) {
+		runtimeModulesPromise = Promise.all([import('./helpers.js'), import('./ast-parsing.js'), import('./utilities.js')]).then(
+			([helpers, astParsing, utilities]) => ({
+				buildCss: helpers.buildCss,
+				generateAttributesFile: helpers.generateAttributesFile,
+				isZeroUiInitialized: helpers.isZeroUiInitialized,
+				processVariants: astParsing.processVariants,
+				formatError: utilities.formatError,
+				registerDeps: utilities.registerDeps,
+			})
+		);
+	}
+
+	return runtimeModulesPromise;
+}
+
+function warnIfNotInitialized(result: Result, isZeroUiInitialized: RuntimeModules['isZeroUiInitialized']) {
+	const cwd = process.cwd();
+
+	if (isZeroUiInitialized() || warnedCwds.has(cwd)) {
+		return;
+	}
+
+	warnedCwds.add(cwd);
+	result.warn('[Zero-UI] Zero UI is not initialized. Run `react-zero-ui` to patch your project config.', { plugin: zeroUIPlugin });
+}
 
 const plugin = () => {
 	return {
 		postcssPlugin: zeroUIPlugin,
 		async Once(root: Root, { result }: { result: Result }) {
 			try {
+				const { buildCss, generateAttributesFile, isZeroUiInitialized, processVariants, formatError, registerDeps } = await loadRuntimeModules();
 				const { finalVariants, initialGlobalValues, sourceFiles } = await processVariants();
 
 				const cssBlock = buildCss(finalVariants);
@@ -25,13 +64,10 @@ const plugin = () => {
 				/* ── register file-dependencies for HMR ─────────────────── */
 				registerDeps(result, zeroUIPlugin, sourceFiles, result.opts.from ?? '');
 
-				/* ── first-run bootstrap ────────────────────────────────── */
-				if (!isZeroUiInitialized()) {
-					console.log('[Zero-UI] Auto-initializing (first-time setup)…');
-					await runZeroUiInit();
-				}
+				warnIfNotInitialized(result, isZeroUiInitialized);
 				await generateAttributesFile(finalVariants, initialGlobalValues);
 			} catch (err: unknown) {
+				const { formatError, registerDeps } = await loadRuntimeModules();
 				const { friendly, loc } = formatError(err);
 				if (process.env.NODE_ENV !== 'production') {
 					if (loc?.file) registerDeps(result, zeroUIPlugin, [loc.file], result.opts.from ?? '');

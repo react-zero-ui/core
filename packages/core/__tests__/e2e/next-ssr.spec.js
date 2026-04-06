@@ -251,8 +251,8 @@ test.describe('Zero-UI Comprehensive Test Suite', () => {
 		await expect(themeTest).toHaveCSS('background-color', 'rgb(0, 0, 0)'); // black
 
 		// Color styling
-		await expect(colorTest).toHaveCSS('background-color', 'oklch(0.637 0.237 25.331)'); // red-500
+		await expect(colorTest).toHaveCSS('background-color', 'lab(55.4814 75.0732 48.8528)'); // red-500
 		await page.getByTestId('color-blue').click();
-		await expect(colorTest).toHaveCSS('background-color', 'oklch(0.623 0.214 259.815)'); // blue-500
+		await expect(colorTest).toHaveCSS('background-color', 'lab(54.1736 13.3369 -74.6839)'); // blue-500
 	});
 });
