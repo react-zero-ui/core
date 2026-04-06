@@ -55,9 +55,9 @@ export default [
 		},
 	},
 
-	/* 4 - ES-module / browser (*.js) */
+	/* 4 - ES-module / browser (*.js, *.mjs) */
 	{
-		files: ['**/*.js'],
+		files: ['**/*.js', '**/*.mjs'],
 		plugins: { n: nodePlugin, import: importPlugin },
 		languageOptions: { ecmaVersion: 'latest', sourceType: 'module', globals: { ...nodeGlobals, ...browserGlobals } },
 		rules: {
