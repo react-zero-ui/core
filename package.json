@@ -45,6 +45,8 @@
 		"prepack:core": "pnpm -F @react-zero-ui/core pack --pack-destination ./dist",
 		"reset": "git clean -fdx && pnpm install --frozen-lockfile && pnpm prepack:core && pnpm i-tarball",
 		"size": "npx esbuild ./packages/core/dist/index.js --bundle --minify --format=esm --external:react --define:process.env.NODE_ENV='\"production\"' | gzip -c | wc -c",
+		"size:badge": "node scripts/write-size-badge.mjs",
+		"size:experimental-runtime": "sh -c 'out=$(mktemp); npx esbuild ./packages/core/dist/experimental/runtime.js --bundle --minify --format=esm --external:react --define:process.env.NODE_ENV=\"production\" > \"$out\" && cat \"$out\" && printf \"\\nExperimental runtime size: %s bytes\\n\" \"$(gzip -c \"$out\" | wc -c | tr -d \" \")\"'",
 		"test": "eslint . && cd packages/core && pnpm test:all && pnpm smoke",
 		"test:cli": "cd packages/core && pnpm test:cli",
 		"test:integration": "cd packages/core && pnpm test:integration",
