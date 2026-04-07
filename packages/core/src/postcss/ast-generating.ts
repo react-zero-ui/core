@@ -35,6 +35,7 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 		const ast = parse(source, AST_CONFIG_OPTS);
 
 		let modified = false;
+		let handled = false;
 
 		traverse(ast, {
 			// Handle CommonJS: module.exports = { ... } and exports = { ... }
@@ -52,7 +53,9 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 					);
 
 					if (pluginsProperty && t.isExpression(pluginsProperty.value)) {
-						modified = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
+						const result = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
+						handled ||= result !== null;
+						modified ||= result === true;
 					}
 				}
 			},
@@ -65,7 +68,9 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 					);
 
 					if (pluginsProperty && t.isExpression(pluginsProperty.value)) {
-						modified = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
+						const result = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
+						handled ||= result !== null;
+						modified ||= result === true;
 					}
 				}
 			},
@@ -78,7 +83,9 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 					);
 
 					if (pluginsProperty && t.isExpression(pluginsProperty.value)) {
-						modified = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
+						const result = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
+						handled ||= result !== null;
+						modified ||= result === true;
 					}
 				}
 			},
@@ -86,6 +93,8 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 
 		if (modified) {
 			return generate(ast).code;
+		} else if (handled) {
+			return source;
 		} else {
 			console.warn(`[Zero-UI] Failed to automatically modify PostCSS config: ${source}`);
 			return null; // Could not automatically modify
@@ -101,17 +110,66 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
  * Helper function to add Zero-UI plugin to plugins configuration
  * Handles both object format {plugin: {}} and array format [plugin]
  */
-function addZeroUiToPlugins(pluginsNode: t.Expression, zeroUiPlugin: string): boolean {
+function addZeroUiToPlugins(pluginsNode: t.Expression, zeroUiPlugin: string): boolean | null {
 	if (t.isObjectExpression(pluginsNode)) {
-		// Object format: { 'plugin': {} }
-		pluginsNode.properties.unshift(t.objectProperty(t.stringLiteral(zeroUiPlugin), t.objectExpression([])));
-		return true;
+		return normalizePluginEntries(
+			pluginsNode.properties,
+			(prop): prop is t.ObjectProperty => t.isObjectProperty(prop) && getPluginObjectKey(prop) === zeroUiPlugin,
+			(prop): prop is t.ObjectProperty => t.isObjectProperty(prop) && getPluginObjectKey(prop) === "@tailwindcss/postcss",
+			() => t.objectProperty(t.stringLiteral(zeroUiPlugin), t.objectExpression([]))
+		);
 	} else if (t.isArrayExpression(pluginsNode)) {
-		// Array format: ['plugin']
-		pluginsNode.elements.unshift(t.stringLiteral(zeroUiPlugin));
-		return true;
+		return normalizePluginEntries(
+			pluginsNode.elements,
+			(el) => isPluginArrayEntry(el, zeroUiPlugin),
+			(el) => isPluginArrayEntry(el, "@tailwindcss/postcss"),
+			() => t.stringLiteral(zeroUiPlugin)
+		);
+	}
+	return null;
+}
+
+function normalizePluginEntries<T>(
+	items: T[],
+	isZeroUi: (item: T) => boolean,
+	isTailwind: (item: T) => boolean,
+	createZeroUi: () => T
+): boolean {
+	const zeroEntries = items.filter(isZeroUi);
+	const zeroIndex = items.findIndex(isZeroUi);
+	const tailwindIndex = items.findIndex(isTailwind);
+
+	// Already correct: exactly one Zero-UI entry and it already comes before Tailwind.
+	if (zeroEntries.length === 1 && (tailwindIndex === -1 || zeroIndex < tailwindIndex)) {
+		return false;
+	}
+
+	const normalized = items.filter((item) => !isZeroUi(item));
+	const insertIndex = normalized.findIndex(isTailwind);
+
+	normalized.splice(insertIndex === -1 ? 0 : insertIndex, 0, zeroEntries[0] ?? createZeroUi());
+	items.splice(0, items.length, ...normalized);
+	return true;
+}
+
+function isPluginArrayEntry(node: t.ArrayExpression["elements"][number], pluginName: string): boolean {
+	if (!node) return false;
+	if (t.isStringLiteral(node)) return node.value === pluginName;
+	if (
+		t.isCallExpression(node) &&
+		t.isIdentifier(node.callee, { name: "require" }) &&
+		node.arguments.length === 1 &&
+		t.isStringLiteral(node.arguments[0])
+	) {
+		return node.arguments[0].value === pluginName;
 	}
 	return false;
+}
+
+function getPluginObjectKey(node: t.ObjectProperty): string | null {
+	if (t.isStringLiteral(node.key)) return node.key.value;
+	if (t.isIdentifier(node.key)) return node.key.name;
+	return null;
 }
 
 /**

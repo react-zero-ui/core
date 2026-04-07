@@ -27,6 +27,40 @@ export default config;
 	);
 });
 
+test("parseAndUpdatePostcssConfig is idempotent for array plugin configs", () => {
+	const source = `module.exports = { plugins: ["@react-zero-ui/core/postcss", "@tailwindcss/postcss"] };`;
+	const updated = parseAndUpdatePostcssConfig(source, zeroUiPlugin, false);
+
+	assert.equal(updated, source);
+	assert.equal((updated?.split(zeroUiPlugin).length ?? 1) - 1, 1);
+});
+
+test("parseAndUpdatePostcssConfig reorders array plugin configs so Zero-UI comes before Tailwind", () => {
+	const source = `module.exports = { plugins: ["@tailwindcss/postcss", "@react-zero-ui/core/postcss"] };`;
+	const updated = parseAndUpdatePostcssConfig(source, zeroUiPlugin, false);
+
+	assert.ok(updated);
+	assert.equal((updated?.split(zeroUiPlugin).length ?? 1) - 1, 1);
+	assert.ok(updated!.indexOf(zeroUiPlugin) < updated!.indexOf("@tailwindcss/postcss"));
+});
+
+test("parseAndUpdatePostcssConfig is idempotent for object plugin configs", () => {
+	const source = `module.exports = { plugins: { "@react-zero-ui/core/postcss": {}, "@tailwindcss/postcss": {} } };`;
+	const updated = parseAndUpdatePostcssConfig(source, zeroUiPlugin, false);
+
+	assert.equal(updated, source);
+	assert.equal((updated?.split(zeroUiPlugin).length ?? 1) - 1, 1);
+});
+
+test("parseAndUpdatePostcssConfig reorders object plugin configs so Zero-UI comes before Tailwind", () => {
+	const source = `module.exports = { plugins: { "@tailwindcss/postcss": {}, "@react-zero-ui/core/postcss": {} } };`;
+	const updated = parseAndUpdatePostcssConfig(source, zeroUiPlugin, false);
+
+	assert.ok(updated);
+	assert.equal((updated?.split(zeroUiPlugin).length ?? 1) - 1, 1);
+	assert.ok(updated!.indexOf(zeroUiPlugin) < updated!.indexOf("@tailwindcss/postcss"));
+});
+
 const FIXTURES = {
 	// 1. ESM object
 	"vite.config.js": `
