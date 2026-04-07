@@ -54,8 +54,8 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 
 					if (pluginsProperty && t.isExpression(pluginsProperty.value)) {
 						const result = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
-						handled ||= result !== "unsupported";
-						modified ||= result === "added" || result === "reordered";
+						handled ||= result !== null;
+						modified ||= result === true;
 					}
 				}
 			},
@@ -69,8 +69,8 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 
 					if (pluginsProperty && t.isExpression(pluginsProperty.value)) {
 						const result = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
-						handled ||= result !== "unsupported";
-						modified ||= result === "added" || result === "reordered";
+						handled ||= result !== null;
+						modified ||= result === true;
 					}
 				}
 			},
@@ -84,8 +84,8 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
 
 					if (pluginsProperty && t.isExpression(pluginsProperty.value)) {
 						const result = addZeroUiToPlugins(pluginsProperty.value, zeroUiPlugin);
-						handled ||= result !== "unsupported";
-						modified ||= result === "added" || result === "reordered";
+						handled ||= result !== null;
+						modified ||= result === true;
 					}
 				}
 			},
@@ -110,7 +110,7 @@ export function parseAndUpdatePostcssConfig(source: string, zeroUiPlugin: string
  * Helper function to add Zero-UI plugin to plugins configuration
  * Handles both object format {plugin: {}} and array format [plugin]
  */
-function addZeroUiToPlugins(pluginsNode: t.Expression, zeroUiPlugin: string): "added" | "reordered" | "present" | "unsupported" {
+function addZeroUiToPlugins(pluginsNode: t.Expression, zeroUiPlugin: string): boolean | null {
 	if (t.isObjectExpression(pluginsNode)) {
 		return normalizePluginEntries(
 			pluginsNode.properties,
@@ -126,7 +126,7 @@ function addZeroUiToPlugins(pluginsNode: t.Expression, zeroUiPlugin: string): "a
 			() => t.stringLiteral(zeroUiPlugin)
 		);
 	}
-	return "unsupported";
+	return null;
 }
 
 function normalizePluginEntries<T>(
@@ -134,25 +134,22 @@ function normalizePluginEntries<T>(
 	isZeroUi: (item: T) => boolean,
 	isTailwind: (item: T) => boolean,
 	createZeroUi: () => T
-): "added" | "reordered" | "present" {
-	const firstZeroUi = items.findIndex(isZeroUi);
-	const existingZeroUi = firstZeroUi === -1 ? null : items[firstZeroUi];
-	const normalized = items.filter((item) => !isZeroUi(item));
-	const tailwindIndex = normalized.findIndex(isTailwind);
-	const targetIndex = tailwindIndex !== -1 ? tailwindIndex : firstZeroUi === -1 ? 0 : firstZeroUi;
+): boolean {
+	const zeroEntries = items.filter(isZeroUi);
+	const zeroIndex = items.findIndex(isZeroUi);
+	const tailwindIndex = items.findIndex(isTailwind);
 
-	normalized.splice(targetIndex, 0, existingZeroUi ?? createZeroUi());
-
-	if (sameOrder(items, normalized)) {
-		return "present";
+	// Already correct: exactly one Zero-UI entry and it already comes before Tailwind.
+	if (zeroEntries.length === 1 && (tailwindIndex === -1 || zeroIndex < tailwindIndex)) {
+		return false;
 	}
 
-	items.splice(0, items.length, ...normalized);
-	return existingZeroUi ? "reordered" : "added";
-}
+	const normalized = items.filter((item) => !isZeroUi(item));
+	const insertIndex = normalized.findIndex(isTailwind);
 
-function sameOrder<T>(left: T[], right: T[]): boolean {
-	return left.length === right.length && left.every((item, index) => item === right[index]);
+	normalized.splice(insertIndex === -1 ? 0 : insertIndex, 0, zeroEntries[0] ?? createZeroUi());
+	items.splice(0, items.length, ...normalized);
+	return true;
 }
 
 function isPluginArrayEntry(node: t.ArrayExpression["elements"][number], pluginName: string): boolean {
