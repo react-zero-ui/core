@@ -2,6 +2,6 @@
   "schemaVersion": 1,
   "label": "bundle size",
   "message": "385 B gzip",
-  "color": "brightgreen",
+  "color": "lightblue",
   "cacheSeconds": 3600
 }
