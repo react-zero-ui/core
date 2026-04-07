@@ -13,9 +13,15 @@
 
 Zero runtime, zero React re-renders, and a simple developer experience. <small>Say goodbye to context and prop-drilling.</small>
 
-<a href="https://bundlephobia.com/package/@react-zero-ui/core@0.2.6" target="_blank" rel="noopener noreferrer"><img src="https://badgen.net/bundlephobia/minzip/@react-zero-ui/core@0.2.6" alt="bundle size" /></a> <a href="https://www.npmjs.com/package/@austinserb/react-zero-ui" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/npm/v/@react-zero-ui/core" alt="npm version" /></a> <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a> ![CI](https://github.com/react-zero-ui/core/actions/workflows/ci.yml/badge.svg?branch=main)
+<a href="https://github.com/react-zero-ui/core/blob/main/docs/size.md" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/react-zero-ui/core/main/.github/badges/core-size.json" alt="bundle size" /></a> <a href="https://www.npmjs.com/package/@react-zero-ui/core" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/npm/v/@react-zero-ui/core" alt="npm version" /></a> <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a> ![CI](https://github.com/react-zero-ui/core/actions/workflows/ci.yml/badge.svg?branch=main)
 
-[See the proof](/docs/demo.md) [Quick Start](#quick-start) [API Reference](/docs/api-reference.md) [Usage Examples](/docs/usage-examples.md) [Migration Guide](/docs/migration-guide.md) [FAQ](/docs/faq.md) [Contributing](#contributing)
+[See the proof](/docs/demo.md) &nbsp;|&nbsp;
+[Quick Start](#quick-start) &nbsp;|&nbsp;
+[API Reference](/docs/api-reference.md) &nbsp;|&nbsp;
+[Usage Examples](/docs/usage-examples.md) &nbsp;|&nbsp;
+[Migration Guide](/docs/migration-guide.md) &nbsp;|&nbsp;
+[FAQ](/docs/faq.md) &nbsp;|&nbsp;
+[Contributing](#contributing)
 
 </div>
 
