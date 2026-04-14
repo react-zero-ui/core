@@ -79,6 +79,29 @@ Until a future plugin system for **Turbopack** emerges, we've chosen the simpler
 
 We may ship a resolver plugin for Turbopack once it's open to third-party hooks.
 
+### When should I use Zero-UI vs useState?
+
+**Short answer:** `useUI` for how things look, `useState` for what things are.
+
+If the state only controls appearance (loading, open/closed, active tab, theme, focused), reach for `useUI` — it skips re-renders entirely. If the state _is_ the thing being rendered (fetched data, form values, counts), keep `useState`.
+
+Most real features are a mix of both. That's the **hybrid pattern**:
+
+```tsx
+const [data, setData] = useState([]); // WHAT is shown
+const [, setStatus] = useUI("search-status", "idle"); // HOW it looks
+
+useEffect(() => {
+  setStatus("loading"); // no re-render — skeleton appears via CSS
+  fetchResults(query).then((r) => {
+    setData(r); // one re-render — the list actually changed
+    setStatus("success"); // no re-render — skeleton hides via CSS
+  });
+}, [query]);
+```
+
+See this exact pattern running live with a side-by-side React-only comparison on the [real-world demo](/demo/real-world).
+
 ### Can I use it with existing state management?
 
 Absolutely! Zero-UI is designed for **UI state only**. Use it alongside:

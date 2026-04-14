@@ -42,9 +42,9 @@ function Hero() {
           Read the Docs <ArrowRight className="h-4 w-4" />
         </Link>
         <Link
-          href="/docs/getting-started/next"
+          href="/demo/real-world"
           className="border-fd-border hover:bg-fd-accent inline-flex items-center gap-2 rounded-md border px-5 py-2.5 font-medium transition-colors">
-          Quick start
+          See it in action
         </Link>
       </div>
     </section>
