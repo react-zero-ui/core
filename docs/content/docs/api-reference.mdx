@@ -21,7 +21,7 @@ const [staleValue, setter] = useUI(key, initial, flag?);
 | --------- | --------------- | ------------------------------------------------------ |
 | `key`     | `string`        | The state key (becomes `data-{key}` attribute)         |
 | `initial` | `T`             | Initial/default value for SSR                          |
-| `flag?`   | `typeof CssVar` | Optional: Use CSS variables instead of data attributes |
+| `flag?`   | `typeof cssVar` | Optional: Use CSS variables instead of data attributes |
 
 #### Returns
 
@@ -41,7 +41,7 @@ setTheme("dark"); // Sets data-theme="dark" on <body>
 const [status, setStatus] = useUI<"loading" | "success" | "error">("status", "loading");
 
 // With CSS variables
-const [color, setColor] = useUI("primary", "#blue", CssVar);
+const [color, setColor] = useUI("primary", "#blue", cssVar);
 setColor("#red"); // Sets --primary: #red on <body>
 
 // Functional updates
@@ -81,7 +81,7 @@ const [modal, setModal] = useScopedUI("modal", "closed");
 </div>;
 
 // With CSS variables
-const [blur, setBlur] = useScopedUI("blur", "0px", CssVar);
+const [blur, setBlur] = useScopedUI("blur", "0px", cssVar);
 
 <div
   ref={setBlur.ref}
@@ -93,19 +93,19 @@ const [blur, setBlur] = useScopedUI("blur", "0px", CssVar);
 
 ## Utilities
 
-### `CssVar`
+### `cssVar`
 
 Flag to enable CSS variable mode instead of data attributes.
 
 ```tsx
-import { CssVar } from "@react-zero-ui/core";
+import { cssVar } from "@react-zero-ui/core";
 
 // Global CSS variable
-const [color, setColor] = useUI("primary", "#blue", CssVar);
+const [color, setColor] = useUI("primary", "#blue", cssVar);
 // Result: <body style="--primary: #blue">
 
 // Scoped CSS variable
-const [size, setSize] = useScopedUI("font-size", "16px", CssVar);
+const [size, setSize] = useScopedUI("font-size", "16px", cssVar);
 // Result: <div style="--font-size: 16px">
 ```
 

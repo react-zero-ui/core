@@ -158,11 +158,11 @@ function FormField({ label, ...props }) {
 ### 1. Dynamic styling with CSS variables
 
 ```tsx
-import { useUI, CssVar } from "@react-zero-ui/core";
+import { useUI, cssVar } from "@react-zero-ui/core";
 
 function DynamicTheme() {
-  const [, setPrimaryColor] = useUI("primary-color", "#3b82f6", CssVar);
-  const [, setBlur] = useUI("blur-amount", "0px", CssVar);
+  const [, setPrimaryColor] = useUI("primary-color", "#3b82f6", cssVar);
+  const [, setBlur] = useUI("blur-amount", "0px", cssVar);
 
   const colors = ["#3b82f6", "#ef4444", "#10b981", "#f59e0b"];
 
@@ -195,10 +195,10 @@ function DynamicTheme() {
 ### 2. Scoped CSS variables
 
 ```tsx
-import { useScopedUI, CssVar } from "@react-zero-ui/core";
+import { useScopedUI, cssVar } from "@react-zero-ui/core";
 
 function CustomSlider() {
-  const [value, setValue] = useScopedUI("slider-value", "50", CssVar);
+  const [value, setValue] = useScopedUI("slider-value", "50", cssVar);
 
   return (
     <div

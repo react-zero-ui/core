@@ -160,12 +160,12 @@ useEffect(() => {
 
 ### Can I use CSS variables?
 
-Yes! Pass the `CssVar` flag:
+Yes! Pass the `cssVar` flag:
 
 ```tsx
-import { useUI, CssVar } from "@react-zero-ui/core";
+import { useUI, cssVar } from "@react-zero-ui/core";
 
-const [, setColor] = useUI("primary", "#blue", CssVar);
+const [, setColor] = useUI("primary", "#blue", cssVar);
 // Result: <body style="--primary: #blue">
 ```
 
