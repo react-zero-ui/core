@@ -25,7 +25,11 @@ Stay **pre-rendered, declarative, and brutally fast.**
  packages/
 ├── core            -> @react-zero-ui/core (library logic + postcss)
 └── cli             -> create-zero-ui (npx installer)
+ docs/              -> Next.js + Fumadocs docs site (apps/docs replacement)
+ examples/demo/     -> Live performance + sprite showcase app
 ```
+
+For the variant extractor / PostCSS pipeline internals (AST parsing, literal resolution, token scanning), see [packages/core/ARCHITECTURE.md](packages/core/ARCHITECTURE.md).
 
 ---
 
@@ -82,6 +86,26 @@ pnpm test:vite        # E2E tests on Vite fixture
 pnpm test:next        # E2E tests on Next.js fixture
 pnpm test             # Runs all of the above
 ```
+
+---
+
+## Bundle Size
+
+This repo measures bundle size from the built `@react-zero-ui/core` entry.
+
+```bash
+pnpm build
+pnpm size          # prints the gzipped byte count
+pnpm size:badge    # refreshes the README badge JSON
+```
+
+The `size` script runs:
+
+```bash
+npx esbuild ./packages/core/dist/index.js --bundle --minify --format=esm --external:react --define:process.env.NODE_ENV='"production"' | gzip -c | wc -c
+```
+
+`size:badge` writes [`.github/badges/core-size.json`](.github/badges/core-size.json), which the README badge reads through a Shields endpoint. Run it after a build when you want to refresh the number.
 
 ---
 
