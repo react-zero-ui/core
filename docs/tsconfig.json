@@ -17,7 +17,8 @@
     "incremental": true,
     "paths": {
       "@/.source": ["./.source/index.ts"],
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@zero-ui/attributes": ["./.zero-ui/attributes.js"]
     },
     "plugins": [
       {
@@ -25,6 +26,6 @@
       }
     ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".zero-ui/**/*.d.ts"],
   "exclude": ["node_modules"]
 }

@@ -15,7 +15,8 @@
     "lucide-react": "^0.544.0",
     "fumadocs-ui": "15.8.5",
     "fumadocs-core": "15.8.5",
-    "fumadocs-mdx": "12.0.3"
+    "fumadocs-mdx": "12.0.3",
+    "@react-zero-ui/core": "^0.4.0"
   },
   "devDependencies": {
     "@types/node": "^20",
