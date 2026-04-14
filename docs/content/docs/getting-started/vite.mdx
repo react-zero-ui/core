@@ -1,0 +1,39 @@
+---
+title: Vite
+description: Set up React Zero-UI in a Vite project
+---
+
+## 1. Install dependencies
+
+```bash
+npm install @react-zero-ui/core
+```
+
+```bash
+npm install @tailwindcss/postcss
+```
+
+## 2. Add the plugin to `vite.config.ts`
+
+```js
+import zeroUI from "@react-zero-ui/core/vite";
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindCss from "@tailwindcss/postcss";
+
+export default defineConfig({
+  // Remove the default `tailwindcss()` plugin — pass it into zeroUI instead
+  plugins: [zeroUI({ tailwind: tailwindCss }), react()],
+});
+```
+
+## 3. Import Tailwind
+
+```css
+/* global.css */
+@import "tailwindcss";
+```
+
+That's it. The plugin adds the data-`*` attributes to the body tag (no FOUC) and Tailwind generates the matching variant classes.
+
+See [Usage examples](/docs/usage-examples) for patterns you can drop into your app.
