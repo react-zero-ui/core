@@ -129,6 +129,27 @@ function Demo() {
         </p>
       </div>
       <LandingDemo />
+
+      <div className="mt-8 grid gap-3 sm:grid-cols-2">
+        <Link
+          href="/demo/perf"
+          className="border-fd-border hover:border-fd-primary hover:bg-fd-accent group flex items-center justify-between gap-3 rounded-lg border p-4 transition-colors">
+          <div>
+            <div className="font-medium">Zero-UI vs React state</div>
+            <div className="text-fd-muted-foreground text-sm">Side-by-side tabbed comparison with the same UI built twice.</div>
+          </div>
+          <ArrowRight className="text-fd-muted-foreground group-hover:text-fd-primary h-5 w-5 shrink-0 transition-colors" />
+        </Link>
+        <Link
+          href="/demo/real-world"
+          className="border-fd-border hover:border-fd-primary hover:bg-fd-accent group flex items-center justify-between gap-3 rounded-lg border p-4 transition-colors">
+          <div>
+            <div className="font-medium">The hybrid pattern</div>
+            <div className="text-fd-muted-foreground text-sm">Search + skeleton loading, useState for data, useUI for presentation.</div>
+          </div>
+          <ArrowRight className="text-fd-muted-foreground group-hover:text-fd-primary h-5 w-5 shrink-0 transition-colors" />
+        </Link>
+      </div>
     </section>
   );
 }
