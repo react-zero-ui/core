@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ArrowRight, Zap, Layers, Feather, Github } from 'lucide-react';
+import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import { LandingDemo } from './_components/LandingDemo';
 
 export default function HomePage() {
@@ -108,13 +109,11 @@ function CodeCard({ label, tone, code }: { label: string; tone: 'muted' | 'prima
   return (
     <div
       className={[
-        'border-fd-border bg-fd-card rounded-xl border p-5',
+        'border-fd-border bg-fd-card flex flex-col gap-3 rounded-xl border p-5',
         tone === 'primary' ? 'ring-fd-primary/40 ring-2' : '',
       ].join(' ')}>
-      <div className="text-fd-muted-foreground mb-3 text-xs font-medium tracking-wide uppercase">{label}</div>
-      <pre className="overflow-x-auto font-mono text-xs leading-relaxed">
-        <code>{code}</code>
-      </pre>
+      <div className="text-fd-muted-foreground text-xs font-medium tracking-wide uppercase">{label}</div>
+      <DynamicCodeBlock lang="tsx" code={code} />
     </div>
   );
 }

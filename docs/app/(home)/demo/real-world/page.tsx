@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
 import { RealWorldDemo } from './_components';
 
 export const metadata = {
@@ -30,8 +31,9 @@ export default function RealWorldDemoPage() {
       <div className="border-fd-border mt-12 grid gap-6 border-t pt-8 sm:grid-cols-2">
         <div>
           <h2 className="mb-2 text-base font-semibold">The code that matters</h2>
-          <pre className="border-fd-border bg-fd-card overflow-x-auto rounded-lg border p-4 font-mono text-xs leading-relaxed">
-            <code>{`const [data, setData] = useState([]);
+          <DynamicCodeBlock
+            lang="tsx"
+            code={`const [data, setData] = useState([]);
 const [, setStatus] = useUI(
   'search-status',
   'idle',
@@ -43,8 +45,8 @@ useEffect(() => {
     setData(r);              // 1 re-render
     setStatus('success');    // no re-render
   });
-}, [query]);`}</code>
-          </pre>
+}, [query]);`}
+          />
         </div>
         <div>
           <h2 className="mb-2 text-base font-semibold">When to reach for this</h2>
