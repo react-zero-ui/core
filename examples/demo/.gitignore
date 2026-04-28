@@ -5,7 +5,6 @@
 .contentlayer
 .content-collections
 .source
-.zero-ui
 
 # test & build
 /coverage
