@@ -1,0 +1,22 @@
+---
+title: Introduction
+description: Ultra-fast React UI state with zero runtime and zero re-renders
+---
+
+React Zero-UI is a state management library that eliminates React re-renders for UI state by using CSS and data attributes instead of component state. It pre-renders all possible UI states at build time and switches between them by flipping `data-*` attributes on `<body>` (or on scoped elements).
+
+## Why Zero-UI?
+
+- **Zero re-renders** — state changes flip DOM attributes, not component trees.
+- **~350 bytes** — smaller than a single SVG icon.
+- **SSR-safe** — no hydration mismatches, no FOUC.
+- **Tailwind-native** — use variants like `theme-dark:bg-gray-900` anywhere.
+
+## Get started
+
+<Cards>
+  <Card title="Next.js setup" href="/docs/getting-started/next" />
+  <Card title="Vite setup" href="/docs/getting-started/vite" />
+  <Card title="Usage examples" href="/docs/usage-examples" />
+  <Card title="API reference" href="/docs/api-reference" />
+</Cards>
