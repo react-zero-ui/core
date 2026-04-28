@@ -4,7 +4,7 @@ import { source } from '@/lib/source';
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://zero-ui.dev');
 
-const staticRoutes = ['/', '/demo/perf', '/demo/real-world'];
+const staticRoutes = ['/', '/demo/real-world'];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date().toISOString();

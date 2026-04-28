@@ -2,8 +2,8 @@
 
 import { Atom, Zap } from 'lucide-react';
 import { useUI } from '@react-zero-ui/core';
-import { ReactState } from './_react-state';
-import { ZeroState } from './_zero-state';
+import { ReactState } from './ReactState';
+import { ZeroState } from './ZeroState';
 
 export function Comparison() {
   const [, setActive] = useUI<'zero' | 'react'>('perf-active', 'zero');

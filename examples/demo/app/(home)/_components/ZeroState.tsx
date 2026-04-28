@@ -1,15 +1,18 @@
 'use client';
 
+import { useRef } from 'react';
 import { useUI } from '@react-zero-ui/core';
 
 export function ZeroState() {
   const [, setTheme] = useUI<'light' | 'dark'>('perf-theme', 'light');
   const [, setAccent] = useUI<'violet' | 'emerald' | 'amber'>('perf-accent', 'violet');
   const [, setMenuOpen] = useUI<'true' | 'false'>('perf-menu-open', 'false');
+  const renderCount = useRef(0);
+  renderCount.current += 1;
 
   return (
     <div className="perf-theme-light:bg-gray-100 perf-theme-dark:bg-gray-900 flex h-full w-full flex-col justify-between space-y-4 py-8 **:transition-all **:duration-300">
-      <Header />
+      <Header renderCount={renderCount.current} />
       <ThemeSwitcher setTheme={setTheme} />
       <AccentPicker setAccent={setAccent} />
       <InteractiveCard toggleMenu={() => setMenuOpen((prev) => (prev === 'true' ? 'false' : 'true'))} />
@@ -18,9 +21,14 @@ export function ZeroState() {
   );
 }
 
-function Header() {
+function Header({ renderCount }: { renderCount: number }) {
   return (
     <div className="space-y-2 text-center">
+      <div
+        className="perf-theme-light:border-violet-300 perf-theme-light:bg-violet-100 perf-theme-light:text-violet-700 perf-theme-dark:border-violet-500/40 perf-theme-dark:bg-violet-500/15 perf-theme-dark:text-violet-300 mx-auto inline-flex items-center gap-1 rounded-md border px-2.5 py-1 font-mono text-xs"
+        suppressHydrationWarning>
+        renders: <span className="font-semibold">{renderCount}</span>
+      </div>
       <h1 className="perf-theme-light:text-gray-900 perf-theme-dark:text-white text-3xl font-bold">Zero UI</h1>
       <p className="perf-theme-light:text-gray-600 perf-theme-dark:text-gray-400">
         Reactive state without re-rendering.

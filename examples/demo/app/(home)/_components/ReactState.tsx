@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 type Theme = 'light' | 'dark';
 type Accent = 'violet' | 'emerald' | 'amber';
@@ -9,11 +9,13 @@ export function ReactState() {
   const [accent, setAccent] = useState<Accent>('violet');
   const [theme, setTheme] = useState<Theme>('light');
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
+  const renderCount = useRef(0);
+  renderCount.current += 1;
 
   return (
     <div
       className={`flex h-full w-full flex-col justify-between space-y-4 py-8 **:transition-all **:duration-300 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
-      <Header theme={theme} />
+      <Header theme={theme} renderCount={renderCount.current} />
       <ThemeSwitcher theme={theme} setTheme={setTheme} />
       <AccentPicker accent={accent} setAccent={setAccent} theme={theme} />
       <InteractiveCard theme={theme} menuOpen={menuOpen} setMenuOpen={setMenuOpen} accent={accent} />
@@ -22,9 +24,14 @@ export function ReactState() {
   );
 }
 
-function Header({ theme }: { theme: Theme }) {
+function Header({ theme, renderCount }: { theme: Theme; renderCount: number }) {
   return (
     <div className="space-y-2 text-center">
+      <div
+        className={`mx-auto inline-flex items-center gap-1 rounded-md border px-2.5 py-1 font-mono text-xs ${theme === 'light' ? 'border-violet-300 bg-violet-100 text-violet-700' : 'border-violet-500/40 bg-violet-500/15 text-violet-300'}`}
+        suppressHydrationWarning>
+        renders: <span className="font-semibold">{renderCount}</span>
+      </div>
       <h1 className={`text-3xl font-bold ${theme === 'light' ? 'text-gray-900' : 'text-white'}`}>
         React State <span className="max-[450px]:hidden">Management</span>
       </h1>

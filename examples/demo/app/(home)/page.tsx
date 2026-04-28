@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ArrowRight, Zap, Layers, Feather, Github } from 'lucide-react';
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
-import { LandingDemo } from './_components/LandingDemo';
+import { Comparison } from './_components/Comparison';
 
 export default function HomePage() {
   return (
@@ -124,21 +124,14 @@ function Demo() {
       <div className="mb-8 text-center">
         <h2 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">Try it right here.</h2>
         <p className="text-fd-muted-foreground mx-auto max-w-xl">
-          The widget below is wired up with Zero-UI. Open React DevTools — you won't see a single render on click.
+          Same UI, built twice. The Zero-UI tab flips <code className="font-mono text-sm">data-*</code> attributes on{' '}
+          <code className="font-mono text-sm">&lt;body&gt;</code>; the React tab holds the same state in{' '}
+          <code className="font-mono text-sm">useState</code>. Watch the render counters as you click around.
         </p>
       </div>
-      <LandingDemo />
+      <Comparison />
 
-      <div className="mt-8 grid gap-3 sm:grid-cols-2">
-        <Link
-          href="/demo/perf"
-          className="border-fd-border hover:border-fd-primary hover:bg-fd-accent group flex items-center justify-between gap-3 rounded-lg border p-4 transition-colors">
-          <div>
-            <div className="font-medium">Zero-UI vs React state</div>
-            <div className="text-fd-muted-foreground text-sm">Side-by-side tabbed comparison with the same UI built twice.</div>
-          </div>
-          <ArrowRight className="text-fd-muted-foreground group-hover:text-fd-primary h-5 w-5 shrink-0 transition-colors" />
-        </Link>
+      <div className="mt-8">
         <Link
           href="/demo/real-world"
           className="border-fd-border hover:border-fd-primary hover:bg-fd-accent group flex items-center justify-between gap-3 rounded-lg border p-4 transition-colors">
