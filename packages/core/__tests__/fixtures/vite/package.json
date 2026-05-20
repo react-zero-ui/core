@@ -9,12 +9,12 @@
 		"build-and-preview": "vite build && vite preview --port 5173"
 	},
 	"dependencies": {
-		"react": "19.2.5",
-		"react-dom": "19.2.5"
+		"react": "19.2.6",
+		"react-dom": "19.2.6"
 	},
 	"devDependencies": {
 		"@tailwindcss/postcss": "4.2.2",
-		"@types/react": "19.2.14",
+		"@types/react": "19.2.15",
 		"@types/react-dom": "19.2.3",
 		"@vitejs/plugin-react": "6.0.1",
 		"postcss": "8.5.8",
