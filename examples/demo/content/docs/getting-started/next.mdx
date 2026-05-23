@@ -19,17 +19,13 @@ Zero-UI must come **before** Tailwind.
 
 ```js
 // postcss.config.* (ESM)
-const config = {
-  plugins: ["@react-zero-ui/core/postcss", "@tailwindcss/postcss"],
-};
+const config = { plugins: ["@react-zero-ui/core/postcss", "@tailwindcss/postcss"] };
 export default config;
 ```
 
 ```js
 // postcss.config.* (CJS)
-module.exports = {
-  plugins: { "@react-zero-ui/core/postcss": {}, tailwindcss: {} },
-};
+module.exports = { plugins: { "@react-zero-ui/core/postcss": {}, tailwindcss: {} } };
 ```
 
 ## 3. Import Tailwind
@@ -56,11 +52,11 @@ Spread `bodyAttributes` on `<body>` in your root layout.
 import { bodyAttributes } from "./.zero-ui/attributes";
 
 export default function RootLayout({ children }) {
-  return (
-    <html lang="en">
-      <body {...bodyAttributes}>{children}</body>
-    </html>
-  );
+	return (
+		<html lang="en">
+			<body {...bodyAttributes}>{children}</body>
+		</html>
+	);
 }
 ```
 

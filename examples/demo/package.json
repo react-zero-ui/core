@@ -17,6 +17,7 @@
     "next": "15.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "schema-dts": "^2.0.0",
     "shiki": "3.23.0"
   },
   "devDependencies": {

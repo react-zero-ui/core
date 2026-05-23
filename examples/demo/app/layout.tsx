@@ -1,30 +1,21 @@
-import '@/app/global.css';
-import { RootProvider } from 'fumadocs-ui/provider/next';
-import { Inter } from 'next/font/google';
-import { bodyAttributes } from '@zero-ui/attributes';
+import "@/app/global.css";
+import { RootProvider } from "fumadocs-ui/provider/next";
+import { Inter } from "next/font/google";
+import { bodyAttributes } from "@zero-ui/attributes";
+import { DOMAIN_URL, SITE_CONFIG } from "./config/site-config";
 
-const inter = Inter({
-  subsets: ['latin'],
-});
+const inter = Inter({ subsets: ["latin"] });
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://zero-ui.dev');
+export const metadata = { metadataBase: new URL(DOMAIN_URL), title: { default: SITE_CONFIG.title }, description: SITE_CONFIG.description };
 
-export const metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    default: 'React Zero-UI',
-    template: '%s · React Zero-UI',
-  },
-  description: 'Ultra-fast React UI state with zero runtime and zero re-renders.',
-};
-
-export default function Layout({ children }: LayoutProps<'/'>) {
-  return (
-    <html lang="en" className={inter.className} suppressHydrationWarning>
-      <body className="flex flex-col min-h-screen" {...bodyAttributes}>
-        <RootProvider>{children}</RootProvider>
-      </body>
-    </html>
-  );
+export default function Layout({ children }: LayoutProps<"/">) {
+	return (
+		<html lang="en">
+			<body
+				className={`flex flex-col min-h-screen ${inter.className}`}
+				{...bodyAttributes}>
+				<RootProvider>{children}</RootProvider>
+			</body>
+		</html>
+	);
 }
