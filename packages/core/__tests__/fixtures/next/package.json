@@ -8,14 +8,14 @@
     "clean": "rm -rf .next node_modules package-lock.json"
   },
   "dependencies": {
-    "next": "16.2.4",
-    "react": "19.2.5",
-    "react-dom": "19.2.5"
+    "next": "16.2.6",
+    "react": "19.2.6",
+    "react-dom": "19.2.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.2.2",
     "@types/node": "24.0.0",
-    "@types/react": "19.2.14",
+    "@types/react": "19.2.15",
     "postcss": "8.5.8",
     "tailwindcss": "4.2.2",
     "typescript": "5.8.3"
