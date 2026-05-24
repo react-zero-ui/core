@@ -31,11 +31,13 @@
 */
 
 import type { Metadata } from "next";
+import { cn } from "fumadocs-ui/utils/cn";
 import Link from "next/link";
 import { ArrowRight, Zap, Layers, Feather, Github } from "lucide-react";
 import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
 import { Comparison } from "./_components/Comparison";
 import { SITE_CONFIG, SITE_SLUGS } from "@/app/config/site-config";
+import { CopyCommand } from "./_components/CopyCommand";
 
 export const metadata: Metadata = { title: { absolute: SITE_CONFIG.title }, description: SITE_CONFIG.description, alternates: { canonical: SITE_SLUGS.home } };
 
@@ -49,7 +51,7 @@ export default function HomePage() {
 			<SocialProof />
 			<a
 				href="https://www.serbyte.net/"
-				className="absolute bottom-4 left-4 text-fd-muted-foreground text-xs max-lg:left-1/2 max-lg:-translate-x-[50%]">
+				className="absolute bottom-4 left-4 text-fd-muted-foreground text-xs max-lg:left-1/2 max-lg:-translate-x-1/2 text-nowrap">
 				Built by Serbyte Web Design & Development
 			</a>
 		</main>
@@ -61,18 +63,17 @@ function Hero() {
 		<section className="mx-auto w-full max-w-5xl px-6 pt-20 pb-16 text-center sm:pt-28">
 			<div className="text-fd-muted-foreground mb-6 font-mono text-xs">Zero runtime · Zero re-renders · ~350 bytes</div>
 			<h1 className="mb-5 text-4xl font-bold tracking-tight sm:text-6xl">
-				Ultra-fast React UI state, <br className="hidden sm:block" />
+				Ultra-fast React state management, <br className="hidden sm:block" />
 				powered by <span className="text-fd-primary">CSS</span>.
 			</h1>
 			<p className="text-fd-muted-foreground mx-auto mb-8 max-w-2xl text-lg">
-				React Zero-UI <em className="font-medium text-fd-primary">pre-renders</em> UI state at build time, giving you built-in global state without providers,
-				re-renders, or hydration headaches.
+				React Zero-UI <code>pre-renders</code> UI state at build time, giving you built-in global state without providers, re-renders, or hydration headaches.
 			</p>
 
-			<div className="mx-auto mb-8 inline-flex items-center gap-3 rounded-lg border border-fd-border bg-fd-card px-4 py-2 font-mono text-sm">
-				<span className="text-fd-muted-foreground">$</span>
-				<span>npx create-zero-ui</span>
-			</div>
+			<CopyCommand
+				command="npx create-zero-ui"
+				label="Copy install command"
+			/>
 
 			<div className="flex flex-wrap items-center justify-center gap-3">
 				<Link
@@ -89,53 +90,45 @@ function Hero() {
 		</section>
 	);
 }
-
 function MentalModel() {
 	return (
 		<section className="mx-auto w-full max-w-5xl px-6 py-16">
 			<div className="mb-10 text-center">
-				<h2 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">Presentation state is not data state.</h2>
+				<h2 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">Familiar state API. Zero React re-renders.</h2>
 				<p className="text-fd-muted-foreground mx-auto max-w-2xl">
-					Themes, modals, sidebars, accents - none of that needs to live in React. Zero-UI moves presentation state into the DOM where it belongs, while you
-					keep React for the things React is good at.
+					Use <code>useUI()</code> to define visual state, then style it with Tailwind variants like <code>menu-open:translate-x-0</code>. Zero-UI generates the
+					CSS at build time, then updates the UI by flipping a <code>data-*</code> attribute.
 				</p>
 			</div>
 
-			<div className="grid gap-4 md:grid-cols-2">
+			<div className="grid gap-4 md:grid-cols-2 ">
 				<CodeCard
 					label="React useState"
 					tone="muted"
-					code={`const [theme, setTheme] = useState('light');
-
-// Every click re-renders the subtree
+					code={`const [menu, setMenu] = useState('closed');
 return (
-  <div className={theme === 'dark'
-    ? 'bg-gray-900' : 'bg-white'}>
-    <button onClick={() =>
-      setTheme(theme === 'light'
-        ? 'dark' : 'light')
-    }>
-      Toggle
+  <aside className={menu === 'open'
+    ? 'translate-x-0'
+    : '-translate-x-full'}>
+    <button onClick={() => setMenu('open');}>
+      Open menu
     </button>
-  </div>
+  </aside>
 );`}
 				/>
+
 				<CodeCard
 					label="Zero-UI useUI"
 					tone="primary"
-					code={`const [, setTheme] = useUI('theme', 'light');
-
-// Zero re-renders.
+					code={`const [, setMenu] = useUI('menu', 'closed');
 return (
-  <div className="theme-light:bg-white
-                  theme-dark:bg-gray-900">
- <button onClick={(prev) =>
-      setTheme(prev === 'light'
-        ? 'dark' : 'light')
-    }>
-      Toggle
+  // automatically generates tailwind variants
+  <aside className="menu-open:translate-x-0
+                    menu-closed:-translate-x-full">
+    <button onClick={() => setMenu('open');}>
+      Open menu
     </button>
-  </div>
+  </aside>
 );`}
 				/>
 			</div>
@@ -145,12 +138,15 @@ return (
 
 function CodeCard({ label, tone, code }: { label: string; tone: "muted" | "primary"; code: string }) {
 	return (
-		<div className={["border-fd-border bg-fd-card flex flex-col gap-3 rounded-xl border p-5", tone === "primary" ? "ring-fd-primary/40 ring-2" : ""].join(" ")}>
-			<div className="text-fd-muted-foreground text-xs font-medium tracking-wide uppercase">{label}</div>
-			<DynamicCodeBlock
-				lang="tsx"
-				code={code}
-			/>
+		<div className={"flex flex-col gap-3 min-w-0 "}>
+			<div className={cn("text-fd-muted-foreground text-xs font-medium tracking-wide uppercase", tone === "primary" && "text-fd-primary")}>{label}</div>
+			<div className={cn(tone === "primary" && "ring-fd-primary/40 ring-2 rounded-lg")}>
+				<DynamicCodeBlock
+					lang="tsx"
+					code={code}
+					codeblock={{ allowCopy: false }}
+				/>
+			</div>
 		</div>
 	);
 }

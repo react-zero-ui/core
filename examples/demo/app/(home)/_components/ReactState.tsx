@@ -34,11 +34,14 @@ export function ReactState() {
 	}, [setTheme]);
 
 	return (
-		<RenderHighlight className={`flex h-full w-full flex-col gap-5 px-6 py-7 **:transition-all **:duration-200 ${isLight ? "bg-white" : "bg-zinc-950"}`}>
-			<Header
-				theme={theme}
-				renderCount={renderCount.current}
+		<RenderHighlight
+			name="Container"
+			className={`flex relative h-full w-full flex-col gap-5 px-6 py-7 **:transition-all **:duration-200 ${isLight ? "bg-white" : "bg-zinc-950"}`}>
+			<RenderCounter
+				count={renderCount.current}
+				className="absolute top-2 right-2"
 			/>
+			<Header theme={theme} />
 			<ThemeSwitcher
 				theme={theme}
 				setTheme={setTheme}
@@ -63,13 +66,10 @@ export function ReactState() {
 	);
 }
 
-function Header({ theme, renderCount }: { theme: Theme; renderCount: number }) {
+function Header({ theme }: { theme: Theme }) {
 	const isLight = theme === "light";
 	return (
 		<div className="relative space-y-1 text-center">
-			<div className="absolute top-0 right-0">
-				<RenderCounter count={renderCount} />
-			</div>
 			<h2 className={`text-2xl font-semibold tracking-tight ${isLight ? "text-zinc-900" : "text-white"}`}>
 				React State <span className="max-[450px]:hidden">Management</span>
 			</h2>

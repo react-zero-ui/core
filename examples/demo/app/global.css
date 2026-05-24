@@ -9,6 +9,15 @@
 		cursor: pointer;
 	}
 
+	:not(pre) > code {
+		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+		font-size: 0.875em;
+		padding: 0.125em 0.375em;
+		border-radius: 0.25rem;
+		background-color: color-mix(in oklab, var(--color-fd-primary) 10%, transparent);
+		color: var(--color-fd-primary);
+	}
+
 	.animate-click {
 		animation: click 200ms ease-in-out;
 		&:active {
@@ -26,6 +35,23 @@
 
 			filter: saturate(1.25) brightness(1.2);
 		}
+	}
+}
+
+/* CSS overrides for topbar menu button */
+@layer components {
+	#nd-home-layout [aria-label="Toggle Menu"] > svg {
+		display: none;
+	}
+
+	#nd-home-layout [aria-label="Toggle Menu"]::before {
+		content: "";
+		width: 1.375rem;
+		height: 1.375rem;
+		background:
+			linear-gradient(currentColor, currentColor) center 6px / 18px 2px no-repeat,
+			linear-gradient(currentColor, currentColor) center / 18px 2px no-repeat,
+			linear-gradient(currentColor, currentColor) center calc(100% - 6px) / 18px 2px no-repeat;
 	}
 }
 

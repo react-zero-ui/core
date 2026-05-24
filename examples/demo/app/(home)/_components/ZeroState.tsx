@@ -30,7 +30,11 @@ export function ZeroState() {
 
 	return (
 		<RenderHighlight className="perf-theme-light:bg-white perf-theme-dark:bg-zinc-950 flex h-full w-full flex-col gap-5 px-6 py-7 **:transition-all **:duration-200">
-			<Header renderCount={renderCount.current} />
+			<RenderCounter
+				count={renderCount.current}
+				className="absolute top-2 right-2"
+			/>
+			<Header />
 			<ThemeSwitcher setTheme={setTheme} />
 			<AccentPicker setAccent={setAccent} />
 			<InteractiveCard toggleMenu={() => setMenuOpen((prev) => (prev === "true" ? "false" : "true"))} />
@@ -39,14 +43,11 @@ export function ZeroState() {
 	);
 }
 
-function Header({ renderCount }: { renderCount: number }) {
+function Header() {
 	return (
 		<RenderHighlight
 			name="Header"
 			className="relative space-y-1 text-center">
-			<div className="absolute top-0 right-0">
-				<RenderCounter count={renderCount} />
-			</div>
 			<h2 className="perf-theme-light:text-zinc-900 perf-theme-dark:text-white text-2xl font-semibold tracking-tight">Zero UI</h2>
 			<p className="perf-theme-light:text-zinc-500 perf-theme-dark:text-zinc-400 text-sm">Reactive state, zero re-renders</p>
 		</RenderHighlight>
