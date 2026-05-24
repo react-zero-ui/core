@@ -1,17 +1,29 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useUI } from "@react-zero-ui/core";
 import { RenderCounter } from "./RenderCounter";
 import { RenderHighlight } from "./RenderHighlight";
 import { Moon, Sun } from "lucide-react";
 
+type Theme = "light" | "dark";
+
+function getInitialTheme(): Theme {
+	if (typeof document === "undefined") return "light";
+	return document.documentElement.classList.contains("dark") ? "dark" : "light";
+}
+
 export function ZeroState() {
-	const [, setTheme] = useUI<"light" | "dark">("perf-theme", "light");
+	const initialTheme = useRef<Theme>(getInitialTheme()).current;
+	const [, setTheme] = useUI<Theme>("perf-theme", "light");
 	const [, setAccent] = useUI<"violet" | "emerald" | "amber">("perf-accent", "violet");
 	const [, setMenuOpen] = useUI<"true" | "false">("perf-menu-open", "false");
 	const renderCount = useRef(0);
 	renderCount.current += 1;
+
+	useEffect(() => {
+		setTheme(initialTheme);
+	}, [initialTheme, setTheme]);
 
 	return (
 		<RenderHighlight className="perf-theme-light:bg-gray-100 perf-theme-dark:bg-gray-900 flex h-full w-full flex-col justify-between space-y-4 py-8 **:transition-all **:duration-300">

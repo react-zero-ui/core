@@ -8,9 +8,14 @@ import { Moon, Sun } from "lucide-react";
 type Theme = "light" | "dark";
 type Accent = "violet" | "emerald" | "amber";
 
+function getInitialTheme(): Theme {
+	if (typeof document === "undefined") return "light";
+	return document.documentElement.classList.contains("dark") ? "dark" : "light";
+}
+
 export function ReactState() {
 	const [accent, setAccent] = useState<Accent>("violet");
-	const [theme, setTheme] = useState<Theme>("light");
+	const [theme, setTheme] = useState<Theme>(getInitialTheme);
 	const [menuOpen, setMenuOpen] = useState<boolean>(false);
 	const renderCount = useRef(0);
 	renderCount.current += 1;
