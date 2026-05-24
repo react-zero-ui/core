@@ -3,7 +3,19 @@ title: Next.js
 description: Set up React Zero-UI in a Next.js App Router project
 ---
 
-## 1. Install dependencies
+## 1. Initialize Zero-UI
+
+Run the CLI in your project root. It installs and configures Zero-UI for the detected framework.
+
+```bash
+npx create-zero-ui
+```
+
+## Manual setup
+
+Use these steps if you want to wire the project yourself or inspect what the CLI configures.
+
+### 1. Install dependencies
 
 ```bash
 npm install @react-zero-ui/core
@@ -13,7 +25,7 @@ npm install @react-zero-ui/core
 npm install @tailwindcss/postcss
 ```
 
-## 2. Add the PostCSS plugin
+### 2. Add the PostCSS plugin
 
 Zero-UI must come **before** Tailwind.
 
@@ -28,14 +40,14 @@ export default config;
 module.exports = { plugins: { "@react-zero-ui/core/postcss": {}, tailwindcss: {} } };
 ```
 
-## 3. Import Tailwind
+### 3. Import Tailwind
 
 ```css
 /* global.css */
 @import "tailwindcss";
 ```
 
-## 4. Start the app
+### 4. Start the app
 
 ```bash
 npm run dev
@@ -43,7 +55,7 @@ npm run dev
 
 Zero-UI generates a `.zero-ui/` folder in your project root containing `attributes.ts` and type definitions.
 
-## 5. Prevent FOUC
+### 5. Prevent FOUC
 
 Spread `bodyAttributes` on `<body>` in your root layout.
 

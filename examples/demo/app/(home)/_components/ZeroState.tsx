@@ -7,6 +7,7 @@ import { RenderHighlight } from "./RenderHighlight";
 import { Moon, Sun } from "lucide-react";
 
 type Theme = "light" | "dark";
+type Accent = "violet" | "emerald" | "amber";
 
 function getInitialTheme(): Theme {
 	if (typeof document === "undefined") return "light";
@@ -15,18 +16,20 @@ function getInitialTheme(): Theme {
 
 export function ZeroState() {
 	const initialTheme = useRef<Theme>(getInitialTheme()).current;
-	const [, setTheme] = useUI<Theme>("perf-theme", "light");
-	const [, setAccent] = useUI<"violet" | "emerald" | "amber">("perf-accent", "violet");
+	const [, setTheme] = useUI<Theme>("perf-theme", "dark");
+	const [, setAccent] = useUI<Accent>("perf-accent", "violet");
 	const [, setMenuOpen] = useUI<"true" | "false">("perf-menu-open", "false");
 	const renderCount = useRef(0);
 	renderCount.current += 1;
 
 	useEffect(() => {
-		setTheme(initialTheme);
+		if (typeof document !== "undefined") {
+			setTheme(initialTheme);
+		}
 	}, [initialTheme, setTheme]);
 
 	return (
-		<RenderHighlight className="perf-theme-light:bg-gray-100 perf-theme-dark:bg-gray-900 flex h-full w-full flex-col justify-between space-y-4 py-8 **:transition-all **:duration-300">
+		<RenderHighlight className="perf-theme-light:bg-white perf-theme-dark:bg-zinc-950 flex h-full w-full flex-col gap-5 px-6 py-7 **:transition-all **:duration-200">
 			<Header renderCount={renderCount.current} />
 			<ThemeSwitcher setTheme={setTheme} />
 			<AccentPicker setAccent={setAccent} />
@@ -40,67 +43,66 @@ function Header({ renderCount }: { renderCount: number }) {
 	return (
 		<RenderHighlight
 			name="Header"
-			className="space-y-2 text-center">
-			<RenderCounter
-				count={renderCount}
-				className="mx-auto"
-			/>
-			<h1 className="perf-theme-light:text-gray-900 perf-theme-dark:text-white text-3xl font-bold">Zero UI</h1>
-			<p className="perf-theme-light:text-gray-600 perf-theme-dark:text-gray-400">
-				Reactive state without re-rendering.
-				<br />
-				<span className="text-sm">
-					<span className="perf-theme-light:text-gray-900 perf-theme-dark:text-white font-bold">Zero</span> re-renders,{" "}
-					<span className="perf-theme-light:text-gray-900 perf-theme-dark:text-white font-bold">Reactive</span> &{" "}
-					<span className="perf-theme-light:text-gray-900 perf-theme-dark:text-white font-bold">Global</span> state.
-				</span>
-			</p>
+			className="relative space-y-1 text-center">
+			<div className="absolute top-0 right-0">
+				<RenderCounter count={renderCount} />
+			</div>
+			<h2 className="perf-theme-light:text-zinc-900 perf-theme-dark:text-white text-2xl font-semibold tracking-tight">Zero UI</h2>
+			<p className="perf-theme-light:text-zinc-500 perf-theme-dark:text-zinc-400 text-sm">Reactive state, zero re-renders</p>
 		</RenderHighlight>
 	);
 }
 
-function ThemeSwitcher({ setTheme }: { setTheme: (t: "light" | "dark") => void }) {
+function ThemeSwitcher({ setTheme }: { setTheme: (t: Theme) => void }) {
 	return (
 		<RenderHighlight
 			name="ThemeSwitcher"
-			className="flex justify-center gap-2">
-			<button
-				className="perf-theme-dark:bg-white perf-theme-dark:text-gray-900 perf-theme-light:bg-gray-200 perf-theme-light:text-gray-600 rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105 flex items-center gap-2"
-				aria-label="Set light theme"
-				onClick={() => setTheme("light")}>
-				<Sun className="h-4 w-4" /> Light
-			</button>
-			<button
-				className="perf-theme-light:bg-gray-900 perf-theme-light:text-white perf-theme-dark:bg-gray-700 perf-theme-dark:text-gray-200 rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105 flex items-center gap-2"
-				aria-label="Set dark theme"
-				onClick={() => setTheme("dark")}>
-				<Moon className="h-4 w-4" /> Dark
-			</button>
+			className="flex justify-center">
+			<div className="perf-theme-light:bg-zinc-100 perf-theme-light:border-zinc-200 perf-theme-dark:bg-zinc-900 perf-theme-dark:border-zinc-800 relative inline-flex rounded-full border p-1">
+				<span
+					aria-hidden="true"
+					className="perf-theme-dark:translate-x-full perf-theme-light:bg-white perf-theme-dark:bg-zinc-700 absolute inset-y-1 left-1 w-[calc(50%-4px)] rounded-full shadow-sm transition-transform duration-300"
+				/>
+				<button
+					type="button"
+					aria-label="Set light theme"
+					onClick={() => setTheme("light")}
+					className="perf-theme-light:text-zinc-900 perf-theme-dark:text-zinc-500 relative z-10 inline-flex items-center gap-1.5 rounded-full px-5 py-1.5 text-sm font-medium">
+					<Sun className="h-3.5 w-3.5" /> Light
+				</button>
+				<button
+					type="button"
+					aria-label="Set dark theme"
+					onClick={() => setTheme("dark")}
+					className="perf-theme-dark:text-white perf-theme-light:text-zinc-500 relative z-10 inline-flex items-center gap-1.5 rounded-full px-5 py-1.5 text-sm font-medium">
+					<Moon className="h-3.5 w-3.5" /> Dark
+				</button>
+			</div>
 		</RenderHighlight>
 	);
 }
 
-function AccentPicker({ setAccent }: { setAccent: (a: "violet" | "emerald" | "amber") => void }) {
+function AccentPicker({ setAccent }: { setAccent: (a: Accent) => void }) {
 	return (
 		<RenderHighlight
 			name="AccentPicker"
-			className="space-y-4 pb-2">
-			<h2 className="perf-theme-light:text-gray-800 perf-theme-dark:text-gray-200 text-center text-lg font-semibold">Choose Accent</h2>
+			className="space-y-2.5">
+			<h3 className="perf-theme-light:text-zinc-500 perf-theme-dark:text-zinc-400 text-center text-xs font-medium tracking-wider uppercase">Accent</h3>
 			<div className="flex justify-center gap-3">
 				<button
 					aria-label="Set violet accent"
 					onClick={() => setAccent("violet")}
-					className="perf-accent-violet:ring-6 perf-accent-violet:ring-violet-200 perf-accent-violet:bg-violet-500 perf-theme-dark:perf-accent-violet:ring-violet-900 h-12 w-12 rounded-full bg-violet-500/50 ring-violet-900 hover:scale-110"
+					className="perf-accent-violet:ring-2 perf-accent-violet:ring-violet-400 perf-accent-violet:bg-violet-500 perf-theme-light:ring-offset-white perf-theme-dark:ring-offset-zinc-950 h-7 w-7 rounded-full bg-violet-500/40 ring-offset-2 hover:scale-110"
 				/>
 				<button
 					aria-label="Set emerald accent"
 					onClick={() => setAccent("emerald")}
-					className="perf-accent-emerald:ring-6 perf-accent-emerald:ring-emerald-200 perf-theme-dark:perf-accent-emerald:ring-emerald-900 perf-accent-emerald:bg-emerald-500 h-12 w-12 rounded-full bg-emerald-500/50 hover:scale-110"
+					className="perf-accent-emerald:ring-2 perf-accent-emerald:ring-emerald-400 perf-accent-emerald:bg-emerald-500 perf-theme-light:ring-offset-white perf-theme-dark:ring-offset-zinc-950 h-7 w-7 rounded-full bg-emerald-500/40 ring-offset-2 hover:scale-110"
 				/>
 				<button
 					aria-label="Set amber accent"
 					onClick={() => setAccent("amber")}
-					className="perf-accent-amber:ring-6 perf-accent-amber:ring-amber-200 perf-theme-dark:perf-accent-amber:ring-amber-900 perf-accent-amber:bg-amber-500 h-12 w-12 rounded-full bg-amber-500/50 hover:scale-110"
+					className="perf-accent-amber:ring-2 perf-accent-amber:ring-amber-400 perf-accent-amber:bg-amber-500 perf-theme-light:ring-offset-white perf-theme-dark:ring-offset-zinc-950 h-7 w-7 rounded-full bg-amber-500/40 ring-offset-2 hover:scale-110"
 				/>
 			</div>
 		</RenderHighlight>
@@ -111,20 +113,26 @@ function InteractiveCard({ toggleMenu }: { toggleMenu: () => void }) {
 	return (
 		<RenderHighlight
 			name="InteractiveCard"
-			className="perf-theme-light:bg-gray-50 perf-theme-light:shadow-gray-200 perf-theme-dark:bg-gray-700 perf-theme-dark:shadow-black/50 relative mx-auto max-w-md overflow-hidden rounded-2xl border border-gray-200 shadow-lg transition-all duration-0!">
-			<div className="space-y-4 p-6">
-				<h3 className="perf-theme-light:text-gray-900 perf-theme-dark:text-white text-xl font-semibold">Open Menu Demo</h3>
+			className="perf-theme-light:bg-zinc-50 perf-theme-light:border-zinc-200 perf-theme-dark:bg-zinc-900 perf-theme-dark:border-zinc-800 mx-auto w-full max-w-sm overflow-hidden rounded-xl border">
+			<div className="space-y-3 p-5">
+				<div className="flex items-center justify-between">
+					<h3 className="perf-theme-light:text-zinc-900 perf-theme-dark:text-white text-sm font-semibold">Panel demo</h3>
+					<span className="perf-theme-light:bg-zinc-200 perf-theme-light:text-zinc-600 perf-theme-dark:bg-zinc-800 perf-theme-dark:text-zinc-400 rounded-full px-2 py-0.5 font-mono text-[10px] tracking-wide uppercase">
+						<span className="perf-menu-open-true:inline hidden">open</span>
+						<span className="perf-menu-open-false:inline hidden">closed</span>
+					</span>
+				</div>
 				<button
 					aria-label="Toggle menu"
 					onClick={toggleMenu}
-					className="perf-accent-violet:bg-violet-500 perf-accent-emerald:bg-emerald-500 perf-accent-amber:bg-amber-500 w-full rounded-lg py-3 font-medium text-white hover:scale-[1.02]">
-					<span className="perf-menu-open-false:hidden">Close Panel</span>
-					<span className="perf-menu-open-true:hidden">Open Panel</span>
+					className="perf-accent-violet:bg-violet-500 perf-accent-emerald:bg-emerald-500 perf-accent-amber:bg-amber-500 w-full rounded-lg py-2.5 text-sm font-medium text-white shadow-sm hover:opacity-90">
+					<span className="perf-menu-open-false:hidden">Close panel</span>
+					<span className="perf-menu-open-true:hidden">Open panel</span>
 				</button>
 			</div>
-			<div className="perf-menu-open-true:max-h-[80px] perf-menu-open-false:max-h-0 overflow-hidden">
-				<div className="perf-theme-dark:bg-gray-700 perf-theme-light:bg-white border-t border-gray-200 p-6 transition-all duration-0!">
-					<p className="perf-theme-dark:text-gray-300 perf-theme-light:text-gray-600 text-center">✨ This panel slides open without re-rendering!</p>
+			<div className="perf-menu-open-true:max-h-24 perf-menu-open-false:max-h-0 overflow-hidden transition-[max-height] duration-300">
+				<div className="perf-theme-light:border-zinc-200 perf-theme-light:text-zinc-600 perf-theme-dark:border-zinc-800 perf-theme-dark:text-zinc-400 border-t p-4 text-center text-xs">
+					Slides open without re-rendering ✨
 				</div>
 			</div>
 		</RenderHighlight>
@@ -136,22 +144,37 @@ function StateDisplay() {
 		<RenderHighlight
 			name="StateDisplay"
 			className="max-[450px]:hidden">
-			<div className="perf-theme-light:text-gray-500 perf-theme-dark:text-gray-400 **:perf-accent-violet:text-violet-500 **:perf-accent-emerald:text-emerald-500 **:perf-accent-amber:text-amber-500 mt-5 flex justify-center gap-4 space-y-1 text-center font-mono text-sm capitalize">
-				<div className="flex gap-1 text-nowrap **:text-nowrap">
-					theme: <span className="perf-theme-dark:hidden">Light</span>
-					<span className="perf-theme-light:hidden">Dark</span>
-				</div>
-				<div className="flex gap-1 text-nowrap **:text-nowrap">
-					accent:
-					<span className="perf-accent-violet:block hidden">Violet</span>
-					<span className="perf-accent-emerald:block hidden">Emerald</span>
-					<span className="perf-accent-amber:block hidden">Amber</span>
-				</div>
-				<div className="flex gap-1 text-nowrap **:text-nowrap">
-					menu:
-					<span className="perf-menu-open-true:hidden">Open</span>
-					<span className="perf-menu-open-false:hidden">Closed</span>
-				</div>
+			<div className="perf-theme-light:bg-zinc-50 perf-theme-light:border-zinc-200 perf-theme-light:text-zinc-500 perf-theme-dark:bg-zinc-900 perf-theme-dark:border-zinc-800 perf-theme-dark:text-zinc-400 **:perf-accent-violet:text-violet-500 **:perf-accent-emerald:text-emerald-500 **:perf-accent-amber:text-amber-500 mx-auto flex w-fit items-center gap-3 rounded-lg border px-3 py-1.5 font-mono text-xs">
+				<span>
+					theme{" "}
+					<span className="font-medium">
+						<span className="perf-theme-dark:hidden">light</span>
+						<span className="perf-theme-light:hidden">dark</span>
+					</span>
+				</span>
+				<span
+					aria-hidden="true"
+					className="perf-theme-light:bg-zinc-300 perf-theme-dark:bg-zinc-700 h-3 w-px"
+				/>
+				<span>
+					accent{" "}
+					<span className="font-medium">
+						<span className="perf-accent-violet:inline hidden">violet</span>
+						<span className="perf-accent-emerald:inline hidden">emerald</span>
+						<span className="perf-accent-amber:inline hidden">amber</span>
+					</span>
+				</span>
+				<span
+					aria-hidden="true"
+					className="perf-theme-light:bg-zinc-300 perf-theme-dark:bg-zinc-700 h-3 w-px"
+				/>
+				<span>
+					panel{" "}
+					<span className="font-medium">
+						<span className="perf-menu-open-true:hidden">closed</span>
+						<span className="perf-menu-open-false:hidden">open</span>
+					</span>
+				</span>
 			</div>
 		</RenderHighlight>
 	);

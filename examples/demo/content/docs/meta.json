@@ -2,7 +2,6 @@
   "title": "Docs",
   "pages": [
     "index",
-    "---Getting Started---",
     "getting-started",
     "---Core Concepts---",
     "usage-examples",

@@ -3,7 +3,19 @@ title: Vite
 description: Set up React Zero-UI in a Vite project
 ---
 
-## 1. Install dependencies
+## 1. Initialize Zero-UI
+
+Run the CLI in your project root. It installs and configures Zero-UI for the detected framework.
+
+```bash
+npx create-zero-ui
+```
+
+## Manual setup
+
+Use these steps if you want to wire the project yourself or inspect what the CLI configures.
+
+### 1. Install dependencies
 
 ```bash
 npm install @react-zero-ui/core
@@ -13,7 +25,7 @@ npm install @react-zero-ui/core
 npm install @tailwindcss/postcss
 ```
 
-## 2. Add the plugin to `vite.config.ts`
+### 2. Add the plugin to `vite.config.ts`
 
 ```js
 import zeroUI from "@react-zero-ui/core/vite";
@@ -27,7 +39,7 @@ export default defineConfig({
 });
 ```
 
-## 3. Import Tailwind
+### 3. Import Tailwind
 
 ```css
 /* global.css */

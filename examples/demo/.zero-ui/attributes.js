@@ -3,7 +3,7 @@ export const bodyAttributes = {
   "data-perf-accent": "violet",
   "data-perf-active": "zero",
   "data-perf-menu-open": "false",
-  "data-perf-theme": "light"
+  "data-perf-theme": "dark"
 };
 export const variantKeyMap = {
   "data-demo-filter-category": true,

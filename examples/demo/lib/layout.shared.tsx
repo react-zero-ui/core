@@ -9,10 +9,11 @@ export function baseOptions(): BaseLayoutProps {
 			title: (
 				<span className="font-bold tracking-tight flex items-center gap-2">
 					<Image
-						src={"/assets/zero-ui-favicon.png"}
+						src={"/assets/zero-ui-favicon-transparent.png"}
 						alt={SITE_NAP.name}
 						width={32}
 						height={32}
+						className="bg-transparent rounded-lg shadow dark:shadow-white/10"
 					/>
 					React Zero-UI
 				</span>
