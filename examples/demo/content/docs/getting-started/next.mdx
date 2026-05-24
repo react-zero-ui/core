@@ -1,0 +1,77 @@
+---
+title: Next.js State Management Setup
+description: Set up React Zero-UI in a Next.js App Router project for UI state management without providers or extra re-renders.
+---
+
+## 1. Initialize Zero-UI
+
+Run the CLI in your project root. It installs and configures Zero-UI for the detected framework.
+
+```bash
+npx create-zero-ui
+```
+
+## Manual setup
+
+Use these steps if you want to wire the project yourself or inspect what the CLI configures.
+
+### 1. Install dependencies
+
+```bash
+npm install @react-zero-ui/core
+```
+
+```bash
+npm install @tailwindcss/postcss
+```
+
+### 2. Add the PostCSS plugin
+
+Zero-UI must come **before** Tailwind.
+
+```js
+// postcss.config.* (ESM)
+const config = { plugins: ["@react-zero-ui/core/postcss", "@tailwindcss/postcss"] };
+export default config;
+```
+
+```js
+// postcss.config.* (CJS)
+module.exports = { plugins: { "@react-zero-ui/core/postcss": {}, tailwindcss: {} } };
+```
+
+### 3. Import Tailwind
+
+```css
+/* global.css */
+@import "tailwindcss";
+```
+
+### 4. Start the app
+
+```bash
+npm run dev
+```
+
+Zero-UI generates a `.zero-ui/` folder in your project root containing `attributes.ts` and type definitions.
+
+### 5. Prevent FOUC
+
+Spread `bodyAttributes` on `<body>` in your root layout.
+
+```tsx
+// app/layout.tsx
+import { bodyAttributes } from "./.zero-ui/attributes";
+
+export default function RootLayout({ children }) {
+	return (
+		<html lang="en">
+			<body {...bodyAttributes}>{children}</body>
+		</html>
+	);
+}
+```
+
+That's it. Zero-UI now adds the data-`*` attributes to the body tag and Tailwind generates the matching variant classes.
+
+Next up: check out the [experimental SSR-safe click handler](/docs/experimental).

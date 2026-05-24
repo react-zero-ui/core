@@ -1,0 +1,14 @@
+{
+  "title": "Docs",
+  "pages": [
+    "index",
+    "getting-started",
+    "---Core Concepts---",
+    "usage-examples",
+    "api-reference",
+    "migration-guide",
+    "---Advanced---",
+    "experimental",
+    "faq"
+  ]
+}

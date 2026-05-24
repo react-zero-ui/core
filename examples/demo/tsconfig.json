@@ -1,32 +1,31 @@
 {
-	"compilerOptions": {
-		"forceConsistentCasingInFileNames": true,
-		"target": "ES2017",
-		"lib": ["dom", "dom.iterable", "esnext"],
-		"allowJs": true,
-		"skipLibCheck": true,
-		"strict": true,
-		"noEmit": true,
-		"esModuleInterop": true,
-		"module": "esnext",
-		"moduleResolution": "bundler",
-		"resolveJsonModule": true,
-		"isolatedModules": true,
-		"jsx": "preserve",
-		"incremental": true,
-		"plugins": [{ "name": "next" }],
-		"paths": { "@/*": ["./src/*"], "@zero-ui/attributes": ["./.zero-ui/attributes.js"] },
-		"baseUrl": "."
-	},
-	"include": [
-		"next-env.d.ts",
-		"**/*.ts",
-		"**/*.d.ts",
-		"**/*.tsx",
-		".next/types/**/*.ts",
-		"scripts/generateUiVariants.cjs",
-		"src/app/(test)/page.tsx",
-		".zero-ui/**/*.d.ts" // ← ensure present
-	],
-	"exclude": ["node_modules"]
+  "compilerOptions": {
+    "baseUrl": ".",
+    "target": "ESNext",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "paths": {
+      "@/.source": ["./.source/index.ts"],
+      "@/*": ["./*"],
+      "@zero-ui/attributes": ["./.zero-ui/attributes.js"]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".zero-ui/**/*.d.ts"],
+  "exclude": ["node_modules"]
 }

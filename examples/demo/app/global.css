@@ -1,0 +1,38 @@
+@import "tailwindcss";
+@import "fumadocs-ui/css/vitepress.css";
+
+@import "fumadocs-ui/css/preset.css";
+
+@layer base {
+	button:not(:disabled),
+	[role="button"]:not(:disabled) {
+		cursor: pointer;
+	}
+
+	.animate-click {
+		animation: click 200ms ease-in-out;
+		&:active {
+			animation: none;
+		}
+	}
+
+	@keyframes click {
+		0%,
+		100% {
+			transform: scaleY(1) scaleX(1);
+		}
+		50% {
+			transform: scaleY(0.8) scaleX(1.1);
+
+			filter: saturate(1.25) brightness(1.2);
+		}
+	}
+}
+
+/* 
+ To edit Fumadocs base styles, you can override CSS variables or classes provided by Fumadocs UI in your global stylesheet. 
+ For example, to change the primary color used by Fumadocs components, override the --fd-color-primary variable below:
+*/
+/* .dark {
+	--color-fd-primary: var(--color-purple-500);
+} */
