@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { RenderCounter } from "./RenderCounter";
+import { RenderHighlight } from "./RenderHighlight";
 
 type Theme = "light" | "dark";
 type Accent = "violet" | "emerald" | "amber";
@@ -14,7 +15,7 @@ export function ReactState() {
 	renderCount.current += 1;
 
 	return (
-		<div
+		<RenderHighlight
 			className={`flex h-full w-full flex-col justify-between space-y-4 py-8 **:transition-all **:duration-300 ${theme === "dark" ? "bg-gray-900" : "bg-gray-100"}`}>
 			<Header
 				theme={theme}
@@ -40,7 +41,7 @@ export function ReactState() {
 				accent={accent}
 				menuOpen={menuOpen}
 			/>
-		</div>
+		</RenderHighlight>
 	);
 }
 

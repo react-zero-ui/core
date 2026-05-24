@@ -14,7 +14,7 @@ export function baseOptions(): BaseLayoutProps {
 						width={32}
 						height={32}
 					/>
-					React <span className="text-fd-primary">Zero-UI</span>
+					React Zero-UI
 				</span>
 			),
 		},

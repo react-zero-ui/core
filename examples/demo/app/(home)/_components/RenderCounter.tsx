@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 
 export function RenderCounter({ count, className = "" }: { count: number; className?: string }) {
 	const prevCount = useRef(count);
@@ -20,15 +20,21 @@ export function RenderCounter({ count, className = "" }: { count: number; classN
 	}, [count]);
 
 	return (
-		<div
-			className={[
-				"px-2.5 w-fit py-1 font-mono text-sm font-bold leading-none text-white transition-colors duration-150",
-				flashing ? "bg-red-300" : "",
-				className,
-			].join(" ")}
-			style={!flashing ? { backgroundColor: "var(--color-violet-700)" } : undefined}
-			suppressHydrationWarning>
+		<RenderChip
+			className={[flashing ? "bg-violet-200" : "", className].join(" ")}
+			style={!flashing ? { backgroundColor: "var(--color-violet-700)", color: "white" } : undefined}>
 			Renders: {count}
+		</RenderChip>
+	);
+}
+
+export function RenderChip({ children, className, style }: { children: ReactNode; className?: string; style?: React.CSSProperties }) {
+	return (
+		<div
+			className={["px-2.5 w-fit py-1 font-mono text-sm font-bold leading-none text-black transition-none", className].join(" ")}
+			style={style}
+			suppressHydrationWarning>
+			{children}
 		</div>
 	);
 }

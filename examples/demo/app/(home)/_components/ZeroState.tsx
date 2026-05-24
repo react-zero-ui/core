@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { useUI } from "@react-zero-ui/core";
 import { RenderCounter } from "./RenderCounter";
+import { RenderHighlight } from "./RenderHighlight";
 
 export function ZeroState() {
 	const [, setTheme] = useUI<"light" | "dark">("perf-theme", "light");
@@ -12,13 +13,13 @@ export function ZeroState() {
 	renderCount.current += 1;
 
 	return (
-		<div className="perf-theme-light:bg-gray-100 perf-theme-dark:bg-gray-900 flex h-full w-full flex-col justify-between space-y-4 py-8 **:transition-all **:duration-300">
+		<RenderHighlight className="perf-theme-light:bg-gray-100 perf-theme-dark:bg-gray-900 flex h-full w-full flex-col justify-between space-y-4 py-8 **:transition-all **:duration-300">
 			<Header renderCount={renderCount.current} />
 			<ThemeSwitcher setTheme={setTheme} />
 			<AccentPicker setAccent={setAccent} />
 			<InteractiveCard toggleMenu={() => setMenuOpen((prev) => (prev === "true" ? "false" : "true"))} />
 			<StateDisplay />
-		</div>
+		</RenderHighlight>
 	);
 }
 

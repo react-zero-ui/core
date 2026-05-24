@@ -4,6 +4,7 @@ import type { ChangeEvent, ReactNode } from "react";
 import { useCallback, useRef, useState } from "react";
 import { useScopedUI } from "@react-zero-ui/core";
 import { RenderCounter } from "../../_components/RenderCounter";
+import { RenderHighlight } from "../../_components/RenderHighlight";
 import { categories, products, type Category, type Product } from "./_data";
 
 type CategoryFilter = Category | "all";
@@ -176,7 +177,9 @@ function ZeroUiPane() {
 		</Pane>
 	);
 }
+ZeroUiPane.displayName = "ZeroUiPane";
 
+CategoryButtons.displayName = "CategoryButtons";
 function CategoryButtons({ value, onChange }: { value: CategoryFilter; onChange: (value: CategoryFilter) => void }) {
 	return (
 		<div className="flex flex-wrap gap-2">
@@ -231,7 +234,9 @@ function ZeroUiCategoryButtons({ onChange }: { onChange: (value: CategoryFilter)
 
 function Pane({ title, subtitle, renderCount, children }: { title: string; subtitle: string; renderCount: number; children: ReactNode }) {
 	return (
-		<div className="border-fd-border bg-fd-card flex flex-col gap-4 rounded-xl border p-5">
+		<RenderHighlight
+			name={"Pane"}
+			className="border-fd-border bg-fd-card flex flex-col gap-4 rounded-xl border p-5">
 			<div className="flex items-start justify-between gap-3">
 				<div>
 					<h3 className="text-base font-semibold">{title}</h3>
@@ -243,9 +248,10 @@ function Pane({ title, subtitle, renderCount, children }: { title: string; subti
 				/>
 			</div>
 			<div className="min-h-[18rem]">{children}</div>
-		</div>
+		</RenderHighlight>
 	);
 }
+Pane.displayName = "Pane";
 
 function ProductList({ products }: { products: Product[] }) {
 	if (products.length === 0) {
