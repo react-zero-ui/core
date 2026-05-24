@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Lightbulb } from "lucide-react";
 import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
+import { SITE_SLUGS } from "@/app/config/site-config";
 import { RealWorldDemo } from "./_components";
 
-export const metadata = { title: "Real-world demo · React Zero-UI", description: "Searchable list filtering - React useState vs Zero-UI attribute filtering." };
+export const metadata: Metadata = {
+	title: "Real-world demo · React Zero-UI",
+	description: "Searchable list filtering - React useState vs Zero-UI attribute filtering.",
+	alternates: { canonical: SITE_SLUGS.realWorldDemo },
+};
 
 export default function RealWorldDemoPage() {
 	return (
@@ -20,6 +26,11 @@ export default function RealWorldDemoPage() {
 					React usually filters by deriving a new array and reconciling a new list. React Zero-UI can keep the rows mounted, flip{" "}
 					<code className="font-mono text-sm">data-*</code> attributes, and let CSS hide the non-matches.
 				</p>
+			</div>
+
+			<div className="border-fd-primary/25 bg-fd-primary/5 text-fd-muted-foreground mb-6 flex max-w-2xl gap-3 rounded-xl border p-4 text-sm">
+				<Lightbulb className="text-fd-primary mt-0.5 h-4 w-4 shrink-0" />
+				<p>Type a search in both panes and switch categories. React re-renders the list; Zero-UI just toggles visibility.</p>
 			</div>
 
 			<RealWorldDemo />

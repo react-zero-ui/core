@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { useUI } from "@react-zero-ui/core";
 import { RenderCounter } from "./RenderCounter";
 import { RenderHighlight } from "./RenderHighlight";
+import { Moon, Sun } from "lucide-react";
 
 export function ZeroState() {
 	const [, setTheme] = useUI<"light" | "dark">("perf-theme", "light");
@@ -52,16 +53,16 @@ function ThemeSwitcher({ setTheme }: { setTheme: (t: "light" | "dark") => void }
 			name="ThemeSwitcher"
 			className="flex justify-center gap-2">
 			<button
+				className="perf-theme-dark:bg-white perf-theme-dark:text-gray-900 perf-theme-light:bg-gray-200 perf-theme-light:text-gray-600 rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105 flex items-center gap-2"
 				aria-label="Set light theme"
-				onClick={() => setTheme("light")}
-				className="perf-theme-light:bg-gray-900 perf-theme-light:text-white perf-theme-dark:bg-gray-700 perf-theme-dark:text-gray-200 rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105">
-				☀️ Light
+				onClick={() => setTheme("light")}>
+				<Sun className="h-4 w-4" /> Light
 			</button>
 			<button
+				className="perf-theme-light:bg-gray-900 perf-theme-light:text-white perf-theme-dark:bg-gray-700 perf-theme-dark:text-gray-200 rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105 flex items-center gap-2"
 				aria-label="Set dark theme"
-				onClick={() => setTheme("dark")}
-				className="perf-theme-dark:bg-white perf-theme-dark:text-gray-900 perf-theme-light:bg-gray-200 perf-theme-light:text-gray-600 rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105">
-				🌙 Dark
+				onClick={() => setTheme("dark")}>
+				<Moon className="h-4 w-4" /> Dark
 			</button>
 		</RenderHighlight>
 	);

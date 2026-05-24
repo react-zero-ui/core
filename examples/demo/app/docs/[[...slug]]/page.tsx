@@ -9,6 +9,7 @@ import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/mdx-components';
 import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
+import { SITE_SLUGS } from '@/app/config/site-config';
 
 export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const params = await props.params;
@@ -43,10 +44,18 @@ export async function generateMetadata(
   const params = await props.params;
   const page = source.getPage(params.slug);
   if (!page) notFound();
+  const canonical = Object.values(SITE_SLUGS.docs).find(
+    (slug) => slug === page.url,
+  );
 
   return {
     title: page.data.title,
     description: page.data.description,
+    alternates: {
+      canonical: canonical ?? (page.slugs.length
+        ? `${SITE_SLUGS.docs.index}/${page.slugs.join('/')}`
+        : SITE_SLUGS.docs.index),
+    },
     openGraph: {
       images: getPageImage(page).url,
     },

@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { RenderCounter } from "./RenderCounter";
 import { RenderHighlight } from "./RenderHighlight";
+import { Moon, Sun } from "lucide-react";
 
 type Theme = "light" | "dark";
 type Accent = "violet" | "emerald" | "amber";
@@ -71,16 +72,16 @@ function ThemeSwitcher({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme)
 			name="ThemeSwitcher"
 			className="flex justify-center gap-2">
 			<button
+				className={`rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105 flex items-center gap-2 ${theme === "dark" ? "bg-white text-gray-900" : "bg-gray-200 text-gray-600"}`}
 				aria-label="Set light theme"
-				onClick={() => setTheme("light")}
-				className={`rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105 ${theme === "light" ? "bg-gray-900 text-white" : "bg-gray-700 text-gray-200"}`}>
-				☀️ Light
+				onClick={() => setTheme("light")}>
+				<Sun className="h-4 w-4" /> Light
 			</button>
 			<button
+				className={`rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105 flex items-center gap-2 ${theme === "light" ? "bg-gray-900 text-white" : "bg-gray-700 text-gray-200"}`}
 				aria-label="Set dark theme"
-				onClick={() => setTheme("dark")}
-				className={`rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105 ${theme === "dark" ? "bg-white text-gray-900" : "bg-gray-200 text-gray-600"}`}>
-				🌙 Dark
+				onClick={() => setTheme("dark")}>
+				<Moon className="h-4 w-4" /> Dark
 			</button>
 		</RenderHighlight>
 	);

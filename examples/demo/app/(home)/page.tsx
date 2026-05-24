@@ -30,10 +30,14 @@
 - Support performance and Tailwind intent with proof sections, generated variants, and the existing benchmark/demo links.
 */
 
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Zap, Layers, Feather, Github } from "lucide-react";
 import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
 import { Comparison } from "./_components/Comparison";
+import { SITE_CONFIG, SITE_SLUGS } from "@/app/config/site-config";
+
+export const metadata: Metadata = { title: SITE_CONFIG.title, description: SITE_CONFIG.description, alternates: { canonical: SITE_SLUGS.home } };
 
 export default function HomePage() {
 	return (
@@ -162,7 +166,7 @@ function Demo() {
 			</div>
 			<Comparison />
 
-			<div className="mt-8">
+			<div className="mt-8 w-fit mx-auto">
 				<Link
 					href="/demo/real-world"
 					className="border-fd-border hover:border-fd-primary hover:bg-fd-accent group flex items-center justify-between gap-3 rounded-lg border p-4 transition-colors">

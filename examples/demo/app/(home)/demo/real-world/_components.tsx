@@ -37,7 +37,7 @@ function ReactPane() {
 
 	return (
 		<Pane
-			className="max-md:order-2 "
+			className="max-lg:order-2 "
 			title="React useState"
 			subtitle="Search and category live in React state, every keystroke re-renders this pane. O(n) re-renders."
 			renderCount={renderCount.current}>
