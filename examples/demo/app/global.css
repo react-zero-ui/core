@@ -62,7 +62,10 @@
 /* .dark {
 	--color-fd-primary: var(--color-purple-500);
 } */
+
 /* 
+
+Alt color theme
 @theme {
 	--color-fd-background: hsl(0, 0%, 100%);
 	--color-fd-foreground: hsl(240, 6%, 25%);
@@ -113,3 +116,56 @@
 	--color-fd-accent-foreground: hsl(259, 90%, 96%);
 	--color-fd-ring: hsl(240, 6%, 54.9%);
 } */
+/* 
+@theme {
+	--color-fd-background: hsl(0, 0%, 100%);
+	--color-fd-foreground: hsl(222, 47%, 11%);
+
+	--color-fd-muted: hsl(210, 40%, 97%);
+	--color-fd-muted-foreground: hsl(215, 16%, 47%);
+
+	--color-fd-popover: hsl(0, 0%, 100%);
+
+	--color-fd-popover-foreground: hsl(222, 47%, 11%);
+
+	--color-fd-card: hsl(0, 0%, 100%);
+	--color-fd-card-foreground: hsl(222, 47%, 11%);
+
+	--color-fd-border: hsl(214, 32%, 91%);
+
+	--color-fd-primary: hsl(262, 83%, 58%);
+	--color-fd-primary-foreground: hsl(0, 0%, 100%);
+
+	--color-fd-secondary: hsl(210, 40%, 96%);
+	--color-fd-secondary-foreground: hsl(222, 47%, 11%);
+
+	--color-fd-accent: hsl(210, 40%, 94%);
+	--color-fd-accent-foreground: hsl(222, 47%, 11%);
+
+	--color-fd-ring: hsl(262, 83%, 58%);
+
+	--color-fd-info: oklch(62.3% 0.214 259.815);
+	--color-fd-warning: oklch(76.9% 0.188 70.08);
+	--color-fd-error: oklch(63.7% 0.237 25.331);
+	--color-fd-success: oklch(72.3% 0.219 149.579);
+}
+
+.dark {
+	--color-fd-background: hsl(222, 47%, 6%);
+	--color-fd-foreground: hsl(210, 40%, 98%);
+	--color-fd-muted: hsl(217, 33%, 12%);
+	--color-fd-muted-foreground: hsl(215, 20%, 65%);
+	--color-fd-popover: hsl(222, 47%, 7%);
+	--color-fd-popover-foreground: hsl(210, 40%, 98%);
+	--color-fd-card: hsl(222, 47%, 8%);
+	--color-fd-card-foreground: hsl(210, 40%, 98%);
+	--color-fd-border: hsl(217, 33%, 17%);
+	--color-fd-primary: hsl(263, 90%, 74%);
+	--color-fd-primary-foreground: hsl(222, 47%, 11%);
+	--color-fd-secondary: hsl(217, 33%, 12%);
+	--color-fd-secondary-foreground: hsl(210, 40%, 98%);
+	--color-fd-accent: hsl(217, 33%, 14%);
+	--color-fd-accent-foreground: hsl(210, 40%, 98%);
+	--color-fd-ring: hsl(263, 90%, 74%);
+}
+ */
