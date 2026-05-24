@@ -50,7 +50,7 @@ function ReactPane() {
 					placeholder="Search products..."
 					value={query}
 					onChange={(event) => setQuery(event.target.value)}
-					className="border-fd-border bg-fd-background focus:border-fd-primary w-full rounded-md border px-3 py-2 text-sm outline-none"
+					className="border-fd-border bg-fd-background focus:border-fd-primary w-full rounded-md border px-3 py-2 text-sm outline-none max-sm:text-[16px]"
 				/>
 				<CategoryButtons
 					value={category}

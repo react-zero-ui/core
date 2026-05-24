@@ -10,19 +10,19 @@ export function Comparison() {
 
 	return (
 		<div className="mx-auto w-full max-w-xl">
-			<div className="relative flex overflow-hidden rounded-t-lg border border-fd-border text-white">
-				<div className="perf-active-zero:left-0 perf-active-react:left-1/2 perf-active-zero:bg-gradient-to-r perf-active-zero:from-purple-600 perf-active-zero:to-blue-600 perf-active-react:bg-gradient-to-l perf-active-react:from-[#58C4E0] perf-active-react:to-blue-500 absolute bottom-0 left-0 z-0 h-full w-1/2 rounded-t-lg transition-all duration-300" />
+			<div className="relative flex overflow-hidden rounded-t-lg border border-fd-border">
+				<div className="perf-active-zero:left-0 perf-active-react:left-1/2 perf-active-zero:bg-fd-primary perf-active-react:bg-[#cba8ff] absolute bottom-0 left-0 z-0 h-full w-1/2 rounded-t-lg transition-all duration-300" />
 				<button
 					type="button"
 					onClick={() => setActive("zero")}
-					className="perf-active-zero:text-white relative z-10 flex flex-1 items-center justify-center gap-2 rounded-tl-lg px-6 py-4 font-semibold text-gray-400 transition-colors duration-300">
+					className="perf-active-zero:text-fd-primary-foreground text-fd-muted-foreground relative z-10 flex flex-1 items-center justify-center gap-2 rounded-tl-lg px-6 py-4 font-semibold transition-colors duration-300">
 					<Zap className="h-4 w-4" />
 					Zero UI
 				</button>
 				<button
 					type="button"
 					onClick={() => setActive("react")}
-					className="perf-active-react:text-white relative z-10 flex flex-1 items-center justify-center gap-2 rounded-tr-lg px-6 py-4 font-semibold text-gray-400 transition-colors duration-300">
+					className="perf-active-react:text-zinc-900 text-fd-muted-foreground relative z-10 flex flex-1 items-center justify-center gap-2 rounded-tr-lg px-6 py-4 font-semibold transition-colors duration-300">
 					<Atom className="h-4 w-4" />
 					React State
 				</button>

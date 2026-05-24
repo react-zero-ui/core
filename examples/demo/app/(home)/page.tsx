@@ -43,32 +43,25 @@ export const metadata: Metadata = { title: { absolute: SITE_CONFIG.title }, desc
 
 export default function HomePage() {
 	return (
-		<main className="flex flex-1 flex-col relative">
+		<main className="flex flex-1 flex-col  ">
 			<Hero />
 			<MentalModel />
 			<Demo />
 			<WhyFast />
-			<SocialProof />
-			<a
-				href="https://www.serbyte.net/"
-				className="absolute bottom-4 left-4 text-fd-muted-foreground text-xs max-lg:left-1/2 max-lg:-translate-x-1/2 text-nowrap">
-				Built by Serbyte Web Design & Development
-			</a>
 		</main>
 	);
 }
 
 function Hero() {
 	return (
-		<section className="mx-auto w-full max-w-5xl px-6 pt-20 pb-16 text-center sm:pt-28">
+		<section className="mx-auto w-full max-w-5xl px-6 pt-8 pb-16 text-center sm:pt-16">
 			<div className="text-fd-muted-foreground mb-6 font-mono text-xs">Zero runtime · Zero re-renders · ~350 bytes</div>
 			<h1 className="mb-5 text-4xl font-bold tracking-tight sm:text-6xl capitalize">
 				React UI state management, <br className="hidden sm:block" />
 				powered by <span className="text-fd-primary">CSS</span>.
 			</h1>
 			<p className="text-fd-muted-foreground mx-auto mb-8 max-w-2xl text-lg">
-				React Zero-UI <code>pre-renders</code> UI state at build time, then updates the interface by flipping <code>data-*</code> attributes. This gives you
-				built-in global state without providers, no Context, no React re-renders.
+				<code>pre-render</code> UI state at build time, update interfaces by flipping <code>data-*</code> attributes.
 			</p>
 
 			<CopyCommand
@@ -80,7 +73,7 @@ function Hero() {
 				<Link
 					href="/docs"
 					className="bg-fd-primary text-fd-primary-foreground hover:bg-fd-primary/90 inline-flex items-center gap-2 rounded-md px-5 py-2.5 font-medium transition-colors">
-					Read the Docs <ArrowRight className="h-4 w-4" />
+					Read the Docs <ArrowRight className="h-4 w-4 max-sm:hidden" />
 				</Link>
 				<Link
 					href="/demo/real-world"
@@ -141,7 +134,7 @@ function CodeCard({ label, tone, code }: { label: string; tone: "muted" | "prima
 	return (
 		<div className={"flex flex-col gap-3 min-w-0 "}>
 			<div className={cn("text-fd-muted-foreground text-xs font-medium tracking-wide uppercase", tone === "primary" && "text-fd-primary")}>{label}</div>
-			<div className={cn(tone === "primary" && "ring-fd-primary/40 ring-2 rounded-lg")}>
+			<div className={cn(tone === "primary" && "ring-fd-primary/40 ring-2 rounded-xl")}>
 				<DynamicCodeBlock
 					lang="tsx"
 					code={code}
@@ -214,37 +207,6 @@ function WhyFast() {
 						<p className="text-fd-muted-foreground text-sm">{c.body}</p>
 					</div>
 				))}
-			</div>
-		</section>
-	);
-}
-
-function SocialProof() {
-	return (
-		<section className="mx-auto w-full max-w-5xl px-6 pt-16 pb-24 text-center">
-			<h2 className="mb-3 text-2xl font-semibold tracking-tight">Open source. Tiny. Tested.</h2>
-			<p className="text-fd-muted-foreground mx-auto mb-6 max-w-xl">MIT licensed. Production-ready core, experimental SSR runtime, and a growing demo suite.</p>
-			<div className="flex flex-wrap items-center justify-center gap-3">
-				<a
-					href="https://github.com/react-zero-ui/core"
-					target="_blank"
-					rel="nofollow noopener noreferrer"
-					className="border-fd-border hover:bg-fd-accent inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
-					<Github className="h-4 w-4" />
-					GitHub
-				</a>
-				<a
-					href="https://www.npmjs.com/package/@react-zero-ui/core"
-					target="_blank"
-					rel="nofollow noopener noreferrer"
-					className="border-fd-border hover:bg-fd-accent inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
-					npm
-				</a>
-				<Link
-					href="/docs/faq"
-					className="border-fd-border hover:bg-fd-accent inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
-					FAQ
-				</Link>
 			</div>
 		</section>
 	);

@@ -34,43 +34,6 @@ export default function RealWorldDemoPage() {
 			</div>
 
 			<RealWorldDemo />
-
-			<div className="border-fd-border mt-12 grid gap-6 border-t pt-8 sm:grid-cols-2">
-				<div>
-					<h2 className="mb-2 text-base font-semibold">The code that matters</h2>
-					<DynamicCodeBlock
-						lang="tsx"
-						code={`const [mode, setMode] = useScopedUI('filter-search', 'idle');
-
-function search(query: string) {
-  setMode(query ? 'active' : 'idle');
-
-  rows.forEach((row) => {
-    row.dataset.searchMatch =
-      row.dataset.searchText?.includes(query)
-        ? 'true'
-        : 'false';
-  });
-}
-
-<div ref={setMode.ref} data-filter-search={mode}>
-<li
-  data-search-match="true"
-  className="filter-search-active:data-[search-match=false]:hidden"
-/>
-</div>`}
-					/>
-				</div>
-				<div>
-					<h2 className="mb-2 text-base font-semibold">When to reach for this</h2>
-					<ul className="text-fd-muted-foreground space-y-2 text-sm">
-						<li>- The list is already loaded and filtering is purely presentational.</li>
-						<li>- Search text is unbounded, so JS marks matching rows.</li>
-						<li>- Finite UI states like active search, category, and empty state flip data attributes.</li>
-						<li>- The expensive tree stays mounted while CSS controls visibility.</li>
-					</ul>
-				</div>
-			</div>
 		</main>
 	);
 }

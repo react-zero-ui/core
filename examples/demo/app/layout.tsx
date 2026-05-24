@@ -1,11 +1,12 @@
 import "@/app/global.css";
 import { RootProvider } from "fumadocs-ui/provider/next";
-import { Inter } from "next/font/google";
+import { Inter_Tight } from "next/font/google";
 import { bodyAttributes } from "@zero-ui/attributes";
 import { DOMAIN_URL, SITE_CONFIG, SITE_NAP } from "./config/site-config";
 import { siteGraph } from "./config/schemas";
+import { Footer } from "./(home)/_components/Footer";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter_Tight({ subsets: ["latin"] });
 
 export const metadata = {
 	metadataBase: new URL(DOMAIN_URL),
@@ -28,7 +29,7 @@ export default function Layout({ children }: LayoutProps<"/">) {
 			lang="en"
 			suppressHydrationWarning>
 			<body
-				className={`flex flex-col ${inter.className}`}
+				className={`flex subpixel-antialiased flex-col ${inter.className}`}
 				{...bodyAttributes}>
 				<script
 					type="application/ld+json"
