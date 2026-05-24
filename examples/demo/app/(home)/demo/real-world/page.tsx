@@ -6,8 +6,8 @@ import { SITE_SLUGS } from "@/app/config/site-config";
 import { RealWorldDemo } from "./_components";
 
 export const metadata: Metadata = {
-	title: "Real-world demo · React Zero-UI",
-	description: "Searchable list filtering - React useState vs Zero-UI attribute filtering.",
+	title: "React Re-render Performance Demo",
+	description: "Compare React useState list filtering with Zero-UI attribute filtering to see how UI state can update without re-rendering the list.",
 	alternates: { canonical: SITE_SLUGS.realWorldDemo },
 };
 

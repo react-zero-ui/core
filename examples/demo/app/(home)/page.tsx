@@ -37,16 +37,21 @@ import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
 import { Comparison } from "./_components/Comparison";
 import { SITE_CONFIG, SITE_SLUGS } from "@/app/config/site-config";
 
-export const metadata: Metadata = { title: SITE_CONFIG.title, description: SITE_CONFIG.description, alternates: { canonical: SITE_SLUGS.home } };
+export const metadata: Metadata = { title: { absolute: SITE_CONFIG.title }, description: SITE_CONFIG.description, alternates: { canonical: SITE_SLUGS.home } };
 
 export default function HomePage() {
 	return (
-		<main className="flex flex-1 flex-col">
+		<main className="flex flex-1 flex-col relative">
 			<Hero />
 			<MentalModel />
 			<Demo />
 			<WhyFast />
 			<SocialProof />
+			<a
+				href="serbyte.net"
+				className="absolute bottom-4 left-4 text-fd-muted-foreground text-xs max-lg:left-1/2 max-lg:-translate-x-[50%]">
+				Built by Serbyte Web Design & Development
+			</a>
 		</main>
 	);
 }
@@ -54,17 +59,14 @@ export default function HomePage() {
 function Hero() {
 	return (
 		<section className="mx-auto w-full max-w-5xl px-6 pt-20 pb-16 text-center sm:pt-28">
-			<div className="border-fd-border text-fd-muted-foreground mb-6 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs">
-				<span className="bg-fd-primary inline-block h-1.5 w-1.5 rounded-full" />
-				Zero runtime · Zero re-renders · ~350 bytes
-			</div>
+			<div className="text-fd-muted-foreground mb-6 font-mono text-xs">Zero runtime · Zero re-renders · ~350 bytes</div>
 			<h1 className="mb-5 text-4xl font-bold tracking-tight sm:text-6xl">
 				Ultra-fast React UI state, <br className="hidden sm:block" />
 				powered by <span className="text-fd-primary">CSS</span>.
 			</h1>
 			<p className="text-fd-muted-foreground mx-auto mb-8 max-w-2xl text-lg">
-				React Zero-UI <em className="font-medium">pre-renders</em> UI state at build time and flips <code className="font-mono text-sm">data-*</code> attributes
-				on the fly, giving you global state without providers, re-renders, or hydration headaches.
+				React Zero-UI <em className="font-medium text-fd-primary">pre-renders</em> UI state at build time, giving you built-in global state without providers,
+				re-renders, or hydration headaches.
 			</p>
 
 			<div className="mx-auto mb-8 inline-flex items-center gap-3 rounded-lg border border-fd-border bg-fd-card px-4 py-2 font-mono text-sm">
@@ -123,13 +125,13 @@ return (
 					tone="primary"
 					code={`const [, setTheme] = useUI('theme', 'light');
 
-// No re-renders. Just flips data-theme on <body>.
+// Zero re-renders.
 return (
   <div className="theme-light:bg-white
                   theme-dark:bg-gray-900">
-    <button onClick={() =>
-      setTheme((p) =>
-        p === 'light' ? 'dark' : 'light')
+ <button onClick={(theme) =>
+      setTheme(theme === 'light'
+        ? 'dark' : 'light')
     }>
       Toggle
     </button>
@@ -195,8 +197,8 @@ function WhyFast() {
 		},
 		{
 			icon: <Layers className="h-5 w-5" />,
-			title: "Build-time CSS",
-			body: "Tailwind variants are generated for every possible state at build time. Switching states is just changing a selector match.",
+			title: 'Build time "pre-rendering"',
+			body: "Zero-UI generates all possible UI states at build time vs re-rendering them on the fly.",
 		},
 	];
 
@@ -229,7 +231,7 @@ function SocialProof() {
 				<a
 					href="https://github.com/react-zero-ui/core"
 					target="_blank"
-					rel="noreferrer"
+					rel="nofollow noopener noreferrer"
 					className="border-fd-border hover:bg-fd-accent inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
 					<Github className="h-4 w-4" />
 					GitHub
@@ -237,7 +239,7 @@ function SocialProof() {
 				<a
 					href="https://www.npmjs.com/package/@react-zero-ui/core"
 					target="_blank"
-					rel="noreferrer"
+					rel="nofollow noopener noreferrer"
 					className="border-fd-border hover:bg-fd-accent inline-flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors">
 					npm
 				</a>

@@ -2,8 +2,8 @@ export const DOMAIN_URL = process.env.NODE_ENV === "production" ? "https://zero-
 
 export const SITE_CONFIG = {
 	// This information is also used in the metadata for the home page and schema
-	title: "React Zero-UI",
-	description: "Ultra-fast React UI state management with zero runtime, zero React re-renders, and generated Tailwind variants.",
+	title: "React UI State Management Without Re-renders | React Zero-UI",
+	description: "React Zero-UI is a CSS-powered React state manager for UI state with zero React re-renders, no providers, and generated Tailwind variants.",
 } as const;
 
 export const SITE_NAP = {

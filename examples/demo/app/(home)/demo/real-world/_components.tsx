@@ -125,7 +125,7 @@ function ZeroUiPane() {
 	return (
 		<RenderHighlight name="ZeroUiPane">
 			<Pane
-				title="Zero-UI attribute filter"
+				title="Zero re-render Search & Filter"
 				subtitle="Search mode, category, and empty state flip data-* attrs; rows stay mounted. Zero re-renders."
 				renderCount={renderCount.current}>
 				<RenderHighlight

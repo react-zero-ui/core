@@ -10,7 +10,7 @@ export function Comparison() {
 
 	return (
 		<div className="mx-auto w-full max-w-xl">
-			<div className="relative flex overflow-hidden rounded-t-lg border border-gray-200 text-white">
+			<div className="relative flex overflow-hidden rounded-t-lg border border-fd-border text-white">
 				<div className="perf-active-zero:left-0 perf-active-react:left-1/2 perf-active-zero:bg-gradient-to-r perf-active-zero:from-purple-600 perf-active-zero:to-blue-600 perf-active-react:bg-gradient-to-l perf-active-react:from-[#58C4E0] perf-active-react:to-blue-500 absolute bottom-0 left-0 z-0 h-full w-1/2 rounded-t-lg transition-all duration-300" />
 				<button
 					type="button"
@@ -28,7 +28,7 @@ export function Comparison() {
 				</button>
 			</div>
 
-			<div className="h-full w-full overflow-hidden rounded-b-lg border border-t-0 border-gray-200">
+			<div className="h-full w-full overflow-hidden rounded-b-lg border border-t-0 border-fd-border">
 				<div className="perf-active-zero:translate-x-0 perf-active-react:translate-x-[-50%] grid h-full w-[200%] grid-cols-2 items-center justify-start transition-transform duration-300">
 					<ZeroState />
 					<ReactState />
