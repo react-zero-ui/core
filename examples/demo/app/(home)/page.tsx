@@ -48,7 +48,7 @@ export default function HomePage() {
 			<WhyFast />
 			<SocialProof />
 			<a
-				href="serbyte.net"
+				href="https://www.serbyte.net/"
 				className="absolute bottom-4 left-4 text-fd-muted-foreground text-xs max-lg:left-1/2 max-lg:-translate-x-[50%]">
 				Built by Serbyte Web Design & Development
 			</a>
@@ -129,8 +129,8 @@ return (
 return (
   <div className="theme-light:bg-white
                   theme-dark:bg-gray-900">
- <button onClick={(theme) =>
-      setTheme(theme === 'light'
+ <button onClick={(prev) =>
+      setTheme(prev === 'light'
         ? 'dark' : 'light')
     }>
       Toggle

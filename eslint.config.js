@@ -36,7 +36,7 @@ const browserGlobals = {
 
 export default [
 	/* 1 - never lint generated / vendor files */
-	{ ignores: ["**/node_modules/**", "**/dist/**", "**/.next/**", "eslint.config.js", "./packages/core/__tests__/unit/fixtures"] },
+	{ ignores: ["**/node_modules/**", "**/dist/**", "**/.next/**", "**/.source/**", "eslint.config.js", "./packages/core/__tests__/unit/fixtures"] },
 
 	/* 2 - baseline rules */
 	js.configs.recommended,
@@ -66,6 +66,13 @@ export default [
 			"import/named": "error",
 			"import/default": "error",
 			"import/no-absolute-path": "error",
+		},
+	},
+
+	{
+		files: ["examples/demo/next.config.mjs"],
+		rules: {
+			"import/no-unresolved": "off",
 		},
 	},
 
