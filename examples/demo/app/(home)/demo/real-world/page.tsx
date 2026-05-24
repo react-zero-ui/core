@@ -1,41 +1,38 @@
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
-import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock';
-import { RealWorldDemo } from './_components';
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
+import { RealWorldDemo } from "./_components";
 
-export const metadata = {
-  title: 'Real-world demo · React Zero-UI',
-  description: 'Searchable list filtering — React useState vs Zero-UI attribute filtering.',
-};
+export const metadata = { title: "Real-world demo · React Zero-UI", description: "Searchable list filtering - React useState vs Zero-UI attribute filtering." };
 
 export default function RealWorldDemoPage() {
-  return (
-    <main className="mx-auto w-full max-w-6xl px-6 py-12">
-      <div className="mb-10">
-        <Link
-          href="/"
-          className="text-fd-muted-foreground hover:text-fd-foreground mb-4 inline-flex items-center gap-1.5 text-sm transition-colors">
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Home
-        </Link>
-        <h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">Search without re-rendering the list.</h1>
-        <p className="text-fd-muted-foreground max-w-2xl text-base">
-          React usually filters by deriving a new array and reconciling a new list. React Zero-UI can keep the rows mounted, flip{' '}
-          <code className="font-mono text-sm">data-*</code> attributes, and let CSS hide the non-matches.
-        </p>
-      </div>
+	return (
+		<main className="mx-auto w-full max-w-6xl px-6 py-12">
+			<div className="mb-10">
+				<Link
+					href="/"
+					className="text-fd-muted-foreground hover:text-fd-foreground mb-4 inline-flex items-center gap-1.5 text-sm transition-colors">
+					<ArrowLeft className="h-3.5 w-3.5" />
+					Home
+				</Link>
+				<h1 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">Search without re-rendering the list.</h1>
+				<p className="text-fd-muted-foreground max-w-2xl text-base">
+					React usually filters by deriving a new array and reconciling a new list. React Zero-UI can keep the rows mounted, flip{" "}
+					<code className="font-mono text-sm">data-*</code> attributes, and let CSS hide the non-matches.
+				</p>
+			</div>
 
-      <RealWorldDemo />
+			<RealWorldDemo />
 
-      <div className="border-fd-border mt-12 grid gap-6 border-t pt-8 sm:grid-cols-2">
-        <div>
-          <h2 className="mb-2 text-base font-semibold">The code that matters</h2>
-          <DynamicCodeBlock
-            lang="tsx"
-            code={`const [, setSearchMode] = useUI('demo-filter-search', 'idle');
+			<div className="border-fd-border mt-12 grid gap-6 border-t pt-8 sm:grid-cols-2">
+				<div>
+					<h2 className="mb-2 text-base font-semibold">The code that matters</h2>
+					<DynamicCodeBlock
+						lang="tsx"
+						code={`const [mode, setMode] = useScopedUI('filter-search', 'idle');
 
 function search(query: string) {
-  setSearchMode(query ? 'active' : 'idle');
+  setMode(query ? 'active' : 'idle');
 
   rows.forEach((row) => {
     row.dataset.searchMatch =
@@ -45,22 +42,24 @@ function search(query: string) {
   });
 }
 
+<div ref={setMode.ref} data-filter-search={mode}>
 <li
   data-search-match="true"
-  className="demo-filter-search-active:data-[search-match=false]:hidden"
-/>`}
-          />
-        </div>
-        <div>
-          <h2 className="mb-2 text-base font-semibold">When to reach for this</h2>
-          <ul className="text-fd-muted-foreground space-y-2 text-sm">
-            <li>— The list is already loaded and filtering is purely presentational.</li>
-            <li>— Search text is unbounded, so JS marks matching rows.</li>
-            <li>— Finite UI states like active search, category, and empty state flip data attributes.</li>
-            <li>— The expensive tree stays mounted while CSS controls visibility.</li>
-          </ul>
-        </div>
-      </div>
-    </main>
-  );
+  className="filter-search-active:data-[search-match=false]:hidden"
+/>
+</div>`}
+					/>
+				</div>
+				<div>
+					<h2 className="mb-2 text-base font-semibold">When to reach for this</h2>
+					<ul className="text-fd-muted-foreground space-y-2 text-sm">
+						<li>- The list is already loaded and filtering is purely presentational.</li>
+						<li>- Search text is unbounded, so JS marks matching rows.</li>
+						<li>- Finite UI states like active search, category, and empty state flip data attributes.</li>
+						<li>- The expensive tree stays mounted while CSS controls visibility.</li>
+					</ul>
+				</div>
+			</div>
+		</main>
+	);
 }

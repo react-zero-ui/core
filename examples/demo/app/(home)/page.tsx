@@ -27,7 +27,7 @@ function Hero() {
 				powered by <span className="text-fd-primary">CSS</span>.
 			</h1>
 			<p className="text-fd-muted-foreground mx-auto mb-8 max-w-2xl text-lg">
-				React Zero-UI pre-renders every UI state at build time and flips <code className="font-mono text-sm">data-*</code> attributes on the fly — giving you
+				React Zero-UI pre-renders every UI state at build time and flips <code className="font-mono text-sm">data-*</code> attributes on the fly - giving you
 				global state without providers, re-renders, or hydration headaches.
 			</p>
 
@@ -58,7 +58,7 @@ function MentalModel() {
 			<div className="mb-10 text-center">
 				<h2 className="mb-3 text-3xl font-semibold tracking-tight sm:text-4xl">Presentation state is not data state.</h2>
 				<p className="text-fd-muted-foreground mx-auto max-w-2xl">
-					Themes, modals, sidebars, accents — none of that needs to live in React. Zero-UI moves presentation state into the DOM where it belongs, while you
+					Themes, modals, sidebars, accents - none of that needs to live in React. Zero-UI moves presentation state into the DOM where it belongs, while you
 					keep React for the things React is good at.
 				</p>
 			</div>
@@ -150,7 +150,7 @@ function WhyFast() {
 		{
 			icon: <Zap className="h-5 w-5" />,
 			title: "Zero re-renders",
-			body: "State changes flip DOM attributes. React stays completely out of the loop — no reconciliation, no render cycles.",
+			body: "State changes flip DOM attributes. React stays completely out of the loop - no reconciliation, no render cycles.",
 		},
 		{
 			icon: <Feather className="h-5 w-5" />,

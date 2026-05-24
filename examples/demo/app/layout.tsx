@@ -10,7 +10,7 @@ export const metadata = { metadataBase: new URL(DOMAIN_URL), title: { default: S
 
 export default function Layout({ children }: LayoutProps<"/">) {
 	return (
-		<html lang="en">
+		<html lang="en" suppressHydrationWarning>
 			<body
 				className={`flex flex-col min-h-screen ${inter.className}`}
 				{...bodyAttributes}>

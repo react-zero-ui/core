@@ -1,8 +1,8 @@
 "use client";
 
 import type { ChangeEvent, ReactNode } from "react";
-import { useRef, useState } from "react";
-import { useUI } from "@react-zero-ui/core";
+import { useCallback, useRef, useState } from "react";
+import { useScopedUI } from "@react-zero-ui/core";
 import { categories, products, type Category, type Product } from "./_data";
 
 type CategoryFilter = Category | "all";
@@ -62,15 +62,24 @@ function ReactPane() {
 }
 
 function ZeroUiPane() {
-	const [, setSearchMode] = useUI<"idle" | "active">("demo-filter-search", "idle");
-	const [, setCategory] = useUI<CategoryFilter>("demo-filter-category", "all");
-	const [, setResults] = useUI<"has-results" | "empty">("demo-filter-results", "has-results");
+	const [searchMode, setSearchMode] = useScopedUI<"idle" | "active">("filter-search", "idle");
+	const [filterCategory, setCategory] = useScopedUI<CategoryFilter>("demo-filter-category", "all");
+	const [filterResults, setResults] = useScopedUI<"has-results" | "empty">("demo-filter-results", "has-results");
 	const inputRef = useRef<HTMLInputElement>(null);
 	const listRef = useRef<HTMLUListElement>(null);
 	const countRef = useRef<HTMLParagraphElement>(null);
 	const categoryRef = useRef<CategoryFilter>("all");
 	const renderCount = useRef(0);
 	renderCount.current += 1;
+
+	const attachFilterScope = useCallback(
+		(node: HTMLDivElement | null) => {
+			setSearchMode.ref?.(node);
+			setCategory.ref?.(node);
+			setResults.ref?.(node);
+		},
+		[setSearchMode, setCategory, setResults]
+	);
 
 	const applyFilter = (rawQuery: string, nextCategory: CategoryFilter) => {
 		const query = rawQuery.trim().toLowerCase();
@@ -113,7 +122,12 @@ function ZeroUiPane() {
 			title="Zero-UI attribute filter"
 			subtitle="The input is uncontrolled. Search mode, category, and empty state flip data-* attrs; rows stay mounted."
 			renderCount={renderCount.current}>
-			<div className="space-y-4">
+			<div
+				ref={attachFilterScope}
+				data-filter-search={searchMode}
+				data-demo-filter-category={filterCategory}
+				data-demo-filter-results={filterResults}
+				className="space-y-4">
 				<div className="relative">
 					<input
 						ref={inputRef}
@@ -127,7 +141,7 @@ function ZeroUiPane() {
 						type="button"
 						aria-label="Clear Zero-UI search"
 						onClick={handleClear}
-						className="demo-filter-search-active:inline-flex text-fd-muted-foreground hover:text-fd-foreground absolute top-1/2 right-3 hidden -translate-y-1/2 text-xs font-medium transition-colors">
+						className="filter-search-active:inline-flex text-fd-muted-foreground hover:text-fd-foreground absolute top-1/2 right-3 hidden -translate-y-1/2 text-xs font-medium transition-colors">
 						Clear
 					</button>
 				</div>
@@ -147,7 +161,7 @@ function ZeroUiPane() {
 							data-category={product.category}
 							data-search-match="true"
 							data-search-text={product.name.toLowerCase()}
-							className="demo-filter-category-books:[&:not([data-category=books])]:hidden demo-filter-category-clothing:[&:not([data-category=clothing])]:hidden demo-filter-category-electronics:[&:not([data-category=electronics])]:hidden demo-filter-search-active:data-[search-match=false]:hidden flex items-center justify-between gap-3 py-2.5 text-sm">
+							className="demo-filter-category-books:[&:not([data-category=books])]:hidden demo-filter-category-clothing:[&:not([data-category=clothing])]:hidden demo-filter-category-electronics:[&:not([data-category=electronics])]:hidden filter-search-active:data-[search-match=false]:hidden flex items-center justify-between gap-3 py-2.5 text-sm">
 							<div>
 								<div className="font-medium">{product.name}</div>
 								<div className="text-fd-muted-foreground text-xs capitalize">{product.category}</div>
