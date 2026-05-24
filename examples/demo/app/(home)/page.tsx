@@ -62,12 +62,13 @@ function Hero() {
 	return (
 		<section className="mx-auto w-full max-w-5xl px-6 pt-20 pb-16 text-center sm:pt-28">
 			<div className="text-fd-muted-foreground mb-6 font-mono text-xs">Zero runtime · Zero re-renders · ~350 bytes</div>
-			<h1 className="mb-5 text-4xl font-bold tracking-tight sm:text-6xl">
-				Ultra-fast React state management, <br className="hidden sm:block" />
+			<h1 className="mb-5 text-4xl font-bold tracking-tight sm:text-6xl capitalize">
+				React UI state management, <br className="hidden sm:block" />
 				powered by <span className="text-fd-primary">CSS</span>.
 			</h1>
 			<p className="text-fd-muted-foreground mx-auto mb-8 max-w-2xl text-lg">
-				React Zero-UI <code>pre-renders</code> UI state at build time, giving you built-in global state without providers, re-renders, or hydration headaches.
+				React Zero-UI <code>pre-renders</code> UI state at build time, then updates the interface by flipping <code>data-*</code> attributes. This gives you
+				built-in global state without providers, no Context, no React re-renders.
 			</p>
 
 			<CopyCommand
@@ -169,8 +170,8 @@ function Demo() {
 					href="/demo/real-world"
 					className="border-fd-border hover:border-fd-primary hover:bg-fd-accent group flex items-center justify-between gap-3 rounded-lg border p-4 transition-colors">
 					<div>
-						<div className="font-medium">Attribute filtering demo</div>
-						<div className="text-fd-muted-foreground text-sm">Search a mounted list by flipping data attributes instead of re-rendering rows.</div>
+						<h3 className="font-medium">Attribute filtering demo</h3>
+						<p className="text-fd-muted-foreground text-sm">Search a mounted list by flipping data attributes instead of re-rendering rows.</p>
 					</div>
 					<ArrowRight className="text-fd-muted-foreground group-hover:text-fd-primary h-5 w-5 shrink-0 transition-colors" />
 				</Link>
