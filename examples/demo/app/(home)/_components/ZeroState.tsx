@@ -25,7 +25,9 @@ export function ZeroState() {
 
 function Header({ renderCount }: { renderCount: number }) {
 	return (
-		<div className="space-y-2 text-center">
+		<RenderHighlight
+			name="Header"
+			className="space-y-2 text-center">
 			<RenderCounter
 				count={renderCount}
 				className="mx-auto"
@@ -40,13 +42,15 @@ function Header({ renderCount }: { renderCount: number }) {
 					<span className="perf-theme-light:text-gray-900 perf-theme-dark:text-white font-bold">Global</span> state.
 				</span>
 			</p>
-		</div>
+		</RenderHighlight>
 	);
 }
 
 function ThemeSwitcher({ setTheme }: { setTheme: (t: "light" | "dark") => void }) {
 	return (
-		<div className="flex justify-center gap-2">
+		<RenderHighlight
+			name="ThemeSwitcher"
+			className="flex justify-center gap-2">
 			<button
 				aria-label="Set light theme"
 				onClick={() => setTheme("light")}
@@ -59,13 +63,15 @@ function ThemeSwitcher({ setTheme }: { setTheme: (t: "light" | "dark") => void }
 				className="perf-theme-dark:bg-white perf-theme-dark:text-gray-900 perf-theme-light:bg-gray-200 perf-theme-light:text-gray-600 rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105">
 				🌙 Dark
 			</button>
-		</div>
+		</RenderHighlight>
 	);
 }
 
 function AccentPicker({ setAccent }: { setAccent: (a: "violet" | "emerald" | "amber") => void }) {
 	return (
-		<div className="space-y-4 pb-2">
+		<RenderHighlight
+			name="AccentPicker"
+			className="space-y-4 pb-2">
 			<h2 className="perf-theme-light:text-gray-800 perf-theme-dark:text-gray-200 text-center text-lg font-semibold">Choose Accent</h2>
 			<div className="flex justify-center gap-3">
 				<button
@@ -84,13 +90,15 @@ function AccentPicker({ setAccent }: { setAccent: (a: "violet" | "emerald" | "am
 					className="perf-accent-amber:ring-6 perf-accent-amber:ring-amber-200 perf-theme-dark:perf-accent-amber:ring-amber-900 perf-accent-amber:bg-amber-500 h-12 w-12 rounded-full bg-amber-500/50 hover:scale-110"
 				/>
 			</div>
-		</div>
+		</RenderHighlight>
 	);
 }
 
 function InteractiveCard({ toggleMenu }: { toggleMenu: () => void }) {
 	return (
-		<div className="perf-theme-light:bg-gray-50 perf-theme-light:shadow-gray-200 perf-theme-dark:bg-gray-700 perf-theme-dark:shadow-black/50 relative mx-auto max-w-md overflow-hidden rounded-2xl border border-gray-200 shadow-lg transition-all duration-0!">
+		<RenderHighlight
+			name="InteractiveCard"
+			className="perf-theme-light:bg-gray-50 perf-theme-light:shadow-gray-200 perf-theme-dark:bg-gray-700 perf-theme-dark:shadow-black/50 relative mx-auto max-w-md overflow-hidden rounded-2xl border border-gray-200 shadow-lg transition-all duration-0!">
 			<div className="space-y-4 p-6">
 				<h3 className="perf-theme-light:text-gray-900 perf-theme-dark:text-white text-xl font-semibold">Open Menu Demo</h3>
 				<button
@@ -106,13 +114,15 @@ function InteractiveCard({ toggleMenu }: { toggleMenu: () => void }) {
 					<p className="perf-theme-dark:text-gray-300 perf-theme-light:text-gray-600 text-center">✨ This panel slides open without re-rendering!</p>
 				</div>
 			</div>
-		</div>
+		</RenderHighlight>
 	);
 }
 
 function StateDisplay() {
 	return (
-		<div className="max-[450px]:hidden">
+		<RenderHighlight
+			name="StateDisplay"
+			className="max-[450px]:hidden">
 			<div className="perf-theme-light:text-gray-500 perf-theme-dark:text-gray-400 **:perf-accent-violet:text-violet-500 **:perf-accent-emerald:text-emerald-500 **:perf-accent-amber:text-amber-500 mt-5 flex justify-center gap-4 space-y-1 text-center font-mono text-sm capitalize">
 				<div className="flex gap-1 text-nowrap **:text-nowrap">
 					theme: <span className="perf-theme-dark:hidden">Light</span>
@@ -130,6 +140,6 @@ function StateDisplay() {
 					<span className="perf-menu-open-false:hidden">Closed</span>
 				</div>
 			</div>
-		</div>
+		</RenderHighlight>
 	);
 }

@@ -47,7 +47,9 @@ export function ReactState() {
 
 function Header({ theme, renderCount }: { theme: Theme; renderCount: number }) {
 	return (
-		<div className="space-y-2 text-center relative">
+		<RenderHighlight
+			name="Header"
+			className="space-y-2 text-center relative">
 			<RenderCounter
 				count={renderCount}
 				className="mx-auto"
@@ -59,13 +61,15 @@ function Header({ theme, renderCount }: { theme: Theme; renderCount: number }) {
 				Reactive state management with React <br />
 				<span className="text-xs text-gray-500">Re-renders O(n)</span>
 			</p>
-		</div>
+		</RenderHighlight>
 	);
 }
 
 function ThemeSwitcher({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => void }) {
 	return (
-		<div className="flex justify-center gap-2">
+		<RenderHighlight
+			name="ThemeSwitcher"
+			className="flex justify-center gap-2">
 			<button
 				aria-label="Set light theme"
 				onClick={() => setTheme("light")}
@@ -78,13 +82,15 @@ function ThemeSwitcher({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme)
 				className={`rounded-full border border-gray-400 px-6 py-3 font-medium hover:scale-105 ${theme === "dark" ? "bg-white text-gray-900" : "bg-gray-200 text-gray-600"}`}>
 				🌙 Dark
 			</button>
-		</div>
+		</RenderHighlight>
 	);
 }
 
 function AccentPicker({ accent, setAccent, theme }: { accent: Accent; setAccent: (a: Accent) => void; theme: Theme }) {
 	return (
-		<div className="space-y-4 pb-2">
+		<RenderHighlight
+			name="AccentPicker"
+			className="space-y-4 pb-2">
 			<h2 className={`text-center text-lg font-semibold ${theme === "light" ? "text-gray-800" : "text-gray-200"}`}>Choose Accent</h2>
 			<div className="flex justify-center gap-3">
 				<button
@@ -103,13 +109,14 @@ function AccentPicker({ accent, setAccent, theme }: { accent: Accent; setAccent:
 					className={`h-12 w-12 rounded-full bg-amber-500 hover:scale-110 ${accent === "amber" ? "ring-6 ring-amber-200" : "bg-amber-500/50 ring-amber-900"} ${theme === "dark" && "ring-amber-900"}`}
 				/>
 			</div>
-		</div>
+		</RenderHighlight>
 	);
 }
 
 function InteractiveCard({ theme, menuOpen, setMenuOpen, accent }: { theme: Theme; menuOpen: boolean; setMenuOpen: (o: boolean) => void; accent: Accent }) {
 	return (
-		<div
+		<RenderHighlight
+			name="InteractiveCard"
 			className={`relative mx-auto max-w-md overflow-hidden rounded-2xl border border-gray-200 shadow-lg transition-all duration-0! ${theme === "light" ? "bg-gray-50 shadow-gray-200" : "bg-gray-700 shadow-black/50"}`}>
 			<div className="space-y-4 p-6">
 				<h3 className={`text-xl font-semibold ${theme === "light" ? "text-gray-900" : "text-white"}`}>Open Menu Demo</h3>
@@ -125,19 +132,21 @@ function InteractiveCard({ theme, menuOpen, setMenuOpen, accent }: { theme: Them
 					<p className={`${theme === "dark" ? "text-gray-300" : "text-gray-600"} text-center`}>✨ This panel slides open and has to re-render!</p>
 				</div>
 			</div>
-		</div>
+		</RenderHighlight>
 	);
 }
 
 function StateDisplay({ theme, accent, menuOpen }: { theme: Theme; accent: Accent; menuOpen: boolean }) {
 	return (
-		<div className="max-[450px]:hidden">
+		<RenderHighlight
+			name="StateDisplay"
+			className="max-[450px]:hidden">
 			<div
 				className={`mt-5 flex justify-center gap-4 space-y-1 text-center font-mono text-sm capitalize **:text-nowrap ${accent === "violet" ? "text-violet-500" : accent === "emerald" ? "text-emerald-500" : "text-amber-500"}`}>
 				<div className="flex gap-1">theme: {theme}</div>
 				<div className="flex gap-1">accent: {accent}</div>
 				<div className="flex gap-1">menu: {menuOpen ? "Open" : "Closed"}</div>
 			</div>
-		</div>
+		</RenderHighlight>
 	);
 }

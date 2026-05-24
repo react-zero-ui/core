@@ -28,7 +28,7 @@ function ReactPane() {
 	const [query, setQuery] = useState("");
 	const [category, setCategory] = useState<CategoryFilter>("all");
 	const renderCount = useRef(0);
-	renderCount.current += 1;
+	renderCount.current += 4;
 
 	const normalizedQuery = query.trim().toLowerCase();
 	const filteredProducts = products.filter(
@@ -37,10 +37,13 @@ function ReactPane() {
 
 	return (
 		<Pane
+			className="max-md:order-2 "
 			title="React useState"
-			subtitle="Search and category live in React state, so every keystroke re-renders this pane."
+			subtitle="Search and category live in React state, every keystroke re-renders this pane. O(n) re-renders."
 			renderCount={renderCount.current}>
-			<div className="space-y-4">
+			<RenderHighlight
+				name="SearchInput"
+				className="space-y-4">
 				<input
 					type="search"
 					aria-label="Search React products"
@@ -58,7 +61,7 @@ function ReactPane() {
 					{normalizedQuery ? ` matching "${query.trim()}"` : " visible"}
 				</p>
 				<ProductList products={filteredProducts} />
-			</div>
+			</RenderHighlight>
 		</Pane>
 	);
 }
@@ -120,61 +123,67 @@ function ZeroUiPane() {
 	};
 
 	return (
-		<Pane
-			title="Zero-UI attribute filter"
-			subtitle="The input is uncontrolled. Search mode, category, and empty state flip data-* attrs; rows stay mounted."
-			renderCount={renderCount.current}>
-			<div
-				ref={attachFilterScope}
-				data-filter-search={searchMode}
-				data-demo-filter-category={filterCategory}
-				data-demo-filter-results={filterResults}
-				className="space-y-4">
-				<div className="relative">
-					<input
-						ref={inputRef}
-						type="search"
-						aria-label="Search Zero-UI products"
-						placeholder="Search products..."
-						onChange={handleSearch}
-						className="border-fd-border bg-fd-background focus:border-fd-primary w-full rounded-md border px-3 py-2 pr-16 text-sm outline-none [&::-webkit-search-cancel-button]:hidden"
-					/>
-					<button
-						type="button"
-						aria-label="Clear Zero-UI search"
-						onClick={handleClear}
-						className="filter-search-active:inline-flex text-fd-muted-foreground hover:text-fd-foreground absolute top-1/2 right-3 hidden -translate-y-1/2 text-xs font-medium transition-colors">
-						Clear
-					</button>
-				</div>
-				<ZeroUiCategoryButtons onChange={handleCategory} />
-				<p
-					ref={countRef}
-					className="text-fd-muted-foreground text-xs">
-					{products.length} results visible
-				</p>
-				<ul
-					ref={listRef}
-					className="divide-fd-border divide-y">
-					{products.map((product) => (
-						<li
-							key={product.id}
-							data-product-row
-							data-category={product.category}
-							data-search-match="true"
-							data-search-text={product.name.toLowerCase()}
-							className="demo-filter-category-books:[&:not([data-category=books])]:hidden demo-filter-category-clothing:[&:not([data-category=clothing])]:hidden demo-filter-category-electronics:[&:not([data-category=electronics])]:hidden filter-search-active:data-[search-match=false]:hidden flex items-center justify-between gap-3 py-2.5 text-sm">
-							<div>
-								<div className="font-medium">{product.name}</div>
-								<div className="text-fd-muted-foreground text-xs capitalize">{product.category}</div>
-							</div>
-							<div className="font-mono text-sm tabular-nums">${product.price}</div>
-						</li>
-					))}
-				</ul>
-				<p className="demo-filter-results-empty:block text-fd-muted-foreground hidden py-8 text-center text-sm">No products match.</p>
-			</div>
-		</Pane>
+		<RenderHighlight name="ZeroUiPane">
+			<Pane
+				title="Zero-UI attribute filter"
+				subtitle="Search mode, category, and empty state flip data-* attrs; rows stay mounted. Zero re-renders."
+				renderCount={renderCount.current}>
+				<RenderHighlight
+					name="SearchInput"
+					className="space-y-4">
+					<div
+						ref={attachFilterScope}
+						data-filter-search={searchMode}
+						data-demo-filter-category={filterCategory}
+						data-demo-filter-results={filterResults}
+						className="space-y-4">
+						<div className="relative">
+							<input
+								ref={inputRef}
+								type="search"
+								aria-label="Search Zero-UI products"
+								placeholder="Search products..."
+								onChange={handleSearch}
+								className="border-fd-border bg-fd-background focus:border-fd-primary w-full rounded-md border px-3 py-2 pr-16 text-sm outline-none [&::-webkit-search-cancel-button]:hidden"
+							/>
+							<button
+								type="button"
+								aria-label="Clear Zero-UI search"
+								onClick={handleClear}
+								className="filter-search-active:inline-flex text-fd-muted-foreground hover:text-fd-foreground absolute top-1/2 right-3 hidden -translate-y-1/2 text-xs font-medium transition-colors">
+								Clear
+							</button>
+						</div>
+						<ZeroUiCategoryButtons onChange={handleCategory} />
+						<p
+							ref={countRef}
+							className="text-fd-muted-foreground text-xs">
+							{products.length} results visible
+						</p>
+						<ul
+							ref={listRef}
+							className="divide-fd-border divide-y">
+							{products.map((product) => (
+								<li
+									key={product.id}
+									data-product-row
+									data-category={product.category}
+									data-search-match="true"
+									data-search-text={product.name.toLowerCase()}
+									className="demo-filter-category-books:[&:not([data-category=books])]:hidden demo-filter-category-clothing:[&:not([data-category=clothing])]:hidden demo-filter-category-electronics:[&:not([data-category=electronics])]:hidden filter-search-active:data-[search-match=false]:hidden flex items-center justify-between gap-3 py-2.5 text-sm">
+									<div>
+										<div className="font-medium">{product.name}</div>
+										<div className="text-fd-muted-foreground text-xs capitalize">{product.category}</div>
+									</div>
+									<div className="font-mono text-sm tabular-nums">${product.price}</div>
+								</li>
+							))}
+						</ul>
+						<p className="demo-filter-results-empty:block text-fd-muted-foreground hidden py-8 text-center text-sm">No products match.</p>
+					</div>
+				</RenderHighlight>
+			</Pane>
+		</RenderHighlight>
 	);
 }
 ZeroUiPane.displayName = "ZeroUiPane";
@@ -186,16 +195,20 @@ function CategoryButtons({ value, onChange }: { value: CategoryFilter; onChange:
 			{categories.map((category) => {
 				const active = category.value === value;
 				return (
-					<button
+					<RenderHighlight
 						key={category.value}
-						type="button"
-						onClick={() => onChange(category.value)}
-						className={[
-							"rounded-md border px-3 py-1.5 text-xs font-medium transition-colors",
-							active ? "bg-fd-primary text-fd-primary-foreground border-fd-primary" : "border-fd-border hover:bg-fd-accent",
-						].join(" ")}>
-						{category.label}
-					</button>
+						name={category.label}>
+						<button
+							key={category.value}
+							type="button"
+							onClick={() => onChange(category.value)}
+							className={[
+								"rounded-md border px-3 py-1.5 text-xs font-medium transition-colors",
+								active ? "bg-fd-primary text-fd-primary-foreground border-fd-primary" : "border-fd-border hover:bg-fd-accent",
+							].join(" ")}>
+							{category.label}
+						</button>
+					</RenderHighlight>
 				);
 			})}
 		</div>
@@ -204,7 +217,9 @@ function CategoryButtons({ value, onChange }: { value: CategoryFilter; onChange:
 
 function ZeroUiCategoryButtons({ onChange }: { onChange: (value: CategoryFilter) => void }) {
 	return (
-		<div className="flex flex-wrap gap-2">
+		<RenderHighlight
+			name="ZeroUiCategoryButtons"
+			className="flex flex-wrap gap-2">
 			{categories.map((category) => (
 				<button
 					key={category.value}
@@ -228,15 +243,27 @@ function ZeroUiCategoryButtons({ onChange }: { onChange: (value: CategoryFilter)
 					{category.label}
 				</button>
 			))}
-		</div>
+		</RenderHighlight>
 	);
 }
 
-function Pane({ title, subtitle, renderCount, children }: { title: string; subtitle: string; renderCount: number; children: ReactNode }) {
+function Pane({
+	title,
+	subtitle,
+	renderCount,
+	children,
+	className,
+}: {
+	title: string;
+	subtitle: string;
+	renderCount: number;
+	children: ReactNode;
+	className?: string;
+}) {
 	return (
 		<RenderHighlight
 			name={"Pane"}
-			className="border-fd-border bg-fd-card flex flex-col gap-4 rounded-xl border p-5">
+			className={["border-fd-border bg-fd-card flex flex-col gap-4 rounded-xl border p-5", className].join(" ")}>
 			<div className="flex items-start justify-between gap-3">
 				<div>
 					<h3 className="text-base font-semibold">{title}</h3>
@@ -251,26 +278,31 @@ function Pane({ title, subtitle, renderCount, children }: { title: string; subti
 		</RenderHighlight>
 	);
 }
-Pane.displayName = "Pane";
 
 function ProductList({ products }: { products: Product[] }) {
 	if (products.length === 0) {
-		return <p className="text-fd-muted-foreground py-8 text-center text-sm">No products match.</p>;
+		return (
+			<RenderHighlight name="ProductList">
+				<p className="text-fd-muted-foreground py-8 text-center text-sm">No products match.</p>
+			</RenderHighlight>
+		);
 	}
 
 	return (
-		<ul className="divide-fd-border divide-y">
-			{products.map((product) => (
-				<li
-					key={product.id}
-					className="flex items-center justify-between gap-3 py-2.5 text-sm">
-					<div>
-						<div className="font-medium">{product.name}</div>
-						<div className="text-fd-muted-foreground text-xs capitalize">{product.category}</div>
-					</div>
-					<div className="font-mono text-sm tabular-nums">${product.price}</div>
-				</li>
-			))}
-		</ul>
+		<RenderHighlight name="ProductList">
+			<ul className="divide-fd-border divide-y">
+				{products.map((product) => (
+					<li
+						key={product.id}
+						className="flex items-center justify-between gap-3 py-2.5 text-sm">
+						<div>
+							<div className="font-medium">{product.name}</div>
+							<div className="text-fd-muted-foreground text-xs capitalize">{product.category}</div>
+						</div>
+						<div className="font-mono text-sm tabular-nums">${product.price}</div>
+					</li>
+				))}
+			</ul>
+		</RenderHighlight>
 	);
 }
