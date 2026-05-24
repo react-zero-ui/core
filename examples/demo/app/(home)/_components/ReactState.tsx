@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { RenderCounter } from "./RenderCounter";
 
 type Theme = "light" | "dark";
 type Accent = "violet" | "emerald" | "amber";
@@ -45,16 +46,11 @@ export function ReactState() {
 
 function Header({ theme, renderCount }: { theme: Theme; renderCount: number }) {
 	return (
-		<div className="space-y-2 text-center">
-			<div
-				className={`mx-auto inline-flex items-center gap-1 rounded-md border px-2.5 py-1 font-mono text-xs ${theme === "light" ? "border-violet-300 bg-violet-100 text-violet-700" : "border-violet-500/40 bg-violet-500/15 text-violet-300"}`}>
-				renders:{" "}
-				<span
-					className="font-semibold"
-					suppressHydrationWarning>
-					{renderCount}
-				</span>
-			</div>
+		<div className="space-y-2 text-center relative">
+			<RenderCounter
+				count={renderCount}
+				className="mx-auto"
+			/>
 			<h1 className={`text-3xl font-bold ${theme === "light" ? "text-gray-900" : "text-white"}`}>
 				React State <span className="max-[450px]:hidden">Management</span>
 			</h1>

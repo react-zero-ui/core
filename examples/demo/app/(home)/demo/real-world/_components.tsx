@@ -3,6 +3,7 @@
 import type { ChangeEvent, ReactNode } from "react";
 import { useCallback, useRef, useState } from "react";
 import { useScopedUI } from "@react-zero-ui/core";
+import { RenderCounter } from "../../_components/RenderCounter";
 import { categories, products, type Category, type Product } from "./_data";
 
 type CategoryFilter = Category | "all";
@@ -236,14 +237,10 @@ function Pane({ title, subtitle, renderCount, children }: { title: string; subti
 					<h3 className="text-base font-semibold">{title}</h3>
 					<p className="text-fd-muted-foreground mt-1 text-xs">{subtitle}</p>
 				</div>
-				<div className="border-fd-primary/30 bg-fd-primary/10 text-fd-primary inline-flex shrink-0 items-center gap-1 rounded-md border px-2.5 py-1 font-mono text-xs">
-					renders:{" "}
-					<span
-						className="font-semibold"
-						suppressHydrationWarning>
-						{renderCount}
-					</span>
-				</div>
+				<RenderCounter
+					count={renderCount}
+					className="shrink-0"
+				/>
 			</div>
 			<div className="min-h-[18rem]">{children}</div>
 		</div>

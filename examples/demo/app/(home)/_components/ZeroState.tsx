@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { useUI } from "@react-zero-ui/core";
+import { RenderCounter } from "./RenderCounter";
 
 export function ZeroState() {
 	const [, setTheme] = useUI<"light" | "dark">("perf-theme", "light");
@@ -24,14 +25,10 @@ export function ZeroState() {
 function Header({ renderCount }: { renderCount: number }) {
 	return (
 		<div className="space-y-2 text-center">
-			<div className="perf-theme-light:border-violet-300 perf-theme-light:bg-violet-100 perf-theme-light:text-violet-700 perf-theme-dark:border-violet-500/40 perf-theme-dark:bg-violet-500/15 perf-theme-dark:text-violet-300 mx-auto inline-flex items-center gap-1 rounded-md border px-2.5 py-1 font-mono text-xs">
-				renders:{" "}
-				<span
-					className="font-semibold"
-					suppressHydrationWarning>
-					{renderCount}
-				</span>
-			</div>
+			<RenderCounter
+				count={renderCount}
+				className="mx-auto"
+			/>
 			<h1 className="perf-theme-light:text-gray-900 perf-theme-dark:text-white text-3xl font-bold">Zero UI</h1>
 			<p className="perf-theme-light:text-gray-600 perf-theme-dark:text-gray-400">
 				Reactive state without re-rendering.

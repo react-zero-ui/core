@@ -1,3 +1,35 @@
+/**
+# Primary Topical Cluster Target: React UI state management
+
+## Data Notes
+- Source: Google Keyword Planner via gsc-mcp, plus Search Console data for zero-ui.dev
+- Location: United States
+- Pulled: 2026-05-23
+- Seeds used: react state management, react zero rerender, react performance, tailwind variants
+- Exclusions: React Native performance terms, MobX/Jotai/Apollo competitor terms, generic React tutorial intent, icon sprite terms
+
+## Keywords to Target
+| Keyword | Avg. monthly searches |
+| --- | ---: |
+| react state management | 1,600 |
+| react state manager | 1,600 |
+| react performance optimization | 590 |
+| tailwind variants | 390 |
+| state management in react | 140 |
+| react global state | 90 |
+| zero ui | 90 |
+| best state management for react | 40 |
+| react global state management | 30 |
+| react re render | 30 |
+| react zero ui | 10 |
+| css state management | 10 |
+
+## Positioning Notes
+- Position the homepage around UI/presentation state management, not server state or business data.
+- Tie the high-volume state-management terms to the differentiator: zero React re-renders via data attributes and CSS.
+- Support performance and Tailwind intent with proof sections, generated variants, and the existing benchmark/demo links.
+*/
+
 import Link from "next/link";
 import { ArrowRight, Zap, Layers, Feather, Github } from "lucide-react";
 import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
@@ -27,8 +59,8 @@ function Hero() {
 				powered by <span className="text-fd-primary">CSS</span>.
 			</h1>
 			<p className="text-fd-muted-foreground mx-auto mb-8 max-w-2xl text-lg">
-				React Zero-UI pre-renders every UI state at build time and flips <code className="font-mono text-sm">data-*</code> attributes on the fly - giving you
-				global state without providers, re-renders, or hydration headaches.
+				React Zero-UI <em className="font-medium">pre-renders</em> UI state at build time and flips <code className="font-mono text-sm">data-*</code> attributes
+				on the fly, giving you global state without providers, re-renders, or hydration headaches.
 			</p>
 
 			<div className="mx-auto mb-8 inline-flex items-center gap-3 rounded-lg border border-fd-border bg-fd-card px-4 py-2 font-mono text-sm">
