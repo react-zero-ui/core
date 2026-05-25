@@ -1,6 +1,6 @@
 {
 	"name": "@react-zero-ui/core",
-	"version": "0.4.2",
+	"version": "0.4.3",
 	"private": false,
 	"scripts": {
 		"build": "rm -rf dist && tsc -p tsconfig.build.json",
@@ -70,8 +70,8 @@
 		"!*.test.cjs"
 	],
 	"dependencies": {
-		"@babel/core": "^7.28.0",
 		"@babel/code-frame": "^7.27.1",
+		"@babel/core": "^7.28.0",
 		"@babel/generator": "^7.28.0",
 		"@babel/parser": "^7.28.0",
 		"@babel/preset-typescript": "^7.27.1",
