@@ -8,7 +8,7 @@
 Zero runtime, zero React re-renders, and the simplest developer experience ever.  
 _Say goodbye to context and prop-drilling._
 
-[![Bundle size](https://badgen.net/bundlephobia/minzip/@react-zero-ui/core@0.2.6)](https://bundlephobia.com/package/@react-zero-ui/core@0.2.6)
+<a href="https://github.com/react-zero-ui/core/blob/main/docs/size.md" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Freact-zero-ui%2Fcore%40main%2F.github%2Fbadges%2Fcore-size.json" alt="bundle size" /></a>
 [![npm version](https://img.shields.io/npm/v/@react-zero-ui/core)](https://www.npmjs.com/package/@react-zero-ui/core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![CI](https://github.com/react-zero-ui/core/actions/workflows/ci.yml/badge.svg?branch=main)
