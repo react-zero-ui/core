@@ -8,6 +8,7 @@ const pkg = readdirSync(dist)
 	.sort((a, b) => statSync(join(dist, b)).mtimeMs - statSync(join(dist, a)).mtimeMs)[0];
 
 const fixtures = ["packages/core/__tests__/fixtures/next", "packages/core/__tests__/fixtures/vite"];
+const installFlags = "--ignore-workspace --ignore-scripts";
 
 for (const dir of fixtures) {
 	const pkgJson = join(dir, "package.json");
@@ -15,10 +16,10 @@ for (const dir of fixtures) {
 	rmSync(join(dir, "pnpm-lock.yaml"), { force: true });
 
 	// 1: Inject the packed tarball
-	execSync(`pnpm --dir ${dir} add --ignore-workspace ${join(dist, pkg)}`, { stdio: "inherit" });
+	execSync(`pnpm --dir ${dir} add ${installFlags} ${join(dist, pkg)}`, { stdio: "inherit" });
 
 	// 2: Install to resolve tree
-	execSync(`pnpm --dir ${dir} install --ignore-workspace`, { stdio: "inherit" });
+	execSync(`pnpm --dir ${dir} install ${installFlags}`, { stdio: "inherit" });
 
 	// 3: Undo changes to package.json
 	execSync(`git restore ${pkgJson}`, { stdio: "inherit" });

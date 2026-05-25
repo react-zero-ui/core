@@ -5,7 +5,9 @@
 </a>
 
 <p align="center" style="display:flex; align-items:center;">
- <img width="1000" height="144" alt="Frame 342" src="/docs/assets/zero-ui-logo.png" />
+ <a href="https://zero-ui.dev">
+  <img width="1000" height="144" alt="React State Management Demo - React Zero-UI" src="/docs/assets/zero-ui-logo.png" />
+ </a>
 </p>
 
 <div align="center">
@@ -13,7 +15,7 @@
 
 Zero runtime, zero React re-renders, and a simple developer experience. <small>Say goodbye to context and prop-drilling.</small>
 
-<a href="https://github.com/react-zero-ui/core/blob/main/docs/size.md" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Freact-zero-ui%2Fcore%40main%2F.github%2Fbadges%2Fcore-size.json" alt="bundle size" /></a> <a href="https://www.npmjs.com/package/@react-zero-ui/core" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/npm/v/@react-zero-ui/core" alt="npm version" /></a> <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a> ![CI](https://github.com/react-zero-ui/core/actions/workflows/ci.yml/badge.svg?branch=main)
+<a href="https://github.com/react-zero-ui/core/blob/main/docs/size.md" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Freact-zero-ui%2Fcore%40main%2F.github%2Fbadges%2Fcore-size.json" alt="bundle size" /></a> <a href="https://www.npmjs.com/package/@react-zero-ui/core" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/npm/v/@react-zero-ui/core" alt="npm version" /></a> <a href="https://github.com/react-zero-ui/core/blob/main/LICENSE" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a> <a href="https://github.com/react-zero-ui/core/actions/workflows/ci.yml" target="_blank" rel="noopener noreferrer"><img src="https://github.com/react-zero-ui/core/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI" /></a>
 
 [Website](https://zero-ui.dev) &nbsp;|&nbsp;
 [See the proof](/docs/demo.md) &nbsp;|&nbsp;

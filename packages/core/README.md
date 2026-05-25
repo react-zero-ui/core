@@ -1,8 +1,8 @@
 # @react-zero-ui/core
 
-![Tagline](https://img.shields.io/badge/The_ZERO_re--render_UI_state_library-%235500AD?style=flat&label=)
+[![Tagline](https://img.shields.io/badge/The_ZERO_re--render_UI_state_library-%235500AD?style=flat&label=)](https://zero-ui.dev)
 
-![Zero UI logo](https://raw.githubusercontent.com/react-zero-ui/core/main/docs/assets/zero-ui-logo.png)
+[![Zero UI logo](https://raw.githubusercontent.com/react-zero-ui/core/main/docs/assets/zero-ui-logo.png)](https://zero-ui.dev)
 
 **The fastest possible UI updates in React. Period.**  
 Zero runtime, zero React re-renders, and the simplest developer experience ever.  
@@ -10,8 +10,8 @@ _Say goodbye to context and prop-drilling._
 
 <a href="https://github.com/react-zero-ui/core/blob/main/docs/size.md" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Freact-zero-ui%2Fcore%40main%2F.github%2Fbadges%2Fcore-size.json" alt="bundle size" /></a>
 [![npm version](https://img.shields.io/npm/v/@react-zero-ui/core)](https://www.npmjs.com/package/@react-zero-ui/core)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![CI](https://github.com/react-zero-ui/core/actions/workflows/ci.yml/badge.svg?branch=main)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/react-zero-ui/core/blob/main/LICENSE)
+[![CI](https://github.com/react-zero-ui/core/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/react-zero-ui/core/actions/workflows/ci.yml)
 
 [Website](https://zero-ui.dev) • [See the proof](https://github.com/react-zero-ui/core/blob/main/docs/demo.md) • [Quick Start](#quick-start) • [API Reference](#api-reference) • [Contributing](#contributing)
 
