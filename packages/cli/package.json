@@ -44,7 +44,7 @@
 		"test": "node --test ../core/__tests__/unit/cli.test.cjs"
 	},
 	"dependencies": {
-		"@react-zero-ui/core": "workspace:^0.4.2"
+		"@react-zero-ui/core": "workspace:^0.4.3"
 	},
 	"engines": {
 		"node": ">=22"
