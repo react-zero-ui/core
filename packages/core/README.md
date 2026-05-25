@@ -13,7 +13,7 @@ _Say goodbye to context and prop-drilling._
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![CI](https://github.com/react-zero-ui/core/actions/workflows/ci.yml/badge.svg?branch=main)
 
-[See the proof](https://github.com/react-zero-ui/core/blob/main/docs/demo.md) • [Quick Start](#quick-start) • [API Reference](#api-reference) • [Contributing](#contributing)
+[Website](https://zero-ui.dev) • [See the proof](https://github.com/react-zero-ui/core/blob/main/docs/demo.md) • [Quick Start](#quick-start) • [API Reference](#api-reference) • [Contributing](#contributing)
 
 ---
 
@@ -173,4 +173,4 @@ We welcome all contributions!
 
 ---
 
-Made for the React community by [@austin1serb](https://github.com/austin1serb)
+Made for the React community by [Serbyte Web Design & Development](https://www.serbyte.net/)

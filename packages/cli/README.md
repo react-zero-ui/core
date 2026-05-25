@@ -2,6 +2,8 @@
 
 > Instantly scaffold React Zero-UI into your Next.js or Vite project
 
+[Website](https://zero-ui.dev) • [Documentation](https://zero-ui.dev/docs)
+
 ```bash
 
 npx create-zero-ui
@@ -88,3 +90,7 @@ PRs welcome at [react-zero-ui/core](https://github.com/react-zero-ui/core).
 ## License
 
 MIT
+
+---
+
+Made for the React community by [Serbyte Web Design & Development](https://www.serbyte.net/)

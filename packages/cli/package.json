@@ -1,6 +1,6 @@
 {
 	"name": "create-zero-ui",
-	"version": "2.0.1",
+	"version": "2.0.2",
 	"description": "Zero-UI project scaffolder for React. Instantly sets up zero-runtime UI state, Tailwind variants, PostCSS, and SSR-safe config in Vite or Next.js apps.",
 	"keywords": [
 		"react",
@@ -28,6 +28,7 @@
 		"type": "github",
 		"url": "https://github.com/sponsors/austin1serb"
 	},
+	"homepage": "https://zero-ui.dev",
 	"type": "module",
 	"main": "./bin.js",
 	"bin": {
@@ -43,7 +44,7 @@
 		"test": "node --test ../core/__tests__/unit/cli.test.cjs"
 	},
 	"dependencies": {
-		"@react-zero-ui/core": "workspace:^0.4.0"
+		"@react-zero-ui/core": "workspace:^0.4.1"
 	},
 	"engines": {
 		"node": ">=22"

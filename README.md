@@ -15,6 +15,7 @@ Zero runtime, zero React re-renders, and a simple developer experience. <small>S
 
 <a href="https://github.com/react-zero-ui/core/blob/main/docs/size.md" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Freact-zero-ui%2Fcore%40main%2F.github%2Fbadges%2Fcore-size.json" alt="bundle size" /></a> <a href="https://www.npmjs.com/package/@react-zero-ui/core" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/npm/v/@react-zero-ui/core" alt="npm version" /></a> <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a> ![CI](https://github.com/react-zero-ui/core/actions/workflows/ci.yml/badge.svg?branch=main)
 
+[Website](https://zero-ui.dev) &nbsp;|&nbsp;
 [See the proof](/docs/demo.md) &nbsp;|&nbsp;
 [Quick Start](#quick-start) &nbsp;|&nbsp;
 [API Reference](/docs/api-reference.md) &nbsp;|&nbsp;
@@ -241,7 +242,6 @@ We welcome bug fixes, feature requests, documentation improvements, and performa
 > First-time contributor? Look for issues labeled `good-first-issue`.
 
 <div align="center">
-Made for the React community by <a href="https://github.com/austin1serb">@austin1serb</a><br />
-Built with support from <a href="https://www.serbyte.net/">Serbyte Web Design &amp; Development</a>
+Made for the React community by <a href="https://www.serbyte.net/">Serbyte Web Design &amp; Development</a>
 
 </div>
