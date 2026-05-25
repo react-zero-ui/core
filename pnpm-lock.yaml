@@ -99,7 +99,7 @@ importers:
   packages/cli:
     dependencies:
       "@react-zero-ui/core":
-        specifier: workspace:^0.4.1
+        specifier: workspace:^0.4.2
         version: link:../core
 
   packages/core:
