@@ -54,7 +54,11 @@ export default function HomePage() {
 
 function Hero() {
 	return (
-		<section className="mx-auto w-full max-w-5xl px-6 pt-8 pb-16 text-center sm:pt-16">
+		<section className="mx-auto w-full max-w-5xl px-6 pt-8 pb-16 text-center sm:pt-16 relative">
+			<div
+				aria-hidden="true"
+				className="bg-fd-primary/10 absolute -top-1/2 left-1/2 h-full w-full -translate-x-1/2 rounded-full blur-3xl"
+			/>
 			<div className="text-fd-muted-foreground mb-6 font-mono text-xs">Zero runtime · Zero re-renders · ~350 bytes</div>
 			<h1 className="mb-5 text-4xl font-bold tracking-tight sm:text-6xl capitalize">
 				React UI state management, <br className="hidden sm:block" />
