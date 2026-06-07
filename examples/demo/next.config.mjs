@@ -9,6 +9,25 @@ const withMDX = createMDX();
 const config = {
   reactStrictMode: true,
   outputFileTracingRoot: path.join(__dirname, '../..'),
+  async redirects() {
+    return [
+      {
+        source: '/icon-sprite',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/react',
+        destination: '/demo/real-world',
+        permanent: true,
+      },
+      {
+        source: '/zero-ui',
+        destination: '/demo/real-world',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default withMDX(config);
