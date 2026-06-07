@@ -38,17 +38,21 @@ import { DynamicCodeBlock } from "fumadocs-ui/components/dynamic-codeblock";
 import { Comparison } from "./_components/Comparison";
 import { SITE_CONFIG, SITE_SLUGS } from "@/app/config/site-config";
 import { CopyCommand } from "./_components/CopyCommand";
+import { Footer } from "./_components/Footer";
 
 export const metadata: Metadata = { title: { absolute: SITE_CONFIG.title }, description: SITE_CONFIG.description, alternates: { canonical: SITE_SLUGS.home } };
 
 export default function HomePage() {
 	return (
-		<main className="flex flex-1 flex-col  ">
-			<Hero />
-			<MentalModel />
-			<Demo />
-			<WhyFast />
-		</main>
+		<>
+			<main className="flex flex-1 flex-col  ">
+				<Hero />
+				<MentalModel />
+				<Demo />
+				<WhyFast />
+			</main>
+			<Footer />
+		</>
 	);
 }
 

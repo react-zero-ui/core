@@ -29,6 +29,7 @@ export const SITE_NAP = {
 export const SITE_SLUGS = {
 	home: "/",
 	realWorldDemo: "/demo/real-world",
+	iconSprite: "/icon-sprite",
 	docs: {
 		index: "/docs",
 		apiReference: "/docs/api-reference",

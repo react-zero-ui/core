@@ -1,8 +1,8 @@
 import type { MetadataRoute } from "next";
 import { source } from "@/lib/source";
-import { DOMAIN_URL } from "./config/site-config";
+import { DOMAIN_URL, SITE_SLUGS } from "./config/site-config";
 
-const staticRoutes = ["/", "/demo/real-world"];
+const staticRoutes = [SITE_SLUGS.home, SITE_SLUGS.realWorldDemo, SITE_SLUGS.iconSprite];
 
 export default function sitemap(): MetadataRoute.Sitemap {
 	const now = new Date().toISOString();

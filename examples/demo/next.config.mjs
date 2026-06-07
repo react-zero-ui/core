@@ -12,11 +12,6 @@ const config = {
   async redirects() {
     return [
       {
-        source: '/icon-sprite',
-        destination: '/',
-        permanent: true,
-      },
-      {
         source: '/react',
         destination: '/demo/real-world',
         permanent: true,

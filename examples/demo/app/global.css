@@ -38,6 +38,45 @@
 	}
 }
 
+/* Registered so the spotlight mask position can be animated; unregistered
+   custom properties have syntax "*" and cannot interpolate between values. */
+@property --x {
+	syntax: "<length-percentage>";
+	inherits: false;
+	initial-value: 50%;
+}
+@property --y {
+	syntax: "<length-percentage>";
+	inherits: false;
+	initial-value: 50%;
+}
+
+@layer utilities {
+	@keyframes icon-spotlight-x {
+		from {
+			--x: 12%;
+		}
+		to {
+			--x: 88%;
+		}
+	}
+
+	@keyframes icon-spotlight-y {
+		from {
+			--y: 22%;
+		}
+		to {
+			--y: 78%;
+		}
+	}
+
+	.icon-spotlight-drift {
+		animation:
+			icon-spotlight-x 9s ease-in-out infinite alternate,
+			icon-spotlight-y 4s ease-in-out infinite alternate;
+	}
+}
+
 /* CSS overrides for topbar menu button */
 @layer components {
 	#nd-home-layout [aria-label="Toggle Menu"] > svg {
