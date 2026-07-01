@@ -11,7 +11,7 @@
 </p>
 
 <div align="center">
- <strong>The fastest possible UI updates in React. Period.</strong>
+ <strong>The fastest possible UI updates in React.</strong>
 
 Zero runtime, zero React re-renders, and a simple developer experience. <small>Say goodbye to context and prop-drilling.</small>
 
