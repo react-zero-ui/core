@@ -294,7 +294,7 @@ function IconSample() {
 			<div className="grid grid-cols-6 gap-3 sm:grid-cols-8 md:grid-cols-12">
 				{sampleIcons.map((Icon, index) => (
 					<div
-						key={index}
+						key={`${Icon.name}-${index}`}
 						className="grid aspect-square place-items-center rounded-lg bg-fd-muted text-fd-foreground transition-colors hover:bg-fd-primary hover:text-fd-primary-foreground">
 						<Icon
 							size={24}

@@ -92,7 +92,7 @@ function IconGrid({ className, style }: { className?: string; style?: CSSPropert
 			style={style}>
 			{heroIcons.map((Icon, index) => (
 				<span
-					key={index}
+					key={`${Icon.name}-${index}`}
 					className="flex aspect-square items-center justify-center border-[0.5px] border-fd-border/10">
 					<Icon
 						size={34}

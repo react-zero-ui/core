@@ -25,3 +25,8 @@ t.*
 !next-env.d.ts
 !packages/core/src/dist/
 
+
+# wiki vault local-only notes
+/wiki/_private/
+
+docs/assets/zero-ui assets/

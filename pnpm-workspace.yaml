@@ -16,3 +16,6 @@ allowBuilds:
   "@tailwindcss/oxide": true
   esbuild: true
   sharp: true
+
+minimumReleaseAgeExclude:
+  - '@react-zero-ui/icon-sprite@0.4.2'
