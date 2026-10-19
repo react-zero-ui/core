@@ -1,0 +1,148 @@
+name: OSS Release Trusted Publishing
+
+# Adapted from oss-release for this pnpm workspace. See wiki/pages/packages-publishing.md.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact package version
+        required: true
+        type: string
+      targets:
+        description: Trusted publishing target (npm)
+        required: true
+        type: string
+      npm_dir:
+        description: Package directory
+        required: true
+        type: choice
+        options:
+          - packages/core
+          - packages/cli
+      # The shared CLI sends these fields even for npm-only dispatches.
+      pypi_dir:
+        required: false
+        default: .
+        type: string
+      vscode_dir:
+        required: false
+        default: .
+        type: string
+      mcp_server_file:
+        required: false
+        default: server.json
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  # A GitHub release and the shared CLI can both trigger the same tag.
+  group: npm-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      package_dir: ${{ steps.release.outputs.package_dir }}
+      version: ${{ steps.release.outputs.version }}
+      dist_tag: ${{ steps.release.outputs.dist_tag }}
+      should_publish: ${{ steps.release.outputs.should_publish }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Resolve and validate the release
+        id: release
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_PACKAGE: ${{ inputs.npm_dir }}
+          INPUT_TARGETS: ${{ inputs.targets }}
+          IS_PRERELEASE: ${{ github.event.release.prerelease || false }}
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import { spawnSync } from 'node:child_process';
+          import { appendFileSync, readFileSync } from 'node:fs';
+          const env = process.env;
+          const match = /^refs\/tags\/(core|cli)-v(\d+\.\d+\.\d+(?:-[\w.-]+)?(?:\+[\w.-]+)?)$/.exec(env.GITHUB_REF);
+          assert(match, 'Publish a release tagged core-v<version> or cli-v<version>');
+          const packageDir = `packages/${match[1]}`;
+          const version = match[2];
+          if (env.GITHUB_EVENT_NAME === 'workflow_dispatch') {
+            assert.equal(env.INPUT_TARGETS, 'npm');
+            assert.equal(env.INPUT_PACKAGE, packageDir, 'Package input must match the tag');
+            assert.equal(env.INPUT_VERSION, version, 'Version input must match the tag');
+          }
+          const pkg = JSON.parse(readFileSync(`${packageDir}/package.json`, 'utf8'));
+          assert.equal(pkg.version, version, 'Commit the package version before creating its release');
+          const distTag = version.includes('-') || env.IS_PRERELEASE === 'true' ? 'next' : 'latest';
+          const lookup = spawnSync('npm', ['view', `${pkg.name}@${version}`, 'version', '--json'], { encoding: 'utf8' });
+          if (lookup.error) throw lookup.error;
+          const result = JSON.parse(lookup.stdout);
+          const published = lookup.status === 0;
+          if (published) {
+            assert.deepEqual(Array.isArray(result) ? result : [result], [version], 'Unexpected npm version response');
+          } else {
+            assert.equal(result.error?.code, 'E404', `npm lookup failed: ${lookup.stderr}`);
+          }
+          appendFileSync(env.GITHUB_OUTPUT, `package_dir=${packageDir}\nversion=${version}\ndist_tag=${distTag}\nshould_publish=${!published}\n`);
+          const summary = published ? `${pkg.name}@${version} is already published; skipping.` : `Publishing ${pkg.name}@${version} with npm tag ${distTag}.`;
+          console.log(summary);
+          appendFileSync(env.GITHUB_STEP_SUMMARY, `${summary}\n`);
+          JS
+
+  publish:
+    needs: prepare
+    if: needs.prepare.outputs.should_publish == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      RELEASE_VERSION: ${{ needs.prepare.outputs.version }}
+      RELEASE_PACKAGE: ${{ needs.prepare.outputs.package_dir }}
+      NPM_DIST_TAG: ${{ needs.prepare.outputs.dist_tag }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+          cache: false
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install browser for tests
+        run: pnpm --dir packages/core exec playwright install --with-deps chromium
+      - name: Prepare packed fixtures
+        run: |
+          pnpm prepack:core
+          pnpm i-tarball
+      - name: Run repository checks
+        run: pnpm test
+      - name: Pack and validate the selected package
+        run: pnpm release:pack "$RELEASE_PACKAGE" "$RELEASE_VERSION" "$RUNNER_TEMP/release"
+      - name: Publish the validated tarball with npm OIDC
+        run: |
+          set -euo pipefail
+          npm install --global npm@12.2.0
+          tarballs=("$RUNNER_TEMP/release/"*.tgz)
+          test "${#tarballs[@]}" -eq 1
+          npm publish "${tarballs[0]}" --dry-run --ignore-scripts --access public --tag "$NPM_DIST_TAG"
+          npm publish "${tarballs[0]}" --ignore-scripts --access public --tag "$NPM_DIST_TAG"

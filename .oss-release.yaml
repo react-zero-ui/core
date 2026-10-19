@@ -1,0 +1,11 @@
+version: 1
+repository: react-zero-ui/core
+branch: main
+targets:
+  - github
+  - npm
+github:
+  tagPrefix: core-v
+  assets: []
+npm:
+  packageDir: packages/core

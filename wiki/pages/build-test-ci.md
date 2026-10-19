@@ -13,6 +13,8 @@ paths:
   - scripts/set-compat-fixture-versions.mjs
   - .github/workflows/ci.yml
   - .github/workflows/compat.yml
+  - .github/workflows/oss-release-trusted.yml
+  - scripts/pack-release.mjs
   - .github/dependabot.yml
 ---
 
@@ -35,7 +37,7 @@ Not every test uses the tarball:
 | `pnpm test:next`        | Only `next-ssr.spec.js` against the Next dev fixture; other Next projects and global setup are commented out |
 | `pnpm test`             | Lint, configured core suites, then an isolated package smoke test                                            |
 
-[Playwright configs](../../packages/core/__tests__/config/) determine active coverage. Existing spec files alone do not establish that CI runs them. [Smoke test](../../packages/core/scripts/smoke-test.js) packs already-built core, installs it in a temporary project, and exercises the published CommonJS PostCSS entry. It is in root `pnpm test`, but the workflows invoke individual suites and omit it.
+[Playwright configs](../../packages/core/__tests__/config/) determine active coverage. Existing spec files alone do not establish that CI runs them. [Smoke test](../../packages/core/scripts/smoke-test.js) packs already-built core, installs it in a temporary project, and exercises the published CommonJS PostCSS entry. It is in root `pnpm test`; the release workflow runs it, while the existing CI and compatibility workflows invoke individual suites and omit it.
 
 ## CI and compatibility
 
@@ -43,6 +45,6 @@ Not every test uses the tarball:
 
 [Compatibility](../../.github/workflows/compat.yml) rewrites fixture framework versions through [set-compat-fixture-versions.mjs](../../scripts/set-compat-fixture-versions.mjs), then runs those suites. Its fixture installation is separate from `i-tarball`; preserve the rewritten versions when changing this flow. [Dependabot](../../.github/dependabot.yml) supplies complementary fixture dependency updates.
 
-Both workflows specify pnpm `10.12.1`, while root `packageManager` specifies `11.3.0`. Toolchain intent is unresolved; verify effective versions when reproducing install/CI failures. Workflow presence does not establish current green runs.
+The existing CI and compatibility workflows specify pnpm `10.12.1`, while root `packageManager` specifies `11.3.0`. Toolchain intent is unresolved for those jobs; verify effective versions when reproducing install/CI failures. The [release workflow](../../.github/workflows/oss-release-trusted.yml) uses the manifest's pnpm version on Node 24, prepares packed fixtures, then runs root `pnpm test` (including smoke validation) and validates the final tarball. [Publishing](packages-publishing.md) owns the release contract. Workflow presence does not establish current green runs.
 
 For source edits, start with `pnpm lint` and `pnpm --dir packages/core run build`, then the relevant boundary above. `packages/core/dev/next/` is a manual playground, separate from fixtures.

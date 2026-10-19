@@ -15,7 +15,7 @@ Website config identifies `zero-ui.dev`, but tracked configuration does not esta
 
 ## Credentials and local notes
 
-The disabled [release workflow](../../.github/workflows/release.yml.disable) references `GITHUB_TOKEN` for GitHub operations and `NPM_TOKEN` through `NODE_AUTH_TOKEN` for npm. References do not prove secrets are configured. [Publishing](packages-publishing.md) describes the workflow's other blockers.
+The [release workflow](../../.github/workflows/oss-release-trusted.yml) publishes npm packages when a matching GitHub Release is published, using GitHub's `id-token: write` permission for short-lived OIDC credentials. Each npm package needs its own trusted-publisher connection to `react-zero-ui/core` and that workflow filename; no long-lived `NPM_TOKEN` is required. The local release orchestrator can also use `gh` authentication to push releases and dispatch Actions. [Publishing](packages-publishing.md) owns setup and release steps. Tracked configuration does not prove those external permissions are configured.
 
 Preserve the existing wiki convention: record service names, credential locations, owners, and rotation procedures without credential values. Local account notes belong under `wiki/_private/`, ignored by [.gitignore](../../.gitignore); they are not part of wiki routing or shared evidence. Do not infer an absence of secrets from checked-in environment-variable usage.
 

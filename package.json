@@ -43,6 +43,7 @@
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"prepack:core": "pnpm -F @react-zero-ui/core pack --pack-destination ./dist",
+		"release:pack": "node scripts/pack-release.mjs",
 		"reset": "git clean -fdx && pnpm install --frozen-lockfile && pnpm prepack:core && pnpm i-tarball",
 		"size": "npx esbuild ./packages/core/dist/index.js --bundle --minify --format=esm --external:react --define:process.env.NODE_ENV='\"production\"' | gzip -c | wc -c",
 		"size:badge": "node scripts/write-size-badge.mjs",

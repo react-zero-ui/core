@@ -29,6 +29,11 @@
 		"url": "https://github.com/sponsors/austin1serb"
 	},
 	"homepage": "https://zero-ui.dev",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/react-zero-ui/core.git",
+		"directory": "packages/cli"
+	},
 	"type": "module",
 	"main": "./bin.js",
 	"bin": {

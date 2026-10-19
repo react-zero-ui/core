@@ -2,7 +2,7 @@
 
 ## 2026-04-06 — Workspace-aware publishing prevents repeated consumer breakage
 
-Project memory reports that plain `npm publish` previously broke consumers by retaining the installer's `workspace:` dependency. Keep `pnpm publish` as a release constraint when replacing manual publishing or restoring automation. This is a recorded failure, not just a package-manager preference. [Preserved project memory](raw/project-memory-2026-04-06.md).
+Project memory reports that plain `npm publish` previously broke consumers by retaining the installer's `workspace:` dependency. Preserve pnpm's workspace rewriting when replacing manual publishing or restoring automation. The current workflow achieves this with `pnpm pack` and publishes only the resulting validated tarball using npm OIDC; `pnpm publish` was the earlier manual constraint. This is a recorded failure, not just a package-manager preference. [Preserved project memory](raw/project-memory-2026-04-06.md).
 
 ## 2026-04-06 — Initialization belongs to explicit setup
 

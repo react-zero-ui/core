@@ -8,4 +8,4 @@
 - [Core](./pages/core/index.md) — Core behavior: DOM setters, build-time variant extraction, explicit project setup, and experimental server-rendered interactions.
 - [Docs and Website](./pages/docs-website.md) — Independent GitHub Markdown and Fumadocs MDX surfaces, shared website routing/SEO owners, and the external icon-sprite build dependency.
 - [Operations](./pages/operations.md) — Deployment evidence limits, release credential boundaries, and preservation of ignored local wiki notes.
-- [Packages and Publishing](./pages/packages-publishing.md) — Package/export boundaries, the previously observed workspace-protocol publishing failure, disabled release automation, and size measurements.
+- [Packages and Publishing](./pages/packages-publishing.md) — Package/export boundaries, validated pnpm tarballs, automatic npm publishing from GitHub releases, oss-release integration, and one-time npm authorization.

@@ -1,0 +1,9 @@
+version: 1
+repository: react-zero-ui/core
+branch: main
+targets:
+  - npm
+github:
+  tagPrefix: cli-v
+npm:
+  packageDir: packages/cli
