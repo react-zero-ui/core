@@ -2,7 +2,7 @@ import { parse, parseExpression, ParserOptions } from "@babel/parser";
 import * as t from "@babel/types";
 import { generate } from "@babel/generator";
 import * as fs from "fs";
-import fg from "fast-glob";
+import { globSync } from "tinyglobby";
 import { IGNORE_DIRS } from "../config.js";
 import { type NodePath } from "@babel/traverse";
 import traverse from "./traverse.cjs";
@@ -274,7 +274,7 @@ function processConfigObject(obj: t.ObjectExpression): boolean {
 }
 
 function findLayoutWithBody(root = process.cwd()): string[] {
-	const files = fg.sync("**/layout.{tsx,jsx,js,ts}", { cwd: root, ignore: IGNORE_DIRS, absolute: true });
+	const files = globSync("**/layout.{tsx,jsx,js,ts}", { cwd: root, ignore: IGNORE_DIRS, absolute: true, expandDirectories: false });
 
 	return files.filter((file) => {
 		const source = fs.readFileSync(file, "utf8");

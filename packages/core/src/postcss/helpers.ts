@@ -1,6 +1,6 @@
 // src/postcss/helpers.ts
 import fs from "fs";
-import fg from "fast-glob";
+import { globSync } from "tinyglobby";
 import path from "path";
 import { CONFIG, IGNORE_DIRS } from "../config.js";
 import { parseJsonWithBabel, parseAndUpdatePostcssConfig, parseAndUpdateViteConfig } from "./ast-generating.js";
@@ -23,19 +23,27 @@ export function toKebabCase(str: string): string {
 		.toLowerCase();
 }
 
-/** Return *absolute* paths of every JS/TS file we care about (à la Tailwind). */
+/** Find unique absolute source paths. Explicit directory roots may be symlinks; links encountered below them are skipped. */
 export function findAllSourceFiles(patterns: string[] = [...CONFIG.CONTENT], cwd: string = process.cwd()): string[] {
-	return fg
-		.sync(patterns, {
+	// Keep !(...) extglobs among the positive patterns.
+	const negativePatterns = patterns.filter((pattern) => pattern.startsWith("!") && !pattern.startsWith("!("));
+	const files = new Set<string>();
+	// Separate crawls start at each pattern's explicit root. A combined crawl starts
+	// at their common parent and would skip symlinked src/app/pages directories.
+	for (const pattern of patterns) {
+		if (negativePatterns.includes(pattern)) continue;
+		const matches = globSync([pattern, ...negativePatterns], {
 			cwd,
-			ignore: IGNORE_DIRS, // <-- pass the actual ignore list
-			absolute: true, // give back absolute paths
-			onlyFiles: true, // skip directories
-			followSymbolicLinks: false, // Tailwind does the same
-			dot: false, // don't match dot-files (change if you need)
-			unique: true, // guard against duplicates
-		})
-		.map((p) => path.resolve(p)); // normalize on Windows
+			ignore: IGNORE_DIRS,
+			absolute: true,
+			onlyFiles: true,
+			followSymbolicLinks: false,
+			dot: false,
+			expandDirectories: false, // Preserve glob semantics for literal directory patterns.
+		});
+		for (const match of matches) files.add(path.resolve(match)); // normalize on Windows
+	}
+	return [...files];
 }
 
 function buildLocalSelector(keySlug: string, valSlug: string): string {

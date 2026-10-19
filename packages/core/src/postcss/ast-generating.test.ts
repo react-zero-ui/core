@@ -101,6 +101,11 @@ test("parseAndUpdateViteConfig inserts Zero-UI and removes Tailwind", () => {
 test("patchNextBodyTag should patch the body tag with the {...bodyAttributes}", async () => {
 	await runTest(
 		{
+			"node_modules/dependency/layout.tsx": "<body />",
+			".next/server/app/layout.tsx": "<body />",
+			".hidden/layout.tsx": "<body />",
+			"src/app/nested/layout.jsx": "<section />",
+			"src/app/directory/layout.tsx/notes.txt": "<body />",
 			"src/app/layout.tsx": `
     <html>
       <body>
@@ -116,6 +121,15 @@ test("patchNextBodyTag should patch the body tag with the {...bodyAttributes}", 
 			assert(result.includes('import { bodyAttributes } from "@zero-ui/attributes";'), "import not found");
 		}
 	);
+});
+
+test("patchNextBodyTag leaves multiple body layouts unchanged", async () => {
+	const source = "<html><body /></html>";
+	await runTest({ "app/first/layout.tsx": source, "app/second/layout.jsx": source }, async () => {
+		await patchNextBodyTag();
+		assert.equal(readFile("app/first/layout.tsx"), source);
+		assert.equal(readFile("app/second/layout.jsx"), source);
+	});
 });
 
 test("parseJsonWithBabel should parse a JSON file", () => {

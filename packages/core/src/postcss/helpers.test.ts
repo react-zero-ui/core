@@ -1,5 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert";
+import fs from "node:fs";
+import path from "node:path";
 import { buildCss, findAllSourceFiles, isZeroUiInitialized, patchPostcssConfig, patchTsConfig, patchViteConfig, toKebabCase } from "./helpers.js";
 import { readFile, runTest } from "./test-utilities.js";
 import { CONFIG } from "../config.js";
@@ -36,9 +38,87 @@ const expectedVariants: VariantData[] = [
 ];
 const initialValues = { "data-feature-enabled": "true", "data-modal-visible": "false" };
 
-test("findAllSourceFiles Return *absolute* paths of every JS/TS file we care about", () => {
-	const result = findAllSourceFiles();
-	assert.equal(result.length > 0, true);
+test("findAllSourceFiles discovers supported code and styles while excluding hidden and generated files", async () => {
+	const sources = [
+		"src/Card.tsx",
+		"src/index.ts",
+		"src/legacy.cjs",
+		"src/module.mjs",
+		"src/typed.mts",
+		"src/types.cts",
+		"src/entry.jsx",
+		"src/entry.js",
+		"src/theme.css",
+		"src/nested/theme.scss",
+		"app/theme.sass",
+		"pages/theme.less",
+	];
+	const ignored = [
+		"src/.secret.ts",
+		"src/.hidden/component.tsx",
+		"src/node_modules/dependency/index.ts",
+		"src/dist/output.ts",
+		"app/.next/generated.ts",
+		"src/coverage/report.js",
+		"pages/public/script.js",
+		"tools/build.ts",
+		"src/directory.tsx/notes.txt",
+	];
+	await runTest(Object.fromEntries([...sources, ...ignored].map((file) => [file, ""])), async () => {
+		assert.deepStrictEqual(findAllSourceFiles().sort(), sources.map((file) => path.resolve(file)).sort());
+	});
+});
+
+test("findAllSourceFiles honors custom roots, deduplicates overlaps, and excludes negated patterns", async () => {
+	await runTest({ "project/src/one.ts": "", "project/src/nested/two.ts": "", "project/src/skip.ts": "" }, async () => {
+		const cwd = path.resolve("project");
+		const files = findAllSourceFiles(["src/**/*.ts", "src/*.ts", "!src/skip.ts"], cwd);
+		assert.deepStrictEqual(files.sort(), [path.join(cwd, "src/nested/two.ts"), path.join(cwd, "src/one.ts")].sort());
+		assert.deepStrictEqual(findAllSourceFiles(["missing/**/*.ts"], cwd), []);
+		assert.deepStrictEqual(findAllSourceFiles(["src"], cwd), [], "literal directories must not expand into source files");
+	});
+});
+
+test("findAllSourceFiles does not traverse linked source directories", async () => {
+	await runTest({ "src/real.ts": "", "external/linked.ts": "" }, async () => {
+		fs.symlinkSync(path.resolve("external"), path.resolve("src/linked"), "junction");
+		assert.deepStrictEqual(findAllSourceFiles(), [path.resolve("src/real.ts")]);
+	});
+});
+
+test("findAllSourceFiles scans linked source roots without following links inside them", async () => {
+	await runTest(
+		{
+			"shared/component.tsx": "",
+			"shared/nested/theme.css": "",
+			"shared/.hidden.ts": "",
+			"shared/node_modules/dependency/index.ts": "",
+			"shared/dist/generated.ts": "",
+			"external/linked.ts": "",
+		},
+		async () => {
+			const cwd = path.resolve("project [sources]");
+			fs.mkdirSync(cwd);
+			const roots = ["src", "app", "pages"];
+			for (const root of roots) {
+				fs.symlinkSync(path.resolve("shared"), path.join(cwd, root), "junction");
+			}
+			fs.symlinkSync(path.resolve("external"), path.resolve("shared/linked"), "junction");
+
+			const expected = roots.flatMap((root) => [path.join(cwd, root, "component.tsx"), path.join(cwd, root, "nested/theme.css")]);
+			assert.deepStrictEqual(findAllSourceFiles([...CONFIG.CONTENT], cwd).sort(), expected.sort());
+			assert.deepStrictEqual(findAllSourceFiles(["src/**/*.tsx", "src/*.tsx", "app/**/*.tsx", "!app/component.tsx"], cwd), [
+				path.join(cwd, "src/component.tsx"),
+			]);
+		}
+	);
+});
+
+test("findAllSourceFiles distinguishes negated patterns from negative extglobs", async () => {
+	await runTest({ "src/skip.ts": "", "app/keep.ts": "", "app/skip.ts": "" }, async () => {
+		assert.deepStrictEqual(findAllSourceFiles(["!(src)/**/*.ts", "!app/skip.ts"]), [path.resolve("app/keep.ts")]);
+		assert.deepStrictEqual(findAllSourceFiles(["!src/**/*.ts"]), []);
+	});
 });
 
 test("processVariants should process variants", async () => {
