@@ -103,7 +103,7 @@ importers:
   packages/cli:
     dependencies:
       '@react-zero-ui/core':
-        specifier: workspace:^0.4.3
+        specifier: workspace:^0.4.4
         version: link:../core
 
   packages/core:

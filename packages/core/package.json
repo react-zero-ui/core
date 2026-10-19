@@ -1,6 +1,6 @@
 {
 	"name": "@react-zero-ui/core",
-	"version": "0.4.3",
+	"version": "0.4.4",
 	"private": false,
 	"scripts": {
 		"build": "rm -rf dist && tsc -p tsconfig.build.json",
