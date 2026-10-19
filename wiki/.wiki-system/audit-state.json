@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "pages": {
+    "pages/architecture.md": {
+      "fingerprint": "sha256:26dde7388210bd2288a9f3004c4d38880da94a81685de893ae9ca7af3c6bf689"
+    },
+    "pages/build-test-ci.md": {
+      "fingerprint": "sha256:0e2a8f727fefd8c4c33eb5c38b5caf98f27e276531a7191db55c1a1412da9832"
+    },
+    "pages/core/experimental-runtime.md": {
+      "fingerprint": "sha256:8431b3cacc0517c70807c3d099040db1a219afd948668a885774a7832006fbca"
+    },
+    "pages/core/runtime-hooks.md": {
+      "fingerprint": "sha256:85f8659cfb30965e31dee7e826f125e3731d735df4f68b01d6707c9dd50a17c3"
+    },
+    "pages/core/setup-cli.md": {
+      "fingerprint": "sha256:11358f09ada6750e64039028d9e7aed6581256fa3a6811b29608d5c830ade664"
+    },
+    "pages/core/variant-extractor.md": {
+      "fingerprint": "sha256:aad71c1479c002a6d7cb328112a479968b4784290b4e2e8142a3faf3bd9617ca"
+    },
+    "pages/docs-website.md": {
+      "fingerprint": "sha256:427d27f3996c4418070af852ac243ba4921aa36eecead0308abdb126534367b4"
+    },
+    "pages/operations.md": {
+      "fingerprint": "sha256:dc255c0a5524276955d110c413b6677753f78dd2705062673e965e10d246e090"
+    },
+    "pages/packages-publishing.md": {
+      "fingerprint": "sha256:0824855aff6fef1406eead97c37fc07bff8c08ea37c6acabf399c565cb3404ea"
+    }
+  }
+}

@@ -1,3 +1,7 @@
+---
+summary: "Historical July 2026 wiki source inventory and verification notes; preserves earlier claims and conventions rather than current synthesis."
+---
+
 # Source Manifest
 
 Raw sources are the existing in-repo docs, left in place (they are version-controlled with the code). Paths relative to repo root. Read-only evidence — corrections live in wiki pages; discrepancies are recorded here.
