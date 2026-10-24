@@ -16,7 +16,8 @@ test("local fonts load without leaking Tailwind directives into their CSS", asyn
 	}
 	expect(fontCss).toContain("@font-face");
 	const loadedFontCount = await page.evaluate(async () => {
-		const family = window.getComputedStyle(document.body).getPropertyValue("--font-test");
+		// Load the bundled font only; Next's Arial fallback may be absent on CI hosts.
+		const family = window.getComputedStyle(document.body).getPropertyValue("--font-test").split(",")[0].trim();
 		return (await document.fonts.load(`16px ${family}`)).length;
 	});
 	expect(loadedFontCount).toBeGreaterThan(0);
