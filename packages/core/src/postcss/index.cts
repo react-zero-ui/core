@@ -2,7 +2,10 @@
 /**
  * @type {import('postcss').PluginCreator}
  */
-type Root = { prepend: (css: string) => void };
+type Root = {
+	prepend: (css: string) => void;
+	walkAtRules: (name: RegExp, callback: () => false | void) => void;
+};
 type Result = {
 	messages: { type: string; plugin: string; file: string; parent: string }[];
 	opts: { from: string };
@@ -50,6 +53,18 @@ function warnIfNotInitialized(result: Result, isZeroUiInitialized: RuntimeModule
 	result.warn("[Zero-UI] Zero UI is not initialized. Run `react-zero-ui` to patch your project config.", { plugin: zeroUIPlugin });
 }
 
+function usesTailwind(root: Root): boolean {
+	// Match @tailwindcss/postcss's early-bail directives. @custom-variant alone
+	// does not trigger compilation, so injecting it into plain CSS (including
+	// next/font's generated modules) leaks @custom-variant and @slot to the bundler.
+	let found = false;
+	root.walkAtRules(/^(import|reference|theme|variant|config|plugin|apply|tailwind)$/, () => {
+		found = true;
+		return false;
+	});
+	return found;
+}
+
 const plugin = () => {
 	return {
 		postcssPlugin: zeroUIPlugin,
@@ -58,8 +73,10 @@ const plugin = () => {
 				const { buildCss, generateAttributesFile, isZeroUiInitialized, processVariants, formatError, registerDeps } = await loadRuntimeModules();
 				const { finalVariants, initialGlobalValues, sourceFiles } = await processVariants();
 
-				const cssBlock = buildCss(finalVariants);
-				if (cssBlock?.trim()) root.prepend(cssBlock + "\n");
+				if (usesTailwind(root)) {
+					const cssBlock = buildCss(finalVariants);
+					if (cssBlock?.trim()) root.prepend(cssBlock + "\n");
+				}
 
 				/* ── register file-dependencies for HMR ─────────────────── */
 				registerDeps(result, zeroUIPlugin, sourceFiles, result.opts.from ?? "");
