@@ -19,3 +19,7 @@ Consumers reported `fast-glob` → `micromatch` → `braces` through core. At re
 ## 2026-10-19 — Keep Node 22 support when choosing the glob implementation
 
 After comparing native glob with both scans, the user chose to retain `tinyglobby` and fix its handling of symlinked source roots. Native glob required exclusion workarounds in the probes, and its directory-symlink support needed by Next layout discovery is available from Node 24.16 / 26.1, not Node 22. Preserving Node 22 with native glob would require extra traversal logic. Separate source-pattern scans restore the old root-symlink behavior without changing the Node requirement or following nested symlinks. [Native API history](https://nodejs.org/docs/latest-v24.x/api/fs.html#fsglobsyncpattern-options); [scan contract](pages/core/variant-extractor.md).
+
+## 2026-10-24 — Inspect stylesheet directives before injecting variants
+
+Reproduced Next.js local-font parsing warnings with a packed core fixture. Zero UI injected Tailwind-only rules into generated font CSS, which [Tailwind deliberately skips](https://github.com/tailwindlabs/tailwindcss/blob/v4.2.2/packages/%40tailwindcss-postcss/src/index.ts#L86-L107). Gate injection by stylesheet directives rather than excluding `.module.css`: user modules may legitimately consume Zero UI variants. The regression checks both font loading and served CSS; successful rendering alone missed the warning. [Integration contract and tests](pages/core/variant-extractor.md).

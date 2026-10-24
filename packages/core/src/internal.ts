@@ -1,6 +1,13 @@
 // src/internal.ts
 import type { UIAction } from "./index.js";
 
+/**
+ * Pass as the third argument to `useUI` or `useScopedUI` to update an inline CSS variable
+ * `--{key}` on the target element instead of a `data-*` attribute, without React re-renders.
+ * Supply the initial CSS value in styles or a `var()` fallback; the hook does not initialize it.
+ *
+ * @see https://zero-ui.dev/docs/api-reference#cssvar
+ */
 export const cssVar: unique symbol = Symbol("cssVar");
 
 export function makeSetter<T extends string>(key: string, initialValue: T, getTarget: () => HTMLElement, flag?: typeof cssVar) {

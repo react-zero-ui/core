@@ -3,6 +3,26 @@ import { test, expect } from "@playwright/test";
 
 test.describe.configure({ mode: "serial" });
 
+test("local fonts load without leaking Tailwind directives into their CSS", async ({ page }) => {
+	await page.goto("/test", { waitUntil: "networkidle" });
+	const stylesheetUrls = await page.locator('link[rel="stylesheet"]').evaluateAll((links) => links.map((link) => link.href));
+	let fontCss = "";
+	for (const url of stylesheetUrls) {
+		const response = await page.request.get(url);
+		expect(response.ok()).toBe(true);
+		const css = await response.text();
+		expect(/@(?:custom-variant|slot)\b/.test(css), `Uncompiled Tailwind directives in ${url}`).toBe(false);
+		if (css.includes("--font-test")) fontCss += css;
+	}
+	expect(fontCss).toContain("@font-face");
+	const loadedFontCount = await page.evaluate(async () => {
+		// Load the bundled font only; Next's Arial fallback may be absent on CI hosts.
+		const family = window.getComputedStyle(document.body).getPropertyValue("--font-test").split(",")[0].trim();
+		return (await document.fonts.load(`16px ${family}`)).length;
+	});
+	expect(loadedFontCount).toBeGreaterThan(0);
+});
+
 test.describe("Zero-UI Comprehensive Test Suite", () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto("/test", { waitUntil: "networkidle" });

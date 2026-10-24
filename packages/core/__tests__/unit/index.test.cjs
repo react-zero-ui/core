@@ -1,4 +1,5 @@
 const postcss = require("postcss");
+const tailwindcss = require("@tailwindcss/postcss");
 const { test } = require("node:test");
 const assert = require("node:assert");
 const fs = require("fs");
@@ -46,7 +47,7 @@ async function runTest(files, callback, cache = true) {
 		}
 
 		// Run PostCSS
-		const result = await postcss([plugin()]).process("", { from: undefined });
+		const result = await postcss([plugin()]).process("@tailwind utilities;", { from: undefined });
 
 		// Run assertions
 		await callback(result);
@@ -92,6 +93,70 @@ test("generates body attributes file correctly", async () => {
 			assert(content.includes("export const bodyAttributes"), "Should export bodyAttributes");
 			assert(content.includes('"data-theme": "light"'), "Should have theme attribute");
 			assert(content.includes('"data-sidebar": "expanded"'), "Should have sidebar attribute");
+		}
+	);
+});
+
+test("leaves non-Tailwind CSS unchanged, including generated local-font modules", async () => {
+	await runTest(
+		{
+			"app/test.jsx": `import { useUI } from '@react-zero-ui/core';
+				function Component() {
+					const [theme, setTheme] = useUI('theme', 'light');
+					return <div className="theme-light:block" />;
+				}`,
+		},
+		async () => {
+			const stylesheets = [
+				["empty.css", ""],
+				["plain.css", '/* @import "tailwindcss"; */ @media (width > 600px) { .label { color: red; } }'],
+				["plain.module.css", ".label { color: red; }"],
+				[
+					"testfont_123.module.css",
+					'@font-face { font-family: "testFont"; src: url("./test.woff2") format("woff2"); font-display: swap; }\n.variable { --font-test: "testFont"; }',
+				],
+			];
+			// A plain stylesheet still triggers attribute generation, even when it runs first.
+			fs.unlinkSync(getAttrFile());
+			for (const [filename, css] of stylesheets) {
+				const result = await postcss([plugin(), tailwindcss({ optimize: false })]).process(css, { from: path.resolve(filename) });
+				assert.strictEqual(result.css, css, `${filename} must not receive Tailwind-only directives`);
+				assert(result.messages.some((message) => message.type === "dependency" && message.file.endsWith("app/test.jsx")));
+				assert(fs.readFileSync(getAttrFile(), "utf8").includes('"data-theme": "light"'));
+			}
+		}
+	);
+});
+
+test("compiles Zero UI variants in Tailwind entrypoints and CSS modules", async () => {
+	await runTest(
+		{
+			"app/test.jsx": `import { useUI, useScopedUI } from '@react-zero-ui/core';
+				function Component() {
+					const [theme, setTheme] = useUI('theme', 'light');
+					setTheme('dark');
+					const [panel, setPanel] = useScopedUI('panel', 'closed');
+					setPanel('open');
+					return <div className="theme-light:block theme-dark:hidden panel-open:block panel-closed:hidden" />;
+				}`,
+			"base.css": "@tailwind utilities source(none);",
+		},
+		async () => {
+			const stylesheets = [
+				["globals.css", '@import "./base.css"; @source inline("theme-dark:hidden panel-open:block");'],
+				["utilities.css", '@tailwind utilities source(none); @source inline("theme-dark:hidden panel-open:block");'],
+				["reference.module.css", '@reference "./base.css"; .label { @apply theme-dark:hidden panel-open:block; }'],
+				["apply.module.css", ".label { @apply theme-dark:hidden panel-open:block; }"],
+				["variant.module.css", ".label { @variant theme-dark { display: none; } @variant panel-open { display: block; } }"],
+			];
+			for (const [filename, css] of stylesheets) {
+				const result = await postcss([plugin(), tailwindcss({ optimize: false })]).process(css, { from: path.resolve(filename) });
+				assert.match(result.css, /body\[data-theme=['"]dark['"]\]/, `${filename} must compile the global variant`);
+				assert.match(result.css, /\[data-panel=['"]open['"]\]/, `${filename} must compile the scoped variant`);
+				assert.match(result.css, /display: none/);
+				assert.match(result.css, /display: block/);
+				assert.doesNotMatch(result.css, /@(?:custom-variant|slot|apply|variant)\b/, `${filename} must not leak Tailwind directives`);
+			}
 		}
 	);
 });
@@ -240,7 +305,7 @@ test("watches for file changes", async () => {
 			await new Promise((resolve) => setTimeout(resolve, 500));
 
 			// Re-process to check if watcher picked up changes
-			const result2 = await postcss([plugin()]).process("", { from: undefined });
+			const result2 = await postcss([plugin()]).process("@tailwind utilities;", { from: undefined });
 
 			assert(result2.css.includes("@custom-variant watch-test-updated"), "Should detect new state");
 		}
@@ -344,7 +409,7 @@ test("handles concurrent file modifications", async () => {
 			}
 
 			// Final processing should work correctly
-			const finalResult = await postcss([plugin()]).process("", { from: undefined });
+			const finalResult = await postcss([plugin()]).process("@tailwind utilities;", { from: undefined });
 
 			assert(finalResult.css.includes("AUTO-GENERATED"), "Should handle rapid changes");
 		}
