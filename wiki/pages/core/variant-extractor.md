@@ -9,6 +9,9 @@ paths:
   - packages/core/src/postcss/index.cts
   - packages/core/src/postcss/vite.ts
   - packages/core/src/postcss/utilities.ts
+  - packages/core/__tests__/unit/index.test.cjs
+  - packages/core/__tests__/e2e/next-ssr.spec.js
+  - packages/core/__tests__/fixtures/next/app/layout.tsx
 ---
 
 # Variant Extractor
@@ -28,6 +31,8 @@ Source and Next layout discovery use `tinyglobby`. Source discovery scans each p
 ## Integration and failure behavior
 
 [index.cts](../../../packages/core/src/postcss/index.cts) is the CommonJS PostCSS entry; it lazily imports ESM helpers. Run Zero-UI before Tailwind so custom variants exist when Tailwind processes utilities. It registers source dependencies for watch mode, warns once per working directory when initialization is missing, and still generates attributes. Application config changes belong to [explicit setup](setup-cli.md).
+
+Variant injection requires a directive recognized by Tailwind's PostCSS early-bail check: `@import`, `@reference`, `@theme`, `@variant`, `@config`, `@plugin`, `@apply`, or `@tailwind`. Plain stylesheets, including `next/font/local` generated CSS modules, stay unchanged; attribute generation and dependency registration still run. `@custom-variant` alone does not trigger Tailwind compilation, so unconditional injection leaks it and `@slot` into Next's CSS parser. Preserve CSS modules using Tailwind directives; filename exclusion would block legitimate variants. [PostCSS integration tests](../../../packages/core/__tests__/unit/index.test.cjs) cover both paths; [Next fixture tests](../../../packages/core/__tests__/e2e/next-ssr.spec.js) check local-font loading and served CSS.
 
 Development extraction failures become warnings and leave the server alive; production failures throw. A running dev server alone does not establish that variants compiled successfully. [vite.ts](../../../packages/core/src/postcss/vite.ts) adds Zero-UI/Tailwind to PostCSS and reads generated attributes during HTML transformation; missing startup output can therefore fail before later CSS generation helps.
 
